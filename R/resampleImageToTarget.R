@@ -7,7 +7,7 @@
 #' @param image image to resample
 #' @param target image of reference, the output will be in this space
 #' @param interpType Choice of interpolator. Supports partial matching.
-#' \itemize{
+#' \describe{
 #' \item{linear}{}
 #' \item{nearestNeighbor}{}
 #' \item{multiLabel}{ for label images but genericlabel is preferred}

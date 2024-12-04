@@ -37,6 +37,5 @@ verbose output to report the progress of the optimization.
 set.seed(123)
 m <- matrix(rnorm(500), nrow = 5)
 result <- optimize_indicator_matrix(m, max_iter = 1000, tol = 1e-6, verbose = TRUE)
-print(result$I)
-print(result$objective_value)
+print(result)
 }

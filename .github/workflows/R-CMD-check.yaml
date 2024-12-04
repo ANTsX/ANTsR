@@ -53,7 +53,17 @@ jobs:
             ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1
             ${{ runner.os }}-${{ hashFiles('.github/R-version') }}
             ${{ runner.os }}-
+
+      - name: Build HDF5 - OSX
+        if: runner.os == 'macOS'
+        run: |
+          brew install hdf5
           
+      - name: Build HDF5 - LINUX
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y libhdf5-dev
+
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE)

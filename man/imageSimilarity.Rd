@@ -23,7 +23,7 @@ imageSimilarity(
 \item{moving}{the moving antsImage}
 
 \item{type}{image metric to calculate
-\itemize{
+\describe{
   \item{MeanSquares}{}
   \item{Correlation}{}
   \item{ANTSNeighborhoodCorrelation}{}
@@ -37,7 +37,7 @@ imageSimilarity(
 \item{moving.mask}{mask for the moving image}
 
 \item{sampling.strategy}{sampling strategy, default if full sampling
-\itemize{
+\describe{
   \item{none}{Full sampling}
   \item{random}{}
   \item{regular}{}

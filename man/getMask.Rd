@@ -29,8 +29,11 @@ Get a binary mask image from the given image after thresholding.
 }
 \details{
 If \code{cleanup} is \code{>0}, the following steps are applied
-\enumerate{ \item Erosion with radius 2 voxels \item Retain largest
-component \item Dilation with radius 1 voxel \item Morphological closing }
+\enumerate{ 
+\item Erosion with radius 2 voxels 
+\item Retain largest component 
+\item Dilation with radius 1 voxel \item Morphological closing 
+}
 
 These functions are available in \link{iMath}, see the operations
 \dQuote{ME}, \dQuote{GetLargestComponent}, \dQuote{MD}, \dQuote{FillHoles}.

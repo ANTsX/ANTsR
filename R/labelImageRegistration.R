@@ -35,7 +35,7 @@
 #' @param randomSeed Definition for deformable registration.
 #' @param verbose Print progress to the screen.
 #' @return outputs a list containing:
-#' \itemize{
+#' \describe{
 #'   \item{fwdtransforms: }{Transforms to move from moving to fixed image.}
 #'   \item{invtransforms: }{Transforms to move from fixed to moving image.}
 #' }

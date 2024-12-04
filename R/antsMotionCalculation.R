@@ -27,7 +27,7 @@
 #' @param ... additional argument to \code{\link{.motion_correction}}
 #'
 #' @return List containing:
-#' \itemize{
+#' \describe{
 #'  \item{moco_img}{ Motion corrected time-series image.}
 #'  \item{moco_params}{ Data frame of translation parameters.}
 #'  \item{moco_avg_img}{ Average motion-corrected image.}

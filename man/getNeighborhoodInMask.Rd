@@ -39,7 +39,7 @@ if \code{spatial.info} is false: a matrix of pixel values where the number of ro
 is the size of the neighborhood and there is a column for each voxel
 
 if \code{spatial.info} is true, a list containing three matrices:
-\itemize{
+\describe{
  \item{values: }{matrix of pixel values where the number of rows
  is the size of the neighborhood and there is a column for each voxel.}
  \item{indices: }{matrix providing the center coordinates for each neighborhood}
@@ -53,7 +53,7 @@ around a center voxel
 }
 \details{
 \code{boundary.condition} should be one of:
-\itemize{
+\describe{
   \item{\code{NA}: }{Fill values with \code{NA}.}
   \item{\code{image}: }{Use image value, even if not in mask.}
   \item{\code{mean}: }{Use man of all non-\code{NA} values for that neighborhood.}

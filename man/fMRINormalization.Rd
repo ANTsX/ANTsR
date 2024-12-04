@@ -58,7 +58,7 @@ estimate such that the 2nd run gives a more accurate correction.}
 }
 \value{
 outputs a list containing:
-\itemize{
+\describe{
   \item{fusedImg: }{runs fused into one image and corrected if polydegree set}
   \item{fusedImgFilt: }{runs fused into one image and filtered}
   \item{seg2bold: }{strutural segmentation in BOLD space.}

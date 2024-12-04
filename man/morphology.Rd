@@ -21,7 +21,7 @@ morphology(
 \item{input}{input image}
 
 \item{operation}{operation to apply
-\itemize{
+\describe{
 \item{"close"}{ Morpholgical closing}
 \item{"dilate"}{ Morpholgical dilation}
 \item{"erode"}{ Morpholgical erosion}
@@ -31,7 +31,7 @@ morphology(
 \item{radius}{radius of structuring element}
 
 \item{type}{type of morphology
-\itemize{
+\describe{
 \item{"binary"}{ Binary operation on a single value}
 \item{"grayscale"}{ Grayscale operations}
 }}
@@ -39,7 +39,7 @@ morphology(
 \item{value}{value to operation on (type='binary' only)}
 
 \item{shape}{shape of the structuring element ( type='binary' only )
-\itemize{
+\describe{
 \item{"ball"}{ spherical structuring element}
 \item{"box"}{ box shaped structuring element}
 \item{"cross"}{ cross shaped structuring element}

@@ -59,7 +59,7 @@ setMethod(f = "initialize", signature(.Object = "antsrMetric"), definition = fun
 #' @param fixed the fixed antsImage
 #' @param moving the moving antsImage
 #' @param type image metric to calculate
-#' \itemize{
+#' \describe{
 #'   \item{MeanSquares}{}
 #'   \item{Correlation}{}
 #'   \item{ANTSNeighborhoodCorrelation}{}
@@ -72,7 +72,7 @@ setMethod(f = "initialize", signature(.Object = "antsrMetric"), definition = fun
 #' @param fixed.mask mask for the fixed image
 #' @param moving.mask mask for the moving image
 #' @param sampling.strategy sampling strategy, default if full sampling
-#' \itemize{
+#' \describe{
 #'   \item{none}{Full sampling}
 #'   \item{random}{}
 #'   \item{regular}{}
@@ -283,7 +283,7 @@ antsrMetricSetRadius <- function(metric, radius) {
 #' @description set image sampling strategy and rate
 #' @param metric an 'antsrMetric'
 #' @param sampling.strategy sampling strategy, default if full sampling
-#' \itemize{
+#' \describe{
 #'   \item{none}{Full sampling}
 #'   \item{random}{}
 #'   \item{regular}{}

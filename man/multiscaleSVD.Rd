@@ -25,7 +25,7 @@ which eigenvector off which to base the scale of the y-axis.'}
 \value{
 list with a vector of tangent, curvature, noise dimensionality and a
 a dataframe containing eigenvalues across scale, in correspondence with r:
-\itemize{
+\describe{
   \item{dim: }{The tangent, curvature and noise dimensionality vector.  The
 data dimensionality is the first entry, the curvature dimensionality exists
 from the second to the first entry of the noise vector.}

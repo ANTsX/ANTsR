@@ -29,7 +29,7 @@
 #' @param extraRuns a list containing additional BOLD images (runs) to be merged with the first image.
 #' @param verbose enables visualization as well as commentary.
 #' @return outputs a list containing:
-#' \itemize{
+#' \describe{
 #'   \item{fusedImg: }{runs fused into one image and corrected if polydegree set}
 #'   \item{fusedImgFilt: }{runs fused into one image and filtered}
 #'   \item{seg2bold: }{strutural segmentation in BOLD space.}

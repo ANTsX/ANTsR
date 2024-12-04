@@ -121,10 +121,10 @@ sparseDistanceMatrix <- function(
     if (!is.na(ncores)) nThreads <- ncores
     efval <- min(c(4, ncol(x)))
     bknn <- RcppHNSW::hnsw_knn(t(x),
-      k = k, M = 16, ef = efval,
-      distance = "euclidean",
-      n_threads = nThreads,
-      grain_size = floor(ncol(x) / nThreads)
+                               k = k, M = 16, ef = efval,
+                               distance = "euclidean",
+                               n_threads = nThreads,
+                               grain_size = floor(ncol(x) / nThreads)
     )
     names(bknn) <- c("nn.idx", "nn.dists")
   }
@@ -134,7 +134,7 @@ sparseDistanceMatrix <- function(
   }
   #  if ( mypkg[1] == "nabor" ) bknn = nabor::knn( t( x ) , k=k, eps=eps )
   #  if ( mypkg[1] == "RANN" )  bknn = RANN::nn2( t( x ) , k=k, eps=eps  )
-
+  
   # if ( mypkg[1] == "rflann" )  {
   #   myncores = as.numeric( system('getconf _NPROCESSORS_ONLN', intern = TRUE) )
   #   if ( !is.na( ncores  ) ) myncores = ncores
@@ -323,20 +323,20 @@ sparseDistanceMatrixXY <- function(x, y, k = 3, r = Inf, sigma = NA,
     nThreads <- as.numeric(Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"))
     if (!is.na(ncores)) nThreads <- ncores
     ann <- RcppHNSW::hnsw_build(t(x),
-      distance = "euclidean",
-      M = 12,
-      ef = efval,
-      n_threads = nThreads,
-      grain_size = floor(ncol(x) / nThreads)
+                                distance = "euclidean",
+                                M = 12,
+                                ef = efval,
+                                n_threads = nThreads,
+                                grain_size = floor(ncol(x) / nThreads)
     )
-
+    
     efval <- min(c(4, ncol(y)))
     bknn <- RcppHNSW::hnsw_search(t(y),
-      ann,
-      k = k,
-      ef = efval,
-      n_threads = nThreads,
-      grain_size = floor(ncol(y) / nThreads)
+                                  ann,
+                                  k = k,
+                                  ef = efval,
+                                  n_threads = nThreads,
+                                  grain_size = floor(ncol(y) / nThreads)
     )
     names(bknn) <- c("nn.idx", "nn.dists")
   }
@@ -353,8 +353,8 @@ sparseDistanceMatrixXY <- function(x, y, k = 3, r = Inf, sigma = NA,
   #   bknn = rflann::Neighbour( t(y), t(x), k=k, "kdtree", cores=myncores, 1 )
   #   names( bknn ) = c( "nn.idx", "nn.dists" )
   # }
-
-
+  
+  
   #  if ( mypkg[1] == "naborpar" ) bknn = .naborpar( t( y ), t( x ) , k=k, eps=eps  )
   if (cometric) bknn$nn.dists <- ecor(bknn$nn.dists)
   tct <- 0
@@ -457,7 +457,7 @@ sparseDistanceMatrixXY <- function(x, y, k = 3, r = Inf, sigma = NA,
 #' which eigenvector off which to base the scale of the y-axis.'
 #' @return list with a vector of tangent, curvature, noise dimensionality and a
 #' a dataframe containing eigenvalues across scale, in correspondence with r:
-#' \itemize{
+#' \describe{
 #'   \item{dim: }{The tangent, curvature and noise dimensionality vector.  The
 #' data dimensionality is the first entry, the curvature dimensionality exists
 #' from the second to the first entry of the noise vector.}
@@ -530,10 +530,10 @@ multiscaleSVD <- function(x, r, locn, nev, knn = 0, verbose = FALSE, plot = 0) {
       sel <- rowdist < myr
       if (sum(sel, na.rm = TRUE) > 2) {
         if (knn > 0 & sum(sel) > knn) # take a subset of sel
-          {
-            selinds <- sample(1:length(sel), knn)
-            sel[-selinds] <- FALSE
-          }
+        {
+          selinds <- sample(1:length(sel), knn)
+          sel[-selinds] <- FALSE
+        }
         lmat <- x[sel, ]
         if (nrow(lmat) < ncol(lmat)) lcov <- cov(t(lmat)) else lcov <- cov(lmat)
         temp <- ba_svd(lcov, nv = (nrow(lcov) - 1))$d # * embeddDim / sum(sel)
@@ -614,9 +614,9 @@ multiscaleSVD <- function(x, r, locn, nev, knn = 0, verbose = FALSE, plot = 0) {
     mycols <- rainbow(nev)
     growthRate1 <- mresponse[, 1]
     plot(r, growthRate1,
-      type = "l", col = mycols[1], main = "Evals by scale",
-      ylim = c(0.00, max(mresponse[, plot], na.rm = TRUE)),
-      xlab = "ball-radius", ylab = "Expected Eval"
+         type = "l", col = mycols[1], main = "Evals by scale",
+         ylim = c(0.00, max(mresponse[, plot], na.rm = TRUE)),
+         xlab = "ball-radius", ylab = "Expected Eval"
     )
     for (i in 2:ncol(mresponse))
     {
@@ -663,8 +663,8 @@ multiscaleSVD <- function(x, r, locn, nev, knn = 0, verbose = FALSE, plot = 0) {
 knnSmoothingMatrix <- function(x, k, sigma, segmentation, ...) {
   usePkg("Matrix")
   jmat <- sparseDistanceMatrix(x,
-    k = k, kmetric = "gaussian", sigma = sigma,
-    sinkhorn = FALSE, ...
+                               k = k, kmetric = "gaussian", sigma = sigma,
+                               sinkhorn = FALSE, ...
   )
   if (!missing(segmentation) & FALSE) {
     diagSparse <- Matrix::sparseMatrix(
@@ -810,7 +810,7 @@ smoothMatrixPrediction <- function(
     locdf$wts <- rowWeights
     wts <- "this is just a placeholder"
     mdl <- lm(as.formula(modelFormula),
-      data = locdf, weights = wts, na.action = "na.exclude"
+              data = locdf, weights = wts, na.action = "na.exclude"
     )
     rm(locdf)
   } else {
@@ -1103,9 +1103,9 @@ smoothMultiRegression <- function(
   svdy <- scale(rsvd::rsvd(y, nu = nv)$u)
   loy <- as.numeric(svdy[, 1])
   ox <- smoothRegression(x, loy,
-    iterations = 50,
-    sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-    smoothingMatrix = smoothingMatrixX, nv = nv, verbose = FALSE
+                         iterations = 50,
+                         sparsenessQuantile = sparsenessQuantile, positivity = positivity,
+                         smoothingMatrix = smoothingMatrixX, nv = nv, verbose = FALSE
   )$v
   oy <- matrix(nrow = ncol(y), ncol = nv)
   for (k in 1:iterations) {
@@ -1115,15 +1115,15 @@ smoothMultiRegression <- function(
       if (j == 1) ry <- y else ry <- residuals(lm(y ~ y %*% oy[, 1:(j - 1)]))
       lox <- (rx %*% (ox))
       oy[, j] <- smoothRegression(ry, lox[, j],
-        iterations = 50,
-        sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-        smoothingMatrix = NA, nv = 2, verbose = FALSE
+                                  iterations = 50,
+                                  sparsenessQuantile = sparsenessQuantile, positivity = positivity,
+                                  smoothingMatrix = NA, nv = 2, verbose = FALSE
       )$v[, 1]
       loy <- (ry %*% (oy))
       ox[, j] <- smoothRegression(rx, loy[, j],
-        iterations = 50,
-        sparsenessQuantile = sparsenessQuantile, positivity = positivity,
-        smoothingMatrix = NA, nv = 2, verbose = FALSE
+                                  iterations = 50,
+                                  sparsenessQuantile = sparsenessQuantile, positivity = positivity,
+                                  smoothingMatrix = NA, nv = 2, verbose = FALSE
       )$v[, 1]
     }
     tt <- x %*% ox
@@ -1433,7 +1433,7 @@ jointSmoothMatrixReconstruction <- function(
   }
   if (positivity == TRUE) positivity <- "positive"
   if (positivity == FALSE) positivity <- "either"
-
+  
   for (k in 1:length(x)) x[[k]] <- x[[k]] / max(abs(x[[k]]))
   gammas <- rep(gamma, nrow(parameters))
   ulist <- list()
@@ -1454,7 +1454,7 @@ jointSmoothMatrixReconstruction <- function(
       rowWeights <- rowWeights * repWeights
     }
   }
-
+  
   for (i in 1:nrow(parameters)) {
     m1 <- parameters[i, 1]
     m2 <- parameters[i, 2]
@@ -1502,14 +1502,14 @@ jointSmoothMatrixReconstruction <- function(
         loSmoo <- smoothingMatrix[[i]]
       }
       temp <- .xuvtHelper(x[[m2]],
-        ulist[[i]], vlist[[i]],
-        errs,
-        iterations = subIterations,
-        smoothingMatrix = loSmoo,
-        repeatedMeasures = repeatedMeasures, ilist[[i]],
-        positivity = positivity, gammas[i] * parameters[i, 3],
-        sparsenessQuantile = sparsenessQuantile, usubs = usubs,
-        doOrth = doOrth, verbose = F
+                          ulist[[i]], vlist[[i]],
+                          errs,
+                          iterations = subIterations,
+                          smoothingMatrix = loSmoo,
+                          repeatedMeasures = repeatedMeasures, ilist[[i]],
+                          positivity = positivity, gammas[i] * parameters[i, 3],
+                          sparsenessQuantile = sparsenessQuantile, usubs = usubs,
+                          doOrth = doOrth, verbose = F
       )
       #    gammas[i] = temp$gamma * 1.0 # 5
       vlist[[i]] <- temp$v
@@ -1525,7 +1525,7 @@ jointSmoothMatrixReconstruction <- function(
       e2 <- perr[k - 1, ] * parameters[, 3]
       if (mean(e1) > mean(e2)) gammas <- gammas * 0.9 # k = iterations
     }
-
+    
     for (i in 1:nrow(parameters)) {
       m1 <- parameters[i, 1]
       m2 <- parameters[i, 2]
@@ -1544,11 +1544,11 @@ jointSmoothMatrixReconstruction <- function(
         vlist[[i]] <- t(t(ulist[[m2]]) %*% x[[m2]])
       }
     }
-
+    
     k <- k + 1
   }
-
-
+  
+  
   return(list(u = ulist, v = vlist, intercepts = ilist))
 }
 
@@ -1572,8 +1572,7 @@ jointSmoothMatrixReconstruction <- function(
 #' set.seed(123)
 #' m <- matrix(rnorm(500), nrow = 5)
 #' result <- optimize_indicator_matrix(m, max_iter = 1000, tol = 1e-6, verbose = TRUE)
-#' print(result$I)
-#' print(result$objective_value)
+#' print(result)
 #' @export
 optimize_indicator_matrix <- function(m, max_iter = 1000, tol = 1e-6, preprocess = TRUE, verbose = FALSE) {
   if (preprocess) {
@@ -1584,16 +1583,16 @@ optimize_indicator_matrix <- function(m, max_iter = 1000, tol = 1e-6, preprocess
       }
     }
   }
-
+  
   # Initialize the indicator matrix I with zeros
   I <- matrix(0, nrow = nrow(m), ncol = ncol(m))
   
   # Track the previous objective value
   prev_sum <- -Inf
-
+  
   # Initialize iteration counter
   iter <- 0
-
+  
   # While loop for optimizing the indicator matrix
   while (iter < max_iter) {
     iter <- iter + 1
@@ -1638,7 +1637,7 @@ optimize_indicator_matrix <- function(m, max_iter = 1000, tol = 1e-6, preprocess
   if (iter == max_iter && verbose) {
     message("Reached the maximum number of iterations (", max_iter, ") without full convergence.")
   }
-
+  
   return( m * I )
 }
 
@@ -1653,7 +1652,7 @@ optimize_indicator_matrix <- function(m, max_iter = 1000, tol = 1e-6, preprocess
 #' @examples
 #' set.seed(123)
 #' m <- matrix(rnorm(500), nrow = 5)
-#' indicator_opt_both_ways(m, preprocess = TRUE)
+#' indicator_opt_both_ways(m)
 #' @export
 indicator_opt_both_ways <- function( m, verbose=FALSE ) {
   # Optimize for original matrix
@@ -1857,9 +1856,9 @@ orthogonalizeAndQSparsifyOld <- function(
 #' mat <- orthogonalizeAndQSparsify(mat)
 #' @export
 orthogonalizeAndQSparsify <- function(
-  v,
-  sparsenessQuantile = 0.5, positivity = "either",
-  orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg = NA
+    v,
+    sparsenessQuantile = 0.5, positivity = "either",
+    orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg = NA
 ) {
   if (!is.na(sparsenessAlg)) {
     if ( sparsenessAlg %in% c("spmp","sum_preserving_matrix_partition") ) return( t(sum_preserving_matrix_partition( t(v) )) )
@@ -1867,7 +1866,7 @@ orthogonalizeAndQSparsify <- function(
     return(rankBasedMatrixSegmentation(v, sparsenessQuantile, basic = basic, positivity = positivity, transpose = TRUE))
   }
   if (sparsenessQuantile == 0) return(v)
-
+  
   safequantile <- function(x, probs, na.rm = TRUE) {
     if (all(x <= 0)) {
       x <- -x
@@ -1910,7 +1909,7 @@ orthogonalizeAndQSparsify <- function(
       localv <- v[, vv]
       doflip <- sum(localv > 0, na.rm = TRUE) < sum(localv < 0, na.rm = TRUE)
       if (doflip) localv <- localv * -1
-
+      
       myquant <- safequantile(localv, sparsenessQuantile, na.rm = TRUE)
       if (!softThresholding) {
         if (positivity == "positive") {
@@ -2023,7 +2022,7 @@ smoothAppGradCCA <- function(x, y,
   }
   #  phix = matrix( rnorm( k * ncol(x), 0, 1e-4 ), ncol=k )
   #  phiy = matrix( rnorm( k * ncol(y), 0, 1e-4 ), ncol=k )
-
+  
   i <- 1
   if (is.na(stochastic)) stoke <- FALSE else stoke <- TRUE
   while (i < iterations) {
@@ -2048,7 +2047,7 @@ smoothAppGradCCA <- function(x, y,
     #    if ( i > 15 ) if ( errs[ i ]  < errs[i-1] ) i = iterations+1
     i <- i + 1
   }
-
+  
   #  print( cor( x %*% phix ) )
   #  print( cor( y %*% phiy ) )
   #  print( cor( y %*% phiy,  x %*% phix  ) )
@@ -2197,7 +2196,7 @@ milr <- function(dataFrame, voxmats, myFormula, smoothingMatrix,
   temp <- summary(lm(myFormula, data = vdf))
   myrownames <- rownames(temp$coefficients)
   mypvs <- matrix(rep(NA, p * length(myrownames)),
-    nrow = length(myrownames)
+                  nrow = length(myrownames)
   )
   myestvs <- mypvs
   myervs <- mypvs
@@ -2265,7 +2264,7 @@ milr <- function(dataFrame, voxmats, myFormula, smoothingMatrix,
   v <- as.matrix(smoothingMatrix %*% v)
   if (!missing(sparsenessQuantile)) {
     v <- orthogonalizeAndQSparsify(v, sparsenessQuantile, positivity,
-      orthogonalize = milrorth
+                                   orthogonalize = milrorth
     )
   }
   dedv <- v * 0
@@ -2313,8 +2312,8 @@ milr <- function(dataFrame, voxmats, myFormula, smoothingMatrix,
     #      dedrv = dedrvX + t( ( t(zRan) %*%  umat ) %*% t( vmat1 )  ) # t2
     #      dedrv = dedrv -  t( t(zRan) %*% voxmats[[1]] ) # t3
     #      vRan = smoothingMatrix %*% ( vRan + dedrvX * gammamx )
-
-
+    
+    
     if (hasRanEff) {
       vRan <- as.matrix(smoothingMatrix %*% vRan)
       # update random effects
@@ -2418,7 +2417,7 @@ milr.predict <- function(
       stop(paste("test matrix ", matnames[k], " does not have ", p, "entries"))
     }
   }
-
+  
   # get names from the standard lm
   temp <- summary(lm(myFormula, data = vdf))
   myrownames <- rownames(temp$coefficients)
@@ -2586,7 +2585,7 @@ mild <- function(dataFrame, voxmats, basisK,
   myrownames <- rownames(temp$coefficients)
   knames <- myrownames[grep("mildBasis", myrownames)]
   mypvs <- matrix(rep(NA, p * length(myrownames)),
-    nrow = length(myrownames)
+                  nrow = length(myrownames)
   )
   myestvs <- mypvs
   myervs <- mypvs
@@ -2633,7 +2632,7 @@ mild <- function(dataFrame, voxmats, basisK,
   colnames(v) <- unms
   hasIntercept <- "(Intercept)" %in% colnames(v)
   if (hasIntercept) dospar <- 2:ncol(v) else dospar <- 1:ncol(v)
-
+  
   for (i in 1:p) {
     if (length(myks) > 0) {
       for (k in 1:length(predictormatrixnames)) {
@@ -2652,7 +2651,7 @@ mild <- function(dataFrame, voxmats, basisK,
   }
   v <- as.matrix(smoothingMatrix %*% v)
   v <- orthogonalizeAndQSparsify(v, sparsenessQuantile, positivity,
-    orthogonalize = mildorth
+                                 orthogonalize = mildorth
   )
   dedv <- v * 0
   predicted <- voxmats[[1]] * 0
@@ -2684,7 +2683,7 @@ mild <- function(dataFrame, voxmats, basisK,
     v <- as.matrix(smoothingMatrix %*% v)
     if (!missing(sparsenessQuantile)) {
       v <- orthogonalizeAndQSparsify(v, sparsenessQuantile, positivity,
-        orthogonalize = mildorth
+                                     orthogonalize = mildorth
       )
     }
     gammamx <- gamma * 0.1 # go a bit slower
@@ -2766,7 +2765,7 @@ mild <- function(dataFrame, voxmats, basisK,
     #  print( cor( u ) )
     return(u)
   }
-
+  
   myorth2 <- function(x) {
     qr.Q(qr(x))
   }
@@ -2827,24 +2826,24 @@ mild <- function(dataFrame, voxmats, basisK,
   locits <- 1
   ########################
   mildx <- mild(dataFrame,
-    voxmats[1], basisK, formx, smoothingMatrixX,
-    iterations = 1, gamma = gamma,
-    sparsenessQuantile = sparsenessQuantileX,
-    positivity = positivityX[[1]],
-    initializationStrategy = initializationStrategyX,
-    repeatedMeasures = repeatedMeasures,
-    verbose = FALSE
+                voxmats[1], basisK, formx, smoothingMatrixX,
+                iterations = 1, gamma = gamma,
+                sparsenessQuantile = sparsenessQuantileX,
+                positivity = positivityX[[1]],
+                initializationStrategy = initializationStrategyX,
+                repeatedMeasures = repeatedMeasures,
+                verbose = FALSE
   )
   colinds <- (ncol(mildx$u) - basisK + 1):ncol(mildx$u)
   ########################
   mildy <- mild(dataFrame,
-    voxmats[2], basisK, formy, smoothingMatrixY,
-    iterations = 1, gamma = gamma,
-    sparsenessQuantile = sparsenessQuantileY,
-    positivity = positivityY[[1]],
-    initializationStrategy = initializationStrategyY,
-    repeatedMeasures = repeatedMeasures,
-    verbose = FALSE
+                voxmats[2], basisK, formy, smoothingMatrixY,
+                iterations = 1, gamma = gamma,
+                sparsenessQuantile = sparsenessQuantileY,
+                positivity = positivityY[[1]],
+                initializationStrategy = initializationStrategyY,
+                repeatedMeasures = repeatedMeasures,
+                verbose = FALSE
   )
   xOrth <- mildy$u[, -1]
   yOrth <- mildx$u[, -1]
@@ -2876,21 +2875,21 @@ mild <- function(dataFrame, voxmats, basisK,
     colnames(dataFramex)[dfinds] <- colnames(mildx$u[, colinds])
     colnames(dataFramey)[dfinds] <- colnames(mildy$u[, colinds])
     mildx <- milr(dataFramex,
-      voxmats[1], formx, smoothingMatrixX,
-      iterations = locits, gamma = gamma * (1),
-      sparsenessQuantile = sparsenessQuantileX,
-      positivity = positivityX[[1]],
-      repeatedMeasures = repeatedMeasures,
-      verbose = FALSE
+                  voxmats[1], formx, smoothingMatrixX,
+                  iterations = locits, gamma = gamma * (1),
+                  sparsenessQuantile = sparsenessQuantileX,
+                  positivity = positivityX[[1]],
+                  repeatedMeasures = repeatedMeasures,
+                  verbose = FALSE
     )
-
+    
     mildy <- milr(dataFramey,
-      voxmats[2], formy, smoothingMatrixY,
-      iterations = locits, gamma = gamma * (1),
-      sparsenessQuantile = sparsenessQuantileY,
-      positivity = positivityY[[1]],
-      repeatedMeasures = repeatedMeasures,
-      verbose = FALSE
+                  voxmats[2], formy, smoothingMatrixY,
+                  iterations = locits, gamma = gamma * (1),
+                  sparsenessQuantile = sparsenessQuantileY,
+                  positivity = positivityY[[1]],
+                  repeatedMeasures = repeatedMeasures,
+                  verbose = FALSE
     )
     ###############################################
     p1 <- antsrimpute(voxmats[[1]] %*% mildx$v[, -1])
@@ -2904,8 +2903,8 @@ mild <- function(dataFrame, voxmats, basisK,
     }
   }
   return(list(simlrX = mildx, simlrY = mildy))
-
-
+  
+  
   if (FALSE) {
     xv <- mildx$v
     yv <- mildy$v
@@ -2921,14 +2920,14 @@ mild <- function(dataFrame, voxmats, basisK,
     xv <- as.matrix(smoothingMatrixX %*% xv[, ])
     xv <- orthogonalizeAndQSparsify(xv, sparsenessQuantileX, positivityX[[1]])
     xv <- as.matrix(smoothingMatrixX %*% xv[, ])
-
+    
     # now make the above sparse
     yvup <- as.matrix(yvup[, ] %*% smoothingMatrixY)
     yv <- yv + t(yvup) * gamma
     yv <- as.matrix(smoothingMatrixY %*% yv[, ])
     yv <- orthogonalizeAndQSparsify(yv, sparsenessQuantileY, positivityY[[1]])
     yv <- as.matrix(smoothingMatrixY %*% yv[, ])
-
+    
     mildy$u[, colinds] <- yOrth[, colinds] <- scale(voxmats[[1]] %*% (xv))[, colinds]
     mildx$u[, colinds] <- xOrth[, colinds] <- scale(voxmats[[2]] %*% (yv))[, colinds]
   } # end if
@@ -2996,7 +2995,7 @@ initializeSimlr <- function(
       X <- Reduce(cbind, voxmats[-1]) # bind all matrices
       #      u = randcca( voxmats[[1]], X, k )$svd$u
       u <- sparseDecom2(list(voxmats[[1]], X),
-        sparseness = c(0.5, 0.5), nvecs = k, its = 3, ell1 = 0.1
+                        sparseness = c(0.5, 0.5), nvecs = k, its = 3, ell1 = 0.1
       )$projections2
     } else {
       u <- replicate(k, rnorm(nrow(voxmats[[1]])))
@@ -3015,7 +3014,7 @@ initializeSimlr <- function(
       uOut[[s]] <- t(fastICA::fastICA(t(X), method = "C", n.comp = k)$A)
     } else if (localAlgorithm == "cca") {
       uOut[[s]] <- sparseDecom2(list(X, voxmats[[s]]),
-        sparseness = c(0.5, 0.5), nvecs = k, its = 3, ell1 = 0.1
+                                sparseness = c(0.5, 0.5), nvecs = k, its = 3, ell1 = 0.1
       )$projections2
     } else if (localAlgorithm == "randomProjection") {
       uOut[[s]] <- t((t(uRand) %*% voxmats[[s]]) %*% t(voxmats[[s]]))
@@ -3053,12 +3052,12 @@ regularizeSimlr <- function(x, knn, fraction = 0.1, sigma, kPackage = "FNN") {
   getSpatialRegularization <- function(inmask, myk, mysig) {
     spatmat <- t(imageDomainToSpatialMatrix(inmask, inmask))
     regs <- knnSmoothingMatrix(spatmat,
-      k = myk,
-      sigma = mysig, kPackage = "FNN"
+                               k = myk,
+                               sigma = mysig, kPackage = "FNN"
     )
     return(regs)
   }
-
+  
   if (missing(knn)) {
     knn <- rep(NA, length(x))
     for (i in 1:length(x)) {
@@ -3074,8 +3073,8 @@ regularizeSimlr <- function(x, knn, fraction = 0.1, sigma, kPackage = "FNN") {
       slist[[i]] <- getSpatialRegularization(x[[i]], knn[i], sigma[i])
     } else {
       slist[[i]] <- knnSmoothingMatrix(scale(data.matrix(x[[i]]), T, T),
-        k = knn[i],
-        sigma = sigma[i], kPackage = kPackage
+                                       k = knn[i],
+                                       sigma = sigma[i], kPackage = kPackage
       )
     }
   }
@@ -3093,7 +3092,7 @@ regularizeSimlr <- function(x, knn, fraction = 0.1, sigma, kPackage = "FNN") {
 #' If not set, each basis set will be used to predict its corresponding matrix.
 #' @param projectv boolean to determine whether raw u or x * v is used; default to TRUE which uses the x * v approach
 #' @return A list of variance explained, predicted matrices and error metrics:
-#' \itemize{
+#' \describe{
 #'   \item{varx: }{Mean variance explained for \code{u_i} predicting \code{x_i}.}
 #'   \item{predictions: }{Predicted \code{x_i} matrix.}
 #'   \item{initialErrors: }{Initial matrix norm.}
@@ -3124,7 +3123,7 @@ predictSimlr <- function(x, simsol, targetMatrix, sourceMatrices, projectv = TRU
     }
   }
   myBetas <- matrix(rep(0, ncol(simsol$u[[1]]) * length(sourceMatrices)),
-    ncol = ncol(simsol$u[[1]])
+                    ncol = ncol(simsol$u[[1]])
   )
   myBetasQ5 <- myBetas
   ct <- 1
@@ -3266,7 +3265,7 @@ sum_preserving_matrix_partition <- function(X, option = 2, tol = 1e-3 ) {
   row_sums <- rowSums(abs(Y))
   row_sums[row_sums == 0] <- 1  # Avoid division by zero
   Y <- Y / row_sums * mean(row_sums, na.rm = TRUE)
-
+  
   # Check if row sums are within tolerance
   if (any(abs(rowSums(abs(Y)) - mean(rowSums(abs(Y)), na.rm = TRUE)) > tol, na.rm = TRUE)) {
     warning("Row sums are not within tolerance. Consider adjusting tol parameter.")
@@ -3312,6 +3311,9 @@ gradient_invariant_orthogonality_defect <- function(A) {
 gradient_invariant_orthogonality_salad<- function(A) {
   #### place holder until we get the correct analytical derivative
   f1=invariant_orthogonality_defect
+  if (!usePkg("salad")) {
+    stop("Please install package hdf5r in order to use gradient_invariant_orthogonality_salad")
+  }
   matrix( salad::d( f1( salad::dual(A) ) ), nrow=nrow(A) )
 }
 
@@ -3452,7 +3454,7 @@ simlr <- function(
     if ( length(temp) > 1 ) num1=as.numeric(temp[2])
     if ( length(temp) > 2 ) num2=as.numeric(temp[3])
     return(c(temp[1], as.numeric(num1), as.numeric(num2)))
-    }
+  }
   if (missing(scale)) scale <- c("centerAndScale")
   if (missing(energyType)) energyType <- "cca"
   if (missing(mixAlg)) mixAlg <- "svd"
@@ -3463,9 +3465,9 @@ simlr <- function(
   if ( verbose ) print(constraint)
   optimizationStyle <- match.arg(optimizationStyle)
   scalechoices = c(
-      "sqrtnp", "np", "centerAndScale",
-      "norm", "none", "impute", "eigenvalue", "center", "robust", 'lowrank','whiten','rank'
-    )
+    "sqrtnp", "np", "centerAndScale",
+    "norm", "none", "impute", "eigenvalue", "center", "robust", 'lowrank','whiten','rank'
+  )
   scaleList <- c()
   if (length(scale) == 1) {
     scaleList[1] <- match.arg(scale[1], choices = scalechoices )
@@ -3473,7 +3475,7 @@ simlr <- function(
   if (length(scale) > 1) {
     for (kk in 1:length(scale)) {
       scaleList[kk] <- match.arg(scale[kk],
-        choices = scalechoices
+                                 choices = scalechoices
       )
     }
   }
@@ -3498,7 +3500,7 @@ simlr <- function(
     }
     return(vgrad)
   }
-
+  
   normalized <- FALSE
   ccaEnergy <- FALSE
   nModalities <- length(voxmats)
@@ -3537,7 +3539,7 @@ simlr <- function(
   if (missing(sparsenessQuantiles)) {
     sparsenessQuantiles <- rep(0.5, nModalities)
   }
-
+  
   lrbasis = length( voxmats )
   if ( ! missing( initialUMatrix ) ) {
     if ( is.integer(initialUMatrix) ) lrbasis=initialUMatrix
@@ -3545,7 +3547,7 @@ simlr <- function(
     if ( is.list( initialUMatrix ) ) if ( is.matrix(initialUMatrix[[1]])) 
       lrbasis=ncol(initialUMatrix[[1]])
   }
-
+  
   # 1.0 adjust matrix norms
   if (!(any(scaleList == "none"))) {
     for (i in 1:nModalities) {
@@ -3587,7 +3589,7 @@ simlr <- function(
       }
     }
   }
-
+  
   # 3.0 setup regularization
   if (missing(smoothingMatrices)) {
     smoothingMatrices <- list()
@@ -3631,12 +3633,12 @@ simlr <- function(
     return(list(q = q, r = r))
   }
   randmat <- 0
-
+  
   # 4.0 setup initialization
   if (missing(initialUMatrix)) {
     initialUMatrix <- nModalities
   }
-
+  
   if (is.matrix(initialUMatrix)) {
     randmat <- initialUMatrix
     initialUMatrix <- list()
@@ -3652,9 +3654,9 @@ simlr <- function(
       initialUMatrix <- initializeSimlr(voxmats, initialUMatrix, uAlgorithm = mixAlg, jointReduction = jointInitialization)
     }
   }
-
+  
   if (length(initialUMatrix) != nModalities &
-    !is.matrix(initialUMatrix)) {
+      !is.matrix(initialUMatrix)) {
     message(paste("initializing with random matrix: ", initialUMatrix, "columns"))
     randmat <- scale(
       ((matrix(rnorm(n * initialUMatrix), nrow = n))), TRUE, TRUE
@@ -3664,7 +3666,7 @@ simlr <- function(
       initialUMatrix[[i]] <- randmat
     }
   }
-
+  
   basisK <- ncol(initialUMatrix[[1]])
   buildV <- FALSE
   if (missing(vmats)) buildV <- TRUE else if (is.null(vmats)) buildV <- TRUE
@@ -3680,7 +3682,7 @@ simlr <- function(
       vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
     }
   }
-
+  
   nc <- ncol(initialUMatrix[[1]])
   myw <- matrix(rnorm(nc^2), nc, nc) # initialization for fastICA
   getSyME2 <- function(lineSearch, gradient, myw, mixAlg,
@@ -3711,7 +3713,7 @@ simlr <- function(
       if ( abs(last_energy) > .Machine$double.eps & myorthEnergy > .Machine$double.eps ) {
         myorthEnergy = as.numeric(constraint[2]) * myorthEnergy # *(abs(last_energy)/myorthEnergy)
       }
-      } else myorthEnergy = 0.0
+    } else myorthEnergy = 0.0
     if (ccaEnergy) {
       # ( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
       t0 <- norm(voxmats[[whichModality]] %*% myenergysearchv, "F")
@@ -3722,15 +3724,15 @@ simlr <- function(
         print(dim(avgU))
         print(dim(voxmats[[whichModality]]))
       }
-#      secondterm = sum(abs(diag( t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ))))
-#      print( paste( "myorthEnergy", myorthEnergy, 'mynorm', mynorm, 'secondterm', secondterm ))
+      #      secondterm = sum(abs(diag( t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ))))
+      #      print( paste( "myorthEnergy", myorthEnergy, 'mynorm', mynorm, 'secondterm', secondterm ))
       return( myorthEnergy + mynorm *
-        sum(abs(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))))
+                sum(abs(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))))
       # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
     }
-
+    
     # ACC tr( abs( U' * X * V ) ) / ( norm2(U)^0.5 * norm2( X * V )^0.5 )
-
+    
     # low-dimensional error approximation
     if (energyType == "lowRank") {
       vpro <- voxmats[[whichModality]] %*% (myenergysearchv)
@@ -3745,30 +3747,30 @@ simlr <- function(
       energy <- norm(avgU - vpro, "F")
       return(myorthEnergy + energy)
     }
-
+    
     prediction <- avgU %*% t(myenergysearchv)
-#    print( paste("Norm(avgU)",norm(avgU,'F')))
-#    print( paste("Norm(myenergysearchv)",norm(myenergysearchv,'F')))
+    #    print( paste("Norm(avgU)",norm(avgU,'F')))
+    #    print( paste("Norm(myenergysearchv)",norm(myenergysearchv,'F')))
     prediction <- prediction - (colMeans(prediction) - colMeans(voxmats[[whichModality]]))
-#    print( paste( "norm(prediction)", norm(prediction,'F'), 
-#      "norm(voxmats[[whichModality]])", norm(voxmats[[whichModality]],'F')))
+    #    print( paste( "norm(prediction)", norm(prediction,'F'), 
+    #      "norm(voxmats[[whichModality]])", norm(voxmats[[whichModality]],'F')))
     if (!normalized) energy <- norm(prediction - voxmats[[whichModality]], "F")
     if (normalized) energy <- norm(prediction / norm(prediction, "F") - voxmats[[whichModality]] / norm(voxmats[[whichModality]], "F"), "F")
     if ( verbose )
       print(paste("basic regression", 'myorthEnergy',myorthEnergy,'energy',energy))
     return(myorthEnergy +energy)
   }
-
+  
   energyPath <- matrix(Inf, nrow = iterations, ncol = nModalities)
   initialEnergy <- 0
-
+  
   for (i in 1:nModalities) {
     loki <- getSyME2(0, 0,
-      myw = myw, mixAlg = mixAlg,
-      avgU = initialUMatrix[[i]],
-      whichModality = i,
-      constraint=constraint,
-      last_energy=1
+                     myw = myw, mixAlg = mixAlg,
+                     avgU = initialUMatrix[[i]],
+                     whichModality = i,
+                     constraint=constraint,
+                     last_energy=1
     )
     initialEnergy <- initialEnergy + loki / nModalities
   }
@@ -3781,7 +3783,7 @@ simlr <- function(
       " <o> mixer:", mixAlg, " <o> E: ", energyType
     ))
   }
-
+  
   getSyMGnorm <- function(v, i, myw, mixAlg) {
     # norm2( X/norm2(X) - U * V'/norm2(U * V') )^2
     u <- initialUMatrix[[i]]
@@ -3842,8 +3844,8 @@ simlr <- function(
         t1 <- norm(u, "F")
         mytr <- sum(diag(t(u) %*% (x %*% v)))
         return(1.0 / (t0 * t1) * (t(x) %*% u) -
-          1 / (t0^3 * t1) * mytr * (t(x) %*% (x %*% v)) +
-          sign(v) * 0.0)
+                 1 / (t0^3 * t1) * mytr * (t(x) %*% (x %*% v)) +
+                 sign(v) * 0.0)
       }
       # tr( abs( v'*X'*u) )/( norm2(X*v ) * norm2( u ) ) # CCA style objective
       subg <- function(x, u, v) {
@@ -3854,10 +3856,10 @@ simlr <- function(
         signer <- t2 * 0
         diag(signer) <- sign(diag(t2))
         return(1.0 / (t0 * t1) * (t(x) %*% u) %*% signer -
-          1.0 / (t0^3 * t1) * mytr * (t(x) %*% (x %*% v)) +
-          sign(v) * 0.0)
+                 1.0 / (t0^3 * t1) * mytr * (t(x) %*% (x %*% v)) +
+                 sign(v) * 0.0)
       }
-
+      
       #        detg <- function( x, u, v ) {
       #          t0 = x %*% v
       #          t1 = norm( t0, "F" )
@@ -3866,7 +3868,7 @@ simlr <- function(
       #          term2 = det( t( u ) %*% ( x %*% v ) ) / ( t1^3 * t2 ) * ( t(x) %*% ( x %*% v ) )
       #          return( term1 - term2 )
       #          }
-
+      
       if (energyType == "cca") {
         return(subg(x, u, v))
       }
@@ -3888,11 +3890,11 @@ simlr <- function(
       t2 <- norm(u, "F")
       mytr <- sum(diag(t(u) %*% (x %*% v)))
       (1.0 / (t1 * t2) * (t(x) %*% u) -
-        1.0 / (t1^3 * t2) * t(preposter %*% poster)) * 0.5
+          1.0 / (t1^3 * t2) * t(preposter %*% poster)) * 0.5
     }
   }
   if (normalized) getSyMG <- getSyMGnorm else getSyMG <- getSyMGccamse
-
+  
   lineSearchLogic <- function(x) { # energy path is input
     nna <- sum(!is.na(x))
     if (nna <= 1) {
@@ -3905,7 +3907,7 @@ simlr <- function(
     return(TRUE)
     # mdl = loess( xx ~ as.numeric(1:length(xx)) ) # for slope estimate
   }
-
+  
   optimizationLogic <- function(energy, iteration, i) {
     if (optimizationStyle == "greedy" & iteration < 3) {
       return(TRUE)
@@ -3938,7 +3940,7 @@ simlr <- function(
       # initialize gradient line search
       temperv <- getSyMG(vmats[[i]], i, myw = myw, mixAlg = mixAlg)
       temperv <- constrainG(temperv, i, constraint = constraint[1] )
-
+      
       useAdam <- FALSE
       if (useAdam) { 
         if (myit == 1 & i == 1) {
@@ -3957,7 +3959,7 @@ simlr <- function(
         m_hat <- m[[i]] / (1 - beta_1^myit)
         v_hat <- v[[i]] / (1 - beta_2^myit)
       }
-
+      
       regnorm = norm(temperv,'F')
       if ( is.nan( regnorm ) ) temperv[] = 0.0
       if (expBeta > 0) {
@@ -3970,21 +3972,21 @@ simlr <- function(
         orthgradnorm = norm(orthgrad,"F")
         if ( orthgradnorm > 0 )
           temperv = temperv - orthgrad * as.numeric(constraint[3])
-#          temperv = temperv - orthgrad * norm(temperv,"F")/orthgradnorm*as.numeric(constraint[3])
+        #          temperv = temperv - orthgrad * norm(temperv,"F")/orthgradnorm*as.numeric(constraint[3])
       }
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
-#        if ( is.nan( norm(initialUMatrix[[i]],'F') ) ) {
-#          print("initialUMatrix[[i]]")
-#          derka
-#        }
+        #        if ( is.nan( norm(initialUMatrix[[i]],'F') ) ) {
+        #          print("initialUMatrix[[i]]")
+        #          derka
+        #        }
         temp <- optimize(getSyME2, # computes the energy
-          interval = lineSearchRange,
-          tol = lineSearchTolerance,
-          gradient = temperv,
-          myw = myw, mixAlg = mixAlg,
-          avgU = initialUMatrix[[i]], whichModality = i, 
-          last_energy=laste, constraint=constraint
+                         interval = lineSearchRange,
+                         tol = lineSearchTolerance,
+                         gradient = temperv,
+                         myw = myw, mixAlg = mixAlg,
+                         avgU = initialUMatrix[[i]], whichModality = i, 
+                         last_energy=laste, constraint=constraint
         )
         errterm[i] <- temp$objective
         gamma[i] <- temp$minimum
@@ -3999,62 +4001,62 @@ simlr <- function(
         )
       }
       if (errterm[i] <= min(energyPath[, i], na.rm = T) |
-        optimizationStyle == "greedy") # ok to update
-        {
-          if (!useAdam) vmats[[i]] <- (vmats[[i]] + (temperv) * gamma[i])
-          if (useAdam) vmats[[i]] <- vmats[[i]] - gamma[i] * m_hat / (sqrt(v_hat) + 1) # adam
-          if (sparsenessQuantiles[i] != 0) {
-            vmats[[i]] <- orthogonalizeAndQSparsify(
-              as.matrix(smoothingMatrices[[i]] %*% vmats[[i]]),
-              sparsenessQuantiles[i],
-              orthogonalize = FALSE, positivity = positivities[i],
-              unitNorm = FALSE,
-              softThresholding = TRUE,
-              sparsenessAlg = sparsenessAlg
-            )
-          }
-          if (normalized) vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
+          optimizationStyle == "greedy") # ok to update
+      {
+        if (!useAdam) vmats[[i]] <- (vmats[[i]] + (temperv) * gamma[i])
+        if (useAdam) vmats[[i]] <- vmats[[i]] - gamma[i] * m_hat / (sqrt(v_hat) + 1) # adam
+        if (sparsenessQuantiles[i] != 0) {
+          vmats[[i]] <- orthogonalizeAndQSparsify(
+            as.matrix(smoothingMatrices[[i]] %*% vmats[[i]]),
+            sparsenessQuantiles[i],
+            orthogonalize = FALSE, positivity = positivities[i],
+            unitNorm = FALSE,
+            softThresholding = TRUE,
+            sparsenessAlg = sparsenessAlg
+          )
         }
+        if (normalized) vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
+      }
       if (ccaEnergy) {
         vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
         initialUMatrix[[i]] <- initialUMatrix[[i]] / norm(initialUMatrix[[i]], "F")
       }
     } # matrange
     if (verbose == 2) print(gamma)
-
+    
     # run the basis calculation for each U_i - convert self to other
     nn <- !ccaEnergy
     if (TRUE) {
       for (jj in 1:nModalities) {
         initialUMatrix[[jj]] <- scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn)
-#        if ( is.nan( norm( initialUMatrix[[jj]], 'F') ) ) {
-#          initialUMatrix[[jj]] <- antsrimpute( initialUMatrix[[jj]] )
-#          print( paste( "IMPUTED", norm( initialUMatrix[[jj]], 'F') ) )
-#        }
+        #        if ( is.nan( norm( initialUMatrix[[jj]], 'F') ) ) {
+        #          initialUMatrix[[jj]] <- antsrimpute( initialUMatrix[[jj]] )
+        #          print( paste( "IMPUTED", norm( initialUMatrix[[jj]], 'F') ) )
+        #        }
       }
       temp <- simlrU(initialUMatrix, mixAlg, myw,
-        orthogonalize = orthogonalize,
-        connectors = connectors
+                     orthogonalize = orthogonalize,
+                     connectors = connectors
       )
       for (jj in 1:nModalities) {
         initialUMatrix[[jj]] <-
-            localGS(temp[[jj]], orthogonalize = orthogonalize)
+          localGS(temp[[jj]], orthogonalize = orthogonalize)
         # below exp avg for u updates --- not tested
         #        initialUMatrix[[jj]] = initialUMatrix[[jj]] * 0.9 +
         #            localGS( temp[[jj]], orthogonalize = orthogonalize ) * 0.1
       }
     }
-
-
+    
+    
     # evaluate new energies
     for (jj in 1:nModalities) {
       loki <- getSyME2(0, 0,
-        myw = myw, mixAlg = mixAlg,
-        avgU = initialUMatrix[[jj]],
-        whichModality = jj, 
-        constraint=constraint,
-        last_energy=1,
-        verbose = FALSE
+                       myw = myw, mixAlg = mixAlg,
+                       avgU = initialUMatrix[[jj]],
+                       whichModality = jj, 
+                       constraint=constraint,
+                       last_energy=1,
+                       verbose = FALSE
       )
       energyPath[myit, jj] <- loki
     } # matrix loop
@@ -4071,7 +4073,7 @@ simlr <- function(
     }
     totalEnergy[myit] <- bestEv
     if (mean(energyPath[myit, ], na.rm = TRUE) <= bestEv |
-      optimizationStyle == "greedy") {
+        optimizationStyle == "greedy") {
       bestU <- initialUMatrix
       bestV <- vmats
     } else { # FIXME - open question - should we reset or not?
@@ -4088,13 +4090,13 @@ simlr <- function(
     }
     if ((myit - bestRow - 1) >= 5) break # consider converged
   } # iterations
-
+  
   names(bestV)=names(voxmats)
   for ( k in 1:length(voxmats)) {
     rownames(bestV[[k]])=colnames(voxmats[[k]])
     colnames(bestV[[k]])=paste0("PC",1:ncol(bestV[[k]]))
   }
-
+  
   energyPath <- na.omit(energyPath)
   return(
     list(
@@ -4188,8 +4190,8 @@ simlrU <- function(
     return(q)
   }
   subU <- function(
-      projectionsU, mixingAlgorithm, initialW,
-      orthogonalize, i, wtobind) {
+    projectionsU, mixingAlgorithm, initialW,
+    orthogonalize, i, wtobind) {
     avgU <- NULL
     mixAlg <- mixingAlgorithm
     nComponents <- ncol(projectionsU[[1]])
@@ -4236,8 +4238,8 @@ simlrU <- function(
       basis <- (rsvd::rrpca(avgU, rand = FALSE)$S[, 1:nc])
     } else if (mixAlg == "ica" & !missing(initialW)) {
       basis <- (fastICA::fastICA(avgU,
-        method = "C", w.init = initialW,
-        n.comp = nc
+                                 method = "C", w.init = initialW,
+                                 n.comp = nc
       )$S)
       if ( is.nan( norm(basis,"F"))) {
         message(paste("fastICA produced NaN - svd instead"))
@@ -4261,7 +4263,7 @@ simlrU <- function(
     }
     return(localGS(basis, orthogonalize = orthogonalize))
   }
-
+  
   outU <- list()
   for (i in 1:length(projectionsU)) {
     if (is.null(connectors)) {
@@ -4269,8 +4271,8 @@ simlrU <- function(
     }
     if (!is.null(connectors)) {
       outU[[i]] <- subU(projectionsU, mixingAlgorithm, initialW, orthogonalize,
-        i,
-        wtobind = connectors[[i]]
+                        i,
+                        wtobind = connectors[[i]]
       )
     }
   }
@@ -4313,61 +4315,61 @@ simlrU <- function(
 #' @return A data frame containing p-values for each permutation.
 #' @export
 simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
-                                      positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
-                                                                              "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
-                                      repeatedMeasures = NA, lineSearchRange = c(-1e+10, 1e+10), 
-                                      lineSearchTolerance = 1e-08, randomSeed, constraint = c("none", 
-                                                                                             "Grassmann", "Stiefel"), energyType = c("cca", "regression", 
-                                                                                                                                     "normalized", "ucca", "lowRank", "lowRankRegression"), 
-                                      vmats, connectors = NULL, optimizationStyle = c("lineSearch", 
-                                                                                      "mixed", "greedy"), scale = c("centerAndScale", "sqrtnp", 
-                                                                                                                    "np", "center", "norm", "none", "impute", "eigenvalue", 
-                                                                                                                    "robust"), expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
-                                      verbose = FALSE, nperms = 50, FUN='mean') {
+                       positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
+                                                                "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
+                       repeatedMeasures = NA, lineSearchRange = c(-1e+10, 1e+10), 
+                       lineSearchTolerance = 1e-08, randomSeed, constraint = c("none", 
+                                                                               "Grassmann", "Stiefel"), energyType = c("cca", "regression", 
+                                                                                                                       "normalized", "ucca", "lowRank", "lowRankRegression"), 
+                       vmats, connectors = NULL, optimizationStyle = c("lineSearch", 
+                                                                       "mixed", "greedy"), scale = c("centerAndScale", "sqrtnp", 
+                                                                                                     "np", "center", "norm", "none", "impute", "eigenvalue", 
+                                                                                                     "robust"), expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
+                       verbose = FALSE, nperms = 50, FUN='mean') {
   
   # Set up permutations
   myseeds <- 1:1000000
   
   # Initial SiMLR run
   simlr_result <- simlr( voxmats, 
-    smoothingMatrices, iterations, sparsenessQuantiles, 
-    positivities, initialUMatrix, mixAlg, orthogonalize, 
-                  repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
-                  energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
-                  jointInitialization, sparsenessAlg, verbose=verbose > 0 )
+                         smoothingMatrices, iterations, sparsenessQuantiles, 
+                         positivities, initialUMatrix, mixAlg, orthogonalize, 
+                         repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
+                         energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
+                         jointInitialization, sparsenessAlg, verbose=verbose > 0 )
   for ( k in 1:length(voxmats)) {
     simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
     simlr_result$v[[k]]=divide_by_column_sum( simlr_result$v[[k]] )
     rownames(simlr_result$v[[k]])=colnames(voxmats[[k]])
   }
-
+  
   refvarxmeans = pairwise_matrix_similarity( voxmats, simlr_result$v, FUN=FUN )
   simlrpermvarx = data.frame( n=ncol(initialUMatrix), perm=0:nperms ) 
   refvarxmeansnms=names(refvarxmeans)
   simlrpermvarx[1, refvarxmeansnms]=refvarxmeans
-
+  
   # begin permutation  
   if ( nperms > 1 )
-  for (nperm in 1:nperms) {
-    set.seed(myseeds[nperm])
-    
-    voxmats_perm <- lapply(voxmats, function(mat) mat[sample(1:nrow(mat)), ])
-    
-    simlr_result_perm <- simlr(voxmats_perm, smoothingMatrices, iterations, sparsenessQuantiles, 
-                         positivities, initialUMatrix, mixAlg, orthogonalize, 
-                         repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
-                         energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
-                         jointInitialization, sparsenessAlg, verbose=verbose > 3)
-    for ( k in 1:length(voxmats)) {
-      simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
-      simlr_result_perm$v[[k]] = divide_by_column_sum( simlr_result_perm$v[[k]] )
+    for (nperm in 1:nperms) {
+      set.seed(myseeds[nperm])
+      
+      voxmats_perm <- lapply(voxmats, function(mat) mat[sample(1:nrow(mat)), ])
+      
+      simlr_result_perm <- simlr(voxmats_perm, smoothingMatrices, iterations, sparsenessQuantiles, 
+                                 positivities, initialUMatrix, mixAlg, orthogonalize, 
+                                 repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
+                                 energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
+                                 jointInitialization, sparsenessAlg, verbose=verbose > 3)
+      for ( k in 1:length(voxmats)) {
+        simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
+        simlr_result_perm$v[[k]] = divide_by_column_sum( simlr_result_perm$v[[k]] )
+      }
+      refvarxmeans_perm = pairwise_matrix_similarity( voxmats_perm, simlr_result_perm$v, FUN=FUN )
+      simlrpermvarx[nperm + 1, refvarxmeansnms ] <- refvarxmeans_perm
+      if ( verbose > 2 ) {
+        print( simlrpermvarx[c(1,nperm+1),])
+      }
     }
-    refvarxmeans_perm = pairwise_matrix_similarity( voxmats_perm, simlr_result_perm$v, FUN=FUN )
-    simlrpermvarx[nperm + 1, refvarxmeansnms ] <- refvarxmeans_perm
-    if ( verbose > 2 ) {
-      print( simlrpermvarx[c(1,nperm+1),])
-    }
-  }
   
   # Statistical significance testing
   simlrpermvarx_ttest <- c()
@@ -4481,7 +4483,7 @@ adjusted_rvcoef <- function(X, Y, lambda = 1e-6) {
 #'
 #' @export
 pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef) {
-
+  
   # Initialize an empty matrix to store RV coefficients
   rv_coeffs <- matrix(NA, nrow = length(mat_list), ncol = length(mat_list))
   rv_coeffs_nms <- matrix("", nrow = length(mat_list), ncol = length(mat_list))
@@ -4540,7 +4542,7 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
 #' # result <- visualize_lowrank_relationships(X1, X2, V1, V2)
 #' @export
 visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1', nm2='X2') {
-
+  
   unique_column_names <- function(df) {
     names <- colnames(df)
     new_names <- character(length(names))
@@ -4556,7 +4558,7 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
     colnames(df) <- new_names
     return(df)
   }
-
+  
   if (missing(plot_title)) plot_title=paste("LRRc: ", nm1, " & ", nm2 )
   # Compute the low-rank projections
   projection1 <- X1 %*% V1
@@ -4566,7 +4568,7 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
   correlation_matrix <- cor(projection1, projection2)
   
   # Perform CCA
-#   cca_result <- cancor(projection1, projection2)
+  #   cca_result <- cancor(projection1, projection2)
   # canonical_correlations <- cca_result$cor
   
   # Perform Wilks' lambda test
@@ -4578,25 +4580,30 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
   
   # Prepare data for plotting
   cor_data <- as.data.frame(as.table(correlation_matrix))
-
-  # Plot the pairwise correlations
-   p <- ggplot(cor_data, aes(Var1, Var2, fill = Freq)) +
-    geom_tile(color = "white") +
-    scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
-                   midpoint = 0, limit = c(-1,1), space = "Lab", 
-                   name="Correlation") +
-  geom_text(aes(label = format(Freq, digits = 2, nsmall = 2)), size = 3)+
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, vjust = 1, 
-                               size = 12, hjust = 1)) +
-    coord_fixed() +
-    labs(title = plot_title, x = "Projection 1", y = "Projection 2")  
   
-  ggp=ggpairs( cordf,
-        upper = list(continuous = "points"), 
-        lower = list(continuous = "cor"),
-        title = plot_title )
-
+  # fix for no visible binding for global variable NOTE
+  Var1 = Var2 = Freq = NULL
+  rm(list = c("Var1", "Var2", "Freq"))
+  # Plot the pairwise correlations
+  p <- ggplot2::ggplot(cor_data, ggplot2::aes(Var1, Var2, fill = Freq)) +
+    ggplot2::geom_tile(color = "white") +
+    ggplot2::scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                         midpoint = 0, limit = c(-1,1), space = "Lab", 
+                         name="Correlation") +
+    ggplot2::geom_text(ggplot2::aes(label = format(Freq, digits = 2, nsmall = 2)), size = 3)+
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(
+        angle = 45, vjust = 1, 
+                                     size = 12, hjust = 1)) +
+    ggplot2::coord_fixed() +
+    ggplot2::labs(title = plot_title, x = "Projection 1", y = "Projection 2")  
+  
+  ggp=GGally::ggpairs( cordf,
+               upper = list(continuous = "points"), 
+               lower = list(continuous = "cor"),
+               title = plot_title )
+  
   # Return a list of results
   return(list(
     plot = p,
@@ -4729,18 +4736,18 @@ vector_to_df <- function(vector, column_name) {
 #' 
 #' @export
 simlr.parameters <- function(
-  nsimlr_options,
-  prescaling_options,
-  objectiver_options,
-  mixer_options,
-  sparval_options,
-  expBeta_options,
-  positivities_options,
-  optimus_options,
-  constraint_options = list("none"),
-  sparsenessAlg = list(NA),
-  num_samples = 10,
-  search_type = c("random", "deterministic", "full")
+    nsimlr_options,
+    prescaling_options,
+    objectiver_options,
+    mixer_options,
+    sparval_options,
+    expBeta_options,
+    positivities_options,
+    optimus_options,
+    constraint_options = list("none"),
+    sparsenessAlg = list(NA),
+    num_samples = 10,
+    search_type = c("random", "deterministic", "full")
 ) {
   search_type <- match.arg(search_type)
   
@@ -4786,14 +4793,14 @@ simlr.parameters <- function(
 #' @return A list containing the best SIMLR result, its significance, and the parameters.
 #' @export
 simlr.search <- function(
-  mats,
-  regs,
-  options_df,
-  maxits = 100,
-  connectors = NULL,
-  nperms = 1,
-  verbose = 0,
-  FUN = rvcoef
+    mats,
+    regs,
+    options_df,
+    maxits = 100,
+    connectors = NULL,
+    nperms = 1,
+    verbose = 0,
+    FUN = rvcoef
 ) {
   myrbind.fill <- function(..., fill = NA) {
     args <- list(...)
@@ -4966,11 +4973,11 @@ simlr.search <- function(
 #' existing_df <- data.frame(matrix(rnorm(147 * 5), nrow = 147, ncol = 5))
 #' # combined_df <- apply_simlr_matrices(existing_df, matrices_list)
 apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robust=FALSE, center=FALSE, scale=FALSE, absolute_value=NULL, verbose=FALSE ) {
-
+  
   if ( is.null( absolute_value ) ) {
     absolute_value = rep( FALSE, length( matrices_list ) )
-    }
-
+  }
+  
   replbind <- function(df1, df2) {
     # Find the common and unique columns
     common_cols <- intersect(names(df1), names(df2))
@@ -5018,7 +5025,7 @@ apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robus
         projection=projection[,1:n_limit]
       }
       newnames=c(newnames,colnames(projection))
-
+      
       existing_df <- replbind(existing_df, projection)
       if ( verbose ) {
         print( inames )
@@ -5055,49 +5062,49 @@ apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robus
 #' @return A list including (entry one) data frame with the original data frame combined with the projections (entry two) the new column names
 #' @export
 apply_simlr_matrices_dtfix <- function(existing_df, matrices_list, n_limit = NULL, robust = FALSE, 
-    center = FALSE, scale = FALSE, absolute_value = NULL, verbose = FALSE) {
-    # Get column names for comparison
-    existing_df_cols = colnames(existing_df)
-    gg = grep("DTI_",existing_df_cols)
-    existing_df_fix = existing_df
-    dta_correspondence=FALSE
-    dt_correspondence=FALSE
-    matrices_list_fix = matrices_list
-    if ( length(gg) > 0 ) {
-      existing_df_cols = existing_df_cols[ gg ]
-      # Shorten the names for comparison
-      shortened_existing_df_cols = shorten_pymm_names(existing_df_cols)
-      dt_cols=NULL
-      dta_cols=NULL
-      if ( "dt" %in% names(matrices_list) ) {
-        rownames(matrices_list_fix$dt)=shorten_pymm_names( rownames(matrices_list$dt ) )
-        dt_cols = rownames(matrices_list_fix$dt)
-        shortened_dt_cols = shorten_pymm_names(dt_cols)
-        dt_correspondence = sum(shortened_existing_df_cols %in% shortened_dt_cols) > sum(existing_df_cols %in% dt_cols)
-      }
-      if ( "dta" %in% names(matrices_list) ) {
-        rownames(matrices_list_fix$dta)=shorten_pymm_names( rownames(matrices_list$dta ) )
-        dta_cols = rownames(matrices_list_fix$dta)
-        shortened_dta_cols = shorten_pymm_names(dta_cols)
-        dta_correspondence = sum(shortened_existing_df_cols %in% shortened_dta_cols) > sum(existing_df_cols %in% dta_cols)
-      } 
-      if ( dt_correspondence || dta_correspondence ) {
-          message("Shortened names improve dt correspondence. Applying shortened names...")
-          colnames(existing_df_fix)[gg] = shortened_existing_df_cols
-      } 
+                                       center = FALSE, scale = FALSE, absolute_value = NULL, verbose = FALSE) {
+  # Get column names for comparison
+  existing_df_cols = colnames(existing_df)
+  gg = grep("DTI_",existing_df_cols)
+  existing_df_fix = existing_df
+  dta_correspondence=FALSE
+  dt_correspondence=FALSE
+  matrices_list_fix = matrices_list
+  if ( length(gg) > 0 ) {
+    existing_df_cols = existing_df_cols[ gg ]
+    # Shorten the names for comparison
+    shortened_existing_df_cols = shorten_pymm_names(existing_df_cols)
+    dt_cols=NULL
+    dta_cols=NULL
+    if ( "dt" %in% names(matrices_list) ) {
+      rownames(matrices_list_fix$dt)=shorten_pymm_names( rownames(matrices_list$dt ) )
+      dt_cols = rownames(matrices_list_fix$dt)
+      shortened_dt_cols = shorten_pymm_names(dt_cols)
+      dt_correspondence = sum(shortened_existing_df_cols %in% shortened_dt_cols) > sum(existing_df_cols %in% dt_cols)
     }
-
-    # Apply SIMLR matrices
-    dd = apply_simlr_matrices(existing_df = existing_df_fix, matrices_list = matrices_list_fix, 
-                              n_limit = n_limit, robust = robust, center = center, 
-                              scale = scale, absolute_value = absolute_value, verbose = verbose)
-
-    # Restore the original column names (if they were changed)
-    if (dt_correspondence || dta_correspondence) {
-        colnames(dd[[1]])[gg] = existing_df_cols
-    }
-
-    return(dd)
+    if ( "dta" %in% names(matrices_list) ) {
+      rownames(matrices_list_fix$dta)=shorten_pymm_names( rownames(matrices_list$dta ) )
+      dta_cols = rownames(matrices_list_fix$dta)
+      shortened_dta_cols = shorten_pymm_names(dta_cols)
+      dta_correspondence = sum(shortened_existing_df_cols %in% shortened_dta_cols) > sum(existing_df_cols %in% dta_cols)
+    } 
+    if ( dt_correspondence || dta_correspondence ) {
+      message("Shortened names improve dt correspondence. Applying shortened names...")
+      colnames(existing_df_fix)[gg] = shortened_existing_df_cols
+    } 
+  }
+  
+  # Apply SIMLR matrices
+  dd = apply_simlr_matrices(existing_df = existing_df_fix, matrices_list = matrices_list_fix, 
+                            n_limit = n_limit, robust = robust, center = center, 
+                            scale = scale, absolute_value = absolute_value, verbose = verbose)
+  
+  # Restore the original column names (if they were changed)
+  if (dt_correspondence || dta_correspondence) {
+    colnames(dd[[1]])[gg] = existing_df_cols
+  }
+  
+  return(dd)
 }
 
 
@@ -5255,12 +5262,12 @@ visualize_permutation_test <- function(permutation_results, original_stat, stat_
   #    geom_histogram( fill = "blue", color = "black", alpha = 0.7) 
   # } else  p <- ggplot(plot_data, aes(x = statistic)) +
   #  geom_histogram( binwidth = bin_width, fill = "blue", color = "black", alpha = 0.7) 
-#  p = p + geom_vline(xintercept = original_stat, color = "red", linetype = "dotted", linewidth = 1.2) +    labs(title = plot_title,
- #        x = paste(stat_name, "Statistic"),
+  #  p = p + geom_vline(xintercept = original_stat, color = "red", linetype = "dotted", linewidth = 1.2) +    labs(title = plot_title,
+  #        x = paste(stat_name, "Statistic"),
   #       y = "Frequency") + theme_minimal()
-
-  p <- gghistogram(plot_data, x = 'statistic', bins = 50, title=plot_title) +
-        geom_vline(xintercept = original_stat, linetype = "dotted", color='red' )
+  
+  p <- ggpubr::gghistogram(plot_data, x = 'statistic', bins = 50, title=plot_title) +
+    ggplot2::geom_vline(xintercept = original_stat, linetype = "dotted", color='red' )
   return( p )
 }
 
@@ -5276,48 +5283,47 @@ visualize_permutation_test <- function(permutation_results, original_stat, stat_
 #' @return A list containing the combined plot and the optimal k value.
 #' @export
 exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
-  # Load necessary libraries
-  library(ggplot2)
-  library(GGally)
-  library(tsne)
-  library(fpc)
-  library(ggdendro)
-  library(patchwork)
-
   if ( verbose ) print("clustering")
   # Find optimal k using pamk
-  pamk_result <- pamk(scale(data), krange = 2:10)
+  pamk_result <- fpc::pamk(scale(data), krange = 2:10)
   optimal_k <- pamk_result$nc
-
+  
   # Perform PAM clustering with optimal k
-  pam_cluster <- pam(scale(data), k = optimal_k)
-
+  pam_cluster <- cluster::pam(scale(data), k = optimal_k)
+  
   if ( verbose ) print("pairwise correlations")
   # Create plots
-  p1 <- ggpairs(data, columns = 1:ncol(data), 
-                upper = list(continuous = "points"), 
-                lower = list(continuous = "cor"))
-
+  p1 <- GGally::ggpairs(data, columns = 1:ncol(data), 
+                        upper = list(continuous = "points"), 
+                        lower = list(continuous = "cor"))
+  
   if ( dotsne ) {
     if ( verbose ) print("tsne")
-    tsne_data <- tsne(data, k = 2)
+    tsne_data <- tsne::tsne(data, k = 2)
     tsne_data <- data.frame(X1 = tsne_data[, 1], X2 = tsne_data[, 2], cluster = pam_cluster$clustering)
-    p2 <- ggplot(tsne_data, aes(x = X1, y = X2, color = factor(cluster))) +
-      geom_point() +
-      theme_minimal() + ggtitle("TSNE projection")
+    # fix for no visible binding for global variable NOTE
+    X1 = X2 = cluster = NULL
+    rm(list = c("X1", "X2", "cluster"))    
+    p2 <- ggplot2::ggplot(tsne_data, 
+                          ggplot2::aes(x = X1, y = X2, 
+                                       color = factor(cluster))) +
+      ggplot2::geom_point() +
+      ggplot2::theme_minimal() + 
+      ggplot2::ggtitle("TSNE projection")
   }
-
+  
   if ( verbose ) print("dendrogram")
-  data_dist <- dist(scale(t(data)))
-  data_cluster <- hclust(data_dist, method = "ward.D2")
-  p3 <- ggdendrogram(data_cluster, rotate = TRUE) +
-    theme_minimal() + ggtitle("Dendrogram")
-
+  data_dist <- stats::dist(scale(t(data)))
+  data_cluster <- stats::hclust(data_dist, method = "ward.D2")
+  p3 <- ggdendro::ggdendrogram(data_cluster, rotate = TRUE) +
+    ggplot2::theme_minimal() + 
+    ggplot2::ggtitle("Dendrogram")
+  
   if ( verbose ) print("join plots")
   # Combine plots into a single page display
   if ( dotsne ) {
-    p_combined <- p2 + wrap_elements(ggmatrix_gtable(p1)) + p3
-  } else p_combined <- wrap_elements(ggmatrix_gtable(p1)) + p3
+    p_combined <- p2 + patchwork::wrap_elements(GGally::ggmatrix_gtable(p1)) + p3
+  } else p_combined <- patchwork::wrap_elements(GGally::ggmatrix_gtable(p1)) + p3
   # Return combined plot and optimal k
   list( plot = p_combined, optimal_k = optimal_k)
 }
@@ -5345,48 +5351,48 @@ antspymm_predictors <- function( demog, doasym=FALSE, return_colnames=FALSE ) {
   badcaud=getNamesFromDataframe("bn_str_ca",demog)
   badcaud=badcaud[ -grep("deep",badcaud)]
   xcl=c("hier_id",'background','SNR','evr','mask','msk','smoothing','minutes', "RandBasis",'templateL1', 'upsampl', 'paramset', 'nc_wm', 'nc_csf', 'censor','bandpass', 'outlier', 'meanBold', 'dimensionality', 'spc', 'org','andwidth',
-  'unclassified', 'cleanup', 'slice', badcaud, 'dimx', 'dimy', 'dimz','dimt', 'modality' )
+        'unclassified', 'cleanup', 'slice', badcaud, 'dimx', 'dimy', 'dimz','dimt', 'modality' )
   if ( doasym & return_colnames ) xcl=c(xcl,'left','right',"_l_","_r_")
   t1namesbst = getNamesFromDataframe( c("T1Hier",'brainstem','vol'), demog, exclusions=c("tissues","lobes"))[-1]
   testnames=c(
-          getNamesFromDataframe( "T1w_" , demog, exclusions=xcl),
-          getNamesFromDataframe( "mtl" , demog, exclusions=xcl),
-          getNamesFromDataframe( "cerebellum" , demog, exclusions=c(xcl,"_cerebell")),
-          getNamesFromDataframe( "T1Hier_" , demog, exclusions=c("hier_id","[.]1","[.]2","[.]3",'background','tissue','dktregions','T1Hier_resnetGrade','hemisphere','lobes','SNR','evr','area',xcl)),
-          t1namesbst,
-          getNamesFromDataframe( "rsfMRI_fcnxpro" , demog, exclusions=c("hier_id",'background','thk','area','vol','FD','dvars','ssnr','tsnr','motion','SNR','evr','_alff','falff_sd','falff_mean',xcl)),
-          getNamesFromDataframe( "perf_" , demog, exclusions=c("hier_id",'background','thk','area','vol','FD','dvars','ssnr','tsnr','motion','SNR','evr','_alff','falff_sd','falff_mean',xcl)),
-          getNamesFromDataframe( "DTI_" , demog, exclusions=c("hier_id",'background','thk','area','vol','motion','FD','dvars','ssnr','tsnr','SNR','evr','cnx','relcn',xcl)) )
+    getNamesFromDataframe( "T1w_" , demog, exclusions=xcl),
+    getNamesFromDataframe( "mtl" , demog, exclusions=xcl),
+    getNamesFromDataframe( "cerebellum" , demog, exclusions=c(xcl,"_cerebell")),
+    getNamesFromDataframe( "T1Hier_" , demog, exclusions=c("hier_id","[.]1","[.]2","[.]3",'background','tissue','dktregions','T1Hier_resnetGrade','hemisphere','lobes','SNR','evr','area',xcl)),
+    t1namesbst,
+    getNamesFromDataframe( "rsfMRI_fcnxpro" , demog, exclusions=c("hier_id",'background','thk','area','vol','FD','dvars','ssnr','tsnr','motion','SNR','evr','_alff','falff_sd','falff_mean',xcl)),
+    getNamesFromDataframe( "perf_" , demog, exclusions=c("hier_id",'background','thk','area','vol','FD','dvars','ssnr','tsnr','motion','SNR','evr','_alff','falff_sd','falff_mean',xcl)),
+    getNamesFromDataframe( "DTI_" , demog, exclusions=c("hier_id",'background','thk','area','vol','motion','FD','dvars','ssnr','tsnr','SNR','evr','cnx','relcn',xcl)) )
   testnames = unique( testnames )
   testnames = intersect( testnames, colnames(demog))
   if ( return_colnames ) return( testnames )
-
+  
   if ( FALSE ) {
     testnames = c(
-                getNamesFromDataframe( "Asym" , demog ),
-                getNamesFromDataframe( "LRAVG" , demog ) ) %>% unique()
+      getNamesFromDataframe( "Asym" , demog ),
+      getNamesFromDataframe( "LRAVG" , demog ) ) %>% unique()
     testnames = testnames[ -multigrep( c("DTI_relcn_LRAVG","DTI_relcn_Asym"), testnames ) ]
     # special LR avg for falff
     falffnames = getNamesFromDataframe( c("falff"), demog, exclusions=c('mean','sd','Unk'))
   }
-
+  
   tempnames=colnames(demog)
   tempnames=gsub("Right","right",tempnames)
   tempnames=gsub("Left","left",tempnames)
   colnames(demog)=tempnames
-
+  
   if ( doasym )
     demog=mapAsymVar( demog, 
-              testnames[ grep("_l_", testnames) ], '_l_', "_r_" )
+                      testnames[ grep("_l_", testnames) ], '_l_', "_r_" )
   demog=mapLRAverageVar( demog, 
-              testnames[ grep("_l_", testnames) ], '_l_', "_r_" )
+                         testnames[ grep("_l_", testnames) ], '_l_', "_r_" )
   if ( doasym )
     demog=mapAsymVar( demog, 
-                  testnames[ grep("left", testnames) ] )
+                      testnames[ grep("left", testnames) ] )
   demog=mapLRAverageVar( demog, 
-              testnames[ grep("left", testnames) ] )
+                         testnames[ grep("left", testnames) ] )
   return( demog )
-  }
+}
 
 
 
@@ -5450,8 +5456,8 @@ antspymm_vartype <- function(x) {
 #' 
 #' @export
 antspymm_nuisance_names <-function(){
-xcl = c("snr_","bandp","_mean","censor","smooth","outlier","motion","FD","despik","_nc_","_evr","minut","left","right","paramset","_sd","upsampling","mhdist","RandBasis","templateL1")
-return( xcl )
+  xcl = c("snr_","bandp","_mean","censor","smooth","outlier","motion","FD","despik","_nc_","_evr","minut","left","right","paramset","_sd","upsampling","mhdist","RandBasis","templateL1")
+  return( xcl )
 }
 
 #' shorter antspymm names
@@ -5461,7 +5467,7 @@ return( xcl )
 #' 
 #' @export
 shorten_pymm_names <-function(x){
-
+  
   shorten_nm_names <- function(voinames) {    
     voinames <- gsub("nm2dmt.nm.", "nm.", voinames, fixed = TRUE)
     voinames <- gsub(".avg.", ".iavg.", voinames, fixed = TRUE)
@@ -5471,63 +5477,63 @@ shorten_pymm_names <-function(x){
     voinames <- gsub("substantianigra", "sn", voinames)    
     return(voinames)
   }
-
-    xx=tolower(x)
-    xx=gsub("_",".",xx)
-    xx=gsub("..",'.',xx,fixed=TRUE)
-    xx=gsub("..",'.',xx,fixed=TRUE)
-    xx=gsub( "sagittal.stratum.include.inferior.longitidinal.fasciculus.and.inferior.fronto.occipital.fasciculus.","ilf.and.ifo",xx,fixed=TRUE)
-    xx=gsub(".cres.stria.terminalis.can.not.be.resolved.with.current.resolution.","",xx,fixed=TRUE)
-    xx=gsub("longitudinal.fasciculus",'l.fasc',xx,fixed=TRUE)
-    xx=gsub("corona.radiata",'cor.rad',xx,fixed=TRUE)
-    xx=gsub("central",'cent',xx,fixed=TRUE)
-    xx=gsub("deep.cit168",'dp.',xx,fixed=TRUE)
-    xx=gsub("cit168",'',xx,fixed=TRUE)
-    xx=gsub(".include",'',xx,fixed=TRUE)
-    xx=gsub("mtg.sn",'',xx,fixed=TRUE)
-    xx=gsub("brainstem",'.bst',xx,fixed=TRUE)
-    xx=gsub("rsfmri.",'rsf.',xx,fixed=TRUE)
-    xx=gsub("dti.mean.fa.",'dti.fa.',xx,fixed=TRUE)
-    xx=gsub("perf.cbf.mean.",'cbf.',xx,fixed=TRUE)
-    xx=gsub(".jhu.icbm.labels.1mm",'',xx,fixed=TRUE)
-    xx=gsub(".include.optic.radiation.",'',xx,fixed=TRUE)
-    xx=gsub("..",'.',xx,fixed=TRUE)
-    xx=gsub("..",'.',xx,fixed=TRUE)
-    xx=gsub("cerebellar.peduncle",'cereb.ped',xx,fixed=TRUE)
-    xx=gsub("anterior.limb.of.internal.capsule",'ant.int.cap',xx,fixed=TRUE)
-    xx=gsub("posterior.limb.of.internal.capsule",'post.int.cap',xx,fixed=TRUE)
-    xx=gsub("t1hier.",'t1.',xx,fixed=TRUE)
-    xx=gsub("anterior",'ant',xx,fixed=TRUE)
-    xx=gsub("posterior",'post',xx,fixed=TRUE)
-    xx=gsub("inferior",'inf',xx,fixed=TRUE)
-    xx=gsub("superior",'sup',xx,fixed=TRUE)
-    xx=gsub("dktcortex",'.ctx',xx,fixed=TRUE)
-    xx=gsub(".lravg",'',xx,fixed=TRUE)
-    xx=gsub("dti.mean.fa",'dti.fa',xx,fixed=TRUE)
-    xx=gsub("retrolenticular.part.of.internal","rent.int.cap",xx,fixed=TRUE)
-    xx=gsub("iculus.could.be.a.part.of.ant.internal.capsule","",xx,fixed=TRUE)
-    xx=gsub("iculus.could.be.a.part.of.ant.internal.capsule","",xx,fixed=TRUE)
-    xx=gsub(".fronto.occipital.",".frnt.occ.",xx,fixed=TRUE)
-    xx=gsub(".longitidinal.fasciculus.",".long.fasc.",xx,fixed=TRUE)
-    xx=gsub(".longitidinal.fasciculus.",".long.fasc.",xx,fixed=TRUE)
-    xx=gsub(".external.capsule",".ext.cap",xx,fixed=TRUE)
-    xx=gsub("of.internal.capsule",".int.cap",xx,fixed=TRUE)
-    xx=gsub("fornix.cres.stria.terminalis","fornix.",xx,fixed=TRUE)
-    xx=gsub("capsule","",xx,fixed=TRUE)
-    xx=gsub("and.inf.frnt.occ.fasciculus.","",xx,fixed=TRUE)
-    xx=gsub("crossing.tract.a.part.of.mcp.","",xx,fixed=TRUE)
-    xx=gsub("post.thalamic.radiation.optic.radiation","post.thalamic.radiation",xx,fixed=TRUE)
-    xx=gsub("adjusted",'adj',xx,fixed=TRUE)
-    xx=gsub("..",'.',xx,fixed=TRUE)
-    xx=gsub("t1w.mean","t1vth",xx,fixed=TRUE)
-    xx=gsub("fcnxpro129","p2",xx,fixed=TRUE)
-    xx=gsub("fcnxpro134","p3",xx,fixed=TRUE)
-    xx=gsub("fcnxpro122","p1",xx,fixed=TRUE)
-    xx=shorten_nm_names(xx)
-#    for ( x in 1:length(xx) ) {
-#      xx[x]=substr(xx[x],0,40)
-#    }
-    return(xx)
+  
+  xx=tolower(x)
+  xx=gsub("_",".",xx)
+  xx=gsub("..",'.',xx,fixed=TRUE)
+  xx=gsub("..",'.',xx,fixed=TRUE)
+  xx=gsub( "sagittal.stratum.include.inferior.longitidinal.fasciculus.and.inferior.fronto.occipital.fasciculus.","ilf.and.ifo",xx,fixed=TRUE)
+  xx=gsub(".cres.stria.terminalis.can.not.be.resolved.with.current.resolution.","",xx,fixed=TRUE)
+  xx=gsub("longitudinal.fasciculus",'l.fasc',xx,fixed=TRUE)
+  xx=gsub("corona.radiata",'cor.rad',xx,fixed=TRUE)
+  xx=gsub("central",'cent',xx,fixed=TRUE)
+  xx=gsub("deep.cit168",'dp.',xx,fixed=TRUE)
+  xx=gsub("cit168",'',xx,fixed=TRUE)
+  xx=gsub(".include",'',xx,fixed=TRUE)
+  xx=gsub("mtg.sn",'',xx,fixed=TRUE)
+  xx=gsub("brainstem",'.bst',xx,fixed=TRUE)
+  xx=gsub("rsfmri.",'rsf.',xx,fixed=TRUE)
+  xx=gsub("dti.mean.fa.",'dti.fa.',xx,fixed=TRUE)
+  xx=gsub("perf.cbf.mean.",'cbf.',xx,fixed=TRUE)
+  xx=gsub(".jhu.icbm.labels.1mm",'',xx,fixed=TRUE)
+  xx=gsub(".include.optic.radiation.",'',xx,fixed=TRUE)
+  xx=gsub("..",'.',xx,fixed=TRUE)
+  xx=gsub("..",'.',xx,fixed=TRUE)
+  xx=gsub("cerebellar.peduncle",'cereb.ped',xx,fixed=TRUE)
+  xx=gsub("anterior.limb.of.internal.capsule",'ant.int.cap',xx,fixed=TRUE)
+  xx=gsub("posterior.limb.of.internal.capsule",'post.int.cap',xx,fixed=TRUE)
+  xx=gsub("t1hier.",'t1.',xx,fixed=TRUE)
+  xx=gsub("anterior",'ant',xx,fixed=TRUE)
+  xx=gsub("posterior",'post',xx,fixed=TRUE)
+  xx=gsub("inferior",'inf',xx,fixed=TRUE)
+  xx=gsub("superior",'sup',xx,fixed=TRUE)
+  xx=gsub("dktcortex",'.ctx',xx,fixed=TRUE)
+  xx=gsub(".lravg",'',xx,fixed=TRUE)
+  xx=gsub("dti.mean.fa",'dti.fa',xx,fixed=TRUE)
+  xx=gsub("retrolenticular.part.of.internal","rent.int.cap",xx,fixed=TRUE)
+  xx=gsub("iculus.could.be.a.part.of.ant.internal.capsule","",xx,fixed=TRUE)
+  xx=gsub("iculus.could.be.a.part.of.ant.internal.capsule","",xx,fixed=TRUE)
+  xx=gsub(".fronto.occipital.",".frnt.occ.",xx,fixed=TRUE)
+  xx=gsub(".longitidinal.fasciculus.",".long.fasc.",xx,fixed=TRUE)
+  xx=gsub(".longitidinal.fasciculus.",".long.fasc.",xx,fixed=TRUE)
+  xx=gsub(".external.capsule",".ext.cap",xx,fixed=TRUE)
+  xx=gsub("of.internal.capsule",".int.cap",xx,fixed=TRUE)
+  xx=gsub("fornix.cres.stria.terminalis","fornix.",xx,fixed=TRUE)
+  xx=gsub("capsule","",xx,fixed=TRUE)
+  xx=gsub("and.inf.frnt.occ.fasciculus.","",xx,fixed=TRUE)
+  xx=gsub("crossing.tract.a.part.of.mcp.","",xx,fixed=TRUE)
+  xx=gsub("post.thalamic.radiation.optic.radiation","post.thalamic.radiation",xx,fixed=TRUE)
+  xx=gsub("adjusted",'adj',xx,fixed=TRUE)
+  xx=gsub("..",'.',xx,fixed=TRUE)
+  xx=gsub("t1w.mean","t1vth",xx,fixed=TRUE)
+  xx=gsub("fcnxpro129","p2",xx,fixed=TRUE)
+  xx=gsub("fcnxpro134","p3",xx,fixed=TRUE)
+  xx=gsub("fcnxpro122","p1",xx,fixed=TRUE)
+  xx=shorten_nm_names(xx)
+  #    for ( x in 1:length(xx) ) {
+  #      xx[x]=substr(xx[x],0,40)
+  #    }
+  return(xx)
 }
 
 
@@ -5560,7 +5566,7 @@ shorten_pymm_names <-function(x){
 #' @importFrom stringr str_match str_extract
 #' @export
 interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
-
+  
   split_string_correctly <- function(input_string) {
     # Extract the leading alphabetic characters (possibly including numbers within the alphabetic segment)
     alpha_part <- str_match(input_string, "([A-Za-z0-9]+(?=[A-Za-z]+[0-9]+$))[A-Za-z]*")[,1]
@@ -5577,7 +5583,7 @@ interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, sho
   } else {
     nmslist = rownames( simlrResult )
   }
-
+  
   # Extract the vector for the given modality and region, and normalize it
   t1vec <- abs(simlrResult[, simlrVariable ])
   t1vec=t1vec/max(t1vec)
@@ -5656,12 +5662,12 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
   }
   if (covariate == "centerAndScale") {
     return(scale(data.matrix(mats[[x]]), center = TRUE, scale = TRUE))
-    }
+  }
   if (covariate == "np") {
     temp = data.matrix(mats[[x]])
     np = prod( dim( temp ) )
     return( temp * 1.0/( np ) )
-    }
+  }
   if (covariate == "mean") {
     mymean <- rowMeans(data.matrix(mats[[x]]))
     covariate2 <- "mymean"
@@ -5707,11 +5713,11 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' # Example usage:
 #' # result <- antspymm_simlr(dataframe)
 antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  
-energy=c('cca','reg','lrr','regression'), nsimlr, constraint, 
-covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
-resnetGradeThresh=1.02, doperm=FALSE, 
-exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modeling=NULL, 
-sparsenessAlg=NA, verbose=FALSE ) 
+                           energy=c('cca','reg','lrr','regression'), nsimlr, constraint, 
+                           covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
+                           resnetGradeThresh=1.02, doperm=FALSE, 
+                           exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modeling=NULL, 
+                           sparsenessAlg=NA, verbose=FALSE ) 
 {
   if ( missing( nsimlr ) ) nsimlr = 5
   safegrep <- function(pattern, x, ...) {
@@ -5745,7 +5751,7 @@ sparsenessAlg=NA, verbose=FALSE )
   idps=idps[ -multigrep(antspymm_nuisance_names()[-3],idps)]
   if ( doAsym == 0 ) {
     idps=safeclean("Asym",idps)
-    } else {
+  } else {
     idps=safeclean("Asymcit168",idps)
   }
   idps=safeclean("cleanup",idps)
@@ -5759,14 +5765,14 @@ sparsenessAlg=NA, verbose=FALSE )
   if ( restrictDFN ) {
     rsfnames = rsfnames[ safegrep("Default",rsfnames)]
   } else {
-#    rsfnames = rsfnames[ multigrep( c("imbic","TempPar"),rsfnames)]
+    #    rsfnames = rsfnames[ multigrep( c("imbic","TempPar"),rsfnames)]
   }
   perfnames = idps[ multigrep( c("perf_cbf_mean_"),idps,intersect=TRUE)]
   t1names = idps[ multigrep( c("T1Hier"),idps,intersect=TRUE)]
   dtnames = unique( c( 
     idps[ multigrep( c("mean_fa","DTI"),idps,intersect=TRUE)],
     idps[ multigrep( c("mean_md","DTI"),idps,intersect=TRUE)] ))
-
+  
   t1asymnames=c()
   dtasymnames=c()
   pfasymnames=c()
@@ -5774,16 +5780,16 @@ sparsenessAlg=NA, verbose=FALSE )
     t1nms = t1names
     t1asymnames = t1nms[ grep("Asym",t1nms)]
     t1names = t1nms[ !( t1nms %in%  t1asymnames ) ]
-
+    
     dtnms = dtnames
     dtasymnames = dtnms[ grep("Asym",dtnms)]
     dtnames = dtnames[ !( dtnames %in%  dtasymnames ) ]
-
+    
     pfnms = perfnames
     pfasymnames = pfnms[ grep("Asym",pfnms)]
     perfnames = pfnms[ !( pfnms %in%  pfasymnames ) ]
-    }
-
+  }
+  
   idps=unique(t1names)
   idplist = list()
   idplist[["t1"]]=t1names
@@ -5791,7 +5797,7 @@ sparsenessAlg=NA, verbose=FALSE )
     idps = c( idps, unique(dtnames) )
     idplist[["dt"]]=dtnames
   }
-
+  
   if ( length(rsfnames) > 0 ) {
     idps = c( idps, unique(rsfnames) )
     idplist[["rsf"]]=rsfnames
@@ -5804,12 +5810,12 @@ sparsenessAlg=NA, verbose=FALSE )
     idps = c( idps, unique(t1asymnames) )
     idplist[["t1a"]]=t1asymnames
   }
-
+  
   if ( length(dtasymnames) > 0 ) {
     idps = c( idps, unique(dtasymnames) )
     idplist[["dta"]]=dtasymnames
   }
-
+  
   if ( length(pfasymnames) > 0 ) {
     idps = c( idps, unique(pfasymnames) )
     idplist[["pfa"]]=pfasymnames
@@ -5834,16 +5840,16 @@ sparsenessAlg=NA, verbose=FALSE )
   matsFull = list()
   mats = list()
   for ( kk in 1:length(idplist)) {
-      matsFull[[ names(idplist)[kk] ]] = blaster[,idplist[[kk]]]
-      mats[[ names(idplist)[kk] ]] = antsrimpute( blaster2[allnna,idplist[[kk]]] )
-      }
+    matsFull[[ names(idplist)[kk] ]] = blaster[,idplist[[kk]]]
+    mats[[ names(idplist)[kk] ]] = antsrimpute( blaster2[allnna,idplist[[kk]]] )
+  }
   if ( verbose ) print("mats done")
   if ( doperm ) {
     nada=setSeedBasedOnTime()
     sss=sample( 1:nrow( matsFull[[1]]  ))
     for ( jj in 1:length( mats ) ) {
-        ss=sample( 1:nrow( mats[[jj]]  ))
-        mats[[jj]]=mats[[jj]][sample( 1:nrow( mats[[jj]]  )),]
+      ss=sample( 1:nrow( mats[[jj]]  ))
+      mats[[jj]]=mats[[jj]][sample( 1:nrow( mats[[jj]]  )),]
     }
   }
   nms = names(mats)
@@ -5860,45 +5866,45 @@ sparsenessAlg=NA, verbose=FALSE )
     result <- apply(mat, 2, rank_and_scale_col)
     return(result)
   }
-
+  
   if ( verbose) print("setting up regularization")
   for ( mycov in covariates ) {
     print(paste("adjust by:",mycov))
-  for ( x in 1:length(mats)) {
+    for ( x in 1:length(mats)) {
       if ( verbose ) {
         if ( x == 1 ) print(paste("training n= ",nrow(mats[[x]])))
         cat(paste0(names(mats)[x],"..."))
       }
       mats[[x]]=antspymm_simlr_update_residuals( mats, x, mycov, blaster2, allnna, n.comp=nsimlr )
       mats[[x]]=data.matrix(mats[[x]])
-  }}
+    }}
   for ( x in 1:length(mats)) {
-      mycor = cor( mats[[x]] )
-      mycor[mycor < 0.8]=0
-      regs0[[x]]=data.matrix(mycor)
-      }
+    mycor = cor( mats[[x]] )
+    mycor[mycor < 0.8]=0
+    regs0[[x]]=data.matrix(mycor)
+  }
   names(regs0)=names(mats)
   regs = regs0 # regularizeSimlr( mats, fraction=0.05, sigma=rep(2.0,length(mats)) )
   if ( verbose ) print("regularizeSimlr done")
   names(regs0)=names(mats)
   names(regs)=names(mats)
   if ( !missing( connect_cog ) ) {
-    regs[["cg"]] = Matrix(regs0[["cg"]], sparse = TRUE) 
+    regs[["cg"]] = Matrix::Matrix(regs0[["cg"]], sparse = TRUE) 
     print("regularize cg")
   }
-
-#  if ( !doperm )
-#    for ( pp in 1:length(regs)) plot(image(regs[[pp]]))
-
+  
+  #  if ( !doperm )
+  #    for ( pp in 1:length(regs)) plot(image(regs[[pp]]))
+  
   if ( verbose ) print("loop mat")
   for ( k in 1:length(mats)) {
     if ( ncol(mats[[k]]) != ncol(regs[[k]]) ) {
-      regs[[k]]=Matrix(regs0[[k]], sparse = TRUE) 
+      regs[[k]]=Matrix::Matrix(regs0[[k]], sparse = TRUE) 
       msg=paste("regularization cols not equal",k,ncol(mats[[k]]),ncol(regs[[k]]),names(mats)[k])
       message(msg)
       # stop( )
-      }
     }
+  }
   if ( verbose ) print("loopmatdone")
   ########### zzz ############
   myjr = T
@@ -5942,32 +5948,32 @@ sparsenessAlg=NA, verbose=FALSE )
     }
     nsimlr = round( ctit * nsimlr )
     message(paste("nsimlr",nsimlr))
-#    print(paste("nsimlr",nsimlr))
-#    print(sparval)
+    #    print(paste("nsimlr",nsimlr))
+    #    print(sparval)
   }
-
+  
   if ( verbose ) {
     print("initu begin")
   }
   initu = initializeSimlr(
-      mats,
-      nsimlr,
-      jointReduction = myjr,
-      zeroUpper = FALSE,
-      uAlgorithm = "pca",
-      addNoise = 0 )
+    mats,
+    nsimlr,
+    jointReduction = myjr,
+    zeroUpper = FALSE,
+    uAlgorithm = "pca",
+    addNoise = 0 )
   if ( verbose ) print("initu done")
-
+  
   # initu = initu[,(ncol(initu)-nsimlr):ncol(initu)]
   # initu = initu[,1:nsimlr]
-
+  
   if ( ! missing( connect_cog ) ) {
     clist = list()
     inflammNums=which(names(mats)=='cg')
     for ( j in 1:length( mats ) ) clist[[j]] = inflammNums
     for ( j in inflammNums )
       clist[[j]] = (1:length(mats))[ -inflammNums ]
-    } else clist=NULL
+  } else clist=NULL
   
   if ( !is.null( path_modeling ) ) {
     clist = path_modeling
@@ -5976,31 +5982,31 @@ sparsenessAlg=NA, verbose=FALSE )
       print( clist )
     }
   }
-
+  
   simlrX = simlr( mats, regs, 
-    iterations=maxits, 
-    verbose= !doperm,
-    randomSeed = myseed,
-    mixAlg=mixer,
-    energyType=objectiver,
-    scale = prescaling,
-    sparsenessQuantiles=sparval,
-    expBeta = ebber,
-    positivities = pizzer, 
-    connectors=clist,
-    constraint=constraint,
-    optimizationStyle=optimus,
-    sparsenessAlg=sparsenessAlg,
-    initialUMatrix=initu )
+                  iterations=maxits, 
+                  verbose= !doperm,
+                  randomSeed = myseed,
+                  mixAlg=mixer,
+                  energyType=objectiver,
+                  scale = prescaling,
+                  sparsenessQuantiles=sparval,
+                  expBeta = ebber,
+                  positivities = pizzer, 
+                  connectors=clist,
+                  constraint=constraint,
+                  optimizationStyle=optimus,
+                  sparsenessAlg=sparsenessAlg,
+                  initialUMatrix=initu )
   for ( kk in 1:length(mats) ) {
     rownames(simlrX$v[[kk]])=idplist[[kk]]
     temp = simlrX$v[[kk]]
     if ( pizzer[kk] == 'positive' ) {
-#      for ( n in 1:ncol(temp)) temp[,n]=abs(temp[,n])/max(abs(temp[,n]))
-#      simlrX$v[[kk]]=eliminateNonUniqueColumns(temp)
-      }
+      #      for ( n in 1:ncol(temp)) temp[,n]=abs(temp[,n])/max(abs(temp[,n]))
+      #      simlrX$v[[kk]]=eliminateNonUniqueColumns(temp)
     }
-
+  }
+  
   if ( verbose ) print('simlr done')
   #################
   nsimx=nsimlr
@@ -6008,11 +6014,11 @@ sparsenessAlg=NA, verbose=FALSE )
   simmat = data.matrix(matsFull[[1]] )%*% abs( simlrX$v[[1]] )
   colnames( simmat ) = paste0(nms[1],colnames( simmat ))
   for ( j in 2:length(mats)) {
-      if (names(mats)[j]=='cg' & pizzer[j] != 'positive' ) {
-        temp = data.matrix(matsFull[[j]] ) %*% ( simlrX$v[[j]])
-      } else temp = data.matrix(matsFull[[j]] ) %*% abs( simlrX$v[[j]] )
-      colnames( temp ) = paste0(nms[j],colnames( temp ))
-      simmat = cbind( simmat, temp )
+    if (names(mats)[j]=='cg' & pizzer[j] != 'positive' ) {
+      temp = data.matrix(matsFull[[j]] ) %*% ( simlrX$v[[j]])
+    } else temp = data.matrix(matsFull[[j]] ) %*% abs( simlrX$v[[j]] )
+    colnames( temp ) = paste0(nms[j],colnames( temp ))
+    simmat = cbind( simmat, temp )
   }
   blaster2sim = cbind( blaster, simmat )
   if ( verbose ) print('bound')
@@ -6027,7 +6033,7 @@ sparsenessAlg=NA, verbose=FALSE )
   #      sourceMatrices=nmats[nmats!=kk] )
   return( list( demog=blaster2sim, mats=matsFull, simnames=simnames, simlrX=simlrX, energy=energy ) )
   ################
-  }
+}
 
 
 
@@ -6132,7 +6138,7 @@ read_simlr_data_frames <- function(file_prefix, data_names, verbose=FALSE ) {
 #' @importFrom stringr str_match str_extract
 #' @export
 interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
-
+  
   split_string_correctly <- function(input_string) {
     # Extract the leading alphabetic characters (possibly including numbers within the alphabetic segment)
     alpha_part <- str_match(input_string, "([A-Za-z0-9]+(?=[A-Za-z]+[0-9]+$))[A-Za-z]*")[,1]
@@ -6152,7 +6158,7 @@ interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2sho
     for ( k in 1:length(simlrMats) ) 
       nmslist[[names(simlrMats)[k]]]=colnames(simlrMats[[k]])
   }
-
+  
   # Extract the vector for the given modality and region, and normalize it
   t1vec <- abs(simlrResult$v[[varparts[1]]][, as.integer(varparts[2])])
   t1vec=t1vec/max(t1vec)
@@ -6230,11 +6236,13 @@ plot_features <- function(data_list, take_abs = TRUE, n_limit = 12 ) {
       top_features <- head(data.frame(feature_names = non_zero_features, values = non_zero_values), n_limit)
       
       # Create the plot
-      plot <- ggbarplot(top_features, x = "feature_names", y = "values", 
-                        main = paste('features !=0:', df_name, col_name), xlab = "Feature", ylab = "Value", 
-                        rotate.x.text = 45, sort.val = "desc", fill = "lightblue") +
-        theme_pubr() +
-        theme(axis.text.x = element_text(angle = 45, hjust = 1))
+      plot <- ggpubr::ggbarplot(
+        top_features, x = "feature_names", y = "values", 
+        main = paste('features !=0:', df_name, col_name), 
+        xlab = "Feature", ylab = "Value", 
+        rotate.x.text = 45, sort.val = "desc", fill = "lightblue") +
+        ggpubr::theme_pubr() +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
       
       plots[[paste(df_name, col_name)]] <- plot
     }
@@ -6317,7 +6325,7 @@ multiview_pca <- function(views, n_components, sparse = 0.5, max_iter = 100, spa
   W_list <- vector("list", n_views)
   for (i in seq_len(n_views)) {
     W_list[[i]] <- matrix(rnorm(ncol(views[[i]]) * n_components), nrow = ncol(views[[i]]), ncol = n_components)
-#    views[[i]]=views[[i]]/prod(dim(views[[i]]))
+    #    views[[i]]=views[[i]]/prod(dim(views[[i]]))
   }
   
   prev_Z <- Z
@@ -6347,7 +6355,7 @@ multiview_pca <- function(views, n_components, sparse = 0.5, max_iter = 100, spa
       if ( sparse[i] > 0 & sparse[i] < 1) {
         for ( jj in 1:ncol(W_list[[i]]) ) {
           W_list[[i]] = orthogonalizeAndQSparsify( W_list[[i]], sparse[i], 'positive', 
-            sparsenessAlg=sparsenessAlg )
+                                                   sparsenessAlg=sparsenessAlg )
         }
       }
     }

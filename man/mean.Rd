@@ -18,17 +18,6 @@
 \description{
 Overloaded Mean for antsImage objects
 }
-\details{
-#' @rdname antsImagemath
-#' @aliases xor,antsImage-method
-setMethod(f = "xor", signature(x = "antsImage",
-                             y = "antsImage"), definition = function(x) {
-  xx = as.array(x)
-  yy = as.array(y)
-  xor(xx, yy)
-  !a2
-})
-}
 \examples{
 img <- makeImage(c(10, 10, 10), rnorm(1000))
 mean(img)

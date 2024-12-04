@@ -28,7 +28,7 @@ transformed.}
 each transform is a filename.}
 
 \item{interpolator}{Choice of interpolator.  Supports partial matching.
-\itemize{
+\describe{
 \item{linear}{}
 \item{nearestNeighbor}{}
 \item{multiLabel}{ for label images but genericlabel is preferred}

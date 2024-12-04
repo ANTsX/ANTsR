@@ -21,5 +21,5 @@ its negative counterpart `m * (-1)`, returning the result that maximizes the sum
 \examples{
 set.seed(123)
 m <- matrix(rnorm(500), nrow = 5)
-indicator_opt_both_ways(m, preprocess = TRUE)
+indicator_opt_both_ways(m)
 }

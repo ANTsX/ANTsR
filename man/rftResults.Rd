@@ -30,11 +30,11 @@ rftResults(
 \item{df}{degrees of freedom expressed as df = c(degrees of
 interest, degrees of error)}
 
-\item{fieldType}{\itemize{
-\item{T: } {T-field}
-\item{F: } {F-field}
-\item{X: } {Chi-square field'}
-\item{Z: } {Gaussian field}
+\item{fieldType}{\describe{
+\item{T: }{T-field}
+\item{F: }{F-field}
+\item{X: }{Chi-square field'}
+\item{Z: }{Gaussian field}
 }}
 
 \item{RPVImg}{resels per voxel image}
@@ -43,14 +43,14 @@ interest, degrees of error)}
 
 \item{threshType}{a numeric value to threshTypeold the statistical
 field or a character of the following methods:
-\itemize{
-    \item{cRFT: } {computes a threshTypeold per expected cluster level
+\describe{
+    \item{cRFT: }{computes a threshTypeold per expected cluster level
     probability }
-    \item{pRFT: } {uses the mask and pval calculates the minimum statistical
+    \item{pRFT: }{uses the mask and pval calculates the minimum statistical
     threshTypeold}
-    \item{cFDR: } {uses an uncorrected threshTypeold at the alpha level and
+    \item{cFDR: }{uses an uncorrected threshTypeold at the alpha level and
     then computes and FDR threshTypeold based on cluster maxima}
-    \item{pFDR: } {computes the fdr threshTypeold for the entire field of
+    \item{pFDR: }{computes the fdr threshTypeold for the entire field of
     voxels}
 }}
 
@@ -69,12 +69,12 @@ images are not saved)}
 \value{
 Outputs a statistical value to be used for threshTypeold a
 statistical field image
-\itemize{
-\item{SetStats: } {set-level statistics and number of clusters}
-\item{ClusterStats: } {cluster-level statistics and descriptors}
-\item{PeakStats: } {peak-level statistics and descriptor"}
-\item{LabeledClusters: } {image of labeled clusters}
-\item{threshTypeold: } {the threshTypeold used}
+\describe{
+\item{SetStats: }{set-level statistics and number of clusters}
+\item{ClusterStats: }{cluster-level statistics and descriptors}
+\item{PeakStats: }{peak-level statistics and descriptor"}
+\item{LabeledClusters: }{image of labeled clusters}
+\item{threshTypeold: }{the threshTypeold used}
 }
 }
 \description{

@@ -20,7 +20,7 @@ createAntsrTransform(
 }
 \arguments{
 \item{type}{type of transform
-\itemize{
+\describe{
   \item{AffineTransform}{}
   \item{CenteredAffineTransform}{}
   \item{Euler2DTransform}{}

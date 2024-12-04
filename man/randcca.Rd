@@ -17,7 +17,7 @@ randcca(x, y, k, seed = NA)
 }
 \value{
 outputs a list containing:
-\itemize{
+\describe{
   \item{whitened: }{low-rank whitened joint matrix}
   \item{svd: }{low-rank svd of joint matrix}
 }

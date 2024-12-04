@@ -4,7 +4,7 @@
 #' for the ITK filter \url{https://itk.org/Doxygen/html/classitk_1_1BSplineScatteredDataPointSetToImageFilter.html}.
 #' This filter is flexible in the possible objects that can be approximated.
 #' Possibilities include:
-#' \itemize{
+#' \describe{
 #'     \item{curve:}{1/2/3/4-D}
 #'     \item{surface:}{2-D surface in 3-D space (not available/templated)}
 #'     \item{scalar:}{2/3/4-D scalar field}

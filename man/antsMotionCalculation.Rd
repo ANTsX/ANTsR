@@ -53,7 +53,7 @@ for discussion.  If \code{NULL}, will not set anything.}
 }
 \value{
 List containing:
-\itemize{
+\describe{
  \item{moco_img}{ Motion corrected time-series image.}
  \item{moco_params}{ Data frame of translation parameters.}
  \item{moco_avg_img}{ Average motion-corrected image.}

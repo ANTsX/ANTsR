@@ -53,7 +53,7 @@
 #' @param ... additional options see antsRegistration in ANTs
 #' @details
 #' typeofTransform can be one of:
-#' \itemize{
+#' \describe{
 #'   \item{"Translation": }{Translation transformation.}
 #'   \item{"Rigid": }{Rigid transformation: Only rotation and translation.}
 #'   \item{"Similarity": }{Similarity transformation: scaling, rotation and
@@ -111,7 +111,7 @@
 #'   \item{"antsRegistrationSyNQuickRepro[x]":}{quick reproducible registration.  x options as above.}
 #' }
 #' @return outputs a list containing:
-#' \itemize{
+#' \describe{
 #'   \item{warpedmovout: }{Moving image warped to space of fixed image.}
 #'   \item{warpedfixout: }{Fixed image warped to space of moving image.}
 #'   \item{fwdtransforms: }{Transforms to move from moving to fixed image.}
