@@ -457,7 +457,7 @@ sparseDistanceMatrixXY <- function(x, y, k = 3, r = Inf, sigma = NA,
 #' which eigenvector off which to base the scale of the y-axis.'
 #' @return list with a vector of tangent, curvature, noise dimensionality and a
 #' a dataframe containing eigenvalues across scale, in correspondence with r:
-#' \itemize{
+#' \describe{
 #'   \item{dim: }{The tangent, curvature and noise dimensionality vector.  The
 #' data dimensionality is the first entry, the curvature dimensionality exists
 #' from the second to the first entry of the noise vector.}
@@ -1572,8 +1572,7 @@ jointSmoothMatrixReconstruction <- function(
 #' set.seed(123)
 #' m <- matrix(rnorm(500), nrow = 5)
 #' result <- optimize_indicator_matrix(m, max_iter = 1000, tol = 1e-6, verbose = TRUE)
-#' print(result$I)
-#' print(result$objective_value)
+#' print(result)
 #' @export
 optimize_indicator_matrix <- function(m, max_iter = 1000, tol = 1e-6, preprocess = TRUE, verbose = FALSE) {
   if (preprocess) {

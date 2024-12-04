@@ -38,7 +38,7 @@
 #'
 #' @return Outputs a statistical value to be used for threshTypeold a
 #' statistical field image
-#' \descrbie{
+#' \describe{
 #' \item{SetStats: }{set-level statistics and number of clusters}
 #' \item{ClusterStats: }{cluster-level statistics and descriptors}
 #' \item{PeakStats: }{peak-level statistics and descriptor"}
