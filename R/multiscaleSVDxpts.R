@@ -4376,7 +4376,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
   if ( nperms >  1  ) {
     for (varname in refvarxmeansnms ) {
       mytt <- t.test(simlrpermvarx[1, varname] - simlrpermvarx[-1, varname], alternative='greater')
-      simlrpermvarx_ttest[varname] = mytt$p.value
+      simlrpermvarx_ttest[varname] = mytt$statistic   
     }
     nexter=nrow(simlrpermvarx)+1
     simlrpermvarx[nexter,'perm']='ttest'
