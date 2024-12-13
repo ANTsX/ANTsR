@@ -152,6 +152,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       stop( paste0( "No common labels for image pair ", i ) )
       }
     }
+
+  deformableMultivariateExtras <- list()
   
   if( verbose )
     {
@@ -179,8 +181,6 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
     fixedCentersOfMass <- array( data = 0, c( totalNumberOfLabels, imageDimension ) )  
     movingCentersOfMass <- array( data = 0, c( totalNumberOfLabels, imageDimension ) )  
-
-    deformableMultivariateExtras <- list()
 
     count <- 1
     for( i in seq.int( length( commonLabelIds ) ) )
@@ -409,13 +409,24 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
   findInverseWarps <- grep( "[0-9]InverseWarp.nii.gz", allXfrms )
   findForwardWarps <- grep( "[0-9]Warp.nii.gz", allXfrms )
 
-  if( length( findInverseWarps ) > 0 ) 
+  fwdtransforms <- c()
+  invtransforms <- c()
+  if( is.null( linearXfrm ) )
     {
-    fwdtransforms <- c( allXfrms[findForwardWarps[1]], linearXfrmFile ) 
-    invtransforms <- c( linearXfrmFile, allXfrms[findInverseWarps[1]] ) 
+    if( length( findInverseWarps ) > 0 ) 
+      {
+      fwdtransforms <- c( allXfrms[findForwardWarps[1]], linearXfrmFile ) 
+      invtransforms <- c( linearXfrmFile, allXfrms[findInverseWarps[1]] ) 
+      } else {
+      fwdtransforms <- c( linearXfrmFile ) 
+      invtransforms <- c( linearXfrmFile ) 
+      }
     } else {
-    fwdtransforms <- c( linearXfrmFile ) 
-    invtransforms <- c( linearXfrmFile ) 
+    if( length( findInverseWarps ) > 0 ) 
+      {
+      fwdtransforms <- c( allXfrms[findForwardWarps[1]] ) 
+      invtransforms <- c( allXfrms[findInverseWarps[1]] ) 
+      }
     }
 
   if( verbose )
