@@ -223,9 +223,26 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
   if( doDeformable )
     {
+
     if( verbose )
       {
       message( "\n\nComputing deformable transform using images.\n" )
+      }
+
+    if( typeOfLinearTransform == "identity" )
+      {
+      for( i in seq.int( length( commonLabelIds ) ) )
+        {
+        for( j in seq.int( length( commonLabelIds[[i]] ) ) )
+          {
+          label <- commonLabelIds[[i]][j]
+          fixedSingleLabelImage <- thresholdImage( fixedLabelImages[[i]], label, label, 1, 0 )  
+          movingSingleLabelImage <- thresholdImage( movingLabelImages[[i]], label, label, 1, 0 )  
+          deformableMultivariateExtras[[count]] <- list( "MSQ", fixedSingleLabelImage,
+                                                      movingSingleLabelImage, 
+                                                      labelImageWeights[i], 0 )
+          } 
+        }
       }
 
     intensityMetric <- "CC"
