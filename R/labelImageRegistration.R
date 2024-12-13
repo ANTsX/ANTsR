@@ -14,8 +14,8 @@
 #' @param movingMask Defines region for similarity metric calculation 
 #' in the space of the moving image.
 #' @param typeOfLinearTransform Use label images with the centers of 
-#' mass to a calculate linear transform of type \code{'rigid'}, 
-#' \code{'similarity'}, \code{'affine'}.
+#' mass to a calculate linear transform of type  \code{'identity'}, 
+#' \code{'rigid'}, \code{'similarity'}, \code{'affine'}.
 #' @param typeOfDeformableTransform Only works with deformable-only transforms, 
 #' specifically the family of \code{antsRegistrationSyN*[so]} or 
 #' \code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
@@ -121,7 +121,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     outputPrefix <- tempfile()
     }
 
-  allowableLinearTransforms <- c( 'rigid', 'similarity', 'affine' )
+  allowableLinearTransforms <- c( 'rigid', 'similarity', 'affine', 'identity' )
   if( ! typeOfLinearTransform %in% allowableLinearTransforms )
     {
     stop( "Unrecognized linear transform." ) 
@@ -165,7 +165,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
   ##############################
 
   linearXfrm <- NULL
-  if( ! is.null( typeOfLinearTransform ) )
+  if( typeOfLinearTransform != "identity" )
     {
     if( verbose )
       {

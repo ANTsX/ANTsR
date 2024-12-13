@@ -37,8 +37,8 @@ in the space of the fixed image.}
 in the space of the moving image.}
 
 \item{typeOfLinearTransform}{Use label images with the centers of 
-mass to a calculate linear transform of type \code{'rigid'}, 
-\code{'similarity'}, \code{'affine'}.}
+mass to a calculate linear transform of type  \code{'identity'}, 
+\code{'rigid'}, \code{'similarity'}, \code{'affine'}.}
 
 \item{typeOfDeformableTransform}{Only works with deformable-only transforms, 
 specifically the family of \code{antsRegistrationSyN*[so]} or 
