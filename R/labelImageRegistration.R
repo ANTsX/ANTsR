@@ -14,8 +14,8 @@
 #' @param movingMask Defines region for similarity metric calculation 
 #' in the space of the moving image.
 #' @param typeOfLinearTransform Use label images with the centers of 
-#' mass to a calculate linear transform of type \code{'rigid'}, 
-#' \code{'similarity'}, \code{'affine'}.
+#' mass to a calculate linear transform of type  \code{'identity'}, 
+#' \code{'rigid'}, \code{'similarity'}, \code{'affine'}.
 #' @param typeOfDeformableTransform Only works with deformable-only transforms, 
 #' specifically the family of \code{antsRegistrationSyN*[so]} or 
 #' \code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
@@ -121,7 +121,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     outputPrefix <- tempfile()
     }
 
-  allowableLinearTransforms <- c( 'rigid', 'similarity', 'affine' )
+  allowableLinearTransforms <- c( 'rigid', 'similarity', 'affine', 'identity' )
   if( ! typeOfLinearTransform %in% allowableLinearTransforms )
     {
     stop( "Unrecognized linear transform." ) 
@@ -152,6 +152,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       stop( paste0( "No common labels for image pair ", i ) )
       }
     }
+
+  deformableMultivariateExtras <- list()
   
   if( verbose )
     {
@@ -165,7 +167,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
   ##############################
 
   linearXfrm <- NULL
-  if( ! is.null( typeOfLinearTransform ) )
+  if( typeOfLinearTransform != "identity" )
     {
     if( verbose )
       {
@@ -179,8 +181,6 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
     fixedCentersOfMass <- array( data = 0, c( totalNumberOfLabels, imageDimension ) )  
     movingCentersOfMass <- array( data = 0, c( totalNumberOfLabels, imageDimension ) )  
-
-    deformableMultivariateExtras <- list()
 
     count <- 1
     for( i in seq.int( length( commonLabelIds ) ) )
@@ -223,9 +223,26 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
   if( doDeformable )
     {
+
     if( verbose )
       {
       message( "\n\nComputing deformable transform using images.\n" )
+      }
+
+    if( typeOfLinearTransform == "identity" )
+      {
+      for( i in seq.int( length( commonLabelIds ) ) )
+        {
+        for( j in seq.int( length( commonLabelIds[[i]] ) ) )
+          {
+          label <- commonLabelIds[[i]][j]
+          fixedSingleLabelImage <- thresholdImage( fixedLabelImages[[i]], label, label, 1, 0 )  
+          movingSingleLabelImage <- thresholdImage( movingLabelImages[[i]], label, label, 1, 0 )  
+          deformableMultivariateExtras[[count]] <- list( "MSQ", fixedSingleLabelImage,
+                                                      movingSingleLabelImage, 
+                                                      labelImageWeights[i], 0 )
+          } 
+        }
       }
 
     intensityMetric <- "CC"
@@ -392,13 +409,24 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
   findInverseWarps <- grep( "[0-9]InverseWarp.nii.gz", allXfrms )
   findForwardWarps <- grep( "[0-9]Warp.nii.gz", allXfrms )
 
-  if( length( findInverseWarps ) > 0 ) 
+  fwdtransforms <- c()
+  invtransforms <- c()
+  if( is.null( linearXfrm ) )
     {
-    fwdtransforms <- c( allXfrms[findForwardWarps[1]], linearXfrmFile ) 
-    invtransforms <- c( linearXfrmFile, allXfrms[findInverseWarps[1]] ) 
+    if( length( findInverseWarps ) > 0 ) 
+      {
+      fwdtransforms <- c( allXfrms[findForwardWarps[1]], linearXfrmFile ) 
+      invtransforms <- c( linearXfrmFile, allXfrms[findInverseWarps[1]] ) 
+      } else {
+      fwdtransforms <- c( linearXfrmFile ) 
+      invtransforms <- c( linearXfrmFile ) 
+      }
     } else {
-    fwdtransforms <- c( linearXfrmFile ) 
-    invtransforms <- c( linearXfrmFile ) 
+    if( length( findInverseWarps ) > 0 ) 
+      {
+      fwdtransforms <- c( allXfrms[findForwardWarps[1]] ) 
+      invtransforms <- c( allXfrms[findInverseWarps[1]] ) 
+      }
     }
 
   if( verbose )
