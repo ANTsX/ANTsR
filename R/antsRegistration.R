@@ -9,7 +9,8 @@
 #' information metric by default. See \code{Details.}
 #' @param initialTransform either a single transform file name, a vector of transform file names,
 #' or a single antsTransform object. If NA, an initial translation aligns the center of mass
-#' of the moving image to that of the fixed image.
+#' of the moving image to that of the fixed image, unless the transform is "deformable only", in which case
+#' the intial transform is 'Identity'.
 #' @param outprefix output will be named with this prefix.
 #' @param mask Registration metric mask in the fixed image space.
 #' @param movingMask Registration metric mask in the moving image space.
@@ -410,9 +411,19 @@ antsRegistration <- function(
         earlyMaskOption <- "[NA,NA]"
       }
 
+      # Set up initial transform args
+      # If no transform is provided, default to align the centers of mass UNLESS the tranform
+      # is one of the "deformable only" transforms
       if (length(initx) == 1 && is.na(initx)) {
-        initx <- paste("[", f, ",", m, ",1]", sep = "")
+        deformableOnlyTransforms <- c("SyNOnly", "ElasticOnly", "TVMSQ", "TVMSQC", tvTypes)
+
+        if ((typeofTransform %in% deformableOnlyTransforms)) {
+          initx <- "Identity"
+        } else {
+          initx <- paste("[", f, ",", m, ",1]", sep = "")
+        }
       }
+
       if (typeofTransform == "SyNBold") {
         args <- list(
           "-d", as.character(fixed@dimension), "-r", initx,
@@ -703,7 +714,7 @@ antsRegistration <- function(
           sep = ""
         )
         args <- list(
-          "-d", as.character(fixed@dimension), # "-r", initx,
+          "-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste(synMetric, "[", f, ",", m, ",1,", synSampling, "]", sep = ""),
           "-t", tvtx,
           "-c", paste("[", synits, ",1e-7,8]", collapse = ""),
@@ -721,7 +732,7 @@ antsRegistration <- function(
           sep = ""
         )
         args <- list(
-          "-d", as.character(fixed@dimension), # "-r", initx,
+          "-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste("demons[", f, ",", m, ",0.5,0]", sep = ""),
           "-m", paste("meansquares[", f, ",", m, ",1,0]", sep = ""),
           "-t", tvtx,
@@ -744,7 +755,7 @@ antsRegistration <- function(
           sep = ""
         )
         args <- list(
-          "-d", as.character(fixed@dimension), # "-r", initx,
+          "-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste(synMetric, "[", f, ",", m, ",1,", synSampling, "]", sep = ""),
           "-t", tvtx,
           "-c", paste("[", synits, ",1e-7,8]", collapse = ""),
