@@ -251,7 +251,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     synSmoothingSigmas <- "3x2x1x0vox"
     synConvergence <- "[100x70x50x20,1e-6,10]"
     splineDistance <- 26
-    gradientStep <- 0.1
+    gradientStep <- 0.2
     synTransform <- "SyN"
 
     synStage <- list() 

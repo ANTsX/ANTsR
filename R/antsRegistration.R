@@ -809,10 +809,12 @@ antsRegistration <- function(
 
         subtypeOfTransform <- "s"
         splineDistance <- 26
-        metricParameter <- 4
+        metricParameter <- 2
         if (doQuick) {
           metricParameter <- 32
         }
+        linearGradientStep <- 0.1
+        synGradientStep <- 0.2
 
         if (grepl("\\[", typeofTransform) && grepl("\\]", typeofTransform)) {
           subtypeOfTransform <- strsplit(strsplit(typeofTransform, "\\[")[[1]][2], "\\]")[[1]][1]
@@ -888,7 +890,7 @@ antsRegistration <- function(
         }
 
         rigidStage <- list(
-          "--transform", paste0(tx, "[0.1]"),
+          "--transform", paste0(tx, "[", linearGradientStep, "]"),
           "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", samplingPercentage, "]"),
           "--convergence", rigidConvergence,
           "--shrink-factors", rigidShrinkFactors,
@@ -896,7 +898,7 @@ antsRegistration <- function(
         )
 
         affineStage <- list(
-          "--transform", "Affine[0.1]",
+          "--transform", "Affine[", linearGradientStep, "]",
           "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", samplingPercentage, "]"),
           "--convergence", affineConvergence,
           "--shrink-factors", affineShrinkFactors,
@@ -913,9 +915,9 @@ antsRegistration <- function(
           synSmoothingSigmas <- "1x0vox"
         }
 
-        synTransform <- "SyN[0.1,3,0]"
+        synTransform <- paste0( "SyN[", synGradientStep, ",3,0]" )
         if (subtypeOfTransform == "b" || subtypeOfTransform == "br" || subtypeOfTransform == "bo") {
-          synTransform <- paste0("BSplineSyN[0.1,", splineDistance, ",0,3]")
+          synTransform <- paste0( "BSplineSyN[", synGradientStep, ",", splineDistance, ",0,3]")
         }
         synStage <- list(
           "--transform", synTransform,
