@@ -137,6 +137,14 @@ fitBsplineObjectToScatteredData <- function(
     numberOfControlPoints <- rep(numberOfControlPoints, parametricDimension)
   }
 
+  for (i in seq.int(length(isParametricDimensionClosed))){
+    if (isParametricDimensionClosed[i]){
+      if (numberOfControlPoints[i] < 2 * splineOrder + 1){
+        stop("Error:  for closed parametric dimension, meshSize > splineOrder")
+      }
+    }       
+  }
+
   if (nrow(parametricData) != nrow(scatteredData)) {
     stop("Error:  the number of points is not equal to the number of scattered data values.")
   }
