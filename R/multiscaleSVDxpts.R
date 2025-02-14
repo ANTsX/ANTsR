@@ -5595,7 +5595,7 @@ interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, sho
   # If 'n2show' is NULL or greater than the length of t1vec, use the length of t1vec
   n_items_to_show <- if (is.null(n2show)) length(t1vec) else min(c(n2show, length(t1vec)))
   t1vec_sorted <- head(t1vec[order(abs(t1vec), decreasing = TRUE)], n_items_to_show)
-  if ( all(t1vec_sorted) < 0 ) t1vec_sorted=abs(t1vec_sorted)
+  if ( all(t1vec_sorted < 0 ) ) t1vec_sorted=abs(t1vec_sorted)
   # Filter out non-significant values (absolute value > 0)
   t1vec_filtered <- t1vec_sorted[abs(t1vec_sorted) > 0]
   if ( return_dataframe ) {
