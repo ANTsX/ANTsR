@@ -5585,8 +5585,8 @@ interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, sho
   }
   
   # Extract the vector for the given modality and region, and normalize it
-  t1vec <- abs(simlrResult[, simlrVariable ])
-  t1vec=t1vec/max(t1vec)
+  t1vec <- (simlrResult[, simlrVariable ])
+  t1vec=t1vec/max(abs(t1vec))
   
   # Assign names to the vector elements from the names list
   names(t1vec) <- nmslist
@@ -5594,7 +5594,7 @@ interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, sho
   # Sort the vector in decreasing order and select the top 'n2show' elements
   # If 'n2show' is NULL or greater than the length of t1vec, use the length of t1vec
   n_items_to_show <- if (is.null(n2show)) length(t1vec) else min(c(n2show, length(t1vec)))
-  t1vec_sorted <- head(t1vec[order(t1vec, decreasing = TRUE)], n_items_to_show)
+  t1vec_sorted <- head(t1vec[order(abs(t1vec), decreasing = TRUE)], n_items_to_show)
   
   # Filter out non-significant values (absolute value > 0)
   t1vec_filtered <- t1vec_sorted[abs(t1vec_sorted) > 0]
