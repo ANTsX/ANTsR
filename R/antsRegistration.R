@@ -415,7 +415,11 @@ antsRegistration <- function(
       # If no transform is provided, default to align the centers of mass UNLESS the tranform
       # is one of the "deformable only" transforms
       if (length(initx) == 1 && is.na(initx)) {
-        deformableOnlyTransforms <- c("SyNOnly", "ElasticOnly", "TVMSQ", "TVMSQC", tvTypes)
+        deformableOnlyTransforms <- c("SyNOnly", "ElasticOnly", "TVMSQ", "TVMSQC", 
+            "antsRegistrationSyN[so]", "antsRegistrationSyNQuick[so]", 
+            "antsRegistrationSyNRepro[so]", "antsRegistrationSyNQuickRepro[so]",
+            "antsRegistrationSyN[bo]", "antsRegistrationSyNQuick[bo]",
+            "antsRegistrationSyNRepro[bo]", "antsRegistrationSyNQuickRepro[bo]", tvTypes)
 
         if ((typeofTransform %in% deformableOnlyTransforms)) {
           initx <- "Identity"
