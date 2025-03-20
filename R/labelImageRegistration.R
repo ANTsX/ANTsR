@@ -20,7 +20,7 @@
 #' specifically the family of \code{antsRegistrationSyN*[so]} or 
 #' \code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
 #' in \code{antsRegistration}.  Additionally, one can use a list
-#' to pass a more tailored deformably-only transform optimization using 
+#' to pass a more tailored deformable-only transform optimization using 
 #' SyN or BSplineSyN transforms.  The order of parameters in the list
 #' would be 1) transform specification, i.e. "SyN" or "BSplineSyN", 
 #' 2) gradient (real), 3) intensity metric (string), 4) intensity metric 
@@ -137,10 +137,10 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
   totalNumberOfLabels <- 0
   for( i in seq.int( length( fixedLabelImages ) ) )
     {
-    fixedLabelGeoms <- labelGeometryMeasures( fixedLabelImages[[i]] )
-    fixedLabelIds <-fixedLabelGeoms$Label
-    movingLabelGeoms <- labelGeometryMeasures( movingLabelImages[[i]] )
-    movingLabelIds <- movingLabelGeoms$Label
+    fixedLabelIds <- unique( fixedLabelImages[[i]] )
+    fixedLabelIds <- fixedLabelIds[! fixedLabelIds %in% c( 0 )]
+    movingLabelIds <- unique( movingLabelImages[[i]] )
+    movingLabelIds <- movingLabelIds[! movingLabelIds %in% c( 0 )]
     commonLabelIds[[i]] <- intersect( fixedLabelIds, movingLabelIds )
     totalNumberOfLabels = totalNumberOfLabels + length( commonLabelIds[[i]] )
     if( verbose )
@@ -411,7 +411,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
   fwdtransforms <- c()
   invtransforms <- c()
-  if( is.null( linearXfrm ) )
+  if( ! is.null( linearXfrm ) )
     {
     if( length( findInverseWarps ) > 0 ) 
       {
@@ -432,7 +432,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
   if( verbose )
     {
     message( "\n\nResulting transforms" )   
-    if( length( findInverseWarps ) > 0 ) 
+    if( length( fwdtransforms ) > 1 ) 
       {
       message( paste0( "  fwdtransforms: [", fwdtransforms[1], ", ", fwdtransforms[2], "]" ) )
       message( paste0( "  invtransforms: [", invtransforms[1], ", ", invtransforms[2], "]" ) )
