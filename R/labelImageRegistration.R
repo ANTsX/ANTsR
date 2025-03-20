@@ -246,7 +246,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       }
 
     intensityMetric <- "CC"
-    intensityMetricParameter <- 2
+    intensityMetricParameter <- NULL
     synShrinkFactors <- "8x4x2x1"
     synSmoothingSigmas <- "3x2x1x0vox"
     synConvergence <- "[100x70x50x20,1e-6,10]"
@@ -315,10 +315,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       if( doQuick )
         {
         intensityMetric <- "MI" 
-        if( is.null( intensityMetricParameter ) )
-          {
-          intensityMetricParameter <- 32 
-          }
+        intensityMetricParameter <- 32 
         synConvergence <- "[100x70x50x0,1e-6,10]"  
         }
       }
