@@ -279,7 +279,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       }
 
     intensityMetric <- "CC"
-    intensityMetricParameter <- NULL
+    intensityMetricParameter <- 2
     synShrinkFactors <- "8x4x2x1"
     synSmoothingSigmas <- "3x2x1x0vox"
     synConvergence <- "[100x70x50x20,1e-6,10]"
