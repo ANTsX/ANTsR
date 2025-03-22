@@ -254,7 +254,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       { 
       for( i in seq.int( length( initialTransforms ) ) )
         {
-        if( ! file.exists( initialTransforms ) )
+        if( ! file.exists( initialTransforms[i] ) )
           {
           stop( paste0( initialTransforms[i], " does not exist." ) )
           } else {
