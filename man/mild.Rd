@@ -11,7 +11,7 @@ mild(
   myFormulaK,
   smoothingMatrix,
   iterations = 10,
-  gamma = 1e-06,
+  gamma = 0.000001,
   sparsenessQuantile = 0.5,
   positivity = c("positive", "negative", "either"),
   initializationStrategy = 0,

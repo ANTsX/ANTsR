@@ -11,7 +11,8 @@ labelImageRegistration(
   movingIntensityImages = NULL,
   fixedMask = NULL,
   movingMask = NULL,
-  typeOfLinearTransform = "affine",
+  initialTransforms = "affine",
+  typeOfLinearTransform = NULL,
   typeOfDeformableTransform = "antsRegistrationSyNQuick[so]",
   labelImageWeighting = 1,
   outputPrefix = "",
@@ -36,15 +37,22 @@ in the space of the fixed image.}
 \item{movingMask}{Defines region for similarity metric calculation 
 in the space of the moving image.}
 
+\item{initialTransforms}{If specified, there are two options:
+1) Use label images with the centers of mass to a calculate linear 
+transform of type  \code{'identity'}, \code{'rigid'}, 
+\code{'similarity'}, \code{'affine'}.  2) Specify a list of transform
+files, e.g., the output of \code{antsRegistration}.}
+
 \item{typeOfLinearTransform}{Use label images with the centers of 
 mass to a calculate linear transform of type  \code{'identity'}, 
-\code{'rigid'}, \code{'similarity'}, \code{'affine'}.}
+\code{'rigid'}, \code{'similarity'}, \code{'affine'}.  Deprecated-
+subsumed by \code{'initialTransforms'}.}
 
 \item{typeOfDeformableTransform}{Only works with deformable-only transforms, 
 specifically the family of \code{antsRegistrationSyN*[so]} or 
 \code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
 in \code{antsRegistration}.  Additionally, one can use a list
-to pass a more tailored deformably-only transform optimization using 
+to pass a more tailored deformable-only transform optimization using 
 SyN or BSplineSyN transforms.  The order of parameters in the list
 would be 1) transform specification, i.e. "SyN" or "BSplineSyN", 
 2) gradient (real), 3) intensity metric (string), 4) intensity metric 
@@ -87,7 +95,7 @@ reg <- labelImageRegistration( list( r16Seg1, r16Seg2 ),
                                      list( r64Seg1, r64Seg2 ),  
                                      fixedIntensityImages = r16,
                                      movingIntensityImages = r64,
-                                     typeOfLinearTransform = 'affine',
+                                     initialTransforms = 'affine',
                                      typeOfDeformableTransform = 'antsRegistrationSyNQuick[bo]',
                                      labelImageWeighting = c( 1.0, 2.0 ),
                                      verbose = TRUE )

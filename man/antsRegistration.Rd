@@ -42,7 +42,8 @@ information metric by default. See \code{Details.}}
 
 \item{initialTransform}{either a single transform file name, a vector of transform file names,
 or a single antsTransform object. If NA, an initial translation aligns the center of mass
-of the moving image to that of the fixed image.}
+of the moving image to that of the fixed image, unless the transform is "deformable only", in which case
+the intial transform is 'Identity'.}
 
 \item{outprefix}{output will be named with this prefix.}
 

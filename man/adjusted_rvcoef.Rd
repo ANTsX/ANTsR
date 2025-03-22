@@ -4,7 +4,7 @@
 \alias{adjusted_rvcoef}
 \title{Adjusted RV Coefficient}
 \usage{
-adjusted_rvcoef(X, Y, lambda = 1e-06)
+adjusted_rvcoef(X, Y, lambda = 0.000001)
 }
 \arguments{
 \item{X}{First matrix}

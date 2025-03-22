@@ -7,7 +7,7 @@
 optimize_indicator_matrix(
   m,
   max_iter = 1000,
-  tol = 1e-06,
+  tol = 0.000001,
   preprocess = TRUE,
   verbose = FALSE
 )
