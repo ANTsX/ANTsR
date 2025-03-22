@@ -13,9 +13,15 @@
 #' in the space of the fixed image.
 #' @param movingMask Defines region for similarity metric calculation 
 #' in the space of the moving image.
+#' @param initialTransforms If specified, there are two options:  
+#' 1) Use label images with the centers of mass to a calculate linear 
+#' transform of type  \code{'identity'}, \code{'rigid'}, 
+#' \code{'similarity'}, \code{'affine'}.  2) Specify a list of transform
+#' files, e.g., the output of \code{antsRegistration}.
 #' @param typeOfLinearTransform Use label images with the centers of 
 #' mass to a calculate linear transform of type  \code{'identity'}, 
-#' \code{'rigid'}, \code{'similarity'}, \code{'affine'}.
+#' \code{'rigid'}, \code{'similarity'}, \code{'affine'}.  Deprecated-
+#' subsumed by \code{'initialTransforms'}.
 #' @param typeOfDeformableTransform Only works with deformable-only transforms, 
 #' specifically the family of \code{antsRegistrationSyN*[so]} or 
 #' \code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
@@ -63,7 +69,8 @@
 labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     fixedIntensityImages = NULL, movingIntensityImages = NULL,
     fixedMask = NULL, movingMask = NULL,
-    typeOfLinearTransform = 'affine', 
+    initialTransforms = "affine",
+    typeOfLinearTransform = NULL, 
     typeOfDeformableTransform = 'antsRegistrationSyNQuick[so]',
     labelImageWeighting = 1.0,
     outputPrefix = '',
@@ -71,6 +78,16 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     verbose = FALSE )
 {     
   # Preform validation check on the input
+
+  if( ! is.null( typeOfLinearTransform ) )
+    {
+    message( "\n" )
+    message( "*****************************************************************************************" )
+    message( "Deprecation warning.  typeOfLinearTransform is deprecated.  Please use initialTransforms." )
+    message( "*****************************************************************************************" )
+    message( "\n" )
+    initialTransforms <- typeOfLinearTransform 
+    }
 
   if( ANTsR::is.antsImage( fixedLabelImages ) )
     {
@@ -121,12 +138,6 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     outputPrefix <- tempfile()
     }
 
-  allowableLinearTransforms <- c( 'rigid', 'similarity', 'affine', 'identity' )
-  if( ! typeOfLinearTransform %in% allowableLinearTransforms )
-    {
-    stop( "Unrecognized linear transform." ) 
-    }
-
   doDeformable <- TRUE
   if( is.null( typeOfDeformableTransform ) || length( typeOfDeformableTransform ) == 0 )
     {
@@ -160,14 +171,15 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     message( "Total number of labels: ", totalNumberOfLabels )
     }
 
+  initialXfrmFiles <- c()
+
   ##############################
   #
-  #    Linear transform
+  #    Initial linear transform
   #
   ##############################
 
-  linearXfrm <- NULL
-  if( typeOfLinearTransform != "identity" )
+  if( length( initialTransforms ) == 1 && initialTransforms %in% c( 'rigid', 'similarity', 'affine' ) )
     {
     if( verbose )
       {
@@ -208,11 +220,48 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
     linearXfrm <- fitTransformToPairedPoints( movingCentersOfMass, 
                                               fixedCentersOfMass, 
-                                              transformType = typeOfLinearTransform,
+                                              transformType = initialTransforms,
                                               verbose = verbose )
-
-    linearXfrmFile <- paste0( outputPrefix, "0GenericAffine.mat" )
+    if( doDeformable )
+      {
+      linearXfrmFile <- paste0( outputPrefix, "LandmarkBasedLinear", initialTransforms, ".mat" )
+      } else {
+      linearXfrmFile <- paste0( outputPrefix, "0GenericAffine.mat" )
+      }
     writeAntsrTransform( linearXfrm, linearXfrmFile )
+    initialXfrmFiles <- append( initialXfrmFiles, linearXfrmFile )
+    } else if( ! is.null( initialTransforms ) || initialTransforms == "identity" ) {
+
+    if( doDeformable )
+      {
+      count <- 1
+      for( i in seq.int( length( commonLabelIds ) ) )
+        {
+        for( j in seq.int( length( commonLabelIds[[i]] ) ) )
+          {
+          label <- commonLabelIds[[i]][j]
+          fixedSingleLabelImage <- thresholdImage( fixedLabelImages[[i]], label, label, 1, 0 )  
+          movingSingleLabelImage <- thresholdImage( movingLabelImages[[i]], label, label, 1, 0 )  
+          deformableMultivariateExtras[[count]] <- list( "MSQ", fixedSingleLabelImage,
+                                                      movingSingleLabelImage, 
+                                                      labelImageWeights[i], 0 )
+          }
+        count <- count + 1 
+        }
+      }
+
+    if( initialTransforms != 'identity' )
+      { 
+      for( i in seq.int( length( initialTransforms ) ) )
+        {
+        if( ! file.exists( initialTransforms ) )
+          {
+          stop( paste0( initialTransforms[i], " does not exist." ) )
+          } else {
+          initialXfrmFiles <- append( initialXfrmFiles, initialTransforms[i] )
+          }  
+        }
+      }
     }
 
   ##############################
@@ -227,22 +276,6 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     if( verbose )
       {
       message( "\n\nComputing deformable transform using images.\n" )
-      }
-
-    if( typeOfLinearTransform == "identity" )
-      {
-      for( i in seq.int( length( commonLabelIds ) ) )
-        {
-        for( j in seq.int( length( commonLabelIds[[i]] ) ) )
-          {
-          label <- commonLabelIds[[i]][j]
-          fixedSingleLabelImage <- thresholdImage( fixedLabelImages[[i]], label, label, 1, 0 )  
-          movingSingleLabelImage <- thresholdImage( movingLabelImages[[i]], label, label, 1, 0 )  
-          deformableMultivariateExtras[[count]] <- list( "MSQ", fixedSingleLabelImage,
-                                                      movingSingleLabelImage, 
-                                                      labelImageWeights[i], 0 )
-          } 
-        }
       }
 
     intensityMetric <- "CC"
@@ -354,18 +387,19 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       }
     synStage <- lappend( synStage, synTransformComplete )    
 
-    args <- NULL
-    if( is.null( linearXfrm ) )
+    args <- list(
+      "-d", as.character( imageDimension ),
+      "-o", outputPrefix )
+
+    if( length( initialXfrmFiles ) > 0 )
       {
-      args <- list(
-        "-d", as.character( imageDimension ),
-        "-o", outputPrefix )
-      } else {
-      args <- list(
-        "-d", as.character( imageDimension ),
-        "-r", linearXfrmFile,
-        "-o", outputPrefix )
+      for( i in seq.int( length( initialXfrmFiles ) ) )
+        {  
+        initialArgs <- list( "-r", initialXfrmFiles[i] )
+        args <- lappend( args, initialArgs )
+        }
       }
+
     args <- lappend( args, synStage ) 
 
     fixedMaskString <- "NA"
@@ -403,40 +437,18 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
   allXfrms <- Sys.glob( paste0( outputPrefix, "*", "[0-9]*" ) )
 
-  findInverseWarps <- grep( "[0-9]InverseWarp.nii.gz", allXfrms )
-  findForwardWarps <- grep( "[0-9]Warp.nii.gz", allXfrms )
+  findInverseWarps <- grep( "[0-9]InverseWarp.nii.gz", allXfrms, value = TRUE )
+  findForwardWarps <- grep( "[0-9]Warp.nii.gz", allXfrms, value = TRUE )
+  findAffines <- grep( "[0-9]GenericAffine.mat", allXfrms, value = TRUE )
 
-  fwdtransforms <- c()
-  invtransforms <- c()
-  if( ! is.null( linearXfrm ) )
-    {
-    if( length( findInverseWarps ) > 0 ) 
-      {
-      fwdtransforms <- c( allXfrms[findForwardWarps[1]], linearXfrmFile ) 
-      invtransforms <- c( linearXfrmFile, allXfrms[findInverseWarps[1]] ) 
-      } else {
-      fwdtransforms <- c( linearXfrmFile ) 
-      invtransforms <- c( linearXfrmFile ) 
-      }
-    } else {
-    if( length( findInverseWarps ) > 0 ) 
-      {
-      fwdtransforms <- c( allXfrms[findForwardWarps[1]] ) 
-      invtransforms <- c( allXfrms[findInverseWarps[1]] ) 
-      }
-    }
+  fwdtransforms <- c( findForwardWarps, findAffines ) 
+  invtransforms <- c( findAffines, findInverseWarps ) 
 
   if( verbose )
     {
     message( "\n\nResulting transforms" )   
-    if( length( fwdtransforms ) > 1 ) 
-      {
-      message( paste0( "  fwdtransforms: [", fwdtransforms[1], ", ", fwdtransforms[2], "]" ) )
-      message( paste0( "  invtransforms: [", invtransforms[1], ", ", invtransforms[2], "]" ) )
-      } else {
-      message( paste0( "  fwdtransforms: [", fwdtransforms[1], "]" ) )
-      message( paste0( "  invtransforms: [", invtransforms[1], "]" ) )
-      }
+    cat( "  fwdtransforms:", fwdtransforms, "\n" )
+    cat( "  invtransforms:", invtransforms, "\n" )
     }
 
   return( list( fwdtransforms = fwdtransforms,
