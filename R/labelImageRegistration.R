@@ -59,7 +59,7 @@
 #'                                      list( r64Seg1, r64Seg2 ),  
 #'                                      fixedIntensityImages = r16,
 #'                                      movingIntensityImages = r64,
-#'                                      typeOfLinearTransform = 'affine',
+#'                                      initialTransforms = 'affine',
 #'                                      typeOfDeformableTransform = 'antsRegistrationSyNQuick[bo]',
 #'                                      labelImageWeighting = c( 1.0, 2.0 ),
 #'                                      verbose = TRUE )
