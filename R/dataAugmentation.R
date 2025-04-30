@@ -35,17 +35,19 @@
 #'    scale, and probability values are *max* values and are randomly selected
 #'    in the range [0, noise_parameter].  Also, the "mean", "saltValue" and
 #'    pepperValue" are assumed to be in the intensity normalized range of [0, 1].
+#' @param noiseParameters parameters for the specified noise model.
 #' @param sdSimulatedBiasField Characterize the standard deviation of the amplitude.
 #' @param sdHistogramWarping Determines the strength of the histogram transformation.
 #' @param sdAffine Determines the amount of affine transformation.
 #' @param sdDeformation Determines the amount of deformable transformation.
 #' @param outputNumpyFilePrefix Filename of output numpy array containing all the
 #'    simulated images and segmentations.
+#' @param verbose print progress to the screen.
 #' @return list of lists of transformed images and/or outputs to a numpy array.
 #' @author Tustison NJ
 #' @importFrom stats rnorm runif
 #' @examples
-#'
+#' \dontrun{
 #' library( ANTsR )
 #' image1 <- antsImageRead( getANTsRData( "r16" ) )
 #' image2 <- antsImageRead( getANTsRData( "r64" ) )
@@ -61,6 +63,7 @@
 #' rm(segmentation2); gc()
 #' rm(image1); gc()
 #' rm(image2); gc()
+#' }
 #' @export dataAugmentation
 dataAugmentation <- function( inputImageList,
   segmentationImageList = NULL,
@@ -225,7 +228,7 @@ dataAugmentation <- function( inputImageList,
           parameters <- c( runif( 1, min = 0.0, max = noiseParameters[1] ), noiseParameters[2], noiseParameters[3] )
           image <- addNoiseToImage( image, noiseModel = "saltandpepper", noiseParameters = parameters )
           } else if( tolower( noiseModel ) == "shot" ) {
-          parameters <- c( runif(1, min = 0.0, max = noiseParameters[1] ) )
+          parameters <- c( runif( 1, min = 0.0, max = noiseParameters[1] ) )
           image <- addNoiseToImage( image, noiseModel = "shot", noiseParameters = parameters )
           } else if( tolower( noiseModel ) == "speckle" ) {
           parameters <- c( runif( 1, min = 0.0, max = noiseParameters[1] ) )
