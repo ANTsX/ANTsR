@@ -9,7 +9,7 @@ n3BiasFieldCorrection2(
   mask,
   rescaleIntensities = FALSE,
   shrinkFactor = 4,
-  convergence = list(iters = 50, tol = 0.0000001),
+  convergence = list(iters = 50, tol = 1e-07),
   splineParam = 200,
   numberOfFittingLevels = 4,
   weightMask = NULL,

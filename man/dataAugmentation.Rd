@@ -59,6 +59,8 @@ Note that the "speckle" model takes much longer than the others.
    in the range [0, noise_parameter].  Also, the "mean", "saltValue" and
    pepperValue" are assumed to be in the intensity normalized range of [0, 1].}
 
+\item{noiseParameters}{parameters for the specified noise model.}
+
 \item{sdSimulatedBiasField}{Characterize the standard deviation of the amplitude.}
 
 \item{sdHistogramWarping}{Determines the strength of the histogram transformation.}
@@ -69,6 +71,8 @@ Note that the "speckle" model takes much longer than the others.
 
 \item{outputNumpyFilePrefix}{Filename of output numpy array containing all the
 simulated images and segmentations.}
+
+\item{verbose}{print progress to the screen.}
 }
 \value{
 list of lists of transformed images and/or outputs to a numpy array.
@@ -80,7 +84,7 @@ the following augmentation possibilities:  spatial transformations, added
 image noise, simulated bias field, and histogram warping.
 }
 \examples{
-
+\dontrun{
 library( ANTsR )
 image1 <- antsImageRead( getANTsRData( "r16" ) )
 image2 <- antsImageRead( getANTsRData( "r64" ) )
@@ -96,6 +100,7 @@ rm(segmentation1); gc()
 rm(segmentation2); gc()
 rm(image1); gc()
 rm(image2); gc()
+}
 }
 \author{
 Tustison NJ
