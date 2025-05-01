@@ -333,7 +333,7 @@ extractImagePatches <- function( image, patchSize, maxNumberOfPatches = 'all',
 #' @return a matrix of image patch spatial or index coordinates.
 #' @author Tustison NJ, Avants B
 #' @examples
-#'
+#' \dontrun{
 #' library( ANTsR )
 #'
 #' image <- antsImageRead( getANTsRData( "r16" ) )
@@ -342,7 +342,7 @@ extractImagePatches <- function( image, patchSize, maxNumberOfPatches = 'all',
 #'   maskImage, randomSeed = 0, physicalCoordinates = TRUE )
 #' patchCoordsI <- extractImagePatchCoordinates( image, c( 32, 32 ), 10, c( 32, 32 ),
 #'   maskImage, randomSeed = 0, physicalCoordinates = FALSE )
-#'
+#' } 
 #' @export extractImagePatchCoordinates
 extractImagePatchCoordinates <- function( image, patchSize, maxNumberOfPatches = 'all',
   strideLength = 1, maskImage = NULL, physicalCoordinates = TRUE,
