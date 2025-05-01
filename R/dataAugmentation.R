@@ -29,12 +29,12 @@
 #' Alternatively, one can specify an array or list of one or more of the options and
 #' one is selected at random with reasonable, randomized parameters.
 #' Note that the "speckle" model takes much longer than the others.
-#' #' @param noiseParameters 'additivegaussian': \code{c( mean, standardDeviation )},
-#'   'saltandpepper': \code{c( probability, saltValue, pepperValue) }, 'shot':
-#'    scale, 'speckle': standardDeviation.  Note that the standard deviation,
-#'    scale, and probability values are *max* values and are randomly selected
-#'    in the range [0, noise_parameter].  Also, the "mean", "saltValue" and
-#'    pepperValue" are assumed to be in the intensity normalized range of [0, 1].
+#' @param noiseParameters 'additivegaussian': \code{c( mean, standardDeviation )},
+#' 'saltandpepper': \code{c( probability, saltValue, pepperValue) }, 'shot':
+#' 'scale, 'speckle': standardDeviation.  Note that the standard deviation,
+#' scale, and probability values are *max* values and are randomly selected
+#' in the range [0, noise_parameter].  Also, the "mean", "saltValue" and
+#' pepperValue" are assumed to be in the intensity normalized range of [0, 1].
 #' @param noiseParameters parameters for the specified noise model.
 #' @param sdSimulatedBiasField Characterize the standard deviation of the amplitude.
 #' @param sdHistogramWarping Determines the strength of the histogram transformation.

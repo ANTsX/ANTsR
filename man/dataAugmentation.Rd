@@ -51,13 +51,7 @@ testing using \code{antsImagePhysicalSpaceConsistency} then calling
 \code{c( "additivegaussian", "saltandpepper", "shot", "speckle", or "random" )}.
 Alternatively, one can specify an array or list of one or more of the options and
 one is selected at random with reasonable, randomized parameters.
-Note that the "speckle" model takes much longer than the others.
-#' @param noiseParameters 'additivegaussian': \code{c( mean, standardDeviation )},
-  'saltandpepper': \code{c( probability, saltValue, pepperValue) }, 'shot':
-   scale, 'speckle': standardDeviation.  Note that the standard deviation,
-   scale, and probability values are *max* values and are randomly selected
-   in the range [0, noise_parameter].  Also, the "mean", "saltValue" and
-   pepperValue" are assumed to be in the intensity normalized range of [0, 1].}
+Note that the "speckle" model takes much longer than the others.}
 
 \item{noiseParameters}{parameters for the specified noise model.}
 
