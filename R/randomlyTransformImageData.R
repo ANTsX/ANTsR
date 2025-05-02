@@ -72,6 +72,7 @@ randomlyTransformImageData <- function( referenceImage,
   inputImageInterpolator = 'linear',
   segmentationImageInterpolator = 'nearestNeighbor' )
 {
+
   createRandomLinearTransform <- function(
     image, fixedParameters, transformType = 'affine', sdAffine = 0.02 )
     {
@@ -141,7 +142,7 @@ randomlyTransformImageData <- function( referenceImage,
     displacementFieldTransform <- antsrTransformFromDisplacementField( displacementField )
     return( displacementFieldTransform )
     }
-
+  
   admissibleTransforms <- c( "translation", "rotation", "rigid", "scaleShear", "affine",
     "affineAndDeformation", "deformation" )
   if( !( transformType %in% admissibleTransforms ) )
@@ -194,7 +195,7 @@ randomlyTransformImageData <- function( referenceImage,
         sdNoise, numberOfFittingLevels, meshSize, sdSmoothing )
       transforms <- list( deformableTransform )
       }
-    if( transformType == 'affineAndDeformation' )
+    else if( transformType == 'affineAndDeformation' )
       {
       deformableTransform <- createRandomDisplacementFieldTransform(
         referenceImage, deformationTransformType, numberOfRandomPoints,
@@ -203,13 +204,12 @@ randomlyTransformImageData <- function( referenceImage,
         fixedParameters, 'affine', sdAffine )
       transforms <- list( deformableTransform, linearTransform )
       }
-    if( transformType %in% admissibleTransforms[1:4] )
+    else( transformType %in% admissibleTransforms[1:4] )
       {
       linearTransform <- createRandomLinearTransform( referenceImage,
         fixedParameters, transformType, sdAffine )
       transforms <- list( linearTransform )
       }
-
     simulatedTransforms[[i]] <- composeAntsrTransforms( transforms )
 
     singleSubjectSimulatedImageList <- list()
