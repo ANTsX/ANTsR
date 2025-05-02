@@ -112,7 +112,7 @@ histogramWarpImageIntensities <- function( image,
     transformedArray[indices] <- intensities + xfrm
     }
   transformedImage <- as.antsImage( transformedArray, reference = image ) *
-    ( ANTsRCore::max( image ) - ANTsRCore::min( image ) ) + ANTsRCore::min( image )
+    ( max( image ) - min( image ) ) + min( image )
 
   return( transformedImage )
   }
