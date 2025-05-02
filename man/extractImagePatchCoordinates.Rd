@@ -51,7 +51,7 @@ a matrix of image patch spatial or index coordinates.
 Extract 2-D or 3-D image patch coordinates.
 }
 \examples{
-
+\dontrun{
 library( ANTsR )
 
 image <- antsImageRead( getANTsRData( "r16" ) )
@@ -60,7 +60,7 @@ patchCoordsP <- extractImagePatchCoordinates( image, c( 32, 32 ), 10, c( 32, 32 
   maskImage, randomSeed = 0, physicalCoordinates = TRUE )
 patchCoordsI <- extractImagePatchCoordinates( image, c( 32, 32 ), 10, c( 32, 32 ),
   maskImage, randomSeed = 0, physicalCoordinates = FALSE )
-
+} 
 }
 \author{
 Tustison NJ, Avants B
