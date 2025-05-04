@@ -14,6 +14,11 @@
 #' @export labelGeometryMeasures
 labelGeometryMeasures <- function(labelImage, intensityImage = NULL) {
   labelImage <- check_ants(labelImage)
+  maxLabel <- 2^32 - 1 # maximum value for uint32, as used in ANTs function
+  if (any(labelImage < 0) || any(labelImage > maxLabel)) {
+    stop("labelImage contains values outside the valid range [0, ", maxLabel, "].")
+  }
+  labelImage <- antsImageClone(labelImage, "unsigned int")
   if (missing(intensityImage) |
     is.null(intensityImage)) {
     intensityImage <- labelImage
@@ -22,9 +27,6 @@ labelGeometryMeasures <- function(labelImage, intensityImage = NULL) {
   veccer <- list(labelImage@dimension, labelImage, intensityImage, outcsv)
   pp <- ANTsRCore::LabelGeometryMeasures(.int_antsProcessArguments(veccer))
   pp <- read.csv(outcsv)
-  pp$Label <- sort(unique(labelImage[labelImage > 0]))
-  names(pp)[2] <- "VolumeInMillimeters"
-  spc <- prod(antsGetSpacing(labelImage))
-  pp$VolumeInMillimeters <- pp$VolumeInMillimeters * spc
   return(pp)
 }
+
