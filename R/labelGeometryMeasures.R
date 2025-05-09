@@ -15,12 +15,12 @@
 labelGeometryMeasures <- function(labelImage, intensityImage = NULL) {
   labelImage <- check_ants(labelImage)
   maxLabel <- 2^32 - 1 # maximum value for uint32, as used in ANTs function
-  if (any(labelImage < 0) || any(labelImage > maxLabel)) {
+  labelData = as.array(labelImage)
+  if (any(labelData < 0) || any(labelData > maxLabel)) {
     stop("labelImage contains values outside the valid range [0, ", maxLabel, "].")
   }
   labelImage <- antsImageClone(labelImage, "unsigned int")
-  if (missing(intensityImage) |
-    is.null(intensityImage)) {
+  if (missing(intensityImage) || is.null(intensityImage)) {
     intensityImage <- labelImage
   }
   outcsv <- tempfile(fileext = ".csv")
@@ -29,4 +29,3 @@ labelGeometryMeasures <- function(labelImage, intensityImage = NULL) {
   pp <- read.csv(outcsv)
   return(pp)
 }
-
