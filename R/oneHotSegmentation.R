@@ -19,7 +19,7 @@
 #' r16 <- antsImageRead( getANTsRData( "r16" ) )
 #' seg <- kmeansSegmentation( r16, 3 )$segmentation
 #' oneHot <- segmentationToOneHot( as.array( seg ),
-#'                                 channelOrderingFirst = TRUE )
+#'                                 channelFirstOrdering = TRUE )
 #'
 #' @author Tustison NJ
 #' @export
@@ -88,9 +88,9 @@ segmentationToOneHot <- function( segmentationsArray,
 #' r16 <- antsImageRead( getANTsRData( "r16" ) )
 #' seg <- kmeansSegmentation( r16, 3 )$segmentation
 #' oneHot <- segmentationToOneHot( as.array( seg ),
-#'                                 channelOrderingFirst = TRUE )
+#'                                 channelFirstOrdering = TRUE )
 #' oneHotInv <- oneHotToSegmentation( oneHot, seg,
-#'                                    channelOrderingFirst = TRUE ) 
+#'                                    channelFirstOrdering = TRUE ) 
 #'
 #' @author Tustison NJ
 #' @export
