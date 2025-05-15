@@ -12,7 +12,6 @@ labelImageRegistration(
   fixedMask = NULL,
   movingMask = NULL,
   initialTransforms = "affine",
-  typeOfLinearTransform = NULL,
   typeOfDeformableTransform = "antsRegistrationSyNQuick[so]",
   labelImageWeighting = 1,
   outputPrefix = "",
@@ -42,11 +41,6 @@ in the space of the moving image.}
 transform of type  \code{'identity'}, \code{'rigid'}, 
 \code{'similarity'}, \code{'affine'}.  2) Specify a list of transform
 files, e.g., the output of \code{antsRegistration}.}
-
-\item{typeOfLinearTransform}{Use label images with the centers of 
-mass to a calculate linear transform of type  \code{'identity'}, 
-\code{'rigid'}, \code{'similarity'}, \code{'affine'}.  Deprecated-
-subsumed by \code{'initialTransforms'}.}
 
 \item{typeOfDeformableTransform}{Only works with deformable-only transforms, 
 specifically the family of \code{antsRegistrationSyN*[so]} or 

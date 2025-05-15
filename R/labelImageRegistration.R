@@ -18,10 +18,6 @@
 #' transform of type  \code{'identity'}, \code{'rigid'}, 
 #' \code{'similarity'}, \code{'affine'}.  2) Specify a list of transform
 #' files, e.g., the output of \code{antsRegistration}.
-#' @param typeOfLinearTransform Use label images with the centers of 
-#' mass to a calculate linear transform of type  \code{'identity'}, 
-#' \code{'rigid'}, \code{'similarity'}, \code{'affine'}.  Deprecated-
-#' subsumed by \code{'initialTransforms'}.
 #' @param typeOfDeformableTransform Only works with deformable-only transforms, 
 #' specifically the family of \code{antsRegistrationSyN*[so]} or 
 #' \code{antsRegistrationSyN*[bo]} transforms.  See 'typeOfTransform' 
@@ -70,7 +66,6 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     fixedIntensityImages = NULL, movingIntensityImages = NULL,
     fixedMask = NULL, movingMask = NULL,
     initialTransforms = "affine",
-    typeOfLinearTransform = NULL, 
     typeOfDeformableTransform = 'antsRegistrationSyNQuick[so]',
     labelImageWeighting = 1.0,
     outputPrefix = '',
@@ -78,17 +73,6 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     verbose = FALSE )
 {     
   # Preform validation check on the input
-
-  if( ! is.null( typeOfLinearTransform ) )
-    {
-    message( "\n" )
-    message( "*****************************************************************************************" )
-    message( "Deprecation warning.  typeOfLinearTransform is deprecated.  Please use initialTransforms." )
-    message( "*****************************************************************************************" )
-    message( "\n" )
-    initialTransforms <- typeOfLinearTransform 
-    }
-
   if( ANTsR::is.antsImage( fixedLabelImages ) )
     {
     fixedLabelImages <- list( antsImageClone( fixedLabelImages ) )
