@@ -50,11 +50,11 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1
+          key: ${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/R-version') }}-1
           restore-keys: |
-            ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1
-            ${{ runner.os }}-${{ hashFiles('.github/R-version') }}
-            ${{ runner.os }}-
+            ${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/R-version') }}-1
+            ${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/R-version') }}
+            ${{ runner.os }}-${{ runner.arch }}-
 
       - name: Build HDF5 - OSX
         if: runner.os == 'macOS'
