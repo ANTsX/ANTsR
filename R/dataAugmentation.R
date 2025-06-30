@@ -174,6 +174,7 @@ dataAugmentation <- function( inputImageList,
       }
 
     simulatedLocalImageList <- list()
+    biasField <- NULL
     for( j in seq.int( numberOfModalities ) )
       {
       if( verbose )
@@ -248,11 +249,14 @@ dataAugmentation <- function( inputImageList,
           cat( "        Adding simulated bias field.\n" )
           }
 
-        logField <- simulateBiasField(image, numberOfPoints = 10,
-          sdBiasField = sdSimulatedBiasField, numberOfFittingLevels = 2, meshSize = 10 ) %>%
-          iMath( "Normalize" )
-        logField <- ( exp( logField ) )^sample( c( 2, 3, 4 ), 1 )
-        image <- image * logField
+        if( j == 1 )
+          {    
+          logField <- simulateBiasField( image, numberOfPoints = 10,
+            sdBiasField = sdSimulatedBiasField, numberOfFittingLevels = 2, meshSize = 10 ) %>%
+            iMath( "Normalize" )
+          biasField <- ( exp( logField ) )^sample( c( 2, 3, 4 ), 1 )
+          }
+        image <- image * biasField
         }
 
       # Histogram intensity warping
