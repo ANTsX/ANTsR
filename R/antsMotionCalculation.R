@@ -14,16 +14,6 @@
 #' \code{"SyN"}.
 #' @param framewise Calculate framewise displacement?
 #' @param verbose enables verbose output.
-#' @param num_threads will execute
-#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
-#' running to attempt a more reproducible result.  See
-#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.
-#' @param seed will execute
-#' \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
-#' running to attempt a more reproducible result.  See
-#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.
 #' @param ... additional argument to \code{\link{.motion_correction}}
 #'
 #' @return List containing:
@@ -41,8 +31,6 @@
 antsMotionCalculation <- function(
     img, mask = NULL, fixed = NULL, moreaccurate = 1,
     txtype = "Affine", framewise = 1, verbose = FALSE,
-    num_threads = 1,
-    seed = NULL,
     ...) {
   if (is.null(fixed)) {
     fixed <- getAverageOfTimeSeries(img)
@@ -51,8 +39,6 @@ antsMotionCalculation <- function(
     img,
     fixed = fixed,
     moreaccurate = moreaccurate, txtype = txtype, verbose = verbose,
-    num_threads = num_threads,
-    seed = seed,
     ...
   )
   #  moco <- .motion_correction(img, fixed=moco$moco_avg_img,
@@ -65,10 +51,7 @@ antsMotionCalculation <- function(
     )
   }
   tsimg <- antsImageClone(img, "double")
-  mocostats <- .antsMotionCorrStats(tsimg, mask, mocoparams,
-    num_threads = num_threads,
-    seed = seed
-  )
+  mocostats <- .antsMotionCorrStats(tsimg, mask, mocoparams)
   fd <- as.data.frame(mocostats$Displacements)
   names(fd) <- c("MeanDisplacement", "MaxDisplacement")
   aslmat <- timeseries2matrix(img, mask)

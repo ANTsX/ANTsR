@@ -11,7 +11,6 @@ abpBrainExtraction(
   temregmask = NULL,
   regtype = "SyN",
   tdir = NA,
-  num_threads = 1,
   pad = 0,
   verbose = FALSE
 )
@@ -28,12 +27,6 @@ abpBrainExtraction(
 \item{regtype}{registration type: 'SyN' (fast, default), 'SyNabp' (better, slower)}
 
 \item{tdir}{temporary directory (optional)}
-
-\item{num_threads}{will execute
-\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
-running to attempt a more reproducible result.  See
-\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-for discussion.  If \code{NULL}, will not set anything.}
 
 \item{pad}{argument passed to \code{\link{iMath}} for how much to
 zero-pad the image}

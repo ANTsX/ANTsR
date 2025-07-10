@@ -10,16 +10,6 @@
 #' @param getMotionDescriptors computes dvars and framewise displacement.  May
 #' take additional memory.
 #' @param verbose enables verbose output.
-#' @param num_threads will execute
-#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
-#' running to attempt a more reproducible result.  See
-#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.
-#' @param seed will execute
-#' \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
-#' running to attempt a more reproducible result.  See
-#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.
 #' @param ... extra parameters passed to antsRegistration
 #' @return List containing:
 #' \describe{
@@ -31,12 +21,6 @@
 #'  \item{dvars}{ DVARS, derivative of frame-wise intensity changes.}
 #' }
 #'
-#' @note For reproducible results, you should run
-#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)},
-#' which is what the \code{num_threads = 1} flag will do.
-#' See \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' and \url{https://github.com/ANTsX/ANTsR/issues/210#issuecomment-377511054}
-#' for discussion
 #' @author BB Avants, Benjamin M. Kandel, JT Duda, Jeffrey S. Phillips
 #' @export antsrMotionCalculation
 antsrMotionCalculation <- function(
@@ -49,26 +33,7 @@ antsrMotionCalculation <- function(
     ),
     getMotionDescriptors = TRUE,
     verbose = FALSE,
-    num_threads = 1,
-    seed = NULL,
     ...) {
-  ants_random_seed <- itk_threads <- NULL
-  if (!is.null(seed)) {
-    ants_random_seed <- Sys.getenv("ANTS_RANDOM_SEED")
-    Sys.setenv(ANTS_RANDOM_SEED = seed)
-  }
-  if (!is.null(num_threads)) {
-    itk_threads <- Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
-    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
-  }
-  on.exit({
-    if (!is.null(ants_random_seed)) {
-      Sys.setenv(ANTS_RANDOM_SEED = ants_random_seed)
-    }
-    if (!is.null(itk_threads)) {
-      Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
-    }
-  })
   typeofTransform <- match.arg(typeofTransform)
   imgdim <- length(dim(img))
   subdim <- imgdim - 1

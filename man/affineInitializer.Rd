@@ -12,8 +12,7 @@ affineInitializer(
   usePrincipalAxis = FALSE,
   localSearchIterations = 10,
   mask,
-  txfn,
-  num_threads = 1
+  txfn
 )
 }
 \arguments{
@@ -32,12 +31,6 @@ affineInitializer(
 \item{mask}{optional mask to restrict registration}
 
 \item{txfn}{filename for the transformation}
-
-\item{num_threads}{will execute
-\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
-running to attempt a more reproducible result.  See
-\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-for discussion.  If \code{NULL}, will not set anything.}
 }
 \value{
 transformationMatrix
