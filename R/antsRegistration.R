@@ -44,9 +44,6 @@
 #' 3D deformation field or \code{c(1,1,0,1,1,0)} for a rigid transformation.
 #' Restriction currently only works if there are no preceding transformations.
 #' @param writeCompositeTransform if \code{TRUE}, will write transformations to h5 format.  Defaults to FALSE.
-#' @param randomSeed integer random seed. combine with setting
-#' ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS environment variable to limit the
-#' impact of numerical differences.
 #' @param samplingPercentage value between zero and one that allows the percentage
 #' of points sampled to be controlled in low-dimensional metric estimation.
 #' @param verbose request verbose output (useful for debugging)
@@ -157,10 +154,6 @@
 #'   fixed = fi, moving = mi,
 #'   affIterations = affIterations
 #' )
-#' # set below for slower but numerically repeatable results
-#' # these should be set in .Renviron not by sys calls
-#' #  Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
-#' #  Sys.setenv(ANTS_RANDOM_SEED = 20180716)
 #' fi <- antsImageRead(getANTsRData("r16"))
 #' mi <- antsImageRead(getANTsRData("r64"))
 #' fi <- resampleImage(fi, c(60, 60), 1, 0)
@@ -221,7 +214,6 @@ antsRegistration <- function(
     multivariateExtras,
     restrictTransformation,
     writeCompositeTransform = FALSE,
-    randomSeed,
     samplingPercentage = 0.2,
     verbose = FALSE,
     printArgs = FALSE, ...) {
@@ -363,6 +355,12 @@ antsRegistration <- function(
       if (!ttexists) {
         stop("Unrecognized transform type.")
       }
+
+      # Perform Repro checking if set_ants_deterministic is True
+      if( getOption( "ants.deterministic", TRUE ) && !grepl( "Repro", typeofTransform ) ) {
+        stop( typeofTransform, " is not deterministic/reproducible.")
+      }
+
       initx <- initialTransform
       if (inherits(initx, "antsrTransform")) {
         tempTXfilename <- tempfile(fileext = ".mat")
@@ -889,10 +887,6 @@ antsRegistration <- function(
           synMetric <- paste0("CC[", f, ",", m, ",1", metricParameter, "]")
         }
 
-        if (missing(randomSeed) && doRepro == TRUE) {
-          randomSeed <- 1
-        }
-
         rigidStage <- list(
           "--transform", paste0(tx, "[", linearGradientStep, "]"),
           "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", samplingPercentage, "]"),
@@ -989,13 +983,12 @@ antsRegistration <- function(
 
       args[[length(args) + 1]] <- "--float"
       args[[length(args) + 1]] <- "1"
-      # set the random seed
-      if (missing(randomSeed)) {
-        myseed <- Sys.getenv("ANTS_RANDOM_SEED")
-        if (nchar(myseed) == 0) myseed <- "1234"
+
+      if( !is.null( getOption( "randomSeed" ) ) ) {
+        args[[length(args) + 1]] <- "--random-seed"
+        args[[length(args) + 1]] <- as.character( getOption( "randomSeed" ) )
       }
-      args[[length(args) + 1]] <- "--random-seed"
-      args[[length(args) + 1]] <- "1"
+
       args[[length(args) + 1]] <- "--write-composite-transform"
       args[[length(args) + 1]] <- as.character(as.numeric(writeCompositeTransform))
       if (verbose) {

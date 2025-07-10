@@ -25,7 +25,6 @@ antsRegistration(
   multivariateExtras,
   restrictTransformation,
   writeCompositeTransform = FALSE,
-  randomSeed,
   samplingPercentage = 0.2,
   verbose = FALSE,
   printArgs = FALSE,
@@ -93,10 +92,6 @@ this is possible by specifying a weight vector of \code{c(1,1,0)} for a
 Restriction currently only works if there are no preceding transformations.}
 
 \item{writeCompositeTransform}{if \code{TRUE}, will write transformations to h5 format.  Defaults to FALSE.}
-
-\item{randomSeed}{integer random seed. combine with setting
-ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS environment variable to limit the
-impact of numerical differences.}
 
 \item{samplingPercentage}{value between zero and one that allows the percentage
 of points sampled to be controlled in low-dimensional metric estimation.}
@@ -218,10 +213,6 @@ mytx2 <- antsRegistration(
   fixed = fi, moving = mi,
   affIterations = affIterations
 )
-# set below for slower but numerically repeatable results
-# these should be set in .Renviron not by sys calls
-#  Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)
-#  Sys.setenv(ANTS_RANDOM_SEED = 20180716)
 fi <- antsImageRead(getANTsRData("r16"))
 mi <- antsImageRead(getANTsRData("r64"))
 fi <- resampleImage(fi, c(60, 60), 1, 0)
