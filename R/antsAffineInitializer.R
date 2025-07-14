@@ -12,11 +12,6 @@
 #' @param localSearchIterations gradient descent iterations
 #' @param mask optional mask to restrict registration
 #' @param txfn filename for the transformation
-#' @param num_threads will execute
-#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
-#' running to attempt a more reproducible result.  See
-#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.
 #' @return transformationMatrix
 #' @author Avants BB
 #'
@@ -36,14 +31,7 @@
 affineInitializer <- function(
     fixedImage, movingImage, searchFactor = 20,
     radianFraction = 0.1, usePrincipalAxis = FALSE, localSearchIterations = 10,
-    mask, txfn, num_threads = 1) {
-  if (!is.null(num_threads)) {
-    itk_threads <- Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
-    on.exit({
-      Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
-    })
-    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
-  }
+    mask, txfn) {
   if (missing(txfn)) {
     txfn <- tempfile(fileext = ".mat")
   }

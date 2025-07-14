@@ -33,16 +33,6 @@
 #' iterations, e.g. \code{c(0.25, 5)}.
 #' @param residualizeMatrix boolean
 #' @param denseFramewise boolean for dense framewise stats
-#' @param num_threads will execute
-#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
-#' running to attempt a more reproducible result.  See
-#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.
-#' @param seed will execute
-#' \code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
-#' running to attempt a more reproducible result.  See
-#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.
 #'
 #' @return List of:
 #' \describe{
@@ -75,9 +65,7 @@ preprocessRestingBOLD <- function(
     frequencyHighThreshold = NA,
     spatialSmoothingType = "none",
     spatialSmoothingParameters = 0,
-    residualizeMatrix = TRUE,
-    num_threads = 1,
-    seed = NULL) {
+    residualizeMatrix = TRUE) {
   nuisanceVariables <- NULL
   if (!missing(initialNuisanceVariables)) {
     nuisanceVariables <- initialNuisanceVariables
@@ -101,9 +89,7 @@ preprocessRestingBOLD <- function(
     for (iter in 1:motionCorrectionIterations) {
       motionCorrectionResults <- .motion_correction(boldImage,
         fixed = meanBoldFixedImageForMotionCorrection,
-        moreaccurate = motionCorrectionAccuracyLevel,
-        num_threads = num_threads,
-        seed = seed
+        moreaccurate = motionCorrectionAccuracyLevel
       )
     }
 

@@ -9,11 +9,6 @@
 #' @param temregmask Template's registration mask including skull but not the face
 #' @param regtype registration type: 'SyN' (fast, default), 'SyNabp' (better, slower)
 #' @param tdir temporary directory (optional)
-#' @param num_threads will execute
-#' \code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
-#' running to attempt a more reproducible result.  See
-#' \url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-#' for discussion.  If \code{NULL}, will not set anything.
 #' @param verbose print diagnostic messages
 #' @param pad argument passed to \code{\link{iMath}} for how much to
 #' zero-pad the image
@@ -36,16 +31,8 @@
 #' @export abpBrainExtraction
 abpBrainExtraction <- function(img, tem, temmask,
                                temregmask = NULL, regtype = "SyN", tdir = NA,
-                               num_threads = 1,
                                pad = 0,
                                verbose = FALSE) {
-  if (!is.null(num_threads)) {
-    itk_threads <- Sys.getenv("ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS")
-    on.exit({
-      Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = itk_threads)
-    })
-    Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)
-  }
 
   if (missing(img) | missing(tem) | missing(temmask) |
     is.null(img) | is.null(tem) | is.null(temmask)) {
@@ -110,16 +97,14 @@ abpBrainExtraction <- function(img, tem, temmask,
       temp <- affineInitializer(
         fixedImage = temsmall, movingImage = imgsmall,
         searchFactor = 15, radianFraction = 0.1, usePrincipalAxis = 0,
-        localSearchIterations = 10, txfn = initafffn,
-        num_threads = num_threads
+        localSearchIterations = 10, txfn = initafffn
       )
     } else {
       temregmask <- check_ants(temregmask)
       temp <- affineInitializer(
         fixedImage = temsmall, movingImage = imgsmall,
         searchFactor = 15, radianFraction = 0.1, usePrincipalAxis = 0,
-        localSearchIterations = 10, txfn = initafffn, mask = temregmask,
-        num_threads = num_threads
+        localSearchIterations = 10, txfn = initafffn, mask = temregmask
       )
     }
   }

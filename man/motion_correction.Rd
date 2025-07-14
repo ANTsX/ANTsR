@@ -9,9 +9,7 @@
   fixed = NULL,
   moreaccurate = 1,
   txtype = "Affine",
-  verbose = FALSE,
-  num_threads = 1,
-  seed = NULL
+  verbose = FALSE
 )
 }
 \arguments{
@@ -19,24 +17,12 @@
 
 \item{fixed}{target fixed image}
 
-\item{moreaccurate}{0, 1 or 2 with higher values being more accurte
+\item{moreaccurate}{0, 1 or 2 with higher values being more accurate
 (use 2 for real applications, 0 for testing)}
 
 \item{txtype}{Transformation type}
 
 \item{verbose}{verbosity boolean}
-
-\item{num_threads}{will execute
-\code{Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)} before
-running to attempt a more reproducible result.  See
-\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-for discussion.  If \code{NULL}, will not set anything.}
-
-\item{seed}{will execute
-\code{Sys.setenv(ANTS_RANDOM_SEED = seed)} before
-running to attempt a more reproducible result.  See
-\url{https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues}
-for discussion.  If \code{NULL}, will not set anything.}
 }
 \value{
 list of outputs
@@ -48,10 +34,9 @@ motion corrects 4D time series imaging data
 This function may give different results on multiple runs.
 }
 \examples{
-set.seed(1000)
 testimg <- makeImage(c(10, 10, 10, 5), rnorm(5000))
 testimg <- iMath(testimg, "PadImage", 5)
-mocorr <- .motion_correction(testimg, num_threads = 1, seed = 10)
+mocorr <- .motion_correction(testimg)
 aimg_to_array <- function(x) {
   if (is.antsImage(x)) {
     x <- as.array(x)
@@ -59,7 +44,7 @@ aimg_to_array <- function(x) {
   x
 }
 amocorr <- lapply(mocorr, aimg_to_array)
-mocorr2 <- .motion_correction(testimg, num_threads = 1, seed = 10)
+mocorr2 <- .motion_correction(testimg)
 amocorr2 <- lapply(mocorr2, aimg_to_array)
 
 # This function may give different results on multiple runs
