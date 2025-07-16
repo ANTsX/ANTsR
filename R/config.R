@@ -16,9 +16,6 @@
 
 #' Set ANTs deterministic behavior
 #'
-#' Register a pair of images either through the full or simplified interface
-#' to the ANTs registration method.
-#'
 #' @param on Set deterministic behavior.
 #' @param seedValue Assign random seed value.
 #'
