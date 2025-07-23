@@ -4409,23 +4409,36 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
 #'
 #' @export
 rvcoef <- function(X, Y) {
-  # Normalize matrices
-  X_norm <- scale(X/max(X), center = TRUE, scale = TRUE)
-  Y_norm <- scale(Y/max(Y), center = TRUE, scale = TRUE)
+  # --- Step 1: Initial Normalization ---
+  X_norm <- X / max(X)
+  Y_norm <- Y / max(Y)
+
+  # --- Step 2: Center the Data ---
+  X_centered <- scale(X_norm, center = TRUE, scale = FALSE)
+  Y_centered <- scale(Y_norm, center = TRUE, scale = FALSE)
+
+  # --- Step 3: Calculate the Numerator using SVD ---
+  # This is the sum of the squared singular values of the cross-product matrix.
+  cross_product_matrix <- t(X_centered) %*% Y_centered
+  svd_C <- svd(cross_product_matrix, nu = 0, nv = 0)
+  numerator <- sum(svd_C$d^2)
+
+  # --- Step 4: Calculate the Denominator (Correctly) ---
+  # This part MUST use the standard formula, which was incorrect in the original.
+  # It is sqrt( Tr(S_XX^2) * Tr(S_YY^2) ), where S_XX = X %*% t(X).
+  S_XX <- X_centered %*% t(X_centered)
+  S_YY <- Y_centered %*% t(Y_centered)
   
-  # Compute cross-product matrix
-  C <- t(X_norm) %*% Y_norm
-  if ( all( is.na( C ) ) ) return( 0.0 )
+  denom_part1 <- sum(diag(S_XX %*% S_XX))
+  denom_part2 <- sum(diag(S_YY %*% S_YY))
+  denominator <- sqrt(denom_part1 * denom_part2)
+
+  # --- Step 5: Compute the Final Coefficient ---
+  if (denominator == 0) {
+    return(0)
+  }
   
-  # Compute SVD
-  # svd_C <- corpcor::fast.svd( C )
-  svd_C <- svd( C , nu=0, nv=0  )
-  
-  # Compute RV coefficient
-  sigma_sq <- sum(svd_C$d^2)
-  s_sq <- sum(rowSums(X_norm^2)) * sum(rowSums(Y_norm^2))
-  rv <- sigma_sq / s_sq
-  
+  rv <- numerator / denominator
   return(rv)
 }
 
