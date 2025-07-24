@@ -4458,6 +4458,7 @@ rvcoef_components <- function(X, Y) {
 #' @param X A numeric matrix (n observations, p variables).
 #' @param Y A numeric matrix (n observations, q variables).
 #' @return A single scalar value for the RV-coefficient.
+#' @export
 rvcoef <- function(X, Y) {
   # Call the component dispatcher and return only the final rv value
   rvcoef_components(X, Y)$rv
@@ -4471,6 +4472,7 @@ rvcoef <- function(X, Y) {
 #' @param X A numeric matrix (n observations, p variables).
 #' @param Y A numeric matrix (n observations, q variables).
 #' @return A single scalar value for the adjusted RV-coefficient.
+#' @export
 adjusted_rvcoef <- function(X, Y) {
   n <- nrow(X)
   if (n <= 1) return(0)

@@ -252,7 +252,7 @@ ggscatter( impresult, 'og', 'imp' ) + ggtitle(paste("Imputed vs original data",i
 
 ## Testing Significance of Joint Relationships
 
-We use a metric (`rvcoef`) that is not directly optimized to assess the significance of the simlr result versus permuted data.  The RV coefficient is analogous to the Pearson correlation coefficient but is used for comparing two matrices (or datasets) rather than two variables. It measures the similarity of the column spaces (subspaces) spanned by the columns of two matrices.  We compute the `rvcoef` across all pairs of data at each permutation and compare to the original values.
+We use a metric (`rvcoef`) that is not directly optimized to assess the significance of the simlr result versus permuted data.  The RV coefficient is analogous to the Pearson correlation coefficient but is used for comparing two matrices (or datasets) rather than two variables. It measures the similarity of the column spaces (subspaces) spanned by the columns of two matrices.  We compute the `rvcoef` across all pairs of data at each permutation and compare to the original values.  Another alternative (`diagcorr`) is also possible.
 
 ```{r permutation,fig.width=8,fig.height=8}
 diagcorr = function( X,Y ) mean(abs(diag(cor(X,Y))))
