@@ -4393,96 +4393,115 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
 }
 
 
-#' RV Coefficient of Two Matrices
-#'
-#' Computes the RV coefficient, a measure of similarity between two matrices.
-#'
-#' @param X First matrix
-#' @param Y Second matrix
-#'
-#' @return RV coefficient (a value between 0 and 1)
-#'
-#' @examples
-#' X <- matrix(rnorm(100), nrow = 10)
-#' Y <- matrix(rnorm(120), nrow = 10)
-#' rvcoef(X, Y)
-#'
-#' @export
-rvcoef <- function(X, Y) {
-  # --- Step 1: Initial Normalization ---
-  X_norm <- X / max(X)
-  Y_norm <- Y / max(Y)
-
-  # --- Step 2: Center the Data ---
-  X_centered <- scale(X_norm, center = TRUE, scale = FALSE)
-  Y_centered <- scale(Y_norm, center = TRUE, scale = FALSE)
-
-  # --- Step 3: Calculate the Numerator using SVD ---
-  # This is the sum of the squared singular values of the cross-product matrix.
-  cross_product_matrix <- t(X_centered) %*% Y_centered
-  svd_C <- svd(cross_product_matrix, nu = 0, nv = 0)
-  numerator <- sum(svd_C$d^2)
-
-  # --- Step 4: Calculate the Denominator (Correctly) ---
-  # This part MUST use the standard formula, which was incorrect in the original.
-  # It is sqrt( Tr(S_XX^2) * Tr(S_YY^2) ), where S_XX = X %*% t(X).
+# --- Internal Implementation 1: Trace Method (for WIDE data, n < p+q) ---
+rvcoef_trace_impl <- function(X_centered, Y_centered) {
   S_XX <- X_centered %*% t(X_centered)
   S_YY <- Y_centered %*% t(Y_centered)
+  S_XY <- X_centered %*% t(Y_centered)
+  
+  numerator <- sum(diag(S_XY %*% t(S_XY)))
   
   denom_part1 <- sum(diag(S_XX %*% S_XX))
   denom_part2 <- sum(diag(S_YY %*% S_YY))
   denominator <- sqrt(denom_part1 * denom_part2)
+  
+  if (denominator == 0) return(0)
+  return(numerator / denominator)
+}
 
-  # --- Step 5: Compute the Final Coefficient ---
-  if (denominator == 0) {
-    return(0)
+# --- Internal Implementation 2: Gram Matrix Method (for TALL data, n >= p+q) ---
+rvcoef_gram_impl <- function(X_centered, Y_centered) {
+  # Numerator (via SVD on the cross-product matrix)
+  cross_product_matrix <- t(X_centered) %*% Y_centered
+  svd_C <- svd(cross_product_matrix, nu = 0, nv = 0)
+  numerator <- sum(svd_C$d^2)
+  
+  # Denominator (via trace of squared Gram matrices)
+  G_X <- t(X_centered) %*% X_centered
+  G_Y <- t(Y_centered) %*% Y_centered
+  
+  denom_part1 <- sum(diag(G_X %*% G_X))
+  denom_part2 <- sum(diag(G_Y %*% G_Y))
+  denominator <- sqrt(denom_part1 * denom_part2)
+  
+  if (denominator == 0) return(0)
+  return(numerator / denominator)
+}
+
+#' Computes the RV-Coefficient with a Performance-Optimized Heuristic
+#'
+#' This function automatically selects the fastest algorithm (Trace vs. Gram matrix)
+#' based on the dimensions of the input matrices.
+#'
+#' @param X A numeric matrix (n observations, p variables).
+#' @param Y A numeric matrix (n observations, q variables).
+#' @return A single scalar value for the RV-coefficient.
+rvcoef <- function(X, Y) {
+  n <- nrow(X)
+  p <- ncol(X)
+  q <- ncol(Y)
+  
+  # Center data once
+  X_centered <- scale(X, center = TRUE, scale = FALSE)
+  Y_centered <- scale(Y, center = TRUE, scale = FALSE)
+  
+  # Heuristic: If n is smaller than the total number of variables, the
+  # n x n covariance matrix is smaller, so the Trace method is faster.
+  if (n < (p + q)) {
+    return(rvcoef_trace_impl(X_centered, Y_centered))
+  } else {
+    return(rvcoef_gram_impl(X_centered, Y_centered))
   }
-  
-  rv <- numerator / denominator
-  return(rv)
 }
 
-#' Adjusted RV Coefficient
+#' Computes the Adjusted RV-Coefficient using the Fast RV-Coefficient Function
 #'
-#' Computes the adjusted RV coefficient between two matrices, as proposed by Mordant and Segers.
+#' This function calculates the adjusted RV-coefficient, correcting for the
+#' expected value under the null hypothesis of independence.
 #'
-#' @param X First matrix
-#' @param Y Second matrix
-#' @param lambda The ridge penalty parameter (default is 1e-6).
-#'
-#' @return Adjusted RV coefficient (a value between 0 and 1)
-#'
-#' @references
-#' Mordant, G., & Segers, J. (2006). A note on the RV coefficient. Journal of Multivariate Analysis, 97(10), 2155-2164.
-#'
-#' @examples
-#' X <- matrix(rnorm(100), nrow = 10)
-#' Y <- matrix(rnorm(100), nrow = 10)
-#' adjusted_rvcoef(X, Y)
-#'
-#' @export
-adjusted_rvcoef <- function(X, Y, lambda = 1e-6) {
-  # Compute the numerator (same as original RV coefficient)
-  numerator <- sum(ba_svd(X %*% t(Y))$d^2)
+#' @param X A numeric matrix (n observations, p variables).
+#' @param Y A numeric matrix (n observations, q variables).
+#' @return A single scalar value for the adjusted RV-coefficient.
+adjusted_rvcoef <- function(X, Y) {
+  n <- nrow(X)
+  if (n <= 1) return(0)
+
+  # Step 1: Calculate the observed RV-coefficient using the fast dispatcher
+  rv_obs <- rvcoef(X, Y)
   
-  # Compute the denominator (maximal value attainable by the numerator)
-  X_svd <- ba_svd(X, nu = 0)
-  Y_svd <- ba_svd(Y, nu = 0)
+  # Step 2: Calculate the expected value of the RV-coefficient
+  # This part is computationally cheap
+  X_centered <- scale(X, center = TRUE, scale = FALSE)
+  Y_centered <- scale(Y, center = TRUE, scale = FALSE)
   
-  # Add a ridge penalty to the singular values
-  X_d <- X_svd$d^2 + lambda
-  Y_d <- Y_svd$d^2 + lambda
+  # The trace of the covariance matrix S_XX is simply the sum of squares
+  # of the centered data, which is faster than forming S_XX.
+  tr_S_XX <- sum(X_centered^2)
+  tr_S_YY <- sum(Y_centered^2)
   
-  denominator <- sum(X_d) * sum(Y_d)
+  # Expected value of the numerator under independence
+  exp_rv_num <- tr_S_XX * tr_S_YY / (n - 1)
   
-  # Add a small value to the denominator to avoid division by zero
-  denominator <- denominator + .Machine$double.eps
+  # We need the denominator from the original RV calculation.
+  # Since this is cheap compared to the main calculation, we can re-calculate it.
+  # Or, for maximum efficiency, the rvcoef function could return a list.
+  # For clarity, we recalculate here.
+  G_X <- t(X_centered) %*% X_centered
+  G_Y <- t(Y_centered) %*% Y_centered
+  denom_part1 <- sum(diag(G_X %*% G_X))
+  denom_part2 <- sum(diag(G_Y %*% G_Y))
+  rv_den <- sqrt(denom_part1 * denom_part2)
   
-  # Compute the adjusted RV coefficient
-  adjusted_rv <- numerator / denominator
+  if (rv_den == 0) return(0)
   
-  return(adjusted_rv)
+  exp_rv <- exp_rv_num / rv_den
+  
+  # Step 3: Apply the adjustment
+  adj_rv <- (rv_obs - exp_rv) / (1 - exp_rv)
+  
+  return(adj_rv)
 }
+
 
 #' pairwise application of matrix similarity to matrix List projected onto a feature list
 #'
