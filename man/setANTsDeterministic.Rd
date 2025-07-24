@@ -12,6 +12,5 @@ setANTsDeterministic(on = TRUE, seedValue = 123)
 \item{seedValue}{Assign random seed value.}
 }
 \description{
-Register a pair of images either through the full or simplified interface
-to the ANTs registration method.
+Set ANTs deterministic behavior
 }

@@ -2,29 +2,19 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{adjusted_rvcoef}
 \alias{adjusted_rvcoef}
-\title{Adjusted RV Coefficient}
+\title{Computes the Adjusted RV-Coefficient using the Fast RV-Coefficient Function}
 \usage{
-adjusted_rvcoef(X, Y, lambda = 1e-06)
+adjusted_rvcoef(X, Y)
 }
 \arguments{
-\item{X}{First matrix}
+\item{X}{A numeric matrix (n observations, p variables).}
 
-\item{Y}{Second matrix}
-
-\item{lambda}{The ridge penalty parameter (default is 1e-6).}
+\item{Y}{A numeric matrix (n observations, q variables).}
 }
 \value{
-Adjusted RV coefficient (a value between 0 and 1)
+A single scalar value for the adjusted RV-coefficient.
 }
 \description{
-Computes the adjusted RV coefficient between two matrices, as proposed by Mordant and Segers.
-}
-\examples{
-X <- matrix(rnorm(100), nrow = 10)
-Y <- matrix(rnorm(100), nrow = 10)
-adjusted_rvcoef(X, Y)
-
-}
-\references{
-Mordant, G., & Segers, J. (2006). A note on the RV coefficient. Journal of Multivariate Analysis, 97(10), 2155-2164.
+This function calculates the adjusted RV-coefficient, correcting for the
+expected value under the null hypothesis of independence.
 }

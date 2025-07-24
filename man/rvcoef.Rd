@@ -2,24 +2,19 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{rvcoef}
 \alias{rvcoef}
-\title{RV Coefficient of Two Matrices}
+\title{Computes the RV-Coefficient with a Performance-Optimized Heuristic}
 \usage{
 rvcoef(X, Y)
 }
 \arguments{
-\item{X}{First matrix}
+\item{X}{A numeric matrix (n observations, p variables).}
 
-\item{Y}{Second matrix}
+\item{Y}{A numeric matrix (n observations, q variables).}
 }
 \value{
-RV coefficient (a value between 0 and 1)
+A single scalar value for the RV-coefficient.
 }
 \description{
-Computes the RV coefficient, a measure of similarity between two matrices.
-}
-\examples{
-X <- matrix(rnorm(100), nrow = 10)
-Y <- matrix(rnorm(120), nrow = 10)
-rvcoef(X, Y)
-
+This function automatically selects the fastest algorithm (Trace vs. Gram matrix)
+based on the dimensions of the input matrices.
 }
