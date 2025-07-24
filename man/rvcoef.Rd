@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{rvcoef}
 \alias{rvcoef}
-\title{Computes the RV-Coefficient with a Performance-Optimized Heuristic}
+\title{Computes the RV-Coefficient (Optimized Public API)}
 \usage{
 rvcoef(X, Y)
 }
@@ -15,6 +15,5 @@ rvcoef(X, Y)
 A single scalar value for the RV-coefficient.
 }
 \description{
-This function automatically selects the fastest algorithm (Trace vs. Gram matrix)
-based on the dimensions of the input matrices.
+This function automatically selects the fastest algorithm based on data dimensions.
 }

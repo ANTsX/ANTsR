@@ -4392,8 +4392,8 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
   return( list( simlr_result=simlr_result, significance=simlrpermvarx))
 }
 
-
-# --- Internal Implementation 1: Trace Method (for WIDE data, n < p+q) ---
+# --- Internal Implementation 1: Trace Method (for WIDE data) ---
+# Returns a list of components.
 rvcoef_trace_impl <- function(X_centered, Y_centered) {
   S_XX <- X_centered %*% t(X_centered)
   S_YY <- Y_centered %*% t(Y_centered)
@@ -4405,18 +4405,21 @@ rvcoef_trace_impl <- function(X_centered, Y_centered) {
   denom_part2 <- sum(diag(S_YY %*% S_YY))
   denominator <- sqrt(denom_part1 * denom_part2)
   
-  if (denominator == 0) return(0)
-  return(numerator / denominator)
+  if (denominator == 0) {
+    return(list(rv = 0, numerator = numerator, denominator = 0))
+  }
+  
+  rv <- numerator / denominator
+  return(list(rv = rv, numerator = numerator, denominator = denominator))
 }
 
-# --- Internal Implementation 2: Gram Matrix Method (for TALL data, n >= p+q) ---
+# --- Internal Implementation 2: Gram Matrix Method (for TALL data) ---
+# Returns a list of components.
 rvcoef_gram_impl <- function(X_centered, Y_centered) {
-  # Numerator (via SVD on the cross-product matrix)
   cross_product_matrix <- t(X_centered) %*% Y_centered
   svd_C <- svd(cross_product_matrix, nu = 0, nv = 0)
   numerator <- sum(svd_C$d^2)
   
-  # Denominator (via trace of squared Gram matrices)
   G_X <- t(X_centered) %*% X_centered
   G_Y <- t(Y_centered) %*% Y_centered
   
@@ -4424,29 +4427,23 @@ rvcoef_gram_impl <- function(X_centered, Y_centered) {
   denom_part2 <- sum(diag(G_Y %*% G_Y))
   denominator <- sqrt(denom_part1 * denom_part2)
   
-  if (denominator == 0) return(0)
-  return(numerator / denominator)
+  if (denominator == 0) {
+    return(list(rv = 0, numerator = numerator, denominator = 0))
+  }
+  
+  rv <- numerator / denominator
+  return(list(rv = rv, numerator = numerator, denominator = denominator))
 }
 
-#' Computes the RV-Coefficient with a Performance-Optimized Heuristic
-#'
-#' This function automatically selects the fastest algorithm (Trace vs. Gram matrix)
-#' based on the dimensions of the input matrices.
-#'
-#' @param X A numeric matrix (n observations, p variables).
-#' @param Y A numeric matrix (n observations, q variables).
-#' @return A single scalar value for the RV-coefficient.
-rvcoef <- function(X, Y) {
+# --- Internal Dispatcher: Returns all components from the fastest method ---
+rvcoef_components <- function(X, Y) {
   n <- nrow(X)
   p <- ncol(X)
   q <- ncol(Y)
   
-  # Center data once
   X_centered <- scale(X, center = TRUE, scale = FALSE)
   Y_centered <- scale(Y, center = TRUE, scale = FALSE)
   
-  # Heuristic: If n is smaller than the total number of variables, the
-  # n x n covariance matrix is smaller, so the Trace method is faster.
   if (n < (p + q)) {
     return(rvcoef_trace_impl(X_centered, Y_centered))
   } else {
@@ -4454,6 +4451,17 @@ rvcoef <- function(X, Y) {
   }
 }
 
+#' Computes the RV-Coefficient (Optimized Public API)
+#'
+#' This function automatically selects the fastest algorithm based on data dimensions.
+#'
+#' @param X A numeric matrix (n observations, p variables).
+#' @param Y A numeric matrix (n observations, q variables).
+#' @return A single scalar value for the RV-coefficient.
+rvcoef <- function(X, Y) {
+  # Call the component dispatcher and return only the final rv value
+  rvcoef_components(X, Y)$rv
+}
 
 #' Computes the Adjusted RV-Coefficient (Highly Optimized)
 #'
@@ -4494,7 +4502,6 @@ adjusted_rvcoef <- function(X, Y) {
   
   return(adj_rv)
 }
-
 
 #' pairwise application of matrix similarity to matrix List projected onto a feature list
 #'
