@@ -255,13 +255,14 @@ ggscatter( impresult, 'og', 'imp' ) + ggtitle(paste("Imputed vs original data",i
 We use a metric (`rvcoef`) that is not directly optimized to assess the significance of the simlr result versus permuted data.  The RV coefficient is analogous to the Pearson correlation coefficient but is used for comparing two matrices (or datasets) rather than two variables. It measures the similarity of the column spaces (subspaces) spanned by the columns of two matrices.  We compute the `rvcoef` across all pairs of data at each permutation and compare to the original values.
 
 ```{r permutation,fig.width=8,fig.height=8}
+diagcorr = function( X,Y ) mean(abs(diag(cor(X,Y))))
 initu = initializeSimlr( matlist, 3, jointReduction = TRUE  )
 np=40
 myperm = simlr.perm(  matlist,
   constraint=constr,scale=prepro, 
   initialUMatrix=initu,
   sparsenessAlg = "spmp",
-  nperms=np, FUN=rvcoef, verbose=TRUE )
+  nperms=np, FUN=diagcorr, verbose=TRUE )
 print( tail( myperm$significance, 2 )  )
 gglist = list()
 simlrmaps=colnames(myperm$significance)[-c(1:2)]
