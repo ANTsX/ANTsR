@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{adjusted_rvcoef}
 \alias{adjusted_rvcoef}
-\title{Computes the Adjusted RV-Coefficient using the Fast RV-Coefficient Function}
+\title{Computes the Adjusted RV-Coefficient (Highly Optimized)}
 \usage{
 adjusted_rvcoef(X, Y)
 }
@@ -15,6 +15,6 @@ adjusted_rvcoef(X, Y)
 A single scalar value for the adjusted RV-coefficient.
 }
 \description{
-This function calculates the adjusted RV-coefficient, correcting for the
-expected value under the null hypothesis of independence.
+This function avoids all redundant computations by getting all necessary
+components from a single call to an internal dispatcher.
 }
