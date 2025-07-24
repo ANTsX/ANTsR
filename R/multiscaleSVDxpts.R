@@ -4454,10 +4454,11 @@ rvcoef <- function(X, Y) {
   }
 }
 
-#' Computes the Adjusted RV-Coefficient using the Fast RV-Coefficient Function
+
+#' Computes the Adjusted RV-Coefficient (Highly Optimized)
 #'
-#' This function calculates the adjusted RV-coefficient, correcting for the
-#' expected value under the null hypothesis of independence.
+#' This function avoids all redundant computations by getting all necessary
+#' components from a single call to an internal dispatcher.
 #'
 #' @param X A numeric matrix (n observations, p variables).
 #' @param Y A numeric matrix (n observations, q variables).
@@ -4466,37 +4467,29 @@ adjusted_rvcoef <- function(X, Y) {
   n <- nrow(X)
   if (n <= 1) return(0)
 
-  # Step 1: Calculate the observed RV-coefficient using the fast dispatcher
-  rv_obs <- rvcoef(X, Y)
+  # Step 1: Get all components in one go from the fastest implementation
+  components <- rvcoef_components(X, Y)
   
-  # Step 2: Calculate the expected value of the RV-coefficient
-  # This part is computationally cheap
+  rv_obs <- components$rv
+  rv_den <- components$denominator
+  
+  if (rv_den == 0) return(0)
+
+  # Step 2: Calculate the expected value (computationally cheap)
+  # Note: We must re-center here as the components function doesn't return it.
   X_centered <- scale(X, center = TRUE, scale = FALSE)
   Y_centered <- scale(Y, center = TRUE, scale = FALSE)
   
-  # The trace of the covariance matrix S_XX is simply the sum of squares
-  # of the centered data, which is faster than forming S_XX.
   tr_S_XX <- sum(X_centered^2)
   tr_S_YY <- sum(Y_centered^2)
   
-  # Expected value of the numerator under independence
   exp_rv_num <- tr_S_XX * tr_S_YY / (n - 1)
-  
-  # We need the denominator from the original RV calculation.
-  # Since this is cheap compared to the main calculation, we can re-calculate it.
-  # Or, for maximum efficiency, the rvcoef function could return a list.
-  # For clarity, we recalculate here.
-  G_X <- t(X_centered) %*% X_centered
-  G_Y <- t(Y_centered) %*% Y_centered
-  denom_part1 <- sum(diag(G_X %*% G_X))
-  denom_part2 <- sum(diag(G_Y %*% G_Y))
-  rv_den <- sqrt(denom_part1 * denom_part2)
-  
-  if (rv_den == 0) return(0)
-  
   exp_rv <- exp_rv_num / rv_den
   
   # Step 3: Apply the adjustment
+  # Handle the case where exp_rv might be >= 1
+  if (exp_rv >= 1) return(NA)
+  
   adj_rv <- (rv_obs - exp_rv) / (1 - exp_rv)
   
   return(adj_rv)
