@@ -4505,6 +4505,36 @@ adjusted_rvcoef <- function(X, Y) {
   return(adj_rv)
 }
 
+
+
+#' Construct SiMLR Feature Names
+#'
+#' A helper function to generate a character vector of SiMLR feature names
+#' based on a set of modality prefixes and numeric indices.
+#'
+#' @param base_names A character vector of modality prefixes (e.g., c("t1", "dt", "rsf")).
+#' @param indices An integer vector of component indices (e.g., 1:10).
+#'
+#' @return A character vector of combined names (e.g., "t1PC1", "dtPC1", ... "rsfPC10").
+#' @export
+#'
+#' @examples
+#' modalities <- c("t1", "dt", "rsf")
+#' components <- 1:3
+#' construct_sim_names(modalities, components)
+construct_sim_names <- function(base_names, indices) {
+  # Ensure inputs are character and integer vectors
+  base_names <- as.character(base_names)
+  indices <- as.integer(indices)
+  
+  # Create combinations using outer and paste
+  sim_names <- as.vector(outer(base_names, indices, FUN = function(name, i) paste0(name, "PC", i)))
+  
+  return(sim_names)
+}
+
+
+
 #' pairwise application of matrix similarity to matrix List projected onto a feature list
 #'
 #' Computes a measure such as the RV coefficient between low-rank projections of all pairs of matrices in a list.
