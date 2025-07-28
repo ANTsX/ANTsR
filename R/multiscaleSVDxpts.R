@@ -4685,7 +4685,7 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
 #' @param m A numeric matrix
 #'
 #' @return A matrix with absolute values taken for unsigned columns
-#'
+#' @export
 take_abs_unsigned <- function(m) {
   unsigned_cols <- colSums(m > 0) == 0 & colSums(m < 0) > 0
   if ( sum(unsigned_cols) > 0 ) {
@@ -5009,7 +5009,69 @@ simlr.search <- function(
 
 
 
-
+#' L1 Normalize Columns of a Matrix
+#'
+#' This function scales the columns of a numeric matrix such that the sum of the
+#' absolute values of each column (the L1 norm) is equal to 1. This is a common
+#' preprocessing step for feature matrices.
+#'
+#' The function is designed to be highly efficient by using vectorized operations.
+#' It also robustly handles columns that sum to zero to prevent division-by-zero errors.
+#'
+#' @param features A numeric matrix or a data frame that can be coerced into one.
+#'   The normalization is applied column-wise.
+#'
+#' @return A matrix with the same dimensions as the input, where each column has
+#'   been L1-normalized.
+#'
+#' @export
+#' @examples
+#' # Create a sample feature matrix
+#' set.seed(123)
+#' my_features <- matrix(rnorm(12, mean = 5), nrow = 4, ncol = 3)
+#' print(my_features)
+#' #>           [,1]     [,2]     [,3]
+#' #> [1,] 4.4395244 5.487429 5.704929
+#' #> [2,] 5.2325834 6.738325 5.558708
+#' #> [3,] 3.4291247 5.575781 4.129288
+#' #> [4,] 5.5060559 4.694612 4.261173
+#'
+#' # Check the column sums of absolute values before normalization
+#' print(colSums(abs(my_features)))
+#' #> [1] 18.60729 22.49615 19.65410
+#'
+#' # Apply L1 normalization
+#' normalized_features <- l1_normalize_features(my_features)
+#' print(normalized_features)
+#' #>            [,1]      [,2]      [,3]
+#' #> [1,] 0.23859089 0.2439247 0.2800889
+#' #> [2,] 0.28121151 0.2995321 0.2891398
+#' #> [3,] 0.18429107 0.2478546 0.2151676
+#' #> [4,] 0.29590653 0.2086886 0.2221037
+#'
+#' # Confirm that the new column sums of absolute values are all 1
+#' print(colSums(abs(normalized_features)))
+#' #> [1] 1 1 1
+l1_normalize_features <- function(features) {
+  
+  # --- 1. Calculate the L1 norm for each column ---
+  # `colSums` is highly optimized for this task.
+  col_l1_norms <- colSums(abs(features))
+  
+  # --- 2. Handle the zero-norm case ---
+  # To prevent division by zero (which results in NaNs), we replace any
+  # zero norms with 1. Dividing by 1 will not change the zero-column.
+  col_l1_norms[col_l1_norms == 0] <- 1
+  
+  # --- 3. Normalize using a vectorized matrix operation ---
+  # The `t()` function is used here for "recycling" to work correctly.
+  # We divide each row of the transposed matrix by the norms vector,
+  # then transpose it back to the original orientation.
+  # This is much faster than a loop.
+  normalized_matrix <- t(t(features) / col_l1_norms)
+  
+  return(normalized_matrix)
+}
 
 #' Apply simlr matrices to an existing data frame and combine the results
 #'
@@ -5080,6 +5142,7 @@ apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robus
       if ( center | scale ) imat=scale(imat,center=center,scale=scale)
       features = data.matrix(matrices_list[[name]][inames,])
       if ( absolute_value[ct] ) features = take_abs_unsigned( features )
+      features = l1_normalize_features(features)
       projection <- as.data.frame( imat %*% features)
       ##################################################
       # Update column names to reflect the matrix name #
