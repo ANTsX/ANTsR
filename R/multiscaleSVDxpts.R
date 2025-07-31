@@ -6635,9 +6635,11 @@ antsr_spca_features <- function(voxmats, k, method = c("elasticnet", "PMA", "spa
         para <- rep(ceiling(ncol(m) / 2), k_adj)
       }
       stopifnot(length(para) == k_adj)
-      sfit <- elasticnet::spca(x = m, K = k_adj, para = para, type = "predictor", sparse = "varnum", trace = FALSE)
+      m_scaled <- scale(m)
+      gram_matrix <- cor(m_scaled)
+      sfit <- elasticnet::spca(x = gram_matrix, K = k_adj, para = para,
+                              type = "Gram", sparse = "varnum", trace = FALSE)
       loadings <- sfit$loadings[, 1:k_adj, drop = FALSE]
-
     } else if (method == "PMA") {
       stopifnot(requireNamespace("PMA", quietly = TRUE))
       if (is.null(para)) {
