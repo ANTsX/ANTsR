@@ -6608,14 +6608,14 @@ antsr_pca_features <- function(voxmats, k) {
 #'
 #' @param voxmats A list of numeric matrices. Each matrix should be subjects × voxels.
 #' @param k Integer. Number of components to retain.
-#' @param method Character. Sparse PCA backend to use. One of "elasticnet", "PMA", or "sparsepca".
+#' @param method Character. Sparse PCA backend to use. One of "default", "elasticnet", "PMA", or "sparsepca".
 #' @param para Sparsity control parameter(s). Interpretation depends on backend:
 #'   - For "elasticnet": number of nonzero loadings per component (length-k vector).
 #'   - For "PMA": L1 bound on loading vector (scalar or length-k).
 #'   - For "sparsepca": ignored (uses built-in defaults).
 #' @return A named list of sparse projection matrices (voxels × k).
 #' @export
-antsr_spca_features <- function(voxmats, k, method = c("elasticnet", "PMA", "sparsepca"), para = NULL) {
+antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet", "PMA", "sparsepca"), para = NULL) {
   method <- match.arg(method)
   stopifnot(is.list(voxmats))
   stopifnot(all(sapply(voxmats, is.matrix)))
@@ -6665,6 +6665,12 @@ antsr_spca_features <- function(voxmats, k, method = c("elasticnet", "PMA", "spa
         warning("Sparse PCA failed: ", conditionMessage(e))
         matrix(NA, nrow = ncol(m), ncol = k_adj)
       })
+    } else {
+      loadings = antsr_pca_features( mats, nsimlrmin )
+      for ( k in 1:length(loadings)) {
+        loadings[[k]] = orthogonalizeAndQSparsify( loadings[[k]], 0.8, positivity='positive' )
+      }
+      return(loadings)
     }
 
     rownames(loadings) <- colnames(m)

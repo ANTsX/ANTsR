@@ -7,7 +7,7 @@
 antsr_spca_features(
   voxmats,
   k,
-  method = c("elasticnet", "PMA", "sparsepca"),
+  method = c("default", "elasticnet", "PMA", "sparsepca"),
   para = NULL
 )
 }
@@ -16,7 +16,7 @@ antsr_spca_features(
 
 \item{k}{Integer. Number of components to retain.}
 
-\item{method}{Character. Sparse PCA backend to use. One of "elasticnet", "PMA", or "sparsepca".}
+\item{method}{Character. Sparse PCA backend to use. One of "default", "elasticnet", "PMA", or "sparsepca".}
 
 \item{para}{Sparsity control parameter(s). Interpretation depends on backend:
 - For "elasticnet": number of nonzero loadings per component (length-k vector).
