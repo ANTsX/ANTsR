@@ -5840,7 +5840,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' # Example usage:
 #' # result <- antspymm_simlr(dataframe)
 antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  
-                           energy=c('cca','reg','lrr','regression','base.rand','base.pca'), nsimlr, constraint, 
+                           energy=c('cca','reg','lrr','regression','base.rand','base.pca','base.spca'), nsimlr, constraint, 
                            covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
                            resnetGradeThresh=1.02, doperm=FALSE, 
                            exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modeling=NULL, 
@@ -6032,6 +6032,18 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
       message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
     } else nsimlrmin=nsimlr
     return( list( simlrX=list(v=antsr_pca_features( mats, nsimlrmin ) ) ))
+  } else if ( energy == 'base.pca' ) {
+    nsimlrmin = min(c(nsimlr,unlist(lapply( mats, ncol))))
+    if ( nsimlrmin < nsimlr ) {
+      message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
+    } else nsimlrmin=nsimlr
+    return( list( simlrX=list(v=antsr_pca_features( mats, nsimlrmin ) ) ))
+  } else if ( energy == 'base.spca' ) {
+    nsimlrmin = min(c(nsimlr,unlist(lapply( mats, ncol))))
+    if ( nsimlrmin < nsimlr ) {
+      message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
+    } else nsimlrmin=nsimlr
+    return( list( simlrX=list(v=antsr_spca_features( mats, nsimlrmin ) ) ))
   }
   
   #  if ( !doperm )
