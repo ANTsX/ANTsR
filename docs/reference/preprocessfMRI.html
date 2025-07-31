@@ -18,7 +18,7 @@ regression, band-pass filtering, and spatial smoothing."><!-- mathjax --><script
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
@@ -85,9 +85,7 @@ regression, band-pass filtering, and spatial smoothing.</p>
 <span>  frequencyHighThreshold <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  spatialSmoothingType <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  spatialSmoothingParameters <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  residualizeMatrix <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  num_threads <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  seed <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  residualizeMatrix <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -163,33 +161,32 @@ iterations, e.g. <code>c(0.25, 5)</code>.</p></dd>
 <dt id="arg-residualizematrix">residualizeMatrix<a class="anchor" aria-label="anchor" href="#arg-residualizematrix"></a></dt>
 <dd><p>boolean</p></dd>
 
-
-<dt id="arg-num-threads">num_threads<a class="anchor" aria-label="anchor" href="#arg-num-threads"></a></dt>
-<dd><p>will execute
-<code>Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)</code> before
-running to attempt a more reproducible result.  See
-<a href="https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues" class="external-link">https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>
-for discussion.  If <code>NULL</code>, will not set anything.</p></dd>
-
-
-<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>will execute
-<code>Sys.setenv(ANTS_RANDOM_SEED = seed)</code> before
-running to attempt a more reproducible result.  See
-<a href="https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues" class="external-link">https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>
-for discussion.  If <code>NULL</code>, will not set anything.</p></dd>
-
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>List of:</p><ul><li><p>cleanBOLDImage: Cleaned BOLD image.</p></li>
-<li><p>maskImage: mask image.</p></li>
-<li><p>DVARS: Framewise change in BOLD signal, as in Powers et al.</p></li>
-<li><p>DVARSPostCleaning: DVARS after cleaning image.</p></li>
-<li><p>FD: Framewise displacement.</p></li>
-<li><p>globalSignal: Global signal.</p></li>
-<li><p>nuisanceVariables: Nuisance variables used in denoising.</p></li>
-</ul></div>
+    <p>List of:</p><dl><dt>cleanBOLDImage: </dt>
+<dd><p>Cleaned BOLD image.</p></dd>
+
+  <dt>maskImage: </dt>
+<dd><p>mask image.</p></dd>
+
+  <dt>DVARS: </dt>
+<dd><p>Framewise change in BOLD signal, as in Powers et al.</p></dd>
+
+  <dt>DVARSPostCleaning: </dt>
+<dd><p>DVARS after cleaning image.</p></dd>
+
+  <dt>FD: </dt>
+<dd><p>Framewise displacement.</p></dd>
+
+  <dt>globalSignal: </dt>
+<dd><p>Global signal.</p></dd>
+
+  <dt>nuisanceVariables: </dt>
+<dd><p>Nuisance variables used in denoising.</p></dd>
+
+
+</dl></div>
     <div id="references">
     <h2>References</h2>
     <p>Power et al. 2012, "Spurious but systematic correlations
@@ -213,7 +210,7 @@ NeuroImage 59, 2142-2154.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

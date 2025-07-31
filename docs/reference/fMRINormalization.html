@@ -25,7 +25,7 @@ and normalized, fused BOLD images in both subject and template space."><!-- math
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
@@ -173,29 +173,74 @@ estimate such that the 2nd run gives a more accurate correction.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>outputs a list containing:</p><ul><li><p>fusedImg: runs fused into one image and corrected if polydegree set</p></li>
-<li><p>fusedImgFilt: runs fused into one image and filtered</p></li>
-<li><p>seg2bold: strutural segmentation in BOLD space.</p></li>
-<li><p>nodes2bold: strutural nodes in BOLD space.</p></li>
-<li><p>boldToTemplate: BOLD fusedImg mapped to template space.</p></li>
-<li><p>mapsToTemplate: invertible maps from BOLD to template space.</p></li>
-<li><p>runID: Identifies which run over time series.</p></li>
-<li><p>boldMat: Matrix of filtered BOLD data.</p></li>
-<li><p>boldMask: BOLD mask.</p></li>
-<li><p>motionCorr: Motion corrected data.</p></li>
-<li><p>polyNuis: Polynomial nuisance variables.</p></li>
-<li><p>timevals: Temporal variables.</p></li>
-<li><p>nuisance: Nuisance variables.</p></li>
-<li><p>FD: mean framewise displacement.</p></li>
-<li><p>badtimes: time frames that are above FD threshold.</p></li>
-<li><p>dmnAtBOLDres: Default mode network at BOLD resolution in MNI space.</p></li>
-<li><p>seg2template: Segmentation in BOLD resolution MNI space.</p></li>
-<li><p>networkPriors2Bold: WIP: standard network priors in BOLD space.</p></li>
-<li><p>powersLabels: Powers nodes in BOLD space i.e. fusedImg.</p></li>
-<li><p>powersPoints: Powers points in BOLD space i.e. fusedImg.</p></li>
-<li><p>connMatNodes: User provided nodal system connectivity matrix.</p></li>
-<li><p>connMatNodesPartialCorr: TUser provided nodal system partial correlation matrix.</p></li>
-</ul></div>
+    <p>outputs a list containing:</p><dl><dt>fusedImg: </dt>
+<dd><p>runs fused into one image and corrected if polydegree set</p></dd>
+
+  <dt>fusedImgFilt: </dt>
+<dd><p>runs fused into one image and filtered</p></dd>
+
+  <dt>seg2bold: </dt>
+<dd><p>strutural segmentation in BOLD space.</p></dd>
+
+  <dt>nodes2bold: </dt>
+<dd><p>strutural nodes in BOLD space.</p></dd>
+
+  <dt>boldToTemplate: </dt>
+<dd><p>BOLD fusedImg mapped to template space.</p></dd>
+
+  <dt>mapsToTemplate: </dt>
+<dd><p>invertible maps from BOLD to template space.</p></dd>
+
+  <dt>runID: </dt>
+<dd><p>Identifies which run over time series.</p></dd>
+
+  <dt>boldMat: </dt>
+<dd><p>Matrix of filtered BOLD data.</p></dd>
+
+  <dt>boldMask: </dt>
+<dd><p>BOLD mask.</p></dd>
+
+  <dt>motionCorr: </dt>
+<dd><p>Motion corrected data.</p></dd>
+
+  <dt>polyNuis: </dt>
+<dd><p>Polynomial nuisance variables.</p></dd>
+
+  <dt>timevals: </dt>
+<dd><p>Temporal variables.</p></dd>
+
+  <dt>nuisance: </dt>
+<dd><p>Nuisance variables.</p></dd>
+
+  <dt>FD: </dt>
+<dd><p>mean framewise displacement.</p></dd>
+
+  <dt>badtimes: </dt>
+<dd><p>time frames that are above FD threshold.</p></dd>
+
+  <dt>dmnAtBOLDres: </dt>
+<dd><p>Default mode network at BOLD resolution in MNI space.</p></dd>
+
+  <dt>seg2template: </dt>
+<dd><p>Segmentation in BOLD resolution MNI space.</p></dd>
+
+  <dt>networkPriors2Bold: </dt>
+<dd><p>WIP: standard network priors in BOLD space.</p></dd>
+
+  <dt>powersLabels: </dt>
+<dd><p>Powers nodes in BOLD space i.e. fusedImg.</p></dd>
+
+  <dt>powersPoints: </dt>
+<dd><p>Powers points in BOLD space i.e. fusedImg.</p></dd>
+
+  <dt>connMatNodes: </dt>
+<dd><p>User provided nodal system connectivity matrix.</p></dd>
+
+  <dt>connMatNodesPartialCorr: </dt>
+<dd><p>TUser provided nodal system partial correlation matrix.</p></dd>
+
+
+</dl></div>
     <div id="author">
     <h2>Author</h2>
     <p>Avants BB, Duda JT</p>
@@ -253,7 +298,7 @@ estimate such that the 2nd run gives a more accurate correction.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

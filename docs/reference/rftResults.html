@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
@@ -108,11 +108,20 @@ interest, degrees of error)</p></dd>
 
 
 <dt id="arg-fieldtype">fieldType<a class="anchor" aria-label="anchor" href="#arg-fieldtype"></a></dt>
-<dd><ul><li><p>T:  T-field</p></li>
-<li><p>F:  F-field</p></li>
-<li><p>X:  Chi-square field'</p></li>
-<li><p>Z:  Gaussian field</p></li>
-</ul></dd>
+<dd><dl><dt>T: </dt>
+<dd><p>T-field</p></dd>
+
+<dt>F: </dt>
+<dd><p>F-field</p></dd>
+
+<dt>X: </dt>
+<dd><p>Chi-square field'</p></dd>
+
+<dt>Z: </dt>
+<dd><p>Gaussian field</p></dd>
+
+
+</dl></dd>
 
 
 <dt id="arg-rpvimg">RPVImg<a class="anchor" aria-label="anchor" href="#arg-rpvimg"></a></dt>
@@ -125,15 +134,24 @@ interest, degrees of error)</p></dd>
 
 <dt id="arg-threshtype">threshType<a class="anchor" aria-label="anchor" href="#arg-threshtype"></a></dt>
 <dd><p>a numeric value to threshTypeold the statistical
-field or a character of the following methods:</p><ul><li><p>cRFT:  computes a threshTypeold per expected cluster level
-    probability</p></li>
-<li><p>pRFT:  uses the mask and pval calculates the minimum statistical
-    threshTypeold</p></li>
-<li><p>cFDR:  uses an uncorrected threshTypeold at the alpha level and
-    then computes and FDR threshTypeold based on cluster maxima</p></li>
-<li><p>pFDR:  computes the fdr threshTypeold for the entire field of
-    voxels</p></li>
-</ul></dd>
+field or a character of the following methods:</p><dl><dt>cRFT: </dt>
+<dd><p>computes a threshTypeold per expected cluster level
+    probability</p></dd>
+
+    <dt>pRFT: </dt>
+<dd><p>uses the mask and pval calculates the minimum statistical
+    threshTypeold</p></dd>
+
+    <dt>cFDR: </dt>
+<dd><p>uses an uncorrected threshTypeold at the alpha level and
+    then computes and FDR threshTypeold based on cluster maxima</p></dd>
+
+    <dt>pFDR: </dt>
+<dd><p>computes the fdr threshTypeold for the entire field of
+    voxels</p></dd>
+
+
+</dl></dd>
 
 
 <dt id="arg-pval">pval<a class="anchor" aria-label="anchor" href="#arg-pval"></a></dt>
@@ -161,12 +179,23 @@ images are not saved)</p></dd>
     <div id="value">
     <h2>Value</h2>
     <p>Outputs a statistical value to be used for threshTypeold a
-statistical field image</p><ul><li><p>SetStats:  set-level statistics and number of clusters</p></li>
-<li><p>ClusterStats:  cluster-level statistics and descriptors</p></li>
-<li><p>PeakStats:  peak-level statistics and descriptor"</p></li>
-<li><p>LabeledClusters:  image of labeled clusters</p></li>
-<li><p>threshTypeold:  the threshTypeold used</p></li>
-</ul></div>
+statistical field image</p><dl><dt>SetStats: </dt>
+<dd><p>set-level statistics and number of clusters</p></dd>
+
+<dt>ClusterStats: </dt>
+<dd><p>cluster-level statistics and descriptors</p></dd>
+
+<dt>PeakStats: </dt>
+<dd><p>peak-level statistics and descriptor"</p></dd>
+
+<dt>LabeledClusters: </dt>
+<dd><p>image of labeled clusters</p></dd>
+
+<dt>threshTypeold: </dt>
+<dd><p>the threshTypeold used</p></dd>
+
+
+</dl></div>
     <div id="details">
     <h2>Details</h2>
     <p><code>rftPval</code> is used to compute all family-wise error (FWE) corrected
@@ -266,7 +295,7 @@ CBF Activation Studies in Human Brain.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

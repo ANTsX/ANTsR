@@ -18,7 +18,7 @@ around a center voxel"><!-- mathjax --><script src="https://cdnjs.cloudflare.com
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
@@ -123,18 +123,32 @@ center voxel) should be returned in addition to the value matrix (WIP)</p></dd>
     <h2>Value</h2>
     <p>if <code>spatial.info</code> is false: a matrix of pixel values where the number of rows
 is the size of the neighborhood and there is a column for each voxel</p>
-<p>if <code>spatial.info</code> is true, a list containing three matrices:</p><ul><li><p>values: matrix of pixel values where the number of rows
- is the size of the neighborhood and there is a column for each voxel.</p></li>
-<li><p>indices: matrix providing the center coordinates for each neighborhood</p></li>
-<li><p>offsets: matrix providing the offsets from center for each
-  voxel in a neighborhood</p></li>
-</ul></div>
+<p>if <code>spatial.info</code> is true, a list containing three matrices:</p><dl><dt>values: </dt>
+<dd><p>matrix of pixel values where the number of rows
+ is the size of the neighborhood and there is a column for each voxel.</p></dd>
+
+ <dt>indices: </dt>
+<dd><p>matrix providing the center coordinates for each neighborhood</p></dd>
+
+ <dt>offsets: </dt>
+<dd><p>matrix providing the offsets from center for each
+  voxel in a neighborhood</p></dd>
+
+
+</dl></div>
     <div id="details">
     <h2>Details</h2>
-    <p><code>boundary.condition</code> should be one of:</p><ul><li><p><code>NA</code>: Fill values with <code>NA</code>.</p></li>
-<li><p><code>image</code>: Use image value, even if not in mask.</p></li>
-<li><p><code>mean</code>: Use man of all non-<code>NA</code> values for that neighborhood.</p></li>
-</ul></div>
+    <p><code>boundary.condition</code> should be one of:</p><dl><dt><code>NA</code>: </dt>
+<dd><p>Fill values with <code>NA</code>.</p></dd>
+
+  <dt><code>image</code>: </dt>
+<dd><p>Use image value, even if not in mask.</p></dd>
+
+  <dt><code>mean</code>: </dt>
+<dd><p>Use man of all non-<code>NA</code> values for that neighborhood.</p></dd>
+
+
+</dl></div>
     <div id="author">
     <h2>Author</h2>
     <p>Duda JT</p>
@@ -183,7 +197,7 @@ is the size of the neighborhood and there is a column for each voxel</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

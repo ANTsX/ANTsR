@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
@@ -77,8 +77,6 @@
 <span>  txtype <span class="op">=</span> <span class="st">"Affine"</span>,</span>
 <span>  framewise <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  num_threads <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -120,36 +118,35 @@ method for intraSubjectBOLD.</p></dd>
 <dd><p>enables verbose output.</p></dd>
 
 
-<dt id="arg-num-threads">num_threads<a class="anchor" aria-label="anchor" href="#arg-num-threads"></a></dt>
-<dd><p>will execute
-<code>Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)</code> before
-running to attempt a more reproducible result.  See
-<a href="https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues" class="external-link">https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>
-for discussion.  If <code>NULL</code>, will not set anything.</p></dd>
-
-
-<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>will execute
-<code>Sys.setenv(ANTS_RANDOM_SEED = seed)</code> before
-running to attempt a more reproducible result.  See
-<a href="https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues" class="external-link">https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>
-for discussion.  If <code>NULL</code>, will not set anything.</p></dd>
-
-
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>additional argument to <code><a href="motion_correction.html">.motion_correction</a></code></p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>List containing:</p><ul><li><p>moco_img Motion corrected time-series image.</p></li>
-<li><p>moco_params Data frame of translation parameters.</p></li>
-<li><p>moco_avg_img Average motion-corrected image.</p></li>
-<li><p>moco_mask Mask used to calculate framewise displacement.</p></li>
-<li><p>tsDisplacement Time-series displacement image.</p></li>
-<li><p>fd Time-series mean and max displacements.</p></li>
-<li><p>dvars DVARS, derivative of frame-wise intensity changes.</p></li>
-</ul></div>
+    <p>List containing:</p><dl><dt>moco_img</dt>
+<dd><p>Motion corrected time-series image.</p></dd>
+
+ <dt>moco_params</dt>
+<dd><p>Data frame of translation parameters.</p></dd>
+
+ <dt>moco_avg_img</dt>
+<dd><p>Average motion-corrected image.</p></dd>
+
+ <dt>moco_mask</dt>
+<dd><p>Mask used to calculate framewise displacement.</p></dd>
+
+ <dt>tsDisplacement</dt>
+<dd><p>Time-series displacement image.</p></dd>
+
+ <dt>fd</dt>
+<dd><p>Time-series mean and max displacements.</p></dd>
+
+ <dt>dvars</dt>
+<dd><p>DVARS, derivative of frame-wise intensity changes.</p></dd>
+
+
+</dl></div>
     <div id="author">
     <h2>Author</h2>
     <p>Benjamin M. Kandel</p>
@@ -167,7 +164,7 @@ for discussion.  If <code>NULL</code>, will not set anything.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

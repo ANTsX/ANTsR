@@ -27,7 +27,7 @@ variations on heuristics suggested in work by Maggioni et al."><!-- mathjax --><
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
@@ -128,14 +128,23 @@ which eigenvector off which to base the scale of the y-axis.'</p></dd>
     <div id="value">
     <h2>Value</h2>
     <p>list with a vector of tangent, curvature, noise dimensionality and a
-a dataframe containing eigenvalues across scale, in correspondence with r:</p><ul><li><p>dim: The tangent, curvature and noise dimensionality vector.  The
+a dataframe containing eigenvalues across scale, in correspondence with r:</p><dl><dt>dim: </dt>
+<dd><p>The tangent, curvature and noise dimensionality vector.  The
 data dimensionality is the first entry, the curvature dimensionality exists
-from the second to the first entry of the noise vector.</p></li>
-<li><p>noiseCutoffs: Dimensionalities where the noise may begin.  These
-are candidate cutoffs but may contain some curvature information.'</p></li>
-<li><p>evalsVsScale: eigenvalues across scale</p></li>
-<li><p>evalClustering:data-driven clustering of the eigenvalues</p></li>
-</ul></div>
+from the second to the first entry of the noise vector.</p></dd>
+
+  <dt>noiseCutoffs: </dt>
+<dd><p>Dimensionalities where the noise may begin.  These
+are candidate cutoffs but may contain some curvature information.'</p></dd>
+
+  <dt>evalsVsScale: </dt>
+<dd><p>eigenvalues across scale</p></dd>
+
+  <dt>evalClustering:</dt>
+<dd><p>data-driven clustering of the eigenvalues</p></dd>
+
+
+</dl></div>
     <div id="references">
     <h2>References</h2>
     <p><a href="http://www.math.jhu.edu/~mauro/multiscaledatageometry.html" class="external-link">http://www.math.jhu.edu/~mauro/multiscaledatageometry.html</a></p>
@@ -203,7 +212,7 @@ are candidate cutoffs but may contain some curvature information.'</p></li>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

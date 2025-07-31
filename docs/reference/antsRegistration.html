@@ -18,7 +18,7 @@ to the ANTs registration method."><!-- mathjax --><script src="https://cdnjs.clo
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
@@ -92,7 +92,6 @@ to the ANTs registration method.</p>
 <span>  <span class="va">multivariateExtras</span>,</span>
 <span>  <span class="va">restrictTransformation</span>,</span>
 <span>  writeCompositeTransform <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">randomSeed</span>,</span>
 <span>  samplingPercentage <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  printArgs <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -120,7 +119,8 @@ information metric by default. See <code>Details.</code></p></dd>
 <dt id="arg-initialtransform">initialTransform<a class="anchor" aria-label="anchor" href="#arg-initialtransform"></a></dt>
 <dd><p>either a single transform file name, a vector of transform file names,
 or a single antsTransform object. If NA, an initial translation aligns the center of mass
-of the moving image to that of the fixed image.</p></dd>
+of the moving image to that of the fixed image, unless the transform is "deformable only", in which case
+the intial transform is 'Identity'.</p></dd>
 
 
 <dt id="arg-outprefix">outprefix<a class="anchor" aria-label="anchor" href="#arg-outprefix"></a></dt>
@@ -204,12 +204,6 @@ Restriction currently only works if there are no preceding transformations.</p><
 <dd><p>if <code>TRUE</code>, will write transformations to h5 format.  Defaults to FALSE.</p></dd>
 
 
-<dt id="arg-randomseed">randomSeed<a class="anchor" aria-label="anchor" href="#arg-randomseed"></a></dt>
-<dd><p>integer random seed. combine with setting
-ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS environment variable to limit the
-impact of numerical differences.</p></dd>
-
-
 <dt id="arg-samplingpercentage">samplingPercentage<a class="anchor" aria-label="anchor" href="#arg-samplingpercentage"></a></dt>
 <dd><p>value between zero and one that allows the percentage
 of points sampled to be controlled in low-dimensional metric estimation.</p></dd>
@@ -229,70 +223,136 @@ of points sampled to be controlled in low-dimensional metric estimation.</p></dd
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>outputs a list containing:</p><ul><li><p>warpedmovout: Moving image warped to space of fixed image.</p></li>
-<li><p>warpedfixout: Fixed image warped to space of moving image.</p></li>
-<li><p>fwdtransforms: Transforms to move from moving to fixed image.</p></li>
-<li><p>invtransforms: Transforms to move from fixed to moving image.</p></li>
-</ul><p>Ouptut of 1 indicates failure</p>
+    <p>outputs a list containing:</p><dl><dt>warpedmovout: </dt>
+<dd><p>Moving image warped to space of fixed image.</p></dd>
+
+  <dt>warpedfixout: </dt>
+<dd><p>Fixed image warped to space of moving image.</p></dd>
+
+  <dt>fwdtransforms: </dt>
+<dd><p>Transforms to move from moving to fixed image.</p></dd>
+
+  <dt>invtransforms: </dt>
+<dd><p>Transforms to move from fixed to moving image.</p></dd>
+
+
+</dl><p>Ouptut of 1 indicates failure</p>
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>typeofTransform can be one of:</p><ul><li><p>"Translation": Translation transformation.</p></li>
-<li><p>"Rigid": Rigid transformation: Only rotation and translation.</p></li>
-<li><p>"Similarity": Similarity transformation: scaling, rotation and
-  translation.</p></li>
-<li><p>"QuickRigid": Rigid transformation: Only rotation and translation.
-  May be useful for quick visualization fixes.'</p></li>
-<li><p>"DenseRigid": Rigid transformation: Only rotation and translation.
-  Employs dense sampling during metric estimation.'</p></li>
-<li><p>"BOLDRigid": Rigid transformation: Parameters typical for BOLD
-  to BOLD intrasubject registration'.'</p></li>
-<li><p>"Affine": Affine transformation: Rigid + scaling.</p></li>
-<li><p>"AffineFast": Fast version of <code>Affine</code>.</p></li>
-<li><p>"BOLDAffine": Affine transformation: Parameters typical for BOLD
-  to BOLD intrasubject registration'.'</p></li>
-<li><p>"TRSAA": translation, rigid, similarity, affine (twice). please set
+    <p>typeofTransform can be one of:</p><dl><dt>"Translation": </dt>
+<dd><p>Translation transformation.</p></dd>
+
+  <dt>"Rigid": </dt>
+<dd><p>Rigid transformation: Only rotation and translation.</p></dd>
+
+  <dt>"Similarity": </dt>
+<dd><p>Similarity transformation: scaling, rotation and
+  translation.</p></dd>
+
+  <dt>"QuickRigid": </dt>
+<dd><p>Rigid transformation: Only rotation and translation.
+  May be useful for quick visualization fixes.'</p></dd>
+
+  <dt>"DenseRigid": </dt>
+<dd><p>Rigid transformation: Only rotation and translation.
+  Employs dense sampling during metric estimation.'</p></dd>
+
+  <dt>"BOLDRigid": </dt>
+<dd><p>Rigid transformation: Parameters typical for BOLD
+  to BOLD intrasubject registration'.'</p></dd>
+
+  <dt>"Affine": </dt>
+<dd><p>Affine transformation: Rigid + scaling.</p></dd>
+
+  <dt>"AffineFast": </dt>
+<dd><p>Fast version of <code>Affine</code>.</p></dd>
+
+  <dt>"BOLDAffine": </dt>
+<dd><p>Affine transformation: Parameters typical for BOLD
+  to BOLD intrasubject registration'.'</p></dd>
+
+  <dt>"TRSAA": </dt>
+<dd><p>translation, rigid, similarity, affine (twice). please set
     <code>regIterations</code> if using this option.  this would be used in cases
-    where you want a really high quality affine mapping (perhaps with mask).</p></li>
-<li><p>"ElasticSyN": Symmetric normalization: Affine + deformable transformation.
-    Uses <code>synMetric</code> as optimization metric and elastic regularization.</p></li>
-<li><p>"SyN": Symmetric normalization: Affine + deformable transformation.
-    Uses <code>synMetric</code> as optimization metric.</p></li>
-<li><p>"SyNRA": Symmetric normalization: Rigid + Affine + deformable transformation.
-    Uses <code>synMetric</code> as optimization metric.</p></li>
-<li><p>"SyNOnly": Symmetric normalization: no initial transformation.
+    where you want a really high quality affine mapping (perhaps with mask).</p></dd>
+
+  <dt>"ElasticSyN": </dt>
+<dd><p>Symmetric normalization: Affine + deformable transformation.
+    Uses <code>synMetric</code> as optimization metric and elastic regularization.</p></dd>
+
+  <dt>"SyN": </dt>
+<dd><p>Symmetric normalization: Affine + deformable transformation.
+    Uses <code>synMetric</code> as optimization metric.</p></dd>
+
+  <dt>"SyNRA": </dt>
+<dd><p>Symmetric normalization: Rigid + Affine + deformable transformation.
+    Uses <code>synMetric</code> as optimization metric.</p></dd>
+
+  <dt>"SyNOnly": </dt>
+<dd><p>Symmetric normalization: no initial transformation.
     Uses <code>synMetric</code> as optimization metric.  Assumes images are
     aligned by an inital transformation. Can be useful if you want to run
-    an unmasked affine followed by masked deformable registration.</p></li>
-<li><p>"ElasticOnly": Elastic normalization: no initial transformation.</p></li>
-<li><p>"SyNCC": SyN, but with cross-correlation as the metric.
+    an unmasked affine followed by masked deformable registration.</p></dd>
+
+  <dt>"ElasticOnly": </dt>
+<dd><p>Elastic normalization: no initial transformation.</p></dd>
+
+  <dt>"SyNCC": </dt>
+<dd><p>SyN, but with cross-correlation as the metric.
     Note, the default or chosen parameters will be replaced with
     <code>synMetric="CC", synSampling=4, synits="2100x1200x1200x20",
-         smoothingsigmas="3x2x1x0", shrinkfactors="4x3x2x1"</code>.</p></li>
-<li><p>"SyNabp": SyN optimized for abpBrainExtraction, forces mutual information
-    as optimization metric.</p></li>
-<li><p>"SyNBold": SyN, but optimized for registrations between
-    BOLD and T1 images.</p></li>
-<li><p>"SyNBoldAff": SyN, but optimized for registrations between
-    BOLD and T1 images, with additional affine step.</p></li>
-<li><p>"SyNAggro": SyN, but with more aggressive registration
-    (fine-scale matching and more deformation).  Takes more time than <code>SyN</code>.</p></li>
-<li><p>"TV[n]": time-varying diffeomorphism with where 'n' indicates number of
+         smoothingsigmas="3x2x1x0", shrinkfactors="4x3x2x1"</code>.</p></dd>
+
+  <dt>"SyNabp": </dt>
+<dd><p>SyN optimized for abpBrainExtraction, forces mutual information
+    as optimization metric.</p></dd>
+
+  <dt>"SyNBold": </dt>
+<dd><p>SyN, but optimized for registrations between
+    BOLD and T1 images.</p></dd>
+
+  <dt>"SyNBoldAff": </dt>
+<dd><p>SyN, but optimized for registrations between
+    BOLD and T1 images, with additional affine step.</p></dd>
+
+  <dt>"SyNAggro": </dt>
+<dd><p>SyN, but with more aggressive registration
+    (fine-scale matching and more deformation).  Takes more time than <code>SyN</code>.</p></dd>
+
+  <dt>"TV[n]": </dt>
+<dd><p>time-varying diffeomorphism with where 'n' indicates number of
             time points in velocity field discretization.  The initial transform
-            should be computed, if needed, in a separate call to ants.registration.</p></li>
-<li><p>"TVMSQ": time-varying diffeomorphism with mean square metric</p></li>
-<li><p>"TVMSQC": time-varying diffeomorphism with mean square metric
-  for very large deformation</p></li>
-<li><p>"Elastic": simple elastic deformation.  one might want to run an
+            should be computed, if needed, in a separate call to ants.registration.</p></dd>
+
+  <dt>"TVMSQ": </dt>
+<dd><p>time-varying diffeomorphism with mean square metric</p></dd>
+
+  <dt>"TVMSQC": </dt>
+<dd><p>time-varying diffeomorphism with mean square metric
+  for very large deformation</p></dd>
+
+  <dt>"Elastic": </dt>
+<dd><p>simple elastic deformation.  one might want to run an
   affine transformation before this.  may not produce diffeomorphic transformations.
-  user may need to explore gradient and sigma parameters.  this will not produce a valid inverse deformation.  <code>totalSigma</code> should be greater than zero.</p></li>
-<li><p>"antsRegistrationSyN[x]":recreation of the antsRegistrationSyN.sh script in ANTs
-                                   where 'x' is one of the transforms available (e.g., 't', 'b', 's')</p></li>
-<li><p>"antsRegistrationSyNQuick[x]":recreation of the antsRegistrationSyNQuick.sh script in ANTs
-                                   where 'x' is one of the transforms available (e.g., 't', 'b', 's')</p></li>
-<li><p>"antsRegistrationSyNRepro[x]":reproducible registration.  x options as above.</p></li>
-<li><p>"antsRegistrationSyNQuickRepro[x]":quick reproducible registration.  x options as above.</p></li>
-</ul></div>
+  user may need to explore gradient and sigma parameters.  this will not produce a valid inverse deformation.  <code>totalSigma</code> should be greater than zero.</p></dd>
+
+  <dt>"antsRegistrationSyN[x]":</dt>
+<dd><p>recreation of the antsRegistrationSyN.sh script in ANTs
+                                   where 'x' is one of the transforms available (e.g., 't', 'b', 's')</p></dd>
+
+  <dt>"antsRegistrationSyNQuick[x]":</dt>
+<dd><p>recreation of the antsRegistrationSyNQuick.sh script in ANTs
+                                   where 'x' is one of the transforms available (e.g., 't', 'b', 's')</p></dd>
+
+  <dt>"antsRegistrationSyNRepro[x]":</dt>
+<dd><p>reproducible registration.  x options as above.</p></dd>
+
+  <dt>"antsRegistrationSyNQuickRepro[x]":</dt>
+<dd><p>quick reproducible registration.  x options as above.</p></dd>
+
+
+</dl></div>
     <div id="author">
     <h2>Author</h2>
     <p>Shrinidhi KL, Tustison NJ, Avants BB</p>
@@ -349,10 +409,6 @@ of points sampled to be controlled in low-dimensional metric estimation.</p></dd
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>,</span></span>
 <span class="r-in"><span>  affIterations <span class="op">=</span> <span class="va">affIterations</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># set below for slower but numerically repeatable results</span></span></span>
-<span class="r-in"><span><span class="co"># these should be set in .Renviron not by sys calls</span></span></span>
-<span class="r-in"><span><span class="co">#  Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = 1)</span></span></span>
-<span class="r-in"><span><span class="co">#  Sys.setenv(ANTS_RANDOM_SEED = 20180716)</span></span></span>
 <span class="r-in"><span><span class="va">fi</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="fu"><a href="getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mi</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="fu"><a href="getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r64"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fi</span> <span class="op">&lt;-</span> <span class="fu"><a href="resampleImage.html">resampleImage</a></span><span class="op">(</span><span class="va">fi</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">60</span>, <span class="fl">60</span><span class="op">)</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span></span>
@@ -405,7 +461,7 @@ of points sampled to be controlled in low-dimensional metric estimation.</p></dd
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

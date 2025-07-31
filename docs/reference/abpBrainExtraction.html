@@ -18,7 +18,7 @@ image.  Should be preceded by abpN4."><!-- mathjax --><script src="https://cdnjs
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
@@ -78,7 +78,6 @@ image.  Should be preceded by abpN4.</p>
 <span>  temregmask <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  regtype <span class="op">=</span> <span class="st">"SyN"</span>,</span>
 <span>  tdir <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  num_threads <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  pad <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -110,14 +109,6 @@ image.  Should be preceded by abpN4.</p>
 
 <dt id="arg-tdir">tdir<a class="anchor" aria-label="anchor" href="#arg-tdir"></a></dt>
 <dd><p>temporary directory (optional)</p></dd>
-
-
-<dt id="arg-num-threads">num_threads<a class="anchor" aria-label="anchor" href="#arg-num-threads"></a></dt>
-<dd><p>will execute
-<code>Sys.setenv(ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = num_threads)</code> before
-running to attempt a more reproducible result.  See
-<a href="https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues" class="external-link">https://github.com/ANTsX/ANTs/wiki/antsRegistration-reproducibility-issues</a>
-for discussion.  If <code>NULL</code>, will not set anything.</p></dd>
 
 
 <dt id="arg-pad">pad<a class="anchor" aria-label="anchor" href="#arg-pad"></a></dt>
@@ -167,7 +158,7 @@ zero-pad the image</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>

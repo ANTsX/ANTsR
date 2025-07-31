@@ -18,7 +18,7 @@ tag-control image pairs to estimate perfusion."><!-- mathjax --><script src="htt
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
       </span>
     </div>
 
@@ -115,20 +115,30 @@ See <code>Details</code>.</p></dd>
 </dl></div>
     <div id="details">
     <h2>Details</h2>
-    <p>Two major types of methods are available for ASL signal averaging:</p><ul><li><p>Subtraction: All the subtraction methods are based on subtracting
+    <p>Two major types of methods are available for ASL signal averaging:</p><dl><dt>Subtraction</dt>
+<dd><p>: All the subtraction methods are based on subtracting
     the tag from control images and averaging the result.  <code>simple</code>
     subtracts adjacent tag and control images.  The other methods use
     interpolation to obtain a subtracted time-series.  Sinc subtraction may
     be marginally more accurate than cubic interpolation, but takes much
-    longer.  Surround subtraction uses linear interpolation and is fast.</p></li>
-<li><p>Regression: Regression regresses the time-series on a vector
+    longer.  Surround subtraction uses linear interpolation and is fast.</p></dd>
+
+   <dt>Regression</dt>
+<dd><p>: Regression regresses the time-series on a vector
    of alternating tag-control dummy variables.  Regression can incorporate
    nuisance covariates.  Bayesian regression incorporates regularization in
    the regression to encourage all voxels of the same tissue type to have
-   similar perfusion values.</p></li>
-</ul><p>For <code>bayesian</code>, two more arguments are required:</p><ul><li><p>segmentation: a segmentation image</p></li>
-<li><p>tissuelist: a list of tissue probability images</p></li>
-</ul><p>These would be as output from <code>atropos</code>; see <code>Examples</code> for a
+   similar perfusion values.</p></dd>
+
+
+</dl><p>For <code>bayesian</code>, two more arguments are required:</p><dl><dt>segmentation</dt>
+<dd><p>: a segmentation image</p></dd>
+
+  <dt>tissuelist</dt>
+<dd><p>: a list of tissue probability images</p></dd>
+
+
+</dl><p>These would be as output from <code>atropos</code>; see <code>Examples</code> for a
 sample usage.</p>
     </div>
     <div id="author">
@@ -170,7 +180,7 @@ sample usage.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
       </footer></div>
