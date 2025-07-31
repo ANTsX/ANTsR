@@ -5840,7 +5840,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' # Example usage:
 #' # result <- antspymm_simlr(dataframe)
 antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  
-                           energy=c('cca','reg','lrr','regression'), nsimlr, constraint, 
+                           energy=c('cca','reg','lrr','regression','base.rand','base.pca'), nsimlr, constraint, 
                            covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
                            resnetGradeThresh=1.02, doperm=FALSE, 
                            exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modeling=NULL, 
@@ -6018,6 +6018,16 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   if ( !missing( connect_cog ) ) {
     regs[["cg"]] = Matrix::Matrix(regs0[["cg"]], sparse = TRUE) 
     print("regularize cg")
+  }
+
+  if ( energy == 'base.rand' ) {
+    return( list( simlrX=list(v=antsr_random_features( mats, nsimlr ) ) ))
+  } else if ( energy == 'base.pca' ) {
+    nsimlrmin = min(c(nsimlr,unlist(lapply( mats, ncol))))
+    if ( nsimlrmin < nsimlr ) {
+      message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
+    } else nsimlrmin=nsimlr
+    return( list( simlrX=list(v=antsr_pca_features( mats, nsimlrmin ) ) ))
   }
   
   #  if ( !doperm )
@@ -6508,4 +6518,62 @@ multiview_pca <- function(views, n_components, sparse = 0.5, max_iter = 100, spa
   }
   
   return(list(Z = Z, W = W_list))
+}
+
+
+
+#' Generate reproducible random feature projections for a list of voxel matrices
+#'
+#' This function applies random projection to each matrix in a list of voxel matrices.
+#' It uses a fixed seed to ensure reproducibility across runs.
+#'
+#' @param voxmats A list of numeric matrices. Each matrix should have dimensions (subjects × voxels).
+#' @param k Integer. Number of projection dimensions (features) to generate.
+#' @param seed Integer. Random seed for reproducibility. Default is 42.
+#'
+#' @return A list of projection matrices, each with dimensions (voxels × k).
+#' @export
+antsr_random_features <- function(voxmats, k, seed = 42) {
+  stopifnot(is.list(voxmats))
+  stopifnot(all(sapply(voxmats, is.matrix)))
+
+  set.seed(seed)
+  plist = lapply(voxmats, function(m) {
+    nvox <- ncol(m)
+    projection_matrix <- 
+    orthogonalizeAndQSparsify( matrix(rnorm(nvox * k), nrow = nvox, ncol = k), 0.8, positivity='positive' )
+  })
+  names(plist)=names(voxmats)
+  return(plist)
+}
+
+#' Generate PCA-based feature projections for a list of voxel matrices
+#'
+#' This function applies principal component analysis (PCA) to each matrix in a list
+#' of voxel matrices and returns a list of projection matrices (principal axes).
+#'
+#' @param voxmats A list of numeric matrices. Each matrix should have dimensions (subjects × voxels).
+#' @param k Integer. Number of principal components to retain.
+#'
+#' @return A named list of projection matrices (voxels × k), one per input matrix.
+#' @export
+antsr_pca_features <- function(voxmats, k) {
+  stopifnot(is.list(voxmats))
+  stopifnot(all(sapply(voxmats, is.matrix)))
+
+  plist <- lapply(voxmats, function(m) {
+    max_components <- min(nrow(m), ncol(m))
+    if (k > max_components) {
+      warning(sprintf("Requested k = %d exceeds maximum possible components (%d) for a matrix with dimensions (%d × %d). Using k = %d instead.",
+                      k, max_components, nrow(m), ncol(m), max_components))
+      k_adj <- max_components
+    } else {
+      k_adj <- k
+    }
+    pca <- prcomp(m, center = TRUE, scale. = TRUE, rank. = k_adj)
+    pca$rotation[, 1:k_adj, drop = FALSE]
+  })
+
+  names(plist) <- names(voxmats)
+  return(plist)
 }

@@ -8,7 +8,7 @@ antspymm_simlr(
   blaster,
   select_training_boolean,
   connect_cog,
-  energy = c("cca", "reg", "lrr", "regression"),
+  energy = c("cca", "reg", "lrr", "regression", "base.rand", "base.pca"),
   nsimlr,
   constraint,
   covariates = "1",
