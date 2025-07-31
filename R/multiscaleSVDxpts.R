@@ -6620,6 +6620,14 @@ antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet",
   stopifnot(is.list(voxmats))
   stopifnot(all(sapply(voxmats, is.matrix)))
 
+  if ( method == "default" ) {
+      loadings = antsr_pca_features( mats, nsimlrmin )
+      for ( k in 1:length(loadings)) {
+        loadings[[k]] = orthogonalizeAndQSparsify( loadings[[k]], 0.8, positivity='positive' )
+      }
+    return(loadings)
+    }
+
   plist <- lapply(voxmats, function(m) {
     max_k <- min(nrow(m), ncol(m))
     if (k > max_k) {
@@ -6665,14 +6673,7 @@ antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet",
         warning("Sparse PCA failed: ", conditionMessage(e))
         matrix(NA, nrow = ncol(m), ncol = k_adj)
       })
-    } else {
-      loadings = antsr_pca_features( mats, nsimlrmin )
-      for ( k in 1:length(loadings)) {
-        loadings[[k]] = orthogonalizeAndQSparsify( loadings[[k]], 0.8, positivity='positive' )
-      }
-      return(loadings)
-    }
-
+    } 
     rownames(loadings) <- colnames(m)
     colnames(loadings) <- paste0("PC", 1:ncol(loadings))
     loadings
