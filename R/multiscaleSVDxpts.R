@@ -6621,7 +6621,7 @@ antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet",
   stopifnot(all(sapply(voxmats, is.matrix)))
 
   if ( method == "default" ) {
-      loadings = antsr_pca_features( voxmats, nsimlrmin )
+      loadings = antsr_pca_features( voxmats, k )
       for ( k in 1:length(loadings)) {
         loadings[[k]] = orthogonalizeAndQSparsify( loadings[[k]], 0.8, positivity='positive' )
       }
