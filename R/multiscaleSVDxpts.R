@@ -6550,6 +6550,7 @@ antsr_random_features <- function(voxmats, k, seed = 42) {
   for ( k in 1:length(voxmats)) {
     rownames(plist[[k]])=colnames(voxmats[[k]])
     prefix=paste0(names(voxmats)[k],"PC")
+    prefix="PC"
     colnames(plist[[k]])=paste0(prefix,1:ncol(plist[[k]]))
   }
   return(plist)
