@@ -6021,7 +6021,11 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   }
 
   if ( energy == 'base.rand' ) {
-    return( list( simlrX=list(v=antsr_random_features( mats, nsimlr ) ) ))
+    temp = antsr_random_features( mats, nsimlr )
+    for ( k in 1:length(mats)) {
+      rownames(temp[[k]]) = colnames(mats[[k]])
+    }
+    return( list( simlrX=list(v=temp) ))
   } else if ( energy == 'base.pca' ) {
     nsimlrmin = min(c(nsimlr,unlist(lapply( mats, ncol))))
     if ( nsimlrmin < nsimlr ) {
@@ -6536,7 +6540,6 @@ multiview_pca <- function(views, n_components, sparse = 0.5, max_iter = 100, spa
 antsr_random_features <- function(voxmats, k, seed = 42) {
   stopifnot(is.list(voxmats))
   stopifnot(all(sapply(voxmats, is.matrix)))
-
   set.seed(seed)
   plist = lapply(voxmats, function(m) {
     nvox <- ncol(m)
@@ -6544,6 +6547,10 @@ antsr_random_features <- function(voxmats, k, seed = 42) {
     orthogonalizeAndQSparsify( matrix(rnorm(nvox * k), nrow = nvox, ncol = k), 0.8, positivity='positive' )
   })
   names(plist)=names(voxmats)
+  for ( k in 1:length(voxmats)) {
+    rownames(plist[[k]])=colnames(voxmats[[k]])
+    colnames(plist[[k]])=paste0("PC",1:ncol(plist[[k]]))
+  }
   return(plist)
 }
 
