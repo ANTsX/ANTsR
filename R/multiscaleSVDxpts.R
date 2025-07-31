@@ -6586,3 +6586,78 @@ antsr_pca_features <- function(voxmats, k) {
   names(plist) <- names(voxmats)
   return(plist)
 }
+
+
+
+#' Generate sparse PCA-based feature projections for a list of voxel matrices
+#'
+#' Applies sparse principal component analysis using the selected backend
+#' ("elasticnet", "PMA", or "sparsepca") to each matrix in a list of subject × voxel data.
+#'
+#' @param voxmats A list of numeric matrices. Each matrix should be subjects × voxels.
+#' @param k Integer. Number of components to retain.
+#' @param method Character. Sparse PCA backend to use. One of "elasticnet", "PMA", or "sparsepca".
+#' @param para Sparsity control parameter(s). Interpretation depends on backend:
+#'   - For "elasticnet": number of nonzero loadings per component (length-k vector).
+#'   - For "PMA": L1 bound on loading vector (scalar or length-k).
+#'   - For "sparsepca": ignored (uses built-in defaults).
+#' @return A named list of sparse projection matrices (voxels × k).
+#' @export
+antsr_spca_features <- function(voxmats, k, method = c("elasticnet", "PMA", "sparsepca"), para = NULL) {
+  method <- match.arg(method)
+  stopifnot(is.list(voxmats))
+  stopifnot(all(sapply(voxmats, is.matrix)))
+
+  plist <- lapply(voxmats, function(m) {
+    max_k <- min(nrow(m), ncol(m))
+    if (k > max_k) {
+      warning(sprintf("Requested k = %d exceeds matrix rank (%d); reducing to k = %d", k, max_k, max_k))
+      k_adj <- max_k
+    } else {
+      k_adj <- k
+    }
+
+    if (method == "elasticnet") {
+      stopifnot(requireNamespace("elasticnet", quietly = TRUE))
+      if (is.null(para)) {
+        para <- rep(ceiling(ncol(m) / 2), k_adj)
+      }
+      stopifnot(length(para) == k_adj)
+      sfit <- elasticnet::spca(x = m, K = k_adj, para = para, type = "predictor", sparse = "varnum", trace = FALSE)
+      loadings <- sfit$loadings[, 1:k_adj, drop = FALSE]
+
+    } else if (method == "PMA") {
+      stopifnot(requireNamespace("PMA", quietly = TRUE))
+      if (is.null(para)) {
+        para <- rep(2.0, k_adj)
+      } else if (length(para) == 1) {
+        para <- rep(para, k_adj)
+      }
+      stopifnot(length(para) == k_adj)
+
+      loadings_list <- lapply(seq_len(k_adj), function(i) {
+        comp <- PMA::SPC(x = scale(m), sumabsv = para[i], K = 1)
+        comp$v[, 1]
+      })
+      loadings <- do.call(cbind, loadings_list)
+
+    } else if (method == "sparsepca") {
+      stopifnot(requireNamespace("sparsepca", quietly = TRUE))
+      loadings <- tryCatch({
+        sfit <- sparsepca::spca(X = scale(m), k = k_adj)
+        if (is.null(sfit$rotation)) stop("rotation matrix is NULL")
+        sfit$rotation[, 1:k_adj, drop = FALSE]
+      }, error = function(e) {
+        warning("Sparse PCA failed: ", conditionMessage(e))
+        matrix(NA, nrow = ncol(m), ncol = k_adj)
+      })
+    }
+
+    rownames(loadings) <- colnames(m)
+    colnames(loadings) <- paste0("PC", 1:ncol(loadings))
+    loadings
+  })
+
+  names(plist) <- names(voxmats)
+  return(plist)
+}
