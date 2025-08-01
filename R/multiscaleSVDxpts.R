@@ -6020,8 +6020,9 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     print("regularize cg")
   }
 
-  if ( energy == 'base.rand' ) {
-    temp = antsr_random_features( mats, nsimlr )
+  if (  grepl('base.rand',energy) ) {
+    get_seed <- function(s) as.integer(sub(".*\\.", "", s))
+    temp = antsr_random_features( mats, nsimlr, seed = get_seed(energy) )
     for ( k in 1:length(mats)) {
       rownames(temp[[k]]) = colnames(mats[[k]])
     }
@@ -6613,6 +6614,7 @@ antsr_pca_features <- function(voxmats, k) {
 #'   - For "elasticnet": number of nonzero loadings per component (length-k vector).
 #'   - For "PMA": L1 bound on loading vector (scalar or length-k).
 #'   - For "sparsepca": ignored (uses built-in defaults).
+#'   - For "default": length-k vector of sparsity parameters.
 #' @return A named list of sparse projection matrices (voxels × k).
 #' @export
 antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet", "PMA", "sparsepca"), para = NULL) {
@@ -6621,9 +6623,14 @@ antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet",
   stopifnot(all(sapply(voxmats, is.matrix)))
 
   if ( method == "default" ) {
-      loadings = antsr_pca_features( voxmats, k )
-      for ( k in 1:length(loadings)) {
-        loadings[[k]] = orthogonalizeAndQSparsify( loadings[[k]], 0.8, positivity='positive' )
+    if ( is.null(para) ) {
+      para <- rep(0.8, length(voxmats))  # Default sparsity
+    } else if ( length(para) == 1 ) {
+      para <- rep(para, length(voxmats))  # Replicate single value
+    }
+    loadings = antsr_pca_features( voxmats, k )
+    for ( k in 1:length(loadings)) {
+      loadings[[k]] = orthogonalizeAndQSparsify( loadings[[k]], para[k], positivity='positive' )
       }
     return(loadings)
     }
