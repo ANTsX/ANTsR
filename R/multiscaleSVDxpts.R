@@ -5817,7 +5817,8 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param blaster A dataframe containing multimodal data for analysis.
 #' @param select_training_boolean boolean vector to define which entries are in training data
 #' @param connect_cog Vector of column names to be treated as a special target matrix;  often used for cognitive data and in a superivsed variant of simlr.  Exclude this argument if this is unclear.
-#' @param energy The type of energy model to use for similarity analysis. Defaults to 'reg'.
+#' @param energy The type of energy model to use for similarity analysis. Usually 'reg' or 'cca'.
+#'              Other options include 'lrr', 'regression', 'base.pca', 'base.spca', 'base.rand.1', and 'base.rand.0'.
 #' @param nsimlr Number of components.
 #' @param constraint orthogonality constraint of the form constraintxFloatWeightEnergyxFloatWeightGrad where constraints is ortho, Stiefel or Grassmann or GrassmannInv
 #' @param covariates any covariates to adjust training matrices. if covariates is set to 'mean' then the rowwise mean will be factored out of each matrix.  this can be a vector e.g. \code{c('center','scale','rank')}. pass the name opt to antspymm_simlr_update_residuals to have the function print the options.
@@ -5840,7 +5841,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' # Example usage:
 #' # result <- antspymm_simlr(dataframe)
 antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  
-                           energy=c('cca','reg','lrr','regression','base.rand','base.pca','base.spca'), nsimlr, constraint, 
+                           energy, nsimlr, constraint, 
                            covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
                            resnetGradeThresh=1.02, doperm=FALSE, 
                            exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modeling=NULL, 
@@ -5853,6 +5854,10 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
       return(1:length(x))
     }
     return(result)
+  }
+  myenergies = c('cca','reg','lrr','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0" )
+  if ( !energy %in% myenergies ) {
+    stop( paste0("energy must be one of ", paste(myenergies, collapse=", ")))
   }
   safeclean = function( pattern, x,fixed=FALSE, exclude=TRUE) {
     mysub=grep(pattern,x,fixed=fixed)
@@ -6021,6 +6026,9 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   }
 
   if (  grepl('base.rand',energy) ) {
+    if ( verbose ) {
+      print(paste("antsr_random_features begin",energy))
+    }
     get_seed <- function(s) as.integer(sub(".*\\.", "", s))
     temp = antsr_random_features( mats, nsimlr, seed = get_seed(energy) )
     for ( k in 1:length(mats)) {
@@ -6029,18 +6037,18 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     return( list( simlrX=list(v=temp) ))
   } else if ( energy == 'base.pca' ) {
     nsimlrmin = min(c(nsimlr,unlist(lapply( mats, ncol))))
-    if ( nsimlrmin < nsimlr ) {
-      message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
-    } else nsimlrmin=nsimlr
-    return( list( simlrX=list(v=antsr_pca_features( mats, nsimlrmin ) ) ))
-  } else if ( energy == 'base.pca' ) {
-    nsimlrmin = min(c(nsimlr,unlist(lapply( mats, ncol))))
+    if ( verbose ) {
+      print(paste("antsr_pca_features begin",energy,nsimlrmin))
+    }
     if ( nsimlrmin < nsimlr ) {
       message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
     } else nsimlrmin=nsimlr
     return( list( simlrX=list(v=antsr_pca_features( mats, nsimlrmin ) ) ))
   } else if ( energy == 'base.spca' ) {
     nsimlrmin = min(c(nsimlr,unlist(lapply( mats, ncol))))
+    if ( verbose ) {
+      print(paste("antsr_spca_features begin",energy,nsimlrmin))
+    }
     if ( nsimlrmin < nsimlr ) {
       message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
     } else nsimlrmin=nsimlr

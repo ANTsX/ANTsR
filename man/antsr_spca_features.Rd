@@ -21,7 +21,8 @@ antsr_spca_features(
 \item{para}{Sparsity control parameter(s). Interpretation depends on backend:
 - For "elasticnet": number of nonzero loadings per component (length-k vector).
 - For "PMA": L1 bound on loading vector (scalar or length-k).
-- For "sparsepca": ignored (uses built-in defaults).}
+- For "sparsepca": ignored (uses built-in defaults).
+- For "default": length-k vector of sparsity parameters.}
 }
 \value{
 A named list of sparse projection matrices (voxels × k).

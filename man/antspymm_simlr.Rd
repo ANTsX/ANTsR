@@ -8,7 +8,7 @@ antspymm_simlr(
   blaster,
   select_training_boolean,
   connect_cog,
-  energy = c("cca", "reg", "lrr", "regression", "base.rand", "base.pca", "base.spca"),
+  energy,
   nsimlr,
   constraint,
   covariates = "1",
@@ -34,7 +34,8 @@ antspymm_simlr(
 
 \item{connect_cog}{Vector of column names to be treated as a special target matrix;  often used for cognitive data and in a superivsed variant of simlr.  Exclude this argument if this is unclear.}
 
-\item{energy}{The type of energy model to use for similarity analysis. Defaults to 'reg'.}
+\item{energy}{The type of energy model to use for similarity analysis. Usually 'reg' or 'cca'.
+Other options include 'lrr', 'regression', 'base.pca', 'base.spca', 'base.rand.1', and 'base.rand.0'.}
 
 \item{nsimlr}{Number of components.}
 
