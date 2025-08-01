@@ -7,11 +7,13 @@
 take_abs_unsigned(m)
 }
 \arguments{
-\item{m}{A numeric matrix}
+\item{m}{A numeric matrix.}
 }
 \value{
-A matrix with absolute values taken for unsigned columns
+A matrix with absolute values taken for unsigned columns.
 }
 \description{
-Take Absolute Value of Unsigned Columns
+This function iterates through each column of a numeric matrix.
+If a column contains only zero and positive values, or only zero and negative values,
+the absolute value of that column is taken. Otherwise, the column is returned as is.
 }

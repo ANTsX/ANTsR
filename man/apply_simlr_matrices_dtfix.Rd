@@ -11,7 +11,6 @@ apply_simlr_matrices_dtfix(
   robust = FALSE,
   center = FALSE,
   scale = FALSE,
-  absolute_value = NULL,
   verbose = FALSE
 )
 }
@@ -27,10 +26,6 @@ apply_simlr_matrices_dtfix(
 \item{center}{boolean center the data before applying}
 
 \item{scale}{boolean scale the data before applying}
-
-\item{absolute_value}{boolean vector indicating whether to take abs of feature matrices ;
-set to FALSE by default; when using \code{antspymm_simlr}, the values should be set to TRUE;
-this is not required but it makes sure that the feature weights are non-negative.}
 
 \item{verbose}{boolean}
 }

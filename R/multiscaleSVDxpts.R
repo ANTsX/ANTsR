@@ -4679,23 +4679,42 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
   ))
 }
 
-
 #' Take Absolute Value of Unsigned Columns
 #'
-#' @param m A numeric matrix
+#' This function iterates through each column of a numeric matrix.
+#' If a column contains only zero and positive values, or only zero and negative values,
+#' the absolute value of that column is taken. Otherwise, the column is returned as is.
 #'
-#' @return A matrix with absolute values taken for unsigned columns
+#' @param m A numeric matrix.
+#'
+#' @return A matrix with absolute values taken for unsigned columns.
 #' @export
 take_abs_unsigned <- function(m) {
-  unsigned_cols <- colSums(m > 0) == 0 & colSums(m < 0) > 0
-  if ( sum(unsigned_cols) > 0 ) {
-    if ( sum(unsigned_cols) == 1 ) {
-      m[, unsigned_cols] <- abs(m[, unsigned_cols] )
-    } else {
-      m[, unsigned_cols] <- apply(m[, unsigned_cols], 2, abs)
+  if (!is.matrix(m) || !is.numeric(m)) {
+    stop("Input must be a numeric matrix.")
+  }
+
+  # Handle edge case of empty matrix to avoid issues with ncol(m) if m is 0x0
+  if (ncol(m) == 0) {
+    return(m)
+  }
+
+  result_matrix <- m # Initialize with the original matrix
+
+  for (j in 1:ncol(m)) {
+    column <- m[, j]
+
+    # Check if the column is unsigned (contains only non-negative or only non-positive values)
+    is_non_negative <- all(column >= 0)
+    is_non_positive <- all(column <= 0)
+
+    if (is_non_negative || is_non_positive) {
+      # Apply absolute value if unsigned
+      result_matrix[, j] <- abs(column)
     }
   }
-  m
+
+  return(result_matrix)
 }
 
 #' SiMLR Path Models helper
@@ -5084,9 +5103,6 @@ l1_normalize_features <- function(features) {
 #' @param robust boolean
 #' @param center boolean center the data before applying
 #' @param scale boolean scale the data before applying
-#' @param absolute_value boolean vector indicating whether to take abs of feature matrices ;
-#' set to FALSE by default; when using \code{antspymm_simlr}, the values should be set to TRUE;
-#' this is not required but it makes sure that the feature weights are non-negative.
 #' @param verbose boolean
 #'
 #' @return A list including (entry one) data frame with the original data frame combined with the projections (entry two) the new column names
@@ -5098,11 +5114,10 @@ l1_normalize_features <- function(features) {
 #' )
 #' existing_df <- data.frame(matrix(rnorm(147 * 5), nrow = 147, ncol = 5))
 #' # combined_df <- apply_simlr_matrices(existing_df, matrices_list)
-apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robust=FALSE, center=FALSE, scale=FALSE, absolute_value=NULL, verbose=FALSE ) {
+apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robust=FALSE, center=FALSE, scale=FALSE, verbose=FALSE ) {
   
-  if ( is.null( absolute_value ) ) {
-    absolute_value = rep( FALSE, length( matrices_list ) )
-  }
+  absolute_value = rep( FALSE, length( matrices_list ) )
+  # now figure out whether these matrices have unsigned rows or not
   
   replbind <- function(df1, df2) {
     # Find the common and unique columns
@@ -5141,7 +5156,7 @@ apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robus
       if ( robust ) imat = robustMatrixTransform( imat )
       if ( center | scale ) imat=scale(imat,center=center,scale=scale)
       features = data.matrix(matrices_list[[name]][inames,])
-      if ( absolute_value[ct] ) features = take_abs_unsigned( features )
+      features = take_abs_unsigned( features )
       features = l1_normalize_features(features)
       projection <- as.data.frame( imat %*% features)
       ##################################################
@@ -5181,15 +5196,12 @@ apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robus
 #' @param robust boolean
 #' @param center boolean center the data before applying
 #' @param scale boolean scale the data before applying
-#' @param absolute_value boolean vector indicating whether to take abs of feature matrices ;
-#' set to FALSE by default; when using \code{antspymm_simlr}, the values should be set to TRUE;
-#' this is not required but it makes sure that the feature weights are non-negative.
 #' @param verbose boolean
 #'
 #' @return A list including (entry one) data frame with the original data frame combined with the projections (entry two) the new column names
 #' @export
 apply_simlr_matrices_dtfix <- function(existing_df, matrices_list, n_limit = NULL, robust = FALSE, 
-                                       center = FALSE, scale = FALSE, absolute_value = NULL, verbose = FALSE) {
+                                       center = FALSE, scale = FALSE, verbose = FALSE) {
   # Get column names for comparison
   existing_df_cols = colnames(existing_df)
   gg = grep("DTI_",existing_df_cols)
@@ -5224,7 +5236,7 @@ apply_simlr_matrices_dtfix <- function(existing_df, matrices_list, n_limit = NUL
   # Apply SIMLR matrices
   dd = apply_simlr_matrices(existing_df = existing_df_fix, matrices_list = matrices_list_fix, 
                             n_limit = n_limit, robust = robust, center = center, 
-                            scale = scale, absolute_value = absolute_value, verbose = verbose)
+                            scale = scale, verbose = verbose)
   
   # Restore the original column names (if they were changed)
   if (dt_correspondence || dta_correspondence) {
