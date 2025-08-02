@@ -328,7 +328,7 @@ paster <- function(vec1, vec2) {
 }
 csearch = as.list( c("none", 
   paster( c("Grassmannx","Stiefelx","orthox"), 
-    c("10x10","100x1","0.0001x0.0001","1x1"))))
+    c("0.0001x0.0001","0.01x0.01"))))
 # the 10x10 are weights on the optimization term of the energy
 simparms = simlr.parameters( 
     nsimlr_options = list( 2 ),
@@ -342,7 +342,7 @@ simparms = simlr.parameters(
             c("positive","positive","positive")),
     optimus_options=list( 'lineSearch'),
     constraint_options=csearch,
-    sparsenessAlg = "spmp",
+#    sparsenessAlg = "spmp",
     search_type="random",
     num_samples=5
     )
@@ -365,7 +365,7 @@ simlrXs=simlr.search(
         matlist,
         regs=regs,
         simparms,
-        nperms=12,
+        nperms=5, # just fast for vignette
         verbose=4
         )
 simlrXs$paramsearch
