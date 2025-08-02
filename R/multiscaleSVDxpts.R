@@ -5115,10 +5115,7 @@ l1_normalize_features <- function(features) {
 #' existing_df <- data.frame(matrix(rnorm(147 * 5), nrow = 147, ncol = 5))
 #' # combined_df <- apply_simlr_matrices(existing_df, matrices_list)
 apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robust=FALSE, center=FALSE, scale=FALSE, verbose=FALSE ) {
-  
-  absolute_value = rep( FALSE, length( matrices_list ) )
-  # now figure out whether these matrices have unsigned rows or not
-  
+    
   replbind <- function(df1, df2) {
     # Find the common and unique columns
     common_cols <- intersect(names(df1), names(df2))
