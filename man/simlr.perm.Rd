@@ -19,7 +19,7 @@ simlr.perm(
   randomSeed,
   constraint = c("none", "Grassmann", "Stiefel"),
   energyType = c("cca", "regression", "normalized", "ucca", "lowRank",
-    "lowRankRegression"),
+    "lowRankRegression", "rv_coefficient"),
   vmats,
   connectors = NULL,
   optimizationStyle = c("lineSearch", "mixed", "greedy"),
