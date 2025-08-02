@@ -3828,27 +3828,30 @@ simlr <- function(
         return(1.0 / norm(xv - u, "F") * t(x) %*% (xv - u))
       }
       if (energyType == "rv_coefficient") {
-              # This is the gradient of the minimization problem -J, where J is the
-      # self-normalizing RV-like objective.
-      # The gradient is: -X'U + lambda * (X'X) * V
-      
-      # 1. Calculate lambda = tr(V'X'U) / ||V'X'XV||_F
-      numerator_lambda <- sum(diag(t(v) %*% t(x) %*% u))
-      inner_term_lambda <- t(v) %*% (t(x) %*% x) %*% v
-      denominator_lambda <- sum(inner_term_lambda^2) # Note: this is ||.||_F^2
-      
-      lambda <- if (denominator_lambda > .Machine$double.eps) {
-        numerator_lambda / sqrt(denominator_lambda)
-      } else {
-        0
-      }
-      
-      # 2. Calculate the two parts of the gradient
-      driving_term <- -t(x) %*% u
-      braking_term <- lambda * (t(x) %*% x) %*% v
-      
-      gradient <- driving_term + braking_term
-      return(gradient)
+        # This is the gradient of the minimization problem -J, where J is the
+        # self-normalizing RV-like objective.
+        # The gradient is: -X'U + lambda * (X'X) * V
+        
+        # 1. Calculate lambda = tr(V'X'U) / ||V'X'XV||_F
+        numerator_lambda <- sum(diag(t(v) %*% t(x) %*% u))
+        inner_term_lambda <- t(v) %*% (t(x) %*% x) %*% v
+        denominator_lambda <- sqrt(sum(inner_term_lambda^2)) # Frobenius norm
+        
+        lambda <- if (denominator_lambda > .Machine$double.eps) {
+          numerator_lambda / denominator_lambda
+        } else {
+          0
+        }
+        
+        # 2. Calculate the two parts of the gradient
+        # The gradient of the MAXIMIZATION objective J is: X'U - lambda*(X'X)V
+        # For the main loop's additive update, we need a DESCENT direction for the
+        # MINIMIZATION problem E = -J. A descent direction for E is \nabla J.
+        
+        ascent_direction_J <- (t(x) %*% u) - (lambda * ((t(x) %*% x) %*% v))
+        
+        # We return the ascent direction for J, which is a descent direction for E=-J
+        return(ascent_direction_J)
       }
       if (energyType == "lowRank") {
         #          term1 = 2.0 * t( x ) %*% ( u - x %*% v ) #  norm2( U - X * V )^2
