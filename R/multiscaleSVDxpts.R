@@ -5910,7 +5910,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     }
     return(result)
   }
-  myenergies = c('cca','reg','lrr','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0" )
+  myenergies = c('cca','reg','lrr','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "rv_coefficient" )
   if ( !energy %in% myenergies ) {
     stop( paste0("energy must be one of ", paste(myenergies, collapse=", ")))
   }
