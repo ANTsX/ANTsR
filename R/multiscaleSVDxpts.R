@@ -3733,11 +3733,25 @@ simlr <- function(
     
     # ACC tr( abs( U' * X * V ) ) / ( norm2(U)^0.5 * norm2( X * V )^0.5 )
     if (energyType == "rv_coefficient") {
-      # We want to MAXIMIZE tr(U' * X * V).
-      # The optimize() function MINIMIZES its objective.
-      # Therefore, we return the NEGATIVE of our objective.
-      objective_value <- sum(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))
-      return(myorthEnergy - objective_value) # Return negative objective + ortho penalty
+      # This objective is J = tr(U'XV) / ||V'X'XV||_F^0.5
+      # It is self-normalizing and more stable.
+      
+      # Numerator term: tr(U' * X * V)
+      numerator <- sum(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))
+      
+      # Denominator term: ||V'X'XV||_F^0.5
+      inner_term <- t(myenergysearchv) %*% (t(voxmats[[whichModality]]) %*% voxmats[[whichModality]]) %*% myenergysearchv
+      denominator <- sqrt(sum(inner_term^2)) # Frobenius norm
+      
+      # Handle potential division by zero
+      if (denominator < .Machine$double.eps) {
+        objective_value <- 0
+      } else {
+        objective_value <- numerator / denominator
+      }
+      
+      # Return the negative, because optimize() MINIMIZES
+      return(myorthEnergy - objective_value)
     }
     # low-dimensional error approximation
     if (energyType == "lowRank") {
@@ -3814,9 +3828,27 @@ simlr <- function(
         return(1.0 / norm(xv - u, "F") * t(x) %*% (xv - u))
       }
       if (energyType == "rv_coefficient") {
-        # The gradient of the objective we want to MINIMIZE (-tr(U'XV))
-        # with respect to V is -X'U.
-        return(-t(x) %*% u)
+              # This is the gradient of the minimization problem -J, where J is the
+      # self-normalizing RV-like objective.
+      # The gradient is: -X'U + lambda * (X'X) * V
+      
+      # 1. Calculate lambda = tr(V'X'U) / ||V'X'XV||_F
+      numerator_lambda <- sum(diag(t(v) %*% t(x) %*% u))
+      inner_term_lambda <- t(v) %*% (t(x) %*% x) %*% v
+      denominator_lambda <- sum(inner_term_lambda^2) # Note: this is ||.||_F^2
+      
+      lambda <- if (denominator_lambda > .Machine$double.eps) {
+        numerator_lambda / sqrt(denominator_lambda)
+      } else {
+        0
+      }
+      
+      # 2. Calculate the two parts of the gradient
+      driving_term <- -t(x) %*% u
+      braking_term <- lambda * (t(x) %*% x) %*% v
+      
+      gradient <- driving_term + braking_term
+      return(gradient)
       }
       if (energyType == "lowRank") {
         #          term1 = 2.0 * t( x ) %*% ( u - x %*% v ) #  norm2( U - X * V )^2
