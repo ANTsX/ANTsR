@@ -3439,7 +3439,7 @@ simlr <- function(
     lineSearchTolerance = 1e-8,
     randomSeed,
     constraint = c( "Grassmannx1000x1000", "Stiefelx1000x1000", "orthox1000x1000", "none"),
-    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression"),
+    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'rv_coefficient'),
     vmats,
     connectors = NULL,
     optimizationStyle = c("lineSearch", "mixed", "greedy"),
@@ -3732,7 +3732,13 @@ simlr <- function(
     }
     
     # ACC tr( abs( U' * X * V ) ) / ( norm2(U)^0.5 * norm2( X * V )^0.5 )
-    
+    if (energyType == "rv_coefficient") {
+      # We want to MAXIMIZE tr(U' * X * V).
+      # The optimize() function MINIMIZES its objective.
+      # Therefore, we return the NEGATIVE of our objective.
+      objective_value <- sum(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))
+      return(myorthEnergy - objective_value) # Return negative objective + ortho penalty
+    }
     # low-dimensional error approximation
     if (energyType == "lowRank") {
       vpro <- voxmats[[whichModality]] %*% (myenergysearchv)
@@ -3806,6 +3812,11 @@ simlr <- function(
       if (energyType == "lowRankRegression") {
         xv <- x %*% (v)
         return(1.0 / norm(xv - u, "F") * t(x) %*% (xv - u))
+      }
+      if (energyType == "rv_coefficient") {
+        # The gradient of the objective we want to MINIMIZE (-tr(U'XV))
+        # with respect to V is -X'U.
+        return(-t(x) %*% u)
       }
       if (energyType == "lowRank") {
         #          term1 = 2.0 * t( x ) %*% ( u - x %*% v ) #  norm2( U - X * V )^2
