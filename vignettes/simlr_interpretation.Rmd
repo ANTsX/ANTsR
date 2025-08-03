@@ -76,7 +76,7 @@ constr='Stiefelx100x1'
 constr='orthox100x0.1'
 constr='Grassmannx100x1'
 result <- simlr(matlist,constraint=constr,scale=prepro, 
-  mixAlg='pca', energyType='rv_coefficient', # recommended
+  mixAlg='pca', energyType='normalized_correlation', # recommended
 #  mixAlg='pca', energyType='cca', # recommended
 #  mixAlg='ica', energyType='regression', # recommended
   sparsenessAlg = "spmp",
@@ -259,7 +259,7 @@ diagcorr = function( X,Y ) mean(abs(diag(cor(X,Y))))
 initu = initializeSimlr( matlist, 3, jointReduction = TRUE  )
 np=40
 myperm = simlr.perm(  matlist,
-  energyType='rv_coefficient',
+  energyType='normalized_correlation',
   constraint='none',scale=prepro, 
   initialUMatrix=initu,
   iterations=100,
@@ -334,7 +334,7 @@ simparms = simlr.parameters(
     nsimlr_options = list( 2 ),
     prescaling_options = list( 
             c( "robust", "centerAndScale",  "np") ),
-    objectiver_options = list("regression",'cca','rv_coefficient'),
+    objectiver_options = list("regression",'cca','normalized_correlation'),
     mixer_options=list("ica",'pca'), 
     sparval_options=list(  c(0.5,0.5,0.5) ),
     expBeta_options = list( c(0.99) ),
