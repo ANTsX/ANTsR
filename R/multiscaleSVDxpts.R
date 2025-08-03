@@ -5978,7 +5978,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param select_training_boolean boolean vector to define which entries are in training data
 #' @param connect_cog Vector of column names to be treated as a special target matrix;  often used for cognitive data and in a superivsed variant of simlr.  Exclude this argument if this is unclear.
 #' @param energy The type of energy model to use for similarity analysis. Usually 'reg' or 'cca'.
-#'              Other options include 'lrr', 'regression', 'base.pca', 'base.spca', 'base.rand.1', and 'base.rand.0'.
+#'              Other options include 'lrr', 'regression', 'nc', 'base.pca', 'base.spca', 'base.rand.1', and 'base.rand.0'.
 #' @param nsimlr Number of components.
 #' @param constraint orthogonality constraint of the form constraintxFloatWeightEnergyxFloatWeightGrad where constraints is ortho, Stiefel or Grassmann or GrassmannInv
 #' @param covariates any covariates to adjust training matrices. if covariates is set to 'mean' then the rowwise mean will be factored out of each matrix.  this can be a vector e.g. \code{c('center','scale','rank')}. pass the name opt to antspymm_simlr_update_residuals to have the function print the options.
@@ -6015,7 +6015,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     }
     return(result)
   }
-  myenergies = c('cca','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation" )
+  myenergies = c('cca','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation", 'nc' )
   if ( !energy %in% myenergies ) {
     message( paste0("energy should be one of ", paste(myenergies, collapse=", ")))
   }
@@ -6215,6 +6215,8 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     return( list( simlrX=list(v=antsr_spca_features( mats, nsimlrmin ) ) ))
   } else if ( energy == 'lrr' ) {
     energy='lowRankRegression'
+  } else if ( energy == 'nc' ) {
+    energy='normalized_correlation'
   }
   
   #  if ( !doperm )
