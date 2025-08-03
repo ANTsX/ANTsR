@@ -3318,6 +3318,122 @@ gradient_invariant_orthogonality_salad<- function(A) {
 }
 
 
+#' Calculate the Gradient for the Procrustes-like Correlation Objective
+#'
+#' This function computes the gradient of the objective function:
+#' J(V) = tr(U'XV) / ||U'XV||_F
+#' with respect to the loading matrix V.
+#'
+#' The returned gradient is an ascent direction for J, which is a descent
+#' direction for the energy E = -J, suitable for use in the simlr optimizer.
+#'
+#' @param X A centered data matrix for a single modality [n x p].
+#' @param U The current shared basis matrix [n x k], with orthonormal columns.
+#' @param V The current loading matrix for the modality [p x k].
+#'
+#' @return A matrix [p x k] representing the gradient of the objective.
+#'
+.calculate_procrustes_gradient <- function(X, U, V) {
+
+  # --- 1. Input Validation ---
+  stopifnot(is.matrix(X), is.matrix(U), is.matrix(V))
+  stopifnot(nrow(X) == nrow(U), ncol(X) == nrow(V), ncol(U) == ncol(V))
+  
+  # --- 2. Calculate the cross-covariance matrix C ---
+  # C = U' * X * V
+  C <- crossprod(U, X %*% V)
+  k <- ncol(U)
+
+  # --- 3. Calculate the scalar components of the gradient formula ---
+  # Trace of C
+  trace_C <- sum(diag(C))
+  
+  # Squared Frobenius norm of C
+  norm_C_sq <- sum(C^2)
+  
+  # Avoid division by zero if the norm is negligible.
+  # If so, the gradient is effectively zero.
+  if (norm_C_sq < .Machine$double.eps) {
+    return(matrix(0, nrow = nrow(V), ncol = ncol(V)))
+  }
+
+  # --- 4. Assemble the gradient using the derived formula ---
+  # Gradient = (X'U * (||C||_F^2 * I - tr(C) * C)) / ||C||_F^3
+  
+  # Calculate the matrix term in the parentheses: (||C||_F^2 * I - tr(C) * C)
+  matrix_term <- (norm_C_sq * diag(k)) - (trace_C * C)
+  
+  # Calculate the driving term: X'U
+  driving_term <- crossprod(X, U)
+  
+  # The full numerator of the gradient
+  gradient_numerator <- driving_term %*% matrix_term
+  
+  # The denominator of the gradient
+  gradient_denominator <- norm_C_sq^(3/2)
+  
+  # The final gradient
+  gradient <- gradient_numerator / gradient_denominator
+  
+  return(gradient)
+}
+
+
+#' Calculate the Analytical Gradient for the Procrustes Correlation Objective
+#'
+#' This function computes the gradient of the objective J(V) = tr(U'XV) / ||U'XV||_F
+#' with respect to the loading matrix V.
+#'
+#' @param X A centered data matrix for a single modality [n x p].
+#' @param U The current shared basis matrix [n x k], with orthonormal columns.
+#' @param V The current loading matrix for the modality [p x k].
+#'
+#' @return A matrix [p x k] representing the gradient, which is the direction
+#'   of steepest ascent for the objective function J(V).
+.calculate_procrustes_gradient <- function(X, U, V) {
+
+  # --- 1. Input Validation ---
+  stopifnot(is.matrix(X), is.matrix(U), is.matrix(V))
+  stopifnot(nrow(X) == nrow(U), ncol(X) == nrow(V), ncol(U) == ncol(V))
+  
+  # --- 2. Calculate the cross-covariance matrix C and its properties ---
+  # C = U' * X * V
+  C <- crossprod(U, X %*% V)
+  k <- ncol(U)
+
+  # Trace of C
+  trace_C <- sum(diag(C))
+  
+  # Squared Frobenius norm of C
+  norm_C_sq <- sum(C^2)
+  
+  # Handle the edge case where the norm is negligible to avoid division by zero.
+  # If the norm is zero, the gradient is also zero.
+  if (norm_C_sq < .Machine$double.eps) {
+    return(matrix(0, nrow = nrow(V), ncol = ncol(V)))
+  }
+
+  # --- 3. Assemble the Gradient using the derived formula ---
+  # Gradient = (X'U * (||C||_F^2 * I - C' * tr(C))) / ||C||_F^3
+  # Note: The formula from LaTeX had a small error, C should be C', as C is not symmetric
+  
+  # Calculate the matrix term in the parentheses: (||C||_F^2 * I - C' * tr(C))
+  matrix_term <- (norm_C_sq * diag(k)) - (t(C) * trace_C)
+  
+  # Calculate the driving term: X'U
+  driving_term <- crossprod(X, U)
+  
+  # The full numerator of the gradient
+  gradient_numerator <- driving_term %*% matrix_term
+  
+  # The denominator of the gradient
+  gradient_denominator <- norm_C_sq^(3/2)
+  
+  # The final gradient
+  gradient <- gradient_numerator / gradient_denominator
+  
+  return(gradient)
+}
 
 #' Similarity-driven multiview linear reconstruction model (simlr) for N modalities
 #'
@@ -3439,7 +3555,7 @@ simlr <- function(
     lineSearchTolerance = 1e-8,
     randomSeed,
     constraint = c( "Grassmannx1000x1000", "Stiefelx1000x1000", "orthox1000x1000", "none"),
-    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'rv_coefficient'),
+    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation'),
     vmats,
     connectors = NULL,
     optimizationStyle = c("lineSearch", "mixed", "greedy"),
@@ -3732,27 +3848,38 @@ simlr <- function(
     }
     
     # ACC tr( abs( U' * X * V ) ) / ( norm2(U)^0.5 * norm2( X * V )^0.5 )
-    if (energyType == "rv_coefficient") {
-      # This objective is J = tr(U'XV) / ||V'X'XV||_F^0.5
-      # It is self-normalizing and more stable.
+    if (energyType == "normalized_correlation") {
+      # Let's use the variable names from the function scope
+      X <- voxmats[[whichModality]]
+      U <- avgU
+      V <- myenergysearchv      
+      # --- Numerator: tr(V' * X' * U) ---
+      # Step 1: Calculate the intermediate product t(X) %*% U
+      # This is the most efficient way to group the calculation.
+      XtU <- crossprod(X, U)  # crossprod(X, U) is t(X) %*% U
+      # Step 2: Pre-multiply by t(V) to get the final k x k matrix
+      # crossprod(V, XtU) is t(V) %*% XtU
+      inner_matrix_num <- crossprod(V, XtU)
+      # Step 3: The numerator is the trace of this k x k matrix
+      numerator <- sum(diag(inner_matrix_num))
+      # --- Denominator: ||U' * X * V||_F ---
+      # a) First, calculate the projected data matrix: XV = X %*% V
+      projection_XV <- X %*% V
       
-      # Numerator term: tr(U' * X * V)
-      numerator <- sum(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))
+      # b) Then, calculate the inner matrix C = (XV)' * (XV)
+      C <- t(avgU) %*% (projection_XV)
       
-      # Denominator term: ||V'X'XV||_F^0.5
-      inner_term <- t(myenergysearchv) %*% (t(voxmats[[whichModality]]) %*% voxmats[[whichModality]]) %*% myenergysearchv
-      denominator <- sqrt(sum(inner_term^2)) # Frobenius norm
+      # c) The Frobenius norm is the square root of the sum of squared elements of C.
+      frobenius_norm <- sqrt(sum(C^2))
       
-      # Handle potential division by zero
-      if (denominator < .Machine$double.eps) {
-        objective_value <- 0
+      # --- Final Objective ---
+      objective_value <- if (frobenius_norm > .Machine$double.eps) {
+        numerator / frobenius_norm
       } else {
-        objective_value <- numerator / denominator
+        0
       }
-      
-      # Return the negative, because optimize() MINIMIZES
       return(myorthEnergy - objective_value)
-    }
+      }
     # low-dimensional error approximation
     if (energyType == "lowRank") {
       vpro <- voxmats[[whichModality]] %*% (myenergysearchv)
@@ -3800,7 +3927,7 @@ simlr <- function(
   if (verbose) {
     print(paste(
       "initialDataTerm:", initialEnergy,
-      " <o> mixer:", mixAlg, " <o> E: ", energyType
+      " <o> mixer:", mixAlg, " <o> E: ", energyType,  " <o> sparsenessAlg: ", sparsenessAlg, " <o> expBeta: ", expBeta
     ))
   }
   
@@ -3827,32 +3954,9 @@ simlr <- function(
         xv <- x %*% (v)
         return(1.0 / norm(xv - u, "F") * t(x) %*% (xv - u))
       }
-      if (energyType == "rv_coefficient") {
-        # This is the gradient of the minimization problem -J, where J is the
-        # self-normalizing RV-like objective.
-        # The gradient is: -X'U + lambda * (X'X) * V
-        
-        # 1. Calculate lambda = tr(V'X'U) / ||V'X'XV||_F
-        numerator_lambda <- sum(diag(t(v) %*% t(x) %*% u))
-        inner_term_lambda <- t(v) %*% (t(x) %*% x) %*% v
-        denominator_lambda <- sqrt(sum(inner_term_lambda^2)) # Frobenius norm
-        
-        lambda <- if (denominator_lambda > .Machine$double.eps) {
-          numerator_lambda / denominator_lambda
-        } else {
-          0
-        }
-        
-        # 2. Calculate the two parts of the gradient
-        # The gradient of the MAXIMIZATION objective J is: X'U - lambda*(X'X)V
-        # For the main loop's additive update, we need a DESCENT direction for the
-        # MINIMIZATION problem E = -J. A descent direction for E is \nabla J.
-        
-        ascent_direction_J <- (t(x) %*% u) - (lambda * ((t(x) %*% x) %*% v))
-        
-        # We return the ascent direction for J, which is a descent direction for E=-J
-        return(ascent_direction_J)
-      }
+      if (energyType == "normalized_correlation") {
+        return( .calculate_procrustes_gradient(x, u, v) )
+        }      
       if (energyType == "lowRank") {
         #          term1 = 2.0 * t( x ) %*% ( u - x %*% v ) #  norm2( U - X * V )^2
         if (TRUE) {
@@ -4366,7 +4470,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                        repeatedMeasures = NA, lineSearchRange = c(-1e+10, 1e+10), 
                        lineSearchTolerance = 1e-08, randomSeed, constraint = c("none", 
                                                                                "Grassmann", "Stiefel"), 
-                      energyType = c("cca", "regression","normalized", "ucca", "lowRank", "lowRankRegression",'rv_coefficient'), 
+                      energyType = c("cca", "regression","normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation'), 
                        vmats, connectors = NULL, optimizationStyle = c("lineSearch", 
                                                                        "mixed", "greedy"), scale = c("centerAndScale", "sqrtnp", 
                                                                                                      "np", "center", "norm", "none", "impute", "eigenvalue", 
@@ -4685,8 +4789,8 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
   # wilks_test <- WilksLambda(projection1, projection2, cca_result)
   
   # Compute RV coefficient
-  rv_coefficient <- rvcoef(projection1, projection2)
-  adj_rv_coefficient <- adjusted_rvcoef(projection1, projection2)
+  rvcoefval <- rvcoef(projection1, projection2)
+  adj_rvcoefval <- adjusted_rvcoef(projection1, projection2)
   
   # Prepare data for plotting
   cor_data <- as.data.frame(as.table(correlation_matrix))
@@ -4720,10 +4824,11 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
     pairsplot = ggp,
     correlations = correlation_matrix,
     # wilks_test = NA,
-    rv_coefficient = rv_coefficient,
-    adj_rv_coefficient=adj_rv_coefficient
+    rv_coefficient = rvcoefval,
+    adj_rv_coefficient=adj_rvcoefval
   ))
 }
+
 
 #' Take Absolute Value of Unsigned Columns
 #'
@@ -5910,7 +6015,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     }
     return(result)
   }
-  myenergies = c('cca','reg','lrr','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "rv_coefficient" )
+  myenergies = c('cca','reg','lrr','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation" )
   if ( !energy %in% myenergies ) {
     stop( paste0("energy must be one of ", paste(myenergies, collapse=", ")))
   }
@@ -6132,18 +6237,12 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   if ( verbose ) print( paste( "maxits",maxits) )
   ebber = 0.99
   pizzer = rep( "positive", length(mats) )
-  objectiver='cca';mixer = 'pca'
-  if ( energy %in% c('reg','regression') ) {
-    objectiver='regression';mixer = 'ica'
-    if ( missing( constraint ) )
-      constraint='orthox0.1x0.1'
-  } else {
-    if ( missing( constraint ) )
-      constraint='Grassmannx1000x1000'
-  }
-  if ( energy == 'lrr') {
-    objectiver='lowRankRegression';mixer = 'pca'
-  }
+  mixer = 'pca'
+  if ( missing( constraint ) )
+    constraint='Stiefelx0.01x0.01'
+  if ( grepl("reg", energy ) ) {
+    mixer = 'ica'
+  } 
   if ( verbose ) print("sparseness begin")
   sparval = rep( 0.8, length( mats ))
   if ( ! is.null( sparseness ) ) {
@@ -6205,7 +6304,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
                   verbose= !doperm,
                   randomSeed = myseed,
                   mixAlg=mixer,
-                  energyType=objectiver,
+                  energyType=energy,
                   scale = prescaling,
                   sparsenessQuantiles=sparval,
                   expBeta = ebber,
