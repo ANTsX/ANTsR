@@ -6015,7 +6015,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     }
     return(result)
   }
-  myenergies = c('cca','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation", 'nc' )
+  myenergies = c('cca','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation", 'nc', 'acc' )
   if ( !energy %in% myenergies ) {
     message( paste0("energy should be one of ", paste(myenergies, collapse=", ")))
   }
@@ -6217,6 +6217,8 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     energy='lowRankRegression'
   } else if ( energy == 'nc' ) {
     energy='normalized_correlation'
+  } else if ( energy == 'acc' ) {
+    energy='cca'
   }
   
   #  if ( !doperm )
