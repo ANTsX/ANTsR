@@ -6015,9 +6015,9 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     }
     return(result)
   }
-  myenergies = c('cca','reg','lrr','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation" )
+  myenergies = c('cca','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation" )
   if ( !energy %in% myenergies ) {
-    stop( paste0("energy must be one of ", paste(myenergies, collapse=", ")))
+    message( paste0("energy should be one of ", paste(myenergies, collapse=", ")))
   }
   safeclean = function( pattern, x,fixed=FALSE, exclude=TRUE) {
     mysub=grep(pattern,x,fixed=fixed)
@@ -6213,6 +6213,8 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
       message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
     } else nsimlrmin=nsimlr
     return( list( simlrX=list(v=antsr_spca_features( mats, nsimlrmin ) ) ))
+  } else if ( energy == 'lrr' ) {
+    energy='lowRankRegression'
   }
   
   #  if ( !doperm )
