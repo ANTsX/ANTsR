@@ -6252,7 +6252,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
   if (covariate == "lowrank") {
     return(lowrankRowMatrix(data.matrix(mats[[x]]), nc))
   }
-  if (scaleList[j] == "eigenvalue") {
+  if (covariate == "eigenvalue") {
     return( mats[[x]] / sum(ba_svd(mats[[x]])$d))
   }
   if (covariate == "robust") {
@@ -6487,10 +6487,8 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
         if ( x == 1 ) print(paste("training n= ",nrow(mats[[x]])))
         cat(paste0(names(mats)[x],"..."))
       }
-      print("ANUS")
       mats[[x]]=antspymm_simlr_update_residuals( mats, x, mycov, blaster2, allnna, n.comp=nsimlr )
       mats[[x]]=data.matrix(mats[[x]])
-      print("BUTT")
     }}
   for ( x in 1:length(mats)) {
     mycor = cor( mats[[x]] )
