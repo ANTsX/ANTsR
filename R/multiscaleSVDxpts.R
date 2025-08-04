@@ -6232,7 +6232,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 
   covariate_options <- c(
     "whiten", "lowrank", "robust", "center", "rank", "scale", "mean", "centerAndScale", "np",
-    "formula such as T1Hier_resnetGrade + snr + EVR + psnr"
+    "formula such as T1Hier_resnetGrade + snr + EVR + psnr", "eigenvalue"
   )
   
   if (!is.null(opt) && opt == "opt") {
@@ -6250,6 +6250,9 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
   }
   if (covariate == "lowrank") {
     return(lowrankRowMatrix(data.matrix(mats[[x]]), nc))
+  }
+  if (scaleList[j] == "eigenvalue") {
+    return( mats[[x]] / sum(ba_svd(mats[[x]])$d))
   }
   if (covariate == "robust") {
     return(robustMatrixTransform(data.matrix(mats[[x]])))
