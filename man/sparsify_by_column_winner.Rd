@@ -51,23 +51,6 @@ mat <- matrix(c(
   1, -2, 3, -4, 5           # Col 4: Mixed signs
 ), nrow = 5, ncol = 4)
 
-print("Original Matrix:")
-print(round(mat, 2))
-
-# Example 1: Default behavior. First col dense, others sparse by magnitude.
-res1 <- sparsify_by_column_winner(mat)
-print("Result 1: Default (first_col='none', default='either')")
-print(round(res1, 2))
-
-# Example 2: Forcing all columns to be sparse and positive-only.
-# Note cols 1 and 3 become all zero because they have no positive values.
-res2 <- sparsify_by_column_winner(mat, "positive", "positive")
-print("Result 2: All columns sparse ('positive')")
-print(round(res2, 2))
-
-# Example 3: Forcing all columns to be sparse and negative-only.
-res3 <- sparsify_by_column_winner(mat, "negative", "negative")
-print("Result 3: All columns sparse ('negative')")
-print(round(res3, 2))
+res1 <- sparsify_by_column_winner(mat, 'positive', 'positive')
 
 }
