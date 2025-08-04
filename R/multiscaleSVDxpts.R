@@ -1861,7 +1861,7 @@ orthogonalizeAndQSparsify <- function(
     orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg = NA
 ) {
   if (!is.na(sparsenessAlg)) {
-    if ( sparsenessAlg %in% c("spmp","sum_preserving_matrix_partition") ) return( t(sum_preserving_matrix_partition( t(v) )) )
+    if ( sparsenessAlg %in% c("spmp","sum_preserving_matrix_partition") ) return( ( t( sparsify_by_column_winner( t(v), positivity, positivity )) ))
     basic <- sparsenessAlg != "orthorank"
     return(rankBasedMatrixSegmentation(v, sparsenessQuantile, basic = basic, positivity = positivity, transpose = TRUE))
   }
@@ -3176,6 +3176,148 @@ invariant_orthogonality_defect <- function( A )
 }
 
 
+#' Sparsify a Matrix via Column-wise Winner-Take-All
+#'
+#' This function applies a "winner-take-all" sparsity model. For each column,
+#' it finds the single most significant entry based on specified sign constraints
+#' and sets all other entries in that column to zero.
+#'
+#' It includes special handling for the first column, which often represents a
+#' main effect that may not require the same constraints as subsequent components.
+#'
+#' @param X A numeric matrix [p_features x k_components].
+#' @param first_column_constraint How to treat the first column. One of:
+#'   \itemize{
+#'     \item `"none"`: (Default) The first column is left dense (not sparsified).
+#'     \item `"either"`: The entry with the largest absolute value is kept, regardless of sign.
+#'     \item `"positive"`: The largest entry with a positive sign is kept.
+#'     \item `"negative"`: The entry with the largest magnitude (most negative) with a negative sign is kept.
+#'   }
+#' @param default_constraint How to treat all other columns (from the second
+#'   onwards). Takes the same options as `first_column_constraint`.
+#'   Defaults to `"either"`.
+#' @param ensure_row_membership Logical. If TRUE, ensures every feature is
+#'   represented in at least one component by "reviving" the single most
+#'   significant entry for any row that becomes all-zero after sparsity.
+#'
+#' @return A sparsified matrix with the same dimensions as X.
+#' @export
+#' @examples
+#' set.seed(123)
+#' mat <- matrix(c(
+#'   -5, 0.1, 0.2, 0.3, 0.4,    # Col 1: Large negative value
+#'    1, 2.0, 0.1, 0.2, 0.3,    # Col 2: Large positive value
+#'   -1, -0.2, -3, -0.4, -0.5, # Col 3: Only negative values
+#'   1, -2, 3, -4, 5           # Col 4: Mixed signs
+#' ), nrow = 5, ncol = 4)
+#'
+#' print("Original Matrix:")
+#' print(round(mat, 2))
+#'
+#' # Example 1: Default behavior. First col dense, others sparse by magnitude.
+#' res1 <- sparsify_by_column_winner(mat)
+#' print("Result 1: Default (first_col='none', default='either')")
+#' print(round(res1, 2))
+#'
+#' # Example 2: Forcing all columns to be sparse and positive-only.
+#' # Note cols 1 and 3 become all zero because they have no positive values.
+#' res2 <- sparsify_by_column_winner(mat, "positive", "positive")
+#' print("Result 2: All columns sparse ('positive')")
+#' print(round(res2, 2))
+#'
+#' # Example 3: Forcing all columns to be sparse and negative-only.
+#' res3 <- sparsify_by_column_winner(mat, "negative", "negative")
+#' print("Result 3: All columns sparse ('negative')")
+#' print(round(res3, 2))
+#'
+sparsify_by_column_winner <- function(X,
+                                      first_column_constraint = c("none", "either", "positive", "negative"),
+                                      default_constraint = c("either", "positive", "negative"),
+                                      ensure_row_membership = TRUE) {
+
+  # --- 1. Input Validation and Setup ---
+  first_column_constraint <- match.arg(first_column_constraint)
+  # Add "none" as a valid option for the default, in case user wants to pass it
+  valid_defaults <- c("either", "positive", "negative", "none")
+  default_constraint <- match.arg(default_constraint, choices = valid_defaults)
+  
+  stopifnot(is.matrix(X))
+
+  if (nrow(X) == 0 || ncol(X) == 0) return(X)
+
+  p <- nrow(X)
+  k <- ncol(X)
+  
+  X_original <- X
+  Y <- matrix(0, nrow = p, ncol = k) # Initialize output matrix
+
+  # --- Helper function to find the winner index in a single column ---
+  find_winner <- function(column_vec, constraint) {
+    if (constraint == "none") {
+      return(NA_integer_) # Sentinel for "do nothing"
+    }
+    
+    vec_for_max <- switch(constraint,
+      "positive" = {
+        temp <- column_vec; temp[temp <= 0] <- -Inf; temp
+      },
+      "negative" = {
+        # To find the "largest" negative, we find the max of the absolute values
+        # of the negative numbers.
+        temp <- column_vec; temp[temp >= 0] <- -Inf; abs(temp)
+      },
+      "either" = {
+        abs(column_vec)
+      }
+    )
+    
+    # Check if a valid max exists (handles all -Inf case)
+    if (all(is.infinite(vec_for_max))) {
+      return(NA_real_) # Sentinel for "no valid winner found"
+    }
+    
+    return(which.max(vec_for_max))
+  }
+
+  # --- 2. Process all columns based on their constraint ---
+  
+  constraints <- c(first_column_constraint, rep(default_constraint, k - 1))
+  
+  for (j in 1:k) {
+    constraint <- constraints[j]
+    
+    if (constraint == "none") {
+      Y[, j] <- X_original[, j] # Keep the column dense
+      next # Move to the next column
+    }
+    
+    winner_row <- find_winner(X_original[, j], constraint)
+    
+    # If a winner was found (i.e., not NA), place it in the output matrix
+    if (!is.na(winner_row)) {
+      Y[winner_row, j] <- X_original[winner_row, j]
+    }
+    # If NA, Y[,j] remains all zeros, which is the correct behavior.
+  }
+
+  # --- 3. Ensure Every Row Has At Least One Non-Zero Entry (Optional) ---
+  if (ensure_row_membership) {
+    # This logic remains the same, as it's independent of the previous steps
+    zero_row_indices <- which(rowSums(abs(Y), na.rm = TRUE) == 0)
+    
+    if (length(zero_row_indices) > 0) {
+      revived_col_indices <- max.col(abs(X_original[zero_row_indices, , drop = FALSE]),
+                                     ties.method = "first")
+      
+      revived_matrix_indices <- cbind(zero_row_indices, revived_col_indices)
+      Y[revived_matrix_indices] <- X_original[revived_matrix_indices]
+    }
+  }
+
+  return(Y)
+}
+
+
 #' Sum preserving matrix partition
 #'
 #' This function takes a matrix as input and partitions each column such that
@@ -3555,7 +3697,7 @@ simlr <- function(
     lineSearchTolerance = 1e-8,
     randomSeed,
     constraint = c( "Grassmannx1000x1000", "Stiefelx1000x1000", "orthox1000x1000", "none"),
-    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation'),
+    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc'),
     vmats,
     connectors = NULL,
     optimizationStyle = c("lineSearch", "mixed", "greedy"),
@@ -3577,6 +3719,7 @@ simlr <- function(
   if (missing(optimizationStyle)) optimizationStyle <- "lineSearch"
   if (!missing("randomSeed")) set.seed(randomSeed) #  else set.seed( 0 )
   energyType <- match.arg(energyType)
+  if ( energyType == 'nc') energyType <- 'normalized_correlation'
   constraint <- parse_constraint( constraint[1] )
   if ( verbose ) print(constraint)
   optimizationStyle <- match.arg(optimizationStyle)
@@ -3599,16 +3742,16 @@ simlr <- function(
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   #
   constrainG <- function(vgrad, i, constraint) {
-    if (constraint == "Grassmann") {
-      # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
-      # Edelman, A., Arias, T. A., & Smith, S. T. (1998). The geometry of algorithms with orthogonality constraints. SIAM journal on Matrix Analysis and Applications, 20(2), 303-353.
-      projjer <- diag(ncol(vgrad)) - t(vmats[[i]]) %*% vmats[[i]]
-      return(vgrad %*% projjer)
-    }
     if (constraint == "GrassmannInv") {
       # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
       temp = vmats[[i]] / norm( vmats[[i]], "F")
       projjer <- diag(ncol(vgrad)) - t(temp) %*% temp
+      return(vgrad %*% projjer)
+    }
+    if (constraint == "Grassmann") {
+      # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
+      # Edelman, A., Arias, T. A., & Smith, S. T. (1998). The geometry of algorithms with orthogonality constraints. SIAM journal on Matrix Analysis and Applications, 20(2), 303-353.
+      projjer <- diag(ncol(vgrad)) - t(vmats[[i]]) %*% vmats[[i]]
       return(vgrad %*% projjer)
     }
     if (constraint == "Stiefel") { # stiefel manifold
@@ -3631,7 +3774,7 @@ simlr <- function(
     normalized <- TRUE
     ccaEnergy <- FALSE
   }
-  if (energyType == "cca" | energyType == "ucca") {
+  if (energyType == "cca" | energyType == "ucca"| energyType == "acc") {
     normalized <- FALSE
     ccaEnergy <- TRUE
   }
@@ -3803,11 +3946,13 @@ simlr <- function(
   myw <- matrix(rnorm(nc^2), nc, nc) # initialization for fastICA
   getSyME2 <- function(lineSearch, gradient, myw, mixAlg,
                        avgU, whichModality, last_energy=0, 
-                       constraint=c('ortho',0.5,2.0), verbose = FALSE ) {
+                       constraint=c('ortho',0.5,2.0), 
+                       orth_weights=NULL,
+                       verbose = FALSE ) {
     prediction <- 0
     myenergysearchv <- (vmats[[whichModality]] + gradient * lineSearch) # update the i^th v matrix
     if (verbose) {
-      print(paste("getSyME2", whichModality))
+      print(paste("in.getSyME2", whichModality))
       print(dim(vmats[[whichModality]]))
     }
     if (sparsenessQuantiles[whichModality] != 0 ) {
@@ -3822,12 +3967,17 @@ simlr <- function(
       )
     }
     if ( constraint[1] %in% c('ortho','Stiefel','Grassmann','GrassmannInv') ) {
-      # print("Begin orth energy")
       myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
       if ( is.na( last_energy )) last_energy=0.0
       # print(paste("myorthEnergy",myorthEnergy,'last',last_energy))
       if ( abs(last_energy) > .Machine$double.eps & myorthEnergy > .Machine$double.eps ) {
         myorthEnergy = as.numeric(constraint[2]) * myorthEnergy # *(abs(last_energy)/myorthEnergy)
+      }
+      if ( ! is.null(orth_weights) ) {
+        if ( length(orth_weights) == nModalities ) {
+          # if ( verbose ) print(paste("Using orth weights", orth_weights[whichModality]))
+          myorthEnergy = myorthEnergy * orth_weights[whichModality]
+        }
       }
     } else myorthEnergy = 0.0
     if (ccaEnergy) {
@@ -3840,11 +3990,8 @@ simlr <- function(
         print(dim(avgU))
         print(dim(voxmats[[whichModality]]))
       }
-      #      secondterm = sum(abs(diag( t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ))))
-      #      print( paste( "myorthEnergy", myorthEnergy, 'mynorm', mynorm, 'secondterm', secondterm ))
       return( myorthEnergy + mynorm *
                 sum(abs(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))))
-      # t(avgU/t1) %*% ( (voxmats[[whichModality]] %*% myenergysearchv) /t0 ) )) )
     }
     
     # ACC tr( abs( U' * X * V ) ) / ( norm2(U)^0.5 * norm2( X * V )^0.5 )
@@ -3909,6 +4056,7 @@ simlr <- function(
   }
   
   energyPath <- matrix(Inf, nrow = iterations, ncol = nModalities)
+  orthPath = matrix(Inf, nrow = iterations, ncol = nModalities)
   initialEnergy <- 0
   
   for (i in 1:nModalities) {
@@ -3917,7 +4065,7 @@ simlr <- function(
                      avgU = initialUMatrix[[i]],
                      whichModality = i,
                      constraint=constraint,
-                     last_energy=1
+                     last_energy=1, orth_weights = NULL, verbose = FALSE
     )
     initialEnergy <- initialEnergy + loki / nModalities
   }
@@ -3946,7 +4094,7 @@ simlr <- function(
   }
   wm <- "matrix"
   if (ccaEnergy) wm <- "ccag"
-  getSyMGccamse <- function(v, i, myw, mixAlg, whichModel = wm) {
+  getSyMGccamse <- function(v, i, myw, mixAlg, whichModel = wm ) {
     u <- initialUMatrix[[i]]
     x <- voxmats[[i]]
     if (whichModel == "matrix") {
@@ -4079,6 +4227,7 @@ simlr <- function(
   bestTot <- Inf
   lastV <- list()
   lastG <- list()
+  orth_weights = rep(1.0, nModalities)
   for (myit in 1:iterations) {
     errterm <- rep(1.0, nModalities)
     matrange <- 1:nModalities
@@ -4091,7 +4240,7 @@ simlr <- function(
       temperv <- getSyMG(vmats[[i]], i, myw = myw, mixAlg = mixAlg)
       temperv <- constrainG(temperv, i, constraint = constraint[1] )
       
-      useAdam <- FALSE
+      useAdam <- F
       if (useAdam) { 
         if (myit == 1 & i == 1) {
           m <- list()
@@ -4120,9 +4269,14 @@ simlr <- function(
       if ( constraint[1] == 'ortho' ) {
         orthgrad = gradient_invariant_orthogonality_defect( vmats[[i]] )
         orthgradnorm = norm(orthgrad,"F")
-        if ( orthgradnorm > 0 )
-          temperv = temperv - orthgrad * as.numeric(constraint[3])
-        #          temperv = temperv - orthgrad * norm(temperv,"F")/orthgradnorm*as.numeric(constraint[3])
+        if ( orthgradnorm > 0 ) {
+          temperv = temperv - orthgrad * as.numeric(constraint[2])
+          if ( ! is.null(orth_weights) ) {
+            if ( length(orth_weights) == nModalities ) {
+              temperv = temperv - orthgrad * as.numeric(constraint[2]) * orth_weights[i]
+            }
+          }
+        }
       }
       if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
       if (optimizationLogic(energyPath, myit, i)) {
@@ -4136,7 +4290,8 @@ simlr <- function(
                          gradient = temperv,
                          myw = myw, mixAlg = mixAlg,
                          avgU = initialUMatrix[[i]], whichModality = i, 
-                         last_energy=laste, constraint=constraint
+                         last_energy=laste, constraint=constraint, 
+                         orth_weights=orth_weights
         )
         errterm[i] <- temp$objective
         gamma[i] <- temp$minimum
@@ -4147,7 +4302,8 @@ simlr <- function(
           myw = myw, mixAlg = mixAlg,
           avgU = initialUMatrix[[i]],
           whichModality = i, last_energy=laste,
-          constraint=constraint
+          constraint=constraint,
+          orth_weights=orth_weights
         )
       }
       if (errterm[i] <= min(energyPath[, i], na.rm = T) |
@@ -4209,6 +4365,17 @@ simlr <- function(
                        verbose = FALSE
       )
       energyPath[myit, jj] <- loki
+      orthPath[myit, jj] <- invariant_orthogonality_defect(vmats[[jj]])
+      if ( myit <= 2 ) {
+        if ( orthPath[myit, jj] > .Machine$double.eps ) {
+          orth_weights[jj] <- abs(energyPath[myit, jj])/orthPath[myit, jj]
+        } else {
+          orth_weights[jj] <- 1.0
+        }
+      }
+      if ( verbose ){  
+          print(paste("iteration", jj, ' E ', energyPath[myit, jj], ' orth ', orthPath[myit, jj], ' wt ',orth_weights[jj]*as.numeric(constraint[2])))
+          }
     } # matrix loop
     if (myit == 1) {
       bestEv <- mean(energyPath[1, ], na.rm = TRUE)
@@ -6015,7 +6182,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     }
     return(result)
   }
-  myenergies = c('cca','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation", 'nc', 'acc' )
+  myenergies = c('cca','acc','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation", 'nc', 'acc' )
   if ( !energy %in% myenergies ) {
     message( paste0("energy should be one of ", paste(myenergies, collapse=", ")))
   }
