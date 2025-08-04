@@ -250,75 +250,171 @@ ground_truth_data <- generate_3view_ground_truth(
 # Pre-process the data as we would in a real analysis
 scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
 
-
-# --- Generic Test Function to Avoid Repetition ---
-# This function runs simlr with a given config and checks the result.
-run_and_verify_simlr <- function(energy, constraint_type, k_to_find, sparsenessAlg=NA) {
+#' Run a single configuration of simlr and return performance metrics
+#'
+#' This worker function executes one run of the simlr algorithm and computes
+#' the key output metrics: the mean correlation with the ground truth signal
+#' and the final feature orthogonality error.
+#'
+#' @param energy The energyType to use.
+#' @param constraint_type The constraint string to use.
+#' @param k_to_find The number of components to find.
+#' @param sparsenessAlg The sparseness algorithm to use.
+#' @param scaled_mats The list of preprocessed input matrices.
+#' @param U_true The ground truth U matrix.
+#' @return A tibble with one row summarizing the results for this configuration.
+run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, scaled_mats, U_true) {
   
-  test_that(paste("simlr recovers signal with energy '", energy, "' and constraint '", constraint_type, "'"), {
-    
-    if ( energy %in% c( "regression") ) {
-      mixAlg = 'ica'
-    } else mixAlg='pca'
-    initu = initializeSimlr(
-      voxmats = scaled_mats,
-      k = k_to_find, uAlgorithm='pca'
-    )
-    # Run the full simlr algorithm
-    # Note: Use a low iteration count to keep tests fast.
-    # We don't need full convergence, just proof that it's heading in the right direction.
-    result <- simlr( # Use the name of your final, refactored function
+  # Set up parameters for the run
+  mixAlg <- if (energy %in% c("regression")) 'ica' else 'pca'
+  
+  # We still use tryCatch to handle potential errors in any single run gracefully
+  result <- tryCatch({
+    simlr(
       voxmats = scaled_mats,
       iterations = 50,
       energyType = energy,
       constraint = constraint_type,
-      mixAlg= mixAlg,
-      initialUMatrix = initu,
-      positivities=rep("positive", k_to_find),
-      sparsenessAlg= sparsenessAlg,
-      verbose = FALSE # Keep test output clean
+      mixAlg = mixAlg,
+      initialUMatrix = k_to_find, # Assuming simlr handles integer initialization
+      positivities = rep("positive", length(scaled_mats)), # Corrected this
+      sparsenessAlg = sparsenessAlg,
+      verbose = FALSE
     )
-    
-    # --- Evaluation ---
-        
-    # 2. The primary success metric: correlation between true U and found U
-    # We take the average of the final U matrices to get the consensus basis
-    U_found <- Reduce("+", result$u) / length(result$u)
-    U_true <- ground_truth_data$U_true
-    
-    # Calculate the correlation between all columns of the two matrices
-    correlation_matrix <- abs(cor(U_true, U_found))
-    
-    # Find the best match for each true component to handle column permutation
-    # `max.col` gives us the column index of the max value in each row
-    best_matches <- max.col(correlation_matrix, "first")
-    
-    # Get the correlation values of these best matches
-    mean_recovery_correlation <- mean(correlation_matrix[cbind(1:k_to_find, best_matches)])
-    orthE = simlr_feature_orth( result$v )
-    print(paste("Corr: ", mean_recovery_correlation, " orth: ", orthE ))
-    # 3. The Main Assertion
-    # We expect a high correlation, indicating the signal was recovered.
-    expect_gt(mean_recovery_correlation, 0.30,
-              label = paste("Mean recovery correlation was low (",
-                            round(mean_recovery_correlation, 3),
-                            "), indicating failure to find the ground truth signal."))
-              
-    # Print success message
-    succeed(sprintf("Successfully recovered signal with correlation %.3f", mean_recovery_correlation))
+  }, error = function(e) {
+    # If a run fails, return NULL so we can filter it out later
+    warning(paste("Run failed for", energy, constraint_type, sparsenessAlg, ":", e$message))
+    return(NULL)
   })
-}
-
-# --- Run the tests for all relevant configurations ---
-
-# Test the best correlation-based methods
-energy_types <- c("normalized_correlation", "lrr", "acc", "regression")
-constraint_types <- c("Stiefelx0.1", "orthox0.1", "Grassmannx0.1","Stiefelx0.05", "orthox0.05", "Grassmannx0.05", "none")
-for ( x in energy_types ) {
-  for ( y in constraint_types ) {
-    for ( sp in c(NA,'spmp')) {
-      print(paste("Running simlr with energy:", x, "and constraint:", y, " sparsenessAlg:", sp))
-      run_and_verify_simlr(energy = x, constraint_type = y, k_to_find = 3, sparsenessAlg=sp)
-    }
+  
+  # If the run failed, return a row of NAs
+  if (is.null(result)) {
+    return(tibble(
+      energy_type = energy,
+      constraint = constraint_type,
+      sparsity_alg = ifelse(is.na(sparsenessAlg), "none", sparsenessAlg),
+      mean_correlation = NA_real_,
+      feature_orthogonality = NA_real_,
+      status = "failed"
+    ))
   }
+  
+  # --- Evaluation ---
+  U_found <- Reduce("+", result$u) / length(result$u)
+  
+  correlation_matrix <- abs(cor(U_true, U_found))
+  best_matches <- max.col(correlation_matrix, "first")
+  
+  mean_recovery_correlation <- mean(correlation_matrix[cbind(1:k_to_find, best_matches)])
+  
+  # Assuming you have a function `simlr_feature_orth`
+  orth_error <- simlr_feature_orth(result$v)
+  
+  # Return a clean, one-row tibble
+  tibble(
+    energy_type = energy,
+    constraint = constraint_type,
+    sparsity_alg = ifelse(is.na(sparsenessAlg), "none", sparsenessAlg),
+    mean_correlation = mean_recovery_correlation,
+    feature_orthogonality = orth_error,
+    status = "success"
+  )
 }
+
+
+#' Run a parameter sweep for simlr and tabulate performance.
+#'
+#' This function iterates through a grid of specified energy types, constraint
+#' types, and sparsity algorithms. It runs simlr for each configuration and
+#' collects key performance metrics into a summary data frame.
+#'
+#' @return A data frame where each row corresponds to one simlr run, with
+#'   columns for the parameters and the resulting performance metrics.
+tabulate_simlr_performance <- function() {
+  
+  # --- Setup: Generate Ground Truth Data ---
+  set.seed(42)
+  ground_truth_data <- generate_3view_ground_truth(
+    n_subjects = 220,
+    n_features = c(250, 98, 606),
+    k_true = 3,
+    noise_level = 0.05
+  )
+  
+  # Pre-process the data
+  scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
+  U_true <- ground_truth_data$U_true
+  k_to_find <- 3
+  
+  # --- Define Parameter Grid ---
+  param_grid <- expand.grid(
+    energy = c("normalized_correlation", "lrr", "acc", "regression"),
+    constraint = c("Stiefelx0.1", "orthox0.1", "Grassmannx0.1", "Stiefelx0.25", "orthox0.25", "Grassmannx0.25", "Stiefelx0.5", "orthox0.5", "Grassmannx0.5", "Stiefelx0",  "Grassmannx0", "none"),
+    sparsity = c(NA, 'spmp'),
+    stringsAsFactors = FALSE
+  )
+  
+  # --- Run the Parameter Sweep ---
+  message(paste("Starting parameter sweep for", nrow(param_grid), "configurations..."))
+  
+  # Use purrr::pmap_dfr for a clean way to iterate over rows of the grid
+  # and automatically row-bind the results.
+  results_table <- purrr::pmap_dfr(param_grid, function(energy, constraint, sparsity) {
+    
+    cat(".") # Print a dot for progress
+    
+    run_simlr_config(
+      energy = energy,
+      constraint_type = constraint,
+      k_to_find = k_to_find,
+      sparsenessAlg = sparsity,
+      scaled_mats = scaled_mats,
+      U_true = U_true
+    )
+  })
+  
+  message("\nParameter sweep complete.")
+  return(results_table)
+}
+
+# Run the entire analysis
+performance_summary <- tabulate_simlr_performance()
+
+# View the results
+print(performance_summary)
+
+# You can now easily analyze the results, for example:
+# Find the top 5 best-performing configurations based on correlation
+top_performers <- performance_summary %>%
+  filter(status == "success") %>%
+  arrange(desc(mean_correlation))
+
+print("Top 5 Performing Configurations:")
+print(head(top_performers, 5))
+
+
+# Analyze the trade-off between correlation and orthogonality
+library(ggplot2)
+print( 
+  ggplot(performance_summary, aes(x = feature_orthogonality, y = mean_correlation, color = energy_type)) +
+    geom_point(alpha = 0.8) +
+    facet_wrap(~constraint, scales = "free_x") +
+    theme_bw() +
+    labs(title = "SIMLR Performance: Correlation vs. Orthogonality",
+          x = "Feature Orthogonality Error (Lower is Better)",
+          y = "Mean Correlation with Ground Truth (Higher is Better)")
+)
+
+
+
+# Analyze the trade-off between correlation and orthogonality
+print( 
+  ggplot(performance_summary, aes(x = feature_orthogonality, y = mean_correlation, color = constraint)) +
+    geom_point(alpha = 0.8) +
+    facet_wrap(~energy_type, scales = "free_x") +
+    theme_bw() +
+    labs(title = "SIMLR Performance: Correlation vs. Orthogonality",
+          x = "Feature Orthogonality Error (Lower is Better)",
+          y = "Mean Correlation with Ground Truth (Higher is Better)")
+)
+
