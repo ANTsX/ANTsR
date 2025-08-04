@@ -12,7 +12,7 @@ antsr_spca_features(
 )
 }
 \arguments{
-\item{voxmats}{A list of numeric matrices. Each matrix should be subjects × voxels.}
+\item{voxmats}{A list of numeric matrices. Each matrix should be subjects by voxels.}
 
 \item{k}{Integer. Number of components to retain.}
 
@@ -25,9 +25,9 @@ antsr_spca_features(
 - For "default": length-k vector of sparsity parameters.}
 }
 \value{
-A named list of sparse projection matrices (voxels × k).
+A named list of sparse projection matrices (voxels by k).
 }
 \description{
 Applies sparse principal component analysis using the selected backend
-("elasticnet", "PMA", or "sparsepca") to each matrix in a list of subject × voxel data.
+("elasticnet", "PMA", or "sparsepca") to each matrix in a list of subject by voxel data.
 }

@@ -1,3 +1,160 @@
+#' Set Seed Based on Current Time
+#'
+#' This function sets the random number generator seed based on the current time,
+#' with a fine resolution of seconds. This ensures a different seed is used each time
+#' the function is called, provided calls are at least one second apart.
+#'
+#' @return The numeric value used as the seed, derived from the current time in seconds.
+#' @examples
+#' seedValue <- setSeedBasedOnTime()
+#' print(seedValue)
+#' @export
+setSeedBasedOnTime <- function() {
+  op <- options(digits.secs = 8)
+  # Get the current time
+  currentTime <- Sys.time()
+  
+  # Convert the current time to a numeric value
+  # numericTime <- as.numeric(currentTime, units = "secs")
+  numericTime = as.integer(substr(as.character(Sys.time()),22,200))
+  # Use the numeric time as the seed
+  set.seed(numericTime)
+  
+  # Optionally, return the seed value used
+  return(numericTime)
+}
+
+#' Grep entries with a vector search parameters
+#'
+#' @param x a vector of search terms
+#' @param desc target vector of items to be searched
+#' @param intersect boolean whether to use intersection or union otherwise
+#'
+#' @return result of grep (indices of desc that match x)
+#' @author Avants BB
+#' @export
+multigrep <- function( x, desc, intersect=FALSE ) {
+  roisel = c()
+  for ( xx in x ) {
+    if (length(roisel)==0 | !intersect ) {
+      roisel = c( roisel, grep(xx, desc) )
+    } else {
+      roisel = intersect( roisel, grep(xx, desc) )
+    }
+  }
+  return(  roisel )
+}
+
+
+#' Extract column names with concatenated search parameters
+#'
+#' @param x vector of strings
+#' @param demogIn the dataframe with column names to search.
+#' @param exclusions the strings to exclude
+#'
+#' @return vector of string column names
+#' @author Avants BB
+#' @examples
+#'
+#' mydf = generateSubtyperData( 5 )
+#' nms = getNamesFromDataframe( c("it","v"), mydf )
+#'
+#' @export
+getNamesFromDataframe <- function( x, demogIn, exclusions ) {
+  outnames = names(demogIn)[ grep(x[1],names(demogIn ) ) ]
+  if ( length( x ) > 1 )
+  for ( y in x[-1] )
+    outnames = outnames[ grep(y,outnames ) ]
+
+  if ( ! missing( exclusions ) ) {
+    toexclude=grep(exclusions[1],outnames)
+    if ( length(exclusions) > 1 )
+      for ( zz in exclusions[-1] ) {
+        toexclude = c( toexclude, grep(zz,outnames) )
+      }
+    if ( length( toexclude ) > 0 ) outnames = outnames[ -toexclude ]
+  }
+  return( outnames )
+}
+
+
+
+#' Convert left/right variables to a measure of asymmetry
+#'
+#' @param mydataframe dataframe containing relevant variables
+#' @param leftvar left side variable names ie the full names of the variables to asym
+#' @param leftname the variable substring indicating left side
+#' @param rightname the variable substring indicating right side
+#' @param replacer string to replace left with in column names of output
+#' @return fixed x
+#' @author Avants BB
+#' @export
+mapAsymVar <-function( mydataframe, leftvar, leftname='left', rightname='right', replacer='Asym' ) {
+
+  library(stringr)
+  library(purrr)
+  replace_values <- function(input_string) {
+    # Function to modify a number based on the specified rules
+    modify_value <- function(number) {
+      num <- as.numeric(number)
+      if (num >= 1 && num <= 249) {
+        return(as.character(num + 249))
+      } else {
+        return(number)
+      }
+    }
+    
+    # Extract all numbers from the string
+    numbers <- str_extract_all(input_string, "\\b\\d+\\b")[[1]]
+    
+    # Apply the modification to the numbers
+    modified_numbers <- map_chr(numbers, modify_value)
+    
+    # Replace old numbers with new numbers in the string
+    for (i in seq_along(numbers)) {
+      input_string <- str_replace(input_string, numbers[i], modified_numbers[i])
+    }
+
+    return(input_string)
+  }
+
+  rightvar =  gsub( leftname, rightname, leftvar )
+#  for ( k in 1:length(rightvar) ) {
+#    r=rightvar[k]
+#    if ( length( grep("rsfMRI_",r) > 0 ) )
+#      rightvar[k]=replace_values(r)
+#  }
+  hasright = rightvar %in% colnames(mydataframe)
+  temp = mydataframe[,leftvar[hasright]] - mydataframe[,rightvar[hasright]]
+  temp = temp * sign(temp )
+  newnames = gsub(leftname, replacer,leftvar[hasright])
+  mydataframe[,newnames]=temp
+  return( mydataframe )
+}
+
+
+
+#' Convert left/right variables to an average measurement
+#'
+#' @param mydataframe dataframe containing relevant variables
+#' @param leftvar left side variable names ie the full names of the variables to average
+#' @param leftname the variable substring indicating left side
+#' @param rightname the variable substring indicating right side
+#' @param replacer string to replace left with in column names of output
+#' @return fixed x
+#' @author Avants BB
+#' @export
+mapLRAverageVar <- function( mydataframe, leftvar, leftname='left',rightname='right', replacer='LRAVG' ) {
+  rightvar =  gsub( leftname, rightname, leftvar )
+  hasright = rightvar %in% colnames(mydataframe)
+  temp = mydataframe[,leftvar[hasright]] * 0.5 + mydataframe[,rightvar[hasright]] * 0.5
+  newnames = gsub(leftname, replacer,leftvar[hasright])
+  mydataframe[,newnames]=temp
+  return( mydataframe )
+}
+
+
+
 #' No fail SVD function that switches to rsvd if svd fails
 #'
 #' This function performs SVD on a matrix using the built-in svd function in R.
@@ -6064,6 +6221,20 @@ interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, sho
 #' }
 #' @export
 antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna, n.comp, opt = NULL) {
+
+  rank_and_scale <- function(mat) {
+    # Function to rank transform and scale a single column
+    rank_and_scale_col <- function(col) {
+      ranked_col <- rank(col, ties.method = "average") # Rank the column
+      scaled_col <- 2 * ((ranked_col - min(ranked_col)) / (max(ranked_col) - min(ranked_col))) - 1 # Scale to range -1 to 1
+      return(scaled_col)
+    }
+    
+    # Apply the rank_and_scale_col function to each column of the matrix
+    result <- apply(mat, 2, rank_and_scale_col)
+    return(result)
+  }
+
   covariate_options <- c(
     "whiten", "lowrank", "robust", "center", "rank", "scale", "mean", "centerAndScale", "np",
     "formula such as T1Hier_resnetGrade + snr + EVR + psnr"
@@ -6862,11 +7033,11 @@ multiview_pca <- function(views, n_components, sparse = 0.5, max_iter = 100, spa
 #' This function applies random projection to each matrix in a list of voxel matrices.
 #' It uses a fixed seed to ensure reproducibility across runs.
 #'
-#' @param voxmats A list of numeric matrices. Each matrix should have dimensions (subjects × voxels).
+#' @param voxmats A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).
 #' @param k Integer. Number of projection dimensions (features) to generate.
 #' @param seed Integer. Random seed for reproducibility. Default is 42.
 #'
-#' @return A list of projection matrices, each with dimensions (voxels × k).
+#' @return A list of projection matrices, each with dimensions (voxels by k).
 #' @export
 antsr_random_features <- function(voxmats, k, seed = 42) {
   stopifnot(is.list(voxmats))
@@ -6892,10 +7063,10 @@ antsr_random_features <- function(voxmats, k, seed = 42) {
 #' This function applies principal component analysis (PCA) to each matrix in a list
 #' of voxel matrices and returns a list of projection matrices (principal axes).
 #'
-#' @param voxmats A list of numeric matrices. Each matrix should have dimensions (subjects × voxels).
+#' @param voxmats A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).
 #' @param k Integer. Number of principal components to retain.
 #'
-#' @return A named list of projection matrices (voxels × k), one per input matrix.
+#' @return A named list of projection matrices (voxels by k), one per input matrix.
 #' @export
 antsr_pca_features <- function(voxmats, k) {
   stopifnot(is.list(voxmats))
@@ -6904,7 +7075,7 @@ antsr_pca_features <- function(voxmats, k) {
   plist <- lapply(voxmats, function(m) {
     max_components <- min(nrow(m), ncol(m))
     if (k > max_components) {
-      warning(sprintf("Requested k = %d exceeds maximum possible components (%d) for a matrix with dimensions (%d × %d). Using k = %d instead.",
+      warning(sprintf("Requested k = %d exceeds maximum possible components (%d) for a matrix with dimensions (%d by %d). Using k = %d instead.",
                       k, max_components, nrow(m), ncol(m), max_components))
       k_adj <- max_components
     } else {
@@ -6923,9 +7094,9 @@ antsr_pca_features <- function(voxmats, k) {
 #' Generate sparse PCA-based feature projections for a list of voxel matrices
 #'
 #' Applies sparse principal component analysis using the selected backend
-#' ("elasticnet", "PMA", or "sparsepca") to each matrix in a list of subject × voxel data.
+#' ("elasticnet", "PMA", or "sparsepca") to each matrix in a list of subject by voxel data.
 #'
-#' @param voxmats A list of numeric matrices. Each matrix should be subjects × voxels.
+#' @param voxmats A list of numeric matrices. Each matrix should be subjects by voxels.
 #' @param k Integer. Number of components to retain.
 #' @param method Character. Sparse PCA backend to use. One of "default", "elasticnet", "PMA", or "sparsepca".
 #' @param para Sparsity control parameter(s). Interpretation depends on backend:
@@ -6933,7 +7104,7 @@ antsr_pca_features <- function(voxmats, k) {
 #'   - For "PMA": L1 bound on loading vector (scalar or length-k).
 #'   - For "sparsepca": ignored (uses built-in defaults).
 #'   - For "default": length-k vector of sparsity parameters.
-#' @return A named list of sparse projection matrices (voxels × k).
+#' @return A named list of sparse projection matrices (voxels by k).
 #' @export
 antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet", "PMA", "sparsepca"), para = NULL) {
   method <- match.arg(method)

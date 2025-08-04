@@ -7,14 +7,14 @@
 antsr_random_features(voxmats, k, seed = 42)
 }
 \arguments{
-\item{voxmats}{A list of numeric matrices. Each matrix should have dimensions (subjects × voxels).}
+\item{voxmats}{A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).}
 
 \item{k}{Integer. Number of projection dimensions (features) to generate.}
 
 \item{seed}{Integer. Random seed for reproducibility. Default is 42.}
 }
 \value{
-A list of projection matrices, each with dimensions (voxels × k).
+A list of projection matrices, each with dimensions (voxels by k).
 }
 \description{
 This function applies random projection to each matrix in a list of voxel matrices.

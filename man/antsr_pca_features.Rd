@@ -7,12 +7,12 @@
 antsr_pca_features(voxmats, k)
 }
 \arguments{
-\item{voxmats}{A list of numeric matrices. Each matrix should have dimensions (subjects × voxels).}
+\item{voxmats}{A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).}
 
 \item{k}{Integer. Number of principal components to retain.}
 }
 \value{
-A named list of projection matrices (voxels × k), one per input matrix.
+A named list of projection matrices (voxels by k), one per input matrix.
 }
 \description{
 This function applies principal component analysis (PCA) to each matrix in a list
