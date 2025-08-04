@@ -21,8 +21,7 @@ Extract column names with concatenated search parameters
 }
 \examples{
 
-mydf = generateSubtyperData( 5 )
-nms = getNamesFromDataframe( c("it","v"), mydf )
+# nms = getNamesFromDataframe( c("sp","ed"), cars )
 
 }
 \author{

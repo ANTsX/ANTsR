@@ -56,8 +56,7 @@ multigrep <- function( x, desc, intersect=FALSE ) {
 #' @author Avants BB
 #' @examples
 #'
-#' mydf = generateSubtyperData( 5 )
-#' nms = getNamesFromDataframe( c("it","v"), mydf )
+#' # nms = getNamesFromDataframe( c("sp","ed"), cars )
 #'
 #' @export
 getNamesFromDataframe <- function( x, demogIn, exclusions ) {
@@ -94,8 +93,6 @@ getNamesFromDataframe <- function( x, demogIn, exclusions ) {
 #' @export
 mapAsymVar <-function( mydataframe, leftvar, leftname='left', rightname='right', replacer='Asym' ) {
 
-  library(stringr)
-  library(purrr)
   replace_values <- function(input_string) {
     # Function to modify a number based on the specified rules
     modify_value <- function(number) {
@@ -108,25 +105,20 @@ mapAsymVar <-function( mydataframe, leftvar, leftname='left', rightname='right',
     }
     
     # Extract all numbers from the string
-    numbers <- str_extract_all(input_string, "\\b\\d+\\b")[[1]]
+    numbers <- stringr::str_extract_all(input_string, "\\b\\d+\\b")[[1]]
     
     # Apply the modification to the numbers
-    modified_numbers <- map_chr(numbers, modify_value)
-    
+    modified_numbers <- purrr::map_chr(numbers, modify_value)
+
     # Replace old numbers with new numbers in the string
     for (i in seq_along(numbers)) {
-      input_string <- str_replace(input_string, numbers[i], modified_numbers[i])
+      input_string <- stringr::str_replace(input_string, numbers[i], modified_numbers[i])
     }
 
     return(input_string)
   }
 
   rightvar =  gsub( leftname, rightname, leftvar )
-#  for ( k in 1:length(rightvar) ) {
-#    r=rightvar[k]
-#    if ( length( grep("rsfMRI_",r) > 0 ) )
-#      rightvar[k]=replace_values(r)
-#  }
   hasright = rightvar %in% colnames(mydataframe)
   temp = mydataframe[,leftvar[hasright]] - mydataframe[,rightvar[hasright]]
   temp = temp * sign(temp )
