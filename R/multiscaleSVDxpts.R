@@ -3832,7 +3832,7 @@ simlr <- function(
     lineSearchTolerance = 1e-8,
     randomSeed,
     constraint = c( "Grassmannx1000x1000", "Stiefelx1000x1000", "orthox1000x1000", "none"),
-    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc'),
+    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc', 'lrr'),
     vmats,
     connectors = NULL,
     optimizationStyle = c("lineSearch", "mixed", "greedy"),
@@ -3855,6 +3855,7 @@ simlr <- function(
   if (!missing("randomSeed")) set.seed(randomSeed) #  else set.seed( 0 )
   energyType <- match.arg(energyType)
   if ( energyType == 'nc') energyType <- 'normalized_correlation'
+  if ( energyType == 'lrr') energyType <- 'lowRankRegression'
   constraint <- parse_constraint( constraint[1] )
   if ( verbose ) print(constraint)
   optimizationStyle <- match.arg(optimizationStyle)
@@ -6480,14 +6481,16 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   
   if ( verbose) print("setting up regularization")
   for ( mycov in covariates ) {
-    print(paste("adjust by:",mycov))
+    if ( verbose ) print(paste("adjust by:",mycov))
     for ( x in 1:length(mats)) {
       if ( verbose ) {
         if ( x == 1 ) print(paste("training n= ",nrow(mats[[x]])))
         cat(paste0(names(mats)[x],"..."))
       }
+      print("ANUS")
       mats[[x]]=antspymm_simlr_update_residuals( mats, x, mycov, blaster2, allnna, n.comp=nsimlr )
       mats[[x]]=data.matrix(mats[[x]])
+      print("BUTT")
     }}
   for ( x in 1:length(mats)) {
     mycor = cor( mats[[x]] )
