@@ -88,6 +88,9 @@ getNamesFromDataframe <- function( x, demogIn, exclusions ) {
 #' @param replacer string to replace left with in column names of output
 #' @return fixed x
 #' @author Avants BB
+#' @importFrom stringr str_extract_all
+#' @importFrom stringr str_replace
+#' @importFrom purrr map_chr
 #' @export
 mapAsymVar <-function( mydataframe, leftvar, leftname='left', rightname='right', replacer='Asym' ) {
 
