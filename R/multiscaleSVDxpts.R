@@ -4170,9 +4170,9 @@ simlr <- function(
     orthogonalize = FALSE,
     repeatedMeasures = NA,
     lineSearchRange = c(-50.0, 50.0),
-    lineSearchTolerance = 1e-8,
+    lineSearchTolerance = 1e-6,
     randomSeed=0,
-    constraint = c( "Grassmannx0.05", "Stiefelx0.05", "orthox0.05", "none"),
+    constraint = c( "Grassmannx0", "Stiefelx0", "orthox0.01", "none"),
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc', 'lrr'),
     vmats,
     connectors = NULL,
@@ -4482,7 +4482,7 @@ simlr <- function(
 # --- Add this parameter to your main simlr() function signature ---
 # optimizer = c("adam", "sgd_momentum")
 optimizer = "adam"
-# Note: `learning_rate` is no longer needed, as the line search finds it.
+optimizer = 'sgd_momentum'
 
 # --- 1. Setup before the loop ---
 bestTot <- Inf
@@ -4526,7 +4526,7 @@ for (myit in 1:iterations) {
       ortho_grad_unweighted <- gradient_invariant_orthogonality_defect(vmats[[i]])
       orthogonality_gradient <- ortho_grad_unweighted * constraint_weight * orth_weights[i]
     }
-    total_gradient <- similarity_gradient - orthogonality_gradient
+    total_gradient <- similarity_gradient + orthogonality_gradient
     
     # 2. Project to get the Riemannian descent gradient
     riemannian_descent_grad <- constrainG(total_gradient, i, constraint_type)
@@ -4572,7 +4572,7 @@ for (myit in 1:iterations) {
             # Calculate total energy for this candidate
             sim_e <- calculate_simlr_energy(V_candidate, voxmats[[i]], initialUMatrix[[i]], energyType)
             ortho_e <- 0
-            if (constraint_type %in% c('ortho', 'Stiefel', 'Grassmann')) {
+            if (constraint_type %in% c('ortho')) {
               ortho_e <- invariant_orthogonality_defect(V_candidate) * constraint_weight * orth_weights[i]
             }
             
@@ -4600,7 +4600,8 @@ for (myit in 1:iterations) {
           positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
           softThresholding = TRUE, sparsenessAlg = sparsenessAlg)
         }
-      if ( !(energyType %in% c('acc','cca','regression','reg') ) ) {
+      #if ( !(energyType %in% c('acc','cca','regression','reg') ) ) 
+      {
         vmats[[i]]=l1_normalize_features(vmats[[i]])
       }
     } # End V_i update loop
@@ -4933,7 +4934,7 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                        positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
                                                                 "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
                        repeatedMeasures = NA, lineSearchRange = c(-50.0, 50.0), 
-                       lineSearchTolerance = 1e-08, randomSeed, constraint = c("none", 
+                       lineSearchTolerance = 1e-6, randomSeed, constraint = c("none", 
                                                                                "Grassmann", "Stiefel"), 
                       energyType = c("cca", "regression","normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation'), 
                        vmats, connectors = NULL, optimizationStyle = c("lineSearch", 
@@ -6728,14 +6729,14 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   if ( verbose ) print( paste( "maxits",maxits) )
   ebber = 0.99
   pizzer = rep( "positive", length(mats) )
-  mixer = 'pca'
+  mixer = 'svd'
   if ( missing( constraint ) )
-    constraint='Stiefelx0'
+    constraint='none'
   if ( grepl("reg", energy ) ) {
-    mixer = 'svd'
+    mixer = 'ica'
   }
   if ( energy %in% c("lrr", "lowRankRegression","nc","normalized_correlation") ) {
-    mixer = 'pca'
+    mixer = 'svd'
   }
   if ( verbose ) print("sparseness begin")
   sparval = rep( 0.8, length( mats ))

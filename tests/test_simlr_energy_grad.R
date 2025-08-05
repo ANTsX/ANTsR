@@ -350,7 +350,7 @@ tabulate_simlr_performance <- function() {
   # --- Define Parameter Grid ---
   param_grid <- expand.grid(
     energy = c("normalized_correlation", "lrr", "acc", "regression"),
-    constraint = c("Stiefelx0.1", "orthox0.1", "Grassmannx0.1", "Stiefelx0.25", "orthox0.25", "Grassmannx0.25", "Stiefelx0.5", "orthox0.5", "Grassmannx0.5", "Stiefelx0",  "Grassmannx0", "none"),
+    constraint = c("Stiefelx0",  "orthox0.001", "orthox0.01", "orthox0.1", "orthox0.25", "none"),
     sparsity = c(NA, 'spmp'),
     stringsAsFactors = FALSE
   )
