@@ -266,7 +266,7 @@ scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
 run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, scaled_mats, U_true) {
   
   # Set up parameters for the run
-  mixAlg <- if (energy %in% c("regression")) 'ica' else 'pca'
+  mixAlg <- if (energy %in% c("regression")) 'ica' else 'svd'
   initu = initializeSimlr(scaled_mats, k_to_find, uAlgorithm='pca' )
   # We still use tryCatch to handle potential errors in any single run gracefully
   result <- tryCatch({
