@@ -4460,7 +4460,7 @@ simlr <- function(
   gamma <- rep(0.01, nModalities) # Start with a reasonable default step size
 
   # Initialize tracking data frames
-  convergence_df <- tibble(
+  convergence_df <- tibble::tibble(
     iteration = integer(),
     modality = character(),
     total_energy = numeric(),
@@ -6022,6 +6022,7 @@ exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
 #' # predictors <- antspymm_predictors(demographic_data)
 #' @export
 #'
+#' @importFrom tibble tibble
 #' @importFrom rsvd rsvd
 #' @importFrom dplyr filter
 #' @importFrom magrittr %>%
