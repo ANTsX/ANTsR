@@ -3794,12 +3794,102 @@ gradient_invariant_orthogonality_salad<- function(A) {
   return( 1.0 * ( term1 - term2) )
 }
 
-#' Calculate Basic Regression Error
-#' @description The energy E = ||X - UV'||^2. This is a **minimization** objective.
+
+#' Calculate Basic or Centered Regression Error
+#'
+#' Computes the squared Frobenius norm of the residual matrix. It can calculate
+#' either the basic reconstruction error ||X - P||^2 or the centered error
+#' ||X_c - P_c||^2, where P is the prediction U*V'.
+#'
+#' @param X A data matrix [n_subjects x p_features].
+#' @param U A target basis matrix [n_subjects x k_components].
+#' @param V A loading matrix [p_features x k_components].
+#' @param center_prediction Logical. If TRUE, both data and prediction are
+#'   column-centered before the error is calculated. Defaults to TRUE.
+#'
+#' @return A single numeric value representing the reconstruction error.
+#' @keywords internal
+.calculate_regression_error <- function(X, U, V, center_prediction = TRUE) {
+
+  # --- 1. Input Validation ---
+  stopifnot(
+    is.matrix(X) && is.matrix(U) && is.matrix(V),
+    "Matrix dimensions are not compatible." =
+      nrow(X) == nrow(U) && ncol(X) == nrow(V) && ncol(U) == ncol(V)
+  )
+
+  # --- 2. Calculate the Prediction ---
+  prediction <- U %*% t(V)
+
+  # --- 3. Calculate the Residual based on the centering flag ---
+  if (center_prediction) {
+    # Compare the centered versions of the matrices
+    X_centered <- scale(X, center = TRUE, scale = FALSE)
+    prediction_centered <- scale(prediction, center = TRUE, scale = FALSE)
+    residual <- X_centered - prediction_centered
+  } else {
+    # Compare the raw, un-centered matrices
+    residual <- X - prediction
+  }
+
+  # --- 4. Compute the Energy ---
+  # The squared Frobenius norm is the sum of all squared elements.
+  energy <- sum(residual^2)
+
+  return(energy)
+}
+
+#' Calculate Gradient for Basic or Centered Regression Error
+#'
+#' Computes the analytical gradient for the regression error objective. The
+#' formula changes depending on whether the prediction is centered.
+#'
+#' @param X A data matrix [n x p].
+#' @param U A target basis matrix [n x k].
+#' @param V The current loading matrix [p x k].
+#' @param center_prediction Logical. If TRUE, computes the gradient for the
+#'   centered error objective. Defaults to TRUE.
+#'
+#' @return A matrix [p x k] representing a DESCENT direction for the energy.
+#' @keywords internal
+.calculate_regression_gradient <- function(X, U, V, center_prediction = TRUE) {
+
+  # --- 1. Defensive Dimension Checks ---
+  n <- nrow(X); p <- ncol(X); k <- ncol(V)
+  stopifnot(
+    is.matrix(X) && is.matrix(U) && is.matrix(V),
+    nrow(U) == n, ncol(U) == k, nrow(V) == p
+  )
+  
+  # --- 2. Gradient Calculation based on the centering flag ---
+  if (center_prediction) {
+    # The gradient for the centered objective depends on centered X and U.
+    X_centered <- scale(X, center = TRUE, scale = FALSE)
+    U_centered <- scale(U, center = TRUE, scale = FALSE)
+    
+    # Descent direction for ||X_c - U_c V'||^2 is 2 * (X_c' U_c - V U_c' U_c)
+    term1 <- crossprod(X_centered, U_centered)
+    term2 <- V %*% crossprod(U_centered)
+    
+    descent_direction <- 2 * (term1 - term2)
+    
+  } else {
+    # The standard gradient for ||X - UV'||^2
+    term1 <- crossprod(X, U)
+    term2 <- V %*% crossprod(U)
+    
+    descent_direction <- 2 * (term1 - term2)
+  }
+  
+  return(descent_direction)
+}
+
+#' Calculate normed Regression Error
+#' @description The energy E = ||X - UV'||^2/||X + epsilon||. This is a **minimization** objective.
 #' @param center_prediction Logical, controls if prediction is centered relative to X.
 #' @return A single numeric value for the energy.
 #' @keywords internal
-.calculate_regression_error <- function(X, U, V, center_prediction = TRUE) {
+.calculate_normed_regression_error <- function(X, U, V, center_prediction = TRUE) {
 
   # --- 1. Calculate the Prediction ---
   prediction <- U %*% t(V)
@@ -3817,23 +3907,23 @@ gradient_invariant_orthogonality_salad<- function(A) {
   
   # --- 3. Calculate the Normalization Factor ---
   # The factor is the squared Frobenius norm of the ORIGINAL data matrix.
-  norm_X_sq <- sum(X^2)
+  norm_X_sq <- sum(X^2) + 1e0
   if (norm_X_sq < .Machine$double.eps) {
     return(0) # Error is zero if the data is zero
   }
 
   # --- 4. Compute the Final Energy ---
   # The energy is the squared norm of the residual, scaled by the norm of X.
-  energy <- sum(residual^2) / ( norm_X_sq + 1e-2)
+  energy <- sum(residual^2) / ( norm_X_sq )
   
   return(energy)
 }
 
 
-#' Calculate Gradient for Centered and Normalized Regression Error
+#' Calculate Gradient for normed Centered and Normalized Regression Error
 #'
 #' This function computes the mathematically precise analytical gradient for the
-#' energy function defined in `.calculate_regression_error`.
+#' energy function defined in `.calculate_normed_regression_error`.
 #'
 #' @param X A data matrix [n x p].
 #' @param U A target basis matrix [n x k].
@@ -3842,11 +3932,11 @@ gradient_invariant_orthogonality_salad<- function(A) {
 #'
 #' @return A matrix [p x k] representing a DESCENT direction for the energy E.
 #' @keywords internal
-.calculate_regression_gradient <- function(X, U, V, center_prediction = TRUE) {
-  
+.calculate_normed_regression_error_gradient <- function(X, U, V, center_prediction = TRUE) {
+
   # --- 1. Calculate the scaling factor from the energy function ---
   # The factor is 2 / ||X||_F^2.
-  norm_X_sq <- sum(X^2) + 1e-2
+  norm_X_sq <- sum(X^2) + 1e0
   if (norm_X_sq < .Machine$double.eps) {
     return(V * 0) # Gradient is zero if data matrix is zero
   }
@@ -3995,7 +4085,7 @@ calculate_simlr_energy <- function(V, X, U, energy_type) {
   # For maximization objectives, we return the negative value because the
   # optimizer's goal is always to MINIMIZE the returned energy.
   energy <- switch(energy_type,
-    "regression" = .calculate_regression_error(X, U, V, center_prediction = TRUE),
+    "regression" = .calculate_regression_error(X, U, V),
     # "normalized" = .calculate_regression_error(X / sqrt(sum(X^2)), U, V, center_prediction = FALSE),
     # "lowRank" = .calculate_lowrank_norm_error(X, U, V), # Assuming this helper exists
     "lowRankRegression" = .calculate_angular_distance(X, U, V),
@@ -4051,6 +4141,7 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
   
   return(gradient)
 }
+
 
 
 #' Similarity-driven multiview linear reconstruction model (simlr) for N modalities
@@ -4169,8 +4260,8 @@ simlr <- function(
     mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
     orthogonalize = FALSE,
     repeatedMeasures = NA,
-    lineSearchRange = c(-50.0, 50.0),
-    lineSearchTolerance = 1e-2,
+    lineSearchRange = c(-5e5, 5e5),
+    lineSearchTolerance = 1e-1,
     randomSeed=0,
     constraint = c( "Grassmannx0", "Stiefelx0", "orthox0.01", "none"),
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc', 'lrr'),
@@ -4481,8 +4572,12 @@ simlr <- function(
 
 # --- Add this parameter to your main simlr() function signature ---
 # optimizer = c("adam", "sgd_momentum")
-optimizer = "adam"
-optimizer = 'sgd_momentum'
+# if ( energyType %in% c("acc", "cca","reg","regression") ) {
+if ( energyType %in% c("reg","regression") ) {
+  optimizer = "adam" # use adam for cca-like energies
+} else {
+  optimizer = "sgd_momentum" # default to SGD with momentum
+}
 
 # --- 1. Setup before the loop ---
 bestTot <- Inf
@@ -4555,18 +4650,17 @@ for (myit in 1:iterations) {
           f = function(step_size) {
             # Take a step along the proposed descent direction
             V_candidate <- vmats[[i]] - step_size * search_direction
-            
-            # A retraction must be performed inside the line search for manifold methods
-            if (constraint_type %in% c("Stiefel", "Grassmann")) {
-                # V_candidate <- qr.Q(qr(V_candidate))
-            }
-            
+                        
             # Apply sparsity (unchanged from original code)
             if (sparsenessQuantiles[i] != 0) {
               V_candidate <- as.matrix(smoothingMatrices[[i]] %*% V_candidate)
               V_candidate <- orthogonalizeAndQSparsify(V_candidate, sparsenessQuantiles[i] , 
                 positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
                 softThresholding = TRUE, sparsenessAlg = sparsenessAlg)
+            }
+            # A retraction must be performed inside the line search for manifold methods
+            if (constraint_type %in% c("Stiefel", "Grassmann")) {
+              V_candidate=t(sparsify_by_column_winner(t(V_candidate), positivities[i], positivities[i]))
             }
             
             # Calculate total energy for this candidate
@@ -4600,15 +4694,15 @@ for (myit in 1:iterations) {
           positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
           softThresholding = TRUE, sparsenessAlg = sparsenessAlg)
         }
-      #if ( !(energyType %in% c('acc','cca','regression','reg') ) ) 
-      {
+      if ( !(energyType %in% c('regression','reg') ) ) 
+        {
         vmats[[i]]=l1_normalize_features(vmats[[i]])
-      }
+        }
     } # End V_i update loop
 
     # A final retraction is crucial for manifold methods
     if (constraint_type %in% c("Stiefel", "Grassmann")) {
-      vmats = orthogonalize_feature_space( vmats, 500, 0.2, verbose=FALSE )
+      vmats = orthogonalize_feature_space( vmats, 5, 0.2, verbose=FALSE )
       for ( oo in 1:length(vmats)) {
         vmats[[oo]]=t(sparsify_by_column_winner(t(vmats[[oo]]), positivities[oo], positivities[oo]))
       }
@@ -4660,7 +4754,7 @@ for (myit in 1:iterations) {
     iter_results$iteration <- myit
     convergence_df <- dplyr::bind_rows(convergence_df, iter_results)
     # --- Adaptive Weighting: Set weights ONLY at the end of the first iteration ---
-  if (myit <= 3 && constraint_type %in% c('ortho','Stiefel','Grassmann')) {
+  if (myit <= 1 && constraint_type %in% c('ortho')) {
     if (verbose) {
       message("Setting adaptive orthogonality weights based on first few iterations...")
       print("Setting adaptive orthogonality weights based on first few iterations...")
@@ -4933,8 +5027,8 @@ simlrU <- function(
 simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
                        positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
                                                                 "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
-                       repeatedMeasures = NA, lineSearchRange = c(-50.0, 50.0), 
-                       lineSearchTolerance = 1e-2, randomSeed, constraint = c("none", 
+                       repeatedMeasures = NA, lineSearchRange = c(-5e5, 5e5), 
+                       lineSearchTolerance = 1e-1, randomSeed, constraint = c("none", 
                                                                                "Grassmann", "Stiefel"), 
                       energyType = c("cca", "regression","normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation'), 
                        vmats, connectors = NULL, optimizationStyle = c("lineSearch", 
@@ -6729,14 +6823,14 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   if ( verbose ) print( paste( "maxits",maxits) )
   ebber = 0.99
   pizzer = rep( "positive", length(mats) )
-  mixer = 'svd'
+  mixer = 'pca'
   if ( missing( constraint ) )
     constraint='none'
   if ( grepl("reg", energy ) ) {
     mixer = 'ica'
   }
   if ( energy %in% c("lrr", "lowRankRegression","nc","normalized_correlation") ) {
-    mixer = 'svd'
+    mixer = 'pca'
   }
   if ( verbose ) print("sparseness begin")
   sparval = rep( 0.8, length( mats ))

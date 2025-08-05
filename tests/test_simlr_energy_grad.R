@@ -1,6 +1,7 @@
 library(testthat)
 library(numDeriv)
 library(ANTsR)
+set.seed(42)
 # ==============================================================================
 #     Expressive and Communicative Test Suite for SIMLR Gradient Functions
 # ==============================================================================
@@ -242,10 +243,10 @@ preprocess_for_simlr <- function(modality_list) {
 # --- Setup: Generate the data once for all tests in this context ---
 set.seed(42)
 ground_truth_data <- generate_3view_ground_truth(
-  n_subjects = 200,
-  n_features = c(40, 250, 600),
+  n_subjects = 300,
+  n_features = c(40, 565, 60),
   k_true = 3,
-  noise_level = 0.15 # Low noise for a clear signal
+  noise_level = 0.35 # Low noise for a clear signal
 )
 # Pre-process the data as we would in a real analysis
 scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
@@ -266,21 +267,22 @@ scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
 run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, scaled_mats, U_true) {
   
   # Set up parameters for the run
-  mixAlg <- if (energy %in% c("regression")) 'ica' else 'svd'
+  mixAlg <- 'pca'
+  if (energy %in% c("regression")) mixAlg <- 'ica'
   initu = initializeSimlr(scaled_mats, k_to_find, uAlgorithm='pca' )
   # We still use tryCatch to handle potential errors in any single run gracefully
   result <- tryCatch({
     simlr(
       voxmats = scaled_mats,
-      iterations = 50,
+      iterations = 500,
       energyType = energy,
       constraint = constraint_type,
       mixAlg = mixAlg,
       initialUMatrix = initu, # Assuming simlr handles integer initialization
       positivities = rep("positive", length(scaled_mats)), # Corrected this
       sparsenessAlg = sparsenessAlg,
-      randomSeed=0,
-      verbose = FALSE
+      randomSeed=808,
+      verbose = T
     )
   }, error = function(e) {
     # If a run fails, return NULL so we can filter it out later
@@ -350,8 +352,8 @@ tabulate_simlr_performance <- function() {
   # --- Define Parameter Grid ---
   param_grid <- expand.grid(
     energy = c("normalized_correlation", "lrr", "acc", "regression"),
-    constraint = c("Stiefelx0",  "orthox0.001", "orthox0.01", "orthox0.1", "orthox0.25", "none"),
-    sparsity = c(NA, 'spmp'),
+    constraint = c(  "Stiefelx0", "Grassmannx0",  "orthox0.2", "orthox0.15", "orthox0.1","orthox0.08", "orthox0.06","orthox0.04","orthox0.02", "orthox0.01",  "orthox0.005", "orthox0.001", "none" ),
+    sparsity = c(NA), # c(NA, 'spmp'),
     stringsAsFactors = FALSE
   )
   

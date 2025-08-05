@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{.calculate_regression_gradient}
 \alias{.calculate_regression_gradient}
-\title{Calculate Gradient for Centered and Normalized Regression Error}
+\title{Calculate Gradient for Basic or Centered Regression Error}
 \usage{
 .calculate_regression_gradient(X, U, V, center_prediction = TRUE)
 }
@@ -13,13 +13,14 @@
 
 \item{V}{The current loading matrix [p x k].}
 
-\item{center_prediction}{Logical. Should be consistent with the energy function.}
+\item{center_prediction}{Logical. If TRUE, computes the gradient for the
+centered error objective. Defaults to TRUE.}
 }
 \value{
-A matrix [p x k] representing a DESCENT direction for the energy E.
+A matrix [p x k] representing a DESCENT direction for the energy.
 }
 \description{
-This function computes the mathematically precise analytical gradient for the
-energy function defined in `.calculate_regression_error`.
+Computes the analytical gradient for the regression error objective. The
+formula changes depending on whether the prediction is centered.
 }
 \keyword{internal}

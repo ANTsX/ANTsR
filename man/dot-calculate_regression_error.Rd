@@ -2,17 +2,26 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{.calculate_regression_error}
 \alias{.calculate_regression_error}
-\title{Calculate Basic Regression Error}
+\title{Calculate Basic or Centered Regression Error}
 \usage{
 .calculate_regression_error(X, U, V, center_prediction = TRUE)
 }
 \arguments{
-\item{center_prediction}{Logical, controls if prediction is centered relative to X.}
+\item{X}{A data matrix [n_subjects x p_features].}
+
+\item{U}{A target basis matrix [n_subjects x k_components].}
+
+\item{V}{A loading matrix [p_features x k_components].}
+
+\item{center_prediction}{Logical. If TRUE, both data and prediction are
+column-centered before the error is calculated. Defaults to TRUE.}
 }
 \value{
-A single numeric value for the energy.
+A single numeric value representing the reconstruction error.
 }
 \description{
-The energy E = ||X - UV'||^2. This is a **minimization** objective.
+Computes the squared Frobenius norm of the residual matrix. It can calculate
+either the basic reconstruction error ||X - P||^2 or the centered error
+||X_c - P_c||^2, where P is the prediction U*V'.
 }
 \keyword{internal}
