@@ -16,7 +16,7 @@ simlr(
   repeatedMeasures = NA,
   lineSearchRange = c(-1e+10, 1e+10),
   lineSearchTolerance = 1e-08,
-  randomSeed,
+  randomSeed = 0,
   constraint = c("Grassmannx0.05", "Stiefelx0.05", "orthox0.05", "none"),
   energyType = c("cca", "regression", "normalized", "ucca", "lowRank",
     "lowRankRegression", "normalized_correlation", "acc", "nc", "lrr"),
