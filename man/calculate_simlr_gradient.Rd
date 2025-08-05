@@ -4,7 +4,7 @@
 \alias{calculate_simlr_gradient}
 \title{Calculate SIMLR Similarity Gradient}
 \usage{
-calculate_simlr_gradient(V, X, U, energy_type)
+calculate_simlr_gradient(V, X, U, energy_type, clipping_threshold = NULL)
 }
 \arguments{
 \item{V}{The current loading matrix [p x k].}
@@ -14,6 +14,8 @@ calculate_simlr_gradient(V, X, U, energy_type)
 \item{U}{The shared basis matrix [n x k].}
 
 \item{energy_type}{A string specifying the similarity objective.}
+
+\item{clipping_threshold}{Optional numeric value for gradient clipping.}
 }
 \value{
 A matrix [p x k] representing the descent direction.
