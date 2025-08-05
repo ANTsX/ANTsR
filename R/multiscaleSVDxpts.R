@@ -3757,7 +3757,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
   # The final gradient is the difference
   gradient <- term1 - term2
   
-  return(gradient)
+  return( 1.0 * gradient)
 }
 
 #' Calculate Absolute Canonical Covariance
@@ -3791,7 +3791,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
 
   term1 <- (crossprod(X, U) %*% signer) / (norm_U * norm_XV)
   term2 <- (sum_abs_diag * crossprod(X, projection_XV)) / (norm_U * (norm_XV^3))
-  return(term1 - term2)
+  return( 1.0 * ( term1 - term2) )
 }
 
 #' Calculate Basic Regression Error
@@ -3800,23 +3800,80 @@ gradient_invariant_orthogonality_salad<- function(A) {
 #' @return A single numeric value for the energy.
 #' @keywords internal
 .calculate_regression_error <- function(X, U, V, center_prediction = TRUE) {
+
+  # --- 1. Calculate the Prediction ---
   prediction <- U %*% t(V)
+
+  # --- 2. Calculate the Residual ---
   if (center_prediction) {
-    prediction <- scale(prediction, center = TRUE, scale = FALSE)
-    col_means_pred <- attr(prediction, "scaled:center")
-    col_means_X <- colMeans(X)
-    prediction <- sweep(prediction, 2, col_means_pred - col_means_X, "+")
+    # Compare the centered versions of the matrices
+    X_centered <- scale(X, center = TRUE, scale = FALSE)
+    prediction_centered <- scale(prediction, center = TRUE, scale = FALSE)
+    residual <- X_centered - prediction_centered
+  } else {
+    # Compare the raw matrices
+    residual <- X - prediction
   }
-  residual <- X - prediction
-  return(sum(residual^2))
+  
+  # --- 3. Calculate the Normalization Factor ---
+  # The factor is the squared Frobenius norm of the ORIGINAL data matrix.
+  norm_X_sq <- sum(X^2)
+  if (norm_X_sq < .Machine$double.eps) {
+    return(0) # Error is zero if the data is zero
+  }
+
+  # --- 4. Compute the Final Energy ---
+  # The energy is the squared norm of the residual, scaled by the norm of X.
+  energy <- sum(residual^2) / norm_X_sq
+  
+  return(energy)
 }
 
-#' Calculate Gradient for Basic Regression Error
-#' @return A matrix [p x k] representing a **descent direction** for the energy E.
+
+#' Calculate Gradient for Centered and Normalized Regression Error
+#'
+#' This function computes the mathematically precise analytical gradient for the
+#' energy function defined in `.calculate_regression_error`.
+#'
+#' @param X A data matrix [n x p].
+#' @param U A target basis matrix [n x k].
+#' @param V The current loading matrix [p x k].
+#' @param center_prediction Logical. Should be consistent with the energy function.
+#'
+#' @return A matrix [p x k] representing a DESCENT direction for the energy E.
 #' @keywords internal
-.calculate_regression_gradient <- function(X, U, V) {
-  return( 2.0 * (crossprod(X, U) - V %*% crossprod(U)))
+.calculate_regression_gradient <- function(X, U, V, center_prediction = TRUE) {
+  
+  # --- 1. Calculate the scaling factor from the energy function ---
+  # The factor is 2 / ||X||_F^2.
+  norm_X_sq <- sum(X^2)
+  if (norm_X_sq < .Machine$double.eps) {
+    return(V * 0) # Gradient is zero if data matrix is zero
+  }
+  scaling_factor <- 2 / norm_X_sq
+
+  # --- 2. Calculate the un-scaled gradient part ---
+  if (center_prediction) {
+    # The gradient for the centered objective depends on centered X and U.
+    X_centered <- scale(X, center = TRUE, scale = FALSE)
+    U_centered <- scale(U, center = TRUE, scale = FALSE)
+    
+    # Descent direction for ||X_c - U_c V'||^2 is 2 * (X_c' U_c - V U_c' U_c)
+    term1 <- crossprod(X_centered, U_centered)
+    term2 <- V %*% crossprod(U_centered)
+    
+    unscaled_gradient <- term1 - term2
+  } else {
+    # The standard gradient for ||X - UV'||^2
+    unscaled_gradient <- crossprod(X, U) - V %*% crossprod(U)
+  }
+  
+  # --- 3. Apply the scaling factor ---
+  descent_direction <- scaling_factor * unscaled_gradient
+  
+  return(descent_direction)
 }
+
 
 #' Calculate SIMLR Similarity Energy
 #'
@@ -3836,8 +3893,8 @@ calculate_simlr_energy <- function(V, X, U, energy_type) {
   # optimizer's goal is always to MINIMIZE the returned energy.
   energy <- switch(energy_type,
     "regression" = .calculate_regression_error(X, U, V, center_prediction = TRUE),
-    "normalized" = .calculate_regression_error(X / sqrt(sum(X^2)), U, V, center_prediction = FALSE),
-    "lowRank" = .calculate_lowrank_norm_error(X, U, V), # Assuming this helper exists
+    # "normalized" = .calculate_regression_error(X / sqrt(sum(X^2)), U, V, center_prediction = FALSE),
+    # "lowRank" = .calculate_lowrank_norm_error(X, U, V), # Assuming this helper exists
     "lowRankRegression" = .calculate_angular_distance(X, U, V),
     "lrr" = .calculate_angular_distance(X, U, V),
     "cca" = -.calculate_abs_canonical_covariance(X, U, V),
@@ -4005,7 +4062,7 @@ simlr <- function(
     lineSearchRange = c(-1e10, 1e10),
     lineSearchTolerance = 1e-8,
     randomSeed,
-    constraint = c( "Grassmannx0.5x0.5", "Stiefelx0.5x0.5", "orthox0.5x0.5", "none"),
+    constraint = c( "Grassmannx0.05", "Stiefelx0.05", "orthox0.05", "none"),
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc', 'lrr'),
     vmats,
     connectors = NULL,
@@ -4278,151 +4335,7 @@ simlr <- function(
     ))
   }
   
-  getSyMGnorm <- function(v, i, myw, mixAlg) {
-    # norm2( X/norm2(X) - U * V'/norm2(U * V') )^2
-    u <- initialUMatrix[[i]]
-    x <- voxmats[[i]]
-    t0 <- v %*% t(u)
-    t1 <- u %*% t(v)
-    t2 <- norm(t1, "F")
-    t3 <- t(x) / norm(x, "F") - t0 / norm(t0)
-    tr <- function(x) sum(diag(x))
-    gradV <- -2.0 / t2 * t3 %*% u +
-      2.0 / t2^3 * tr(t1 %*% t3) * (t0 %*% u)
-    return(gradV)
-  }
-  wm <- "matrix"
-  if (ccaEnergy) wm <- "ccag"
-  getSyMGccamse <- function(v, i, myw, mixAlg, whichModel = wm ) {
-    u <- initialUMatrix[[i]]
-    x <- voxmats[[i]]
-    if (whichModel == "matrix") {
-      if (energyType == "lowRankRegression") {
-        calculate_angular_distance_gradient <- function(X, U, V) {
-          projection_XV <- X %*% V
-          norm_U <- sqrt(sum(U^2))
-          norm_XV <- sqrt(sum(projection_XV^2))
-          # Handle edge cases
-          if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) {
-            return(matrix(0, nrow = nrow(V), ncol = ncol(V)))
-          }
-          # --- 2. Calculate components of the gradient of J = Cosine Similarity ---
-          # tr(U' * XV)
-          trace_term <- sum(diag(crossprod(U, projection_XV)))
-          
-          # X'U
-          driving_term <- crossprod(X, U)
-          
-          # X'XV
-          braking_term <- crossprod(X, projection_XV)
-          
-          # --- 3. Assemble the gradient of J ---
-          # grad(J) = [ (X'U)||XV||^2 - tr(U'XV)(X'XV) ] / (||U|| * ||XV||^3)
-          grad_J_numerator <- (driving_term * (norm_XV^2)) - (trace_term * braking_term)
-          grad_J_denominator <- norm_U * (norm_XV^3)
-          grad_J <- grad_J_numerator / grad_J_denominator
-          
-          # --- 4. Final Gradient ---
-          # The gradient of E = 2(1 - J) is \nabla E = -2 * \nabla J.
-          # A DESCENT direction for E is -(\nabla E) = 2 * \nabla J.
-          # This is the direction the optimizer should step in.
-          descent_direction <- 2 * grad_J
-          
-          return(descent_direction)
-        }
-        return(calculate_angular_distance_gradient(x, u, v) )
-      }
-      if (energyType == "normalized_correlation") {
-        return( .calculate_procrustes_gradient(x, u, v) )
-        }      
-      if (energyType == "lowRank") {
-        #          term1 = 2.0 * t( x ) %*% ( u - x %*% v ) #  norm2( U - X * V )^2
-        if (TRUE) {
-          t0 <- x %*% v
-          t1 <- norm(t0, "F")
-          t2 <- t((u) / norm(u, "F") - (t0) / t1)
-          tr <- function(x) sum(diag(x))
-          vgrad1 <- -2.0 / t1 * (t2 %*% x)
-          lowx <- (t(x) %*% (x %*% v))
-          vgrad2 <- (2.0 / t1^3 * tr((t2) %*% (t0)) * t(lowx))
-          return(t(vgrad2 + vgrad1))
-        }
-        return(term1)
-      } else {
-        term1 <- 2.0 * (t(x) %*% u - (v %*% t(u)) %*% u)
-      } #  norm2( X - U * V' )^2
-      term2 <- 0
-      if (i %in% connectors[i]) { # d/dV ( norm2( X - X * V * V' )^2 ) => reconstruction energy
-        temp <- (x - (x %*% v) %*% t(v)) # n by p
-        term2 <- (t(temp) %*% (x %*% v)) -
-          t(x) %*% (temp %*% v)
-        term1 <- term1 * 0.5
-      }
-      return(term1 + term2) # + sign( v ) * 0.001 # pure data-term
-    }
-    if (whichModel == "regression") {
-      mdl <- lm(x ~ u)
-      intercept <- coefficients(mdl)[1, ]
-      return(t(coefficients(mdl)[-1, ]) * 0.05) # move toward these coefficients
-    }
-    if (whichModel == "ccag") {
-      # ( v'*X'*u)/( norm2(X*v ) * norm2( u ) ) # CCA objective
-      subg <- function(x, u, v) {
-        t0 <- norm(x %*% v, "F")
-        t1 <- norm(u, "F")
-        mytr <- sum(diag(t(u) %*% (x %*% v)))
-        return(1.0 / (t0 * t1) * (t(x) %*% u) -
-                 1 / (t0^3 * t1) * mytr * (t(x) %*% (x %*% v)) +
-                 sign(v) * 0.0)
-      }
-      # tr( abs( v'*X'*u) )/( norm2(X*v ) * norm2( u ) ) # CCA style objective
-      subg <- function(x, u, v) {
-        t0 <- norm(x %*% v, "F")
-        t1 <- norm(u, "F")
-        t2 <- t(u) %*% (x %*% v)
-        mytr <- sum(abs(diag(t2)))
-        signer <- t2 * 0
-        diag(signer) <- sign(diag(t2))
-        return(1.0 / (t0 * t1) * (t(x) %*% u) %*% signer -
-                 1.0 / (t0^3 * t1) * mytr * (t(x) %*% (x %*% v)) +
-                 sign(v) * 0.0)
-      }
-      
-      #        detg <- function( x, u, v ) {
-      #          t0 = x %*% v
-      #          t1 = norm( t0, "F" )
-      #          t2 = norm( u, "F" )
-      #          term1 = 1.0/(t1*t2) * ( t(x) %*% u ) %*% matlib::adjoint( t(t0) %*% u )
-      #          term2 = det( t( u ) %*% ( x %*% v ) ) / ( t1^3 * t2 ) * ( t(x) %*% ( x %*% v ) )
-      #          return( term1 - term2 )
-      #          }
-      
-      if (energyType == "cca") {
-        return(subg(x, u, v))
-      }
-      gradder <- v * 0
-      for (j in 1:nModalities) {
-        if (j != i) {
-          gradder <- gradder +
-            subg(x, scale(voxmats[[j]] %*% vmats[[j]], TRUE, TRUE), v)
-        }
-      }
-      return(gradder / (nModalities - 1))
-    }
-    if (whichModel == "ccag2") { # THIS IS WIP / not recommended
-      # tr( (x'*X'/norm2(X*x ))*(Y/norm2( Y )))
-      t0 <- x %*% v
-      poster <- t(t(x) %*% t0)
-      preposter <- (t(u) %*% (t0))
-      t1 <- norm(t0, "F")
-      t2 <- norm(u, "F")
-      mytr <- sum(diag(t(u) %*% (x %*% v)))
-      (1.0 / (t1 * t2) * (t(x) %*% u) -
-          1.0 / (t1^3 * t2) * t(preposter %*% poster)) * 0.5
-    }
-  }
-  if (normalized) getSyMG <- getSyMGnorm else getSyMG <- getSyMGccamse
-  
+  # 2.0 Define Logic for Optimization Style
   lineSearchLogic <- function(x) { # energy path is input
     nna <- sum(!is.na(x))
     if (nna <= 1) {
@@ -4545,16 +4458,20 @@ simlr <- function(
       }
       # A final retraction is crucial for manifold methods
       if (constraint_type %in% c("Stiefel", "Grassmann")) {
-      #  vmats[[i]] <- qr.Q(qr(vmats[[i]]))
+        vmats[[i]] = t( sparsify_by_column_winner( t(vmats[[i]]), positivities[i], positivities[i] ))
       }
     } # End V_i update loop
     
     # --- B. Update each U_i matrix (logic is unchanged from original simlr) ---
-    tempU <- lapply(1:nModalities, function(j) scale(voxmats[[j]] %*% vmats[[j]], TRUE, TRUE))
-    vmats <- lapply(1:nModalities, function(j) vmats[[j]] / norm(vmats[[j]], 'F'))
-    updated_Us <- simlrU(initialUMatrix, mixAlg, myw,
-                 orthogonalize = orthogonalize,
-                 connectors = connectors)
+    if ( energyType != 'regression' ) {
+      tempU <- lapply(1:nModalities, function(j) scale(voxmats[[j]] %*% vmats[[j]], TRUE, TRUE))
+      vmats <- lapply(1:nModalities, function(j) vmats[[j]] / norm(vmats[[j]], 'F'))
+      } else {
+        tempU <- lapply(1:nModalities, function(j) voxmats[[j]] %*% vmats[[j]])
+      }
+    updated_Us <- simlrU(tempU, mixAlg, myw,
+                   orthogonalize = orthogonalize,
+                   connectors = connectors)
     # Apply Gram-Schmidt orthogonalization (localGS)
     initialUMatrix <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalize))
 
@@ -4574,7 +4491,7 @@ simlr <- function(
       orth_e <- invariant_orthogonality_defect(V_current)
       
       # If 'ortho' constraint, the total energy includes the weighted penalty
-      if (constraint_type == 'ortho') {
+      if (constraint_type %in% c('ortho')) {
         total_e <- sim_e + orth_e * constraint_weight * orth_weights[mod_idx]
       } else {
         total_e <- sim_e # For Stiefel/Grassmann, the reported energy is just similarity
@@ -4591,8 +4508,11 @@ simlr <- function(
     iter_results$iteration <- myit
     convergence_df <- dplyr::bind_rows(convergence_df, iter_results)
     # --- Adaptive Weighting: Set weights ONLY at the end of the first iteration ---
-  if (myit == 1 && constraint_type == 'ortho') {
-    if (verbose) message("Setting adaptive orthogonality weights based on first iteration...")
+  if (myit == 1 && constraint_type %in% c('ortho','Stiefel','Grassmann')) {
+    if (verbose) {
+      message("Setting adaptive orthogonality weights based on first iteration...")
+      print("Setting adaptive orthogonality weights based on first iteration...")
+    }
     
     for (i in 1:nModalities) {
       # Get the results for this modality from the table we just built
@@ -4625,26 +4545,27 @@ simlr <- function(
   }
   
   # Check for convergence
-  if ((myit - bestRow) > 5) {
-    if(verbose) message("Convergence criteria met: No improvement in 5 iterations.")
+  maxitnoimp=5
+  if ((myit - bestRow) > maxitnoimp) {
+    if(verbose) message(paste("Convergence criteria met: No improvement in", maxitnoimp, "iterations."))
     break
   }
 } # End main optimization loop
 
 
-  names(bestV)=names(voxmats)
-  for ( k in 1:length(voxmats)) {
+names(bestV)=names(voxmats)
+for ( k in 1:length(voxmats)) {
     rownames(bestV[[k]])=colnames(voxmats[[k]])
     colnames(bestV[[k]])=paste0("PC",1:ncol(bestV[[k]]))
   }
   
-  energyPath <- na.omit(energyPath)
-  return(
+energyPath <- na.omit(energyPath)
+return(
     list(
       u = bestU,
       v = bestV,
       initialRandomMatrix = randmat,
-      energyPath = energyPath,
+      energyPath = convergence_df,
       finalError = bestTot,
       totalEnergy = totalEnergy,
       connectors = connectors,
@@ -6654,12 +6575,15 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   if ( verbose ) print( paste( "maxits",maxits) )
   ebber = 0.99
   pizzer = rep( "positive", length(mats) )
-  mixer = 'pca'
+  mixer = 'svd'
   if ( missing( constraint ) )
     constraint='Stiefelx0.01x0.01'
   if ( grepl("reg", energy ) ) {
-    mixer = 'ica'
+    mixer = 'svd'
   } 
+  if ( energy %in% c("lrr", "lowRankRegression","nc","normalized_correlation") ) {
+    mixer = 'svd'
+  }
   if ( verbose ) print("sparseness begin")
   sparval = rep( 0.8, length( mats ))
   if ( ! is.null( sparseness ) ) {
