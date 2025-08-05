@@ -1,6 +1,6 @@
 library(testthat)
 library(numDeriv)
-
+library(ANTsR)
 # ==============================================================================
 #     Expressive and Communicative Test Suite for SIMLR Gradient Functions
 # ==============================================================================
@@ -267,7 +267,7 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
   
   # Set up parameters for the run
   mixAlg <- if (energy %in% c("regression")) 'ica' else 'pca'
-  
+  initu = initializeSimlr(scaled_mats, k_to_find, uAlgorithm='pca' )
   # We still use tryCatch to handle potential errors in any single run gracefully
   result <- tryCatch({
     simlr(
@@ -276,9 +276,10 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
       energyType = energy,
       constraint = constraint_type,
       mixAlg = mixAlg,
-      initialUMatrix = k_to_find, # Assuming simlr handles integer initialization
+      initialUMatrix = initu, # Assuming simlr handles integer initialization
       positivities = rep("positive", length(scaled_mats)), # Corrected this
       sparsenessAlg = sparsenessAlg,
+      randomSeed=0,
       verbose = FALSE
     )
   }, error = function(e) {
@@ -338,7 +339,7 @@ tabulate_simlr_performance <- function() {
     n_subjects = 220,
     n_features = c(250, 98, 606),
     k_true = 3,
-    noise_level = 0.05
+    noise_level = 0.25
   )
   
   # Pre-process the data

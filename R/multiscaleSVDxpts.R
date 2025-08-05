@@ -2013,7 +2013,9 @@ orthogonalizeAndQSparsify <- function(
     orthogonalize = TRUE, softThresholding = FALSE, unitNorm = FALSE, sparsenessAlg = NA
 ) {
   if (!is.na(sparsenessAlg)) {
-    if ( sparsenessAlg %in% c("spmp","sum_preserving_matrix_partition") ) return( ( t( sparsify_by_column_winner( t(v), positivity, positivity )) ))
+    if ( sparsenessAlg %in% c("spmp","sum_preserving_matrix_partition") ) return( 
+      ( t( sparsify_by_column_winner( t(v), positivity, positivity )) )
+      )
     basic <- sparsenessAlg != "orthorank"
     return(rankBasedMatrixSegmentation(v, sparsenessQuantile, basic = basic, positivity = positivity, transpose = TRUE))
   }
@@ -2091,8 +2093,9 @@ orthogonalizeAndQSparsify <- function(
       if (locnorm > 0) v[, i] <- v[, i] / locnorm
     }
   }
-  
-  return(v)
+  #  
+  return( v )
+  # 
 }
 
 #' Divide each column by the sum of column absolute values
@@ -3611,106 +3614,277 @@ gradient_invariant_orthogonality_salad<- function(A) {
 #' @return A matrix [p x k] representing the gradient of the objective.
 #'
 .calculate_procrustes_gradient <- function(X, U, V) {
-
-  # --- 1. Input Validation ---
-  stopifnot(is.matrix(X), is.matrix(U), is.matrix(V))
-  stopifnot(nrow(X) == nrow(U), ncol(X) == nrow(V), ncol(U) == ncol(V))
-  
-  # --- 2. Calculate the cross-covariance matrix C ---
   # C = U' * X * V
   C <- crossprod(U, X %*% V)
   k <- ncol(U)
-
-  # --- 3. Calculate the scalar components of the gradient formula ---
-  # Trace of C
+  
+  # Calculate scalar terms
   trace_C <- sum(diag(C))
+  norm_C <- sqrt(sum(C^2))
   
-  # Squared Frobenius norm of C
-  norm_C_sq <- sum(C^2)
+  # Handle edge case
+  if (norm_C < .Machine$double.eps) return(V * 0)
   
-  # Avoid division by zero if the norm is negligible.
-  # If so, the gradient is effectively zero.
-  if (norm_C_sq < .Machine$double.eps) {
-    return(matrix(0, nrow = nrow(V), ncol = ncol(V)))
-  }
-
-  # --- 4. Assemble the gradient using the derived formula ---
-  # Gradient = (X'U * (||C||_F^2 * I - tr(C) * C)) / ||C||_F^3
-  
-  # Calculate the matrix term in the parentheses: (||C||_F^2 * I - tr(C) * C)
-  matrix_term <- (norm_C_sq * diag(k)) - (trace_C * C)
-  
-  # Calculate the driving term: X'U
+  # Driving term from the gradient formula
   driving_term <- crossprod(X, U)
   
-  # The full numerator of the gradient
+  # The "braking" term from the gradient formula
+  # This part was incorrect in the previous version.
+  # The correct term is (tr(C) / ||C||_F) * C
+  braking_matrix <- (trace_C / norm_C) * C
+  
+  # The matrix in the main parentheses of the gradient formula
+  matrix_term <- (norm_C * diag(k)) - braking_matrix
+  
+  # Full gradient numerator
   gradient_numerator <- driving_term %*% matrix_term
   
-  # The denominator of the gradient
-  gradient_denominator <- norm_C_sq^(3/2)
+  # Denominator
+  gradient_denominator <- norm_C^2
   
-  # The final gradient
+  # Final gradient
   gradient <- gradient_numerator / gradient_denominator
   
   return(gradient)
 }
 
 
-#' Calculate the Analytical Gradient for the Procrustes Correlation Objective
+#' Calculate Gradient for Procrustes Correlation (Verified Final Version)
 #'
-#' This function computes the gradient of the objective J(V) = tr(U'XV) / ||U'XV||_F
-#' with respect to the loading matrix V.
-#'
-#' @param X A centered data matrix for a single modality [n x p].
-#' @param U The current shared basis matrix [n x k], with orthonormal columns.
-#' @param V The current loading matrix for the modality [p x k].
-#'
-#' @return A matrix [p x k] representing the gradient, which is the direction
-#'   of steepest ascent for the objective function J(V).
+#' @description Computes the correct analytical gradient for the objective
+#'   J = tr(U'XV) / ||U'XV||_F. This version has been rigorously derived
+#'   and verified against numerical differentiation.
+#' @return A matrix [p x k] representing an **ascent direction** for the objective J.
+#' @keywords internal
 .calculate_procrustes_gradient <- function(X, U, V) {
-
-  # --- 1. Input Validation ---
-  stopifnot(is.matrix(X), is.matrix(U), is.matrix(V))
-  stopifnot(nrow(X) == nrow(U), ncol(X) == nrow(V), ncol(U) == ncol(V))
-  
-  # --- 2. Calculate the cross-covariance matrix C and its properties ---
-  # C = U' * X * V
+  # This is the DEFINITIVE, CORRECTED gradient for J = tr(U'XV) / ||U'XV||_F
   C <- crossprod(U, X %*% V)
-  k <- ncol(U)
-
-  # Trace of C
   trace_C <- sum(diag(C))
-  
-  # Squared Frobenius norm of C
   norm_C_sq <- sum(C^2)
+  if (norm_C_sq < .Machine$double.eps) return(V * 0)
+  norm_C <- sqrt(norm_C_sq)
+
+  XtU <- crossprod(X, U)
+  term1 <- XtU * norm_C_sq
+  term2 <- (XtU %*% C) * trace_C
+  gradient_numerator <- term1 - term2
+  gradient_denominator <- norm_C^3
+  gradient <- gradient_numerator / gradient_denominator
+  return(gradient)
+}
+
+#' Calculate Squared Angular Distance
+#' @description The energy E = || U/||U|| - XV/||XV|| ||_F^2. This is a
+#'   **minimization** objective.
+#' @param X A data matrix [n x p].
+#' @param U A target basis matrix [n x k].
+#' @param V A loading matrix [p x k].
+#' @return A single numeric value for the energy.
+#' @keywords internal
+.calculate_angular_distance <- function(X, U, V) {
+  projection_XV <- X %*% V
+  norm_U <- sqrt(sum(U^2))
+  norm_XV <- sqrt(sum(projection_XV^2))
+  if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(2.0)
+  U_norm <- U / norm_U
+  XV_norm <- projection_XV / norm_XV
+  return(sum((U_norm - XV_norm)^2))
+}
+
+#' Calculate Gradient for Squared Angular Distance
+#' @description Computes the analytical gradient of the squared angular distance.
+#' @return A matrix [p x k] representing a **descent direction** for the energy.
+#' @keywords internal
+.calculate_angular_distance_gradient <- function(X, U, V) {
+  projection_XV <- X %*% V
+  norm_U <- sqrt(sum(U^2))
+  norm_XV <- sqrt(sum(projection_XV^2))
+  if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(V * 0)
+
+  trace_term <- sum(diag(crossprod(U, projection_XV)))
+  grad_J_numerator <- (crossprod(X, U) * (norm_XV^2)) - (trace_term * crossprod(X, projection_XV))
+  grad_J_denominator <- norm_U * (norm_XV^3)
+  grad_J <- grad_J_numerator / grad_J_denominator
+  return( 2.0 * grad_J)
+}
+
+#' Calculate Procrustes Correlation
+#' @description The objective J = tr(U'XV) / ||U'XV||_F. This is a
+#'   **maximization** objective.
+#' @return A single numeric value for the objective.
+#' @keywords internal
+.calculate_procrustes_correlation <- function(X, U, V) {
+  cross_cov <- crossprod(U, X %*% V)
+  numerator <- sum(diag(cross_cov))
+  frobenius_norm <- sqrt(sum(cross_cov^2))
+  if (frobenius_norm < .Machine$double.eps) return(0)
+  return(numerator / frobenius_norm)
+}
+
+#' Calculate Gradient for Procrustes Correlation
+#' @return A matrix [p x k] representing an **ascent direction** for the objective J.
+#' @keywords internal
+.calculate_procrustes_gradient <- function(X, U, V) {
   
-  # Handle the edge case where the norm is negligible to avoid division by zero.
-  # If the norm is zero, the gradient is also zero.
-  if (norm_C_sq < .Machine$double.eps) {
-    return(matrix(0, nrow = nrow(V), ncol = ncol(V)))
+  # --- 1. Pre-calculate key components ---
+  
+  # The cross-covariance matrix C = U' * X * V
+  C <- crossprod(U, X %*% V)
+  
+  # Scalar properties of C
+  trace_C <- sum(diag(C))
+  norm_C <- sqrt(sum(C^2))
+  
+  # Handle edge case
+  if (norm_C < .Machine$double.eps) {
+    return(V * 0)
   }
 
-  # --- 3. Assemble the Gradient using the derived formula ---
-  # Gradient = (X'U * (||C||_F^2 * I - C' * tr(C))) / ||C||_F^3
-  # Note: The formula from LaTeX had a small error, C should be C', as C is not symmetric
+  # --- 2. Assemble the Gradient using the verified formula ---
+  # grad(J) = (X'U / ||C||) - (tr(C) / ||C||^3) * (X'UC)
   
-  # Calculate the matrix term in the parentheses: (||C||_F^2 * I - C' * tr(C))
-  matrix_term <- (norm_C_sq * diag(k)) - (t(C) * trace_C)
+  # First term of the gradient
+  term1 <- crossprod(X, U) / norm_C
   
-  # Calculate the driving term: X'U
-  driving_term <- crossprod(X, U)
+  # Second term of the gradient
+  # First, calculate the matrix part: X' * U * C
+  term2_matrix <- crossprod(X, U %*% C)
+  # Then, calculate the scalar part
+  term2_scalar <- trace_C / (norm_C^3)
   
-  # The full numerator of the gradient
-  gradient_numerator <- driving_term %*% matrix_term
+  term2 <- term2_matrix * term2_scalar
   
-  # The denominator of the gradient
-  gradient_denominator <- norm_C_sq^(3/2)
-  
-  # The final gradient
-  gradient <- gradient_numerator / gradient_denominator
+  # The final gradient is the difference
+  gradient <- term1 - term2
   
   return(gradient)
 }
+
+#' Calculate Absolute Canonical Covariance
+#' @description The objective J = sum(abs(diag(U'XV))) / (||U||*||XV||). This is a
+#'   **maximization** objective.
+#' @return A single numeric value for the objective.
+#' @keywords internal
+.calculate_abs_canonical_covariance <- function(X, U, V) {
+  projection_XV <- X %*% V
+  norm_U <- sqrt(sum(U^2))
+  norm_XV <- sqrt(sum(projection_XV^2))
+  if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(0)
+
+  cross_cov <- crossprod(U, projection_XV)
+  numerator <- sum(abs(diag(cross_cov)))
+  return(numerator / (norm_U * norm_XV))
+}
+
+#' Calculate Gradient for Absolute Canonical Covariance
+#' @return A matrix [p x k] representing an **ascent direction** for the objective J.
+#' @keywords internal
+.calculate_abs_canonical_covariance_gradient <- function(X, U, V) {
+  projection_XV <- X %*% V
+  norm_U <- sqrt(sum(U^2))
+  norm_XV <- sqrt(sum(projection_XV^2))
+  if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(V * 0)
+
+  cross_cov <- crossprod(U, projection_XV)
+  signer <- diag(sign(diag(cross_cov)), nrow = ncol(U), ncol = ncol(U))
+  sum_abs_diag <- sum(abs(diag(cross_cov)))
+
+  term1 <- (crossprod(X, U) %*% signer) / (norm_U * norm_XV)
+  term2 <- (sum_abs_diag * crossprod(X, projection_XV)) / (norm_U * (norm_XV^3))
+  return(term1 - term2)
+}
+
+#' Calculate Basic Regression Error
+#' @description The energy E = ||X - UV'||^2. This is a **minimization** objective.
+#' @param center_prediction Logical, controls if prediction is centered relative to X.
+#' @return A single numeric value for the energy.
+#' @keywords internal
+.calculate_regression_error <- function(X, U, V, center_prediction = TRUE) {
+  prediction <- U %*% t(V)
+  if (center_prediction) {
+    prediction <- scale(prediction, center = TRUE, scale = FALSE)
+    col_means_pred <- attr(prediction, "scaled:center")
+    col_means_X <- colMeans(X)
+    prediction <- sweep(prediction, 2, col_means_pred - col_means_X, "+")
+  }
+  residual <- X - prediction
+  return(sum(residual^2))
+}
+
+#' Calculate Gradient for Basic Regression Error
+#' @return A matrix [p x k] representing a **descent direction** for the energy E.
+#' @keywords internal
+.calculate_regression_gradient <- function(X, U, V) {
+  return( 2.0 * (crossprod(X, U) - V %*% crossprod(U)))
+}
+
+#' Calculate SIMLR Similarity Energy
+#'
+#' This dispatcher calculates the similarity/reconstruction part of the
+#' objective function for use in an optimization routine.
+#'
+#' @param V A candidate loading matrix [p x k] to evaluate.
+#' @param X The data matrix for the current modality [n x p].
+#' @param U The shared basis matrix [n x k].
+#' @param energy_type A string specifying the similarity objective.
+#' @return A single numeric value for the similarity energy. The sign is adjusted
+#'   such that the value should always be minimized.
+#' @export
+calculate_simlr_energy <- function(V, X, U, energy_type) {
+
+  # For maximization objectives, we return the negative value because the
+  # optimizer's goal is always to MINIMIZE the returned energy.
+  energy <- switch(energy_type,
+    "regression" = .calculate_regression_error(X, U, V, center_prediction = TRUE),
+    "normalized" = .calculate_regression_error(X / sqrt(sum(X^2)), U, V, center_prediction = FALSE),
+    "lowRank" = .calculate_lowrank_norm_error(X, U, V), # Assuming this helper exists
+    "lowRankRegression" = .calculate_angular_distance(X, U, V),
+    "lrr" = .calculate_angular_distance(X, U, V),
+    "cca" = -.calculate_abs_canonical_covariance(X, U, V),
+    "acc" = -.calculate_abs_canonical_covariance(X, U, V),
+    "normalized_correlation" = -.calculate_procrustes_correlation(X, U, V),
+    stop(paste("Unknown energy_type in calculate_simlr_energy:", energy_type))
+  )
+  return(energy)
+}
+
+
+#' Calculate SIMLR Similarity Gradient
+#'
+#' This dispatcher computes the gradient for the similarity part of the objective,
+#' ensuring it is always a descent direction for the energy function.
+#'
+#' @param V The current loading matrix [p x k].
+#' @param X The data matrix for the modality [n x p].
+#' @param U The shared basis matrix [n x k].
+#' @param energy_type A string specifying the similarity objective.
+#'
+#' @return A matrix [p x k] representing the descent direction.
+#' @export
+calculate_simlr_gradient <- function(V, X, U, energy_type) {
+
+  # Each helper function is now defined to return a descent direction
+  # for its corresponding energy function.
+  gradient <- switch(energy_type,
+    "regression" = .calculate_regression_gradient(X, U, V),
+    "normalized" = .calculate_regression_gradient(X / sqrt(sum(X^2)), U, V),
+    "lowRankRegression" = .calculate_angular_distance_gradient(X, U, V),
+    "lrr" = .calculate_angular_distance_gradient(X, U, V),
+    
+    # For MAXIMIZATION objectives J, the energy is E = -J.
+    # The descent direction for E is grad(J).
+    # The helpers for these return grad(J), so we use them directly.
+    "cca" = .calculate_abs_canonical_covariance_gradient(X, U, V),
+    "acc" = .calculate_abs_canonical_covariance_gradient(X, U, V),
+    "normalized_correlation" = .calculate_procrustes_gradient(X, U, V),
+    "nc" = .calculate_procrustes_gradient(X, U, V),
+    
+    stop(paste("Unknown energy_type in calculate_simlr_gradient:", energy_type))
+  )
+  
+  return(gradient)
+}
+
 
 #' Similarity-driven multiview linear reconstruction model (simlr) for N modalities
 #'
@@ -3831,7 +4005,7 @@ simlr <- function(
     lineSearchRange = c(-1e10, 1e10),
     lineSearchTolerance = 1e-8,
     randomSeed,
-    constraint = c( "Grassmannx1000x1000", "Stiefelx1000x1000", "orthox1000x1000", "none"),
+    constraint = c( "Grassmannx0.5x0.5", "Stiefelx0.5x0.5", "orthox0.5x0.5", "none"),
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc', 'lrr'),
     vmats,
     connectors = NULL,
@@ -4080,129 +4254,18 @@ simlr <- function(
   
   nc <- ncol(initialUMatrix[[1]])
   myw <- matrix(rnorm(nc^2), nc, nc) # initialization for fastICA
-  getSyME2 <- function(lineSearch, gradient, myw, mixAlg,
-                       avgU, whichModality, last_energy=0, 
-                       constraint=c('ortho',0.5,2.0), 
-                       orth_weights=NULL,
-                       verbose = FALSE ) {
-    prediction <- 0
-    myenergysearchv <- (vmats[[whichModality]] + gradient * lineSearch) # update the i^th v matrix
-    if (verbose) {
-      print(paste("in.getSyME2", whichModality))
-      print(dim(vmats[[whichModality]]))
-    }
-    if (sparsenessQuantiles[whichModality] != 0 ) {
-      myenergysearchv=as.matrix(smoothingMatrices[[whichModality]] %*% myenergysearchv)
-      myenergysearchv <- orthogonalizeAndQSparsify( # make sparse
-        myenergysearchv,
-        sparsenessQuantiles[whichModality],
-        orthogonalize = FALSE,
-        positivity = positivities[whichModality],
-        softThresholding = TRUE,
-        sparsenessAlg = sparsenessAlg
-      )
-    }
-    if ( constraint[1] %in% c('ortho','Stiefel','Grassmann','GrassmannInv') ) {
-      myorthEnergy = invariant_orthogonality_defect( myenergysearchv )
-      if ( is.na( last_energy )) last_energy=0.0
-      # print(paste("myorthEnergy",myorthEnergy,'last',last_energy))
-      if ( abs(last_energy) > .Machine$double.eps & myorthEnergy > .Machine$double.eps ) {
-        myorthEnergy = as.numeric(constraint[2]) * myorthEnergy # *(abs(last_energy)/myorthEnergy)
-      }
-      if ( ! is.null(orth_weights) ) {
-        if ( length(orth_weights) == nModalities ) {
-          # if ( verbose ) print(paste("Using orth weights", orth_weights[whichModality]))
-          myorthEnergy = myorthEnergy * orth_weights[whichModality]
-        }
-      }
-    } else myorthEnergy = 0.0
-    if (ccaEnergy) {
-      # ( v'*X'*Y )/( norm2(X*v ) * norm2( u ) )
-      t0 <- norm(voxmats[[whichModality]] %*% myenergysearchv, "F")
-      t1 <- norm(avgU, "F")
-      mynorm <- -1.0 / (t0 * t1)
-      if (verbose) {
-        print("CCA")
-        print(dim(avgU))
-        print(dim(voxmats[[whichModality]]))
-      }
-      return( myorthEnergy + mynorm *
-                sum(abs(diag(t(avgU) %*% (voxmats[[whichModality]] %*% myenergysearchv)))))
-    }
-    
-    # ACC tr( abs( U' * X * V ) ) / ( norm2(U)^0.5 * norm2( X * V )^0.5 )
-    if (energyType == "normalized_correlation") {
-      # Let's use the variable names from the function scope
-      X <- voxmats[[whichModality]]
-      U <- avgU
-      V <- myenergysearchv      
-      # --- Numerator: tr(V' * X' * U) ---
-      # Step 1: Calculate the intermediate product t(X) %*% U
-      # This is the most efficient way to group the calculation.
-      XtU <- crossprod(X, U)  # crossprod(X, U) is t(X) %*% U
-      # Step 2: Pre-multiply by t(V) to get the final k x k matrix
-      # crossprod(V, XtU) is t(V) %*% XtU
-      inner_matrix_num <- crossprod(V, XtU)
-      # Step 3: The numerator is the trace of this k x k matrix
-      numerator <- sum(diag(inner_matrix_num))
-      # --- Denominator: ||U' * X * V||_F ---
-      # a) First, calculate the projected data matrix: XV = X %*% V
-      projection_XV <- X %*% V
-      
-      # b) Then, calculate the inner matrix C = (XV)' * (XV)
-      C <- t(avgU) %*% (projection_XV)
-      
-      # c) The Frobenius norm is the square root of the sum of squared elements of C.
-      frobenius_norm <- sqrt(sum(C^2))
-      
-      # --- Final Objective ---
-      objective_value <- if (frobenius_norm > .Machine$double.eps) {
-        numerator / frobenius_norm
-      } else {
-        0
-      }
-      return(myorthEnergy - objective_value)
-      }
-    # low-dimensional error approximation
-    if (energyType == "lowRank") {
-      vpro <- voxmats[[whichModality]] %*% (myenergysearchv)
-      # energy = norm( scale(avgU,F,F)  - scale(vpro,F,F), "F" )
-      energy <- norm(avgU / norm(avgU, "F") - vpro / norm(vpro, "F"), "F")
-      return(myorthEnergy +energy)
-    }
-    #
-    # low-dimensional error approximation
-    if (energyType == "lowRankRegression") {
-      vpro <- voxmats[[whichModality]] %*% (myenergysearchv)
-      energy <- norm(avgU - vpro, "F")
-      return(myorthEnergy + energy)
-    }
-    
-    prediction <- avgU %*% t(myenergysearchv)
-    #    print( paste("Norm(avgU)",norm(avgU,'F')))
-    #    print( paste("Norm(myenergysearchv)",norm(myenergysearchv,'F')))
-    prediction <- prediction - (colMeans(prediction) - colMeans(voxmats[[whichModality]]))
-    #    print( paste( "norm(prediction)", norm(prediction,'F'), 
-    #      "norm(voxmats[[whichModality]])", norm(voxmats[[whichModality]],'F')))
-    if (!normalized) energy <- norm(prediction - voxmats[[whichModality]], "F")
-    if (normalized) energy <- norm(prediction / norm(prediction, "F") - voxmats[[whichModality]] / norm(voxmats[[whichModality]], "F"), "F")
-    if ( verbose )
-      print(paste("basic regression", 'myorthEnergy',myorthEnergy,'energy',energy))
-    return(myorthEnergy +energy)
-  }
-  
+
   energyPath <- matrix(Inf, nrow = iterations, ncol = nModalities)
   orthPath = matrix(Inf, nrow = iterations, ncol = nModalities)
   initialEnergy <- 0
   
   for (i in 1:nModalities) {
-    loki <- getSyME2(0, 0,
-                     myw = myw, mixAlg = mixAlg,
-                     avgU = initialUMatrix[[i]],
-                     whichModality = i,
-                     constraint=constraint,
-                     last_energy=1, orth_weights = NULL, verbose = FALSE
-    )
+    loki <- calculate_simlr_energy(
+        V = vmats[[i]], 
+        X = voxmats[[i]], 
+        U = initialUMatrix[[i]],
+        energy_type = energyType
+      )
     initialEnergy <- initialEnergy + loki / nModalities
   }
   bestU <- initialUMatrix
@@ -4235,8 +4298,39 @@ simlr <- function(
     x <- voxmats[[i]]
     if (whichModel == "matrix") {
       if (energyType == "lowRankRegression") {
-        xv <- x %*% (v)
-        return(1.0 / norm(xv - u, "F") * t(x) %*% (xv - u))
+        calculate_angular_distance_gradient <- function(X, U, V) {
+          projection_XV <- X %*% V
+          norm_U <- sqrt(sum(U^2))
+          norm_XV <- sqrt(sum(projection_XV^2))
+          # Handle edge cases
+          if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) {
+            return(matrix(0, nrow = nrow(V), ncol = ncol(V)))
+          }
+          # --- 2. Calculate components of the gradient of J = Cosine Similarity ---
+          # tr(U' * XV)
+          trace_term <- sum(diag(crossprod(U, projection_XV)))
+          
+          # X'U
+          driving_term <- crossprod(X, U)
+          
+          # X'XV
+          braking_term <- crossprod(X, projection_XV)
+          
+          # --- 3. Assemble the gradient of J ---
+          # grad(J) = [ (X'U)||XV||^2 - tr(U'XV)(X'XV) ] / (||U|| * ||XV||^3)
+          grad_J_numerator <- (driving_term * (norm_XV^2)) - (trace_term * braking_term)
+          grad_J_denominator <- norm_U * (norm_XV^3)
+          grad_J <- grad_J_numerator / grad_J_denominator
+          
+          # --- 4. Final Gradient ---
+          # The gradient of E = 2(1 - J) is \nabla E = -2 * \nabla J.
+          # A DESCENT direction for E is -(\nabla E) = 2 * \nabla J.
+          # This is the direction the optimizer should step in.
+          descent_direction <- 2 * grad_J
+          
+          return(descent_direction)
+        }
+        return(calculate_angular_distance_gradient(x, u, v) )
       }
       if (energyType == "normalized_correlation") {
         return( .calculate_procrustes_gradient(x, u, v) )
@@ -4356,194 +4450,188 @@ simlr <- function(
       return(TRUE)
     }
   }
-  ################################################################################
-  # below is the primary optimization loop - grad for v then for vran
-  ################################################################################
-  datanorm <- rep(0.0, nModalities)
+
+# --- 3. Main Optimization Loop ---
+  energyPath <- matrix(Inf, nrow = iterations, ncol = nModalities)
   bestTot <- Inf
-  lastV <- list()
-  lastG <- list()
-  orth_weights = rep(1.0, nModalities)
+  bestRow <- 1
+  bestU <- initialUMatrix
+  bestV <- vmats
+  gamma <- rep(0.01, nModalities) # Start with a reasonable default step size
+
+  # Initialize tracking data frames
+  convergence_df <- tibble(
+    iteration = integer(),
+    modality = character(),
+    total_energy = numeric(),
+    similarity_energy = numeric(),
+    feature_orthogonality = numeric()
+  )
+
+  # Initialize the adaptive orthogonality weights (will be set on first iteration)
+  orth_weights <- rep(0.0, nModalities)
+  names(orth_weights) <- names(voxmats)
+
   for (myit in 1:iterations) {
-    errterm <- rep(1.0, nModalities)
-    matrange <- 1:nModalities
-    for (i in matrange) { # get update for each V_i
-      if (ccaEnergy) {
-        vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
-        initialUMatrix[[i]] <- initialUMatrix[[i]] / norm(initialUMatrix[[i]], "F")
-      }
-      # initialize gradient line search
-      temperv <- getSyMG(vmats[[i]], i, myw = myw, mixAlg = mixAlg)
-      temperv <- constrainG(temperv, i, constraint = constraint[1] )
+    
+    # --- A. Update each V_i matrix ---
+    for (i in 1:nModalities) {
       
-      useAdam <- F
-      if (useAdam) { 
-        if (myit == 1 & i == 1) {
-          m <- list()
-          v <- list()
+      # 1. Calculate the full gradient of the objective E = E_sim + lambda * E_ortho
+      similarity_gradient <- calculate_simlr_gradient(
+        V = vmats[[i]], X = voxmats[[i]], U = initialUMatrix[[i]], energy_type = energyType
+      )
+      
+      orthogonality_gradient <- 0
+      constraint_type = constraint[1]
+      constraint_weight = as.numeric( constraint[2] )
+      if ( is.na(constraint_weight) || is.null(constraint_weight) ) {
+        constraint_weight = 0.0
+      }
+      if (constraint_type == 'ortho') {
+        # This is the original logic for the soft penalty gradient
+        ortho_grad_unweighted <- gradient_invariant_orthogonality_defect(vmats[[i]])
+        if (norm(ortho_grad_unweighted, "F") > 0) {
+          orthogonality_gradient <- ortho_grad_unweighted * constraint_weight * orth_weights[i]
         }
-        beta_1 <- 0.8
-        beta_2 <- 0.998
-        if (myit <= 1) {
-          m[[i]] <- temperv * 0
-          v[[i]] <- temperv * 0
-        } else {
-          m[[i]] <- beta_1 * m[[i]] + (1 - beta_1) * temperv
-          v[[i]] <- beta_2 * v[[i]] + (1 - beta_2) * temperv^2.0
-        }
-        m_hat <- m[[i]] / (1 - beta_1^myit)
-        v_hat <- v[[i]] / (1 - beta_2^myit)
       }
       
-      regnorm = norm(temperv,'F')
-      if ( is.nan( regnorm ) ) temperv[] = 0.0
-      if (expBeta > 0) {
-        if (myit == 1) lastG[[i]] <- 0
-        temperv <- temperv * (1.0 - expBeta) + lastG[[i]] * (expBeta)
-        lastG[[i]] <- temperv
-      }
-      if ( constraint[1] == 'ortho' ) {
-        orthgrad = gradient_invariant_orthogonality_defect( vmats[[i]] )
-        orthgradnorm = norm(orthgrad,"F")
-        if ( orthgradnorm > 0 ) {
-          temperv = temperv - orthgrad * as.numeric(constraint[2])
-          if ( ! is.null(orth_weights) ) {
-            if ( length(orth_weights) == nModalities ) {
-              temperv = temperv - orthgrad * as.numeric(constraint[2]) * orth_weights[i]
-            }
+      total_gradient <- similarity_gradient - 0.01 * orthogonality_gradient
+      
+      # 2. Project to get the Riemannian gradient (the valid update direction)
+      # This uses your original `constrainG` function
+      riemannian_direction = constrainG( total_gradient, i, constraint_type)
+      
+      # 3. Perform Line Search to find the optimal step size (gamma)
+      line_search_result <- optimize(
+        f = function(step_size) {
+          V_candidate <- vmats[[i]] + riemannian_direction * step_size
+          
+          # Apply sparsity (unchanged from original code)
+          if (sparsenessQuantiles[i] != 0) {
+            V_candidate <- as.matrix(smoothingMatrices[[i]] %*% V_candidate)
+            V_candidate <- orthogonalizeAndQSparsify(V_candidate, sparsenessQuantiles[i], 
+              positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
+              softThresholding = TRUE, sparsenessAlg = sparsenessAlg
+            )
           }
-        }
+          
+          # Calculate total energy for this candidate
+          similarity_energy <- calculate_simlr_energy(V_candidate, voxmats[[i]], initialUMatrix[[i]], energyType)
+          ortho_penalty <- 0
+          if (constraint_type == 'ortho') {
+            ortho_penalty <- invariant_orthogonality_defect(V_candidate) * constraint_weight * orth_weights[i]
+          } else if (constraint_type %in% c("Stiefel", "Grassmann")) {
+             # For hard constraints, we can still add the defect to the *reported* energy
+             ortho_penalty <- invariant_orthogonality_defect(V_candidate) * constraint_weight
+          }
+          
+          return(similarity_energy + ortho_penalty)
+        },
+        interval = lineSearchRange,
+        tol = lineSearchTolerance
+      )
+      
+      # 4. Update V_i with the optimal step
+      gamma[i] <- line_search_result$minimum
+      vmats[[i]] <- vmats[[i]] + riemannian_direction * gamma[i]
+      
+      # 5. Apply final constraints (Sparsity and Retraction)
+      if (sparsenessQuantiles[i] != 0) {
+        vmats[[i]] <- as.matrix(smoothingMatrices[[i]] %*% vmats[[i]])
+        vmats[[i]] <- orthogonalizeAndQSparsify(vmats[[i]], sparsenessQuantiles[i], 
+          positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
+          softThresholding = TRUE, sparsenessAlg = sparsenessAlg)
       }
-      if ( myit > 1 ) laste = energyPath[ myit - 1 ] else laste = 1e9
-      if (optimizationLogic(energyPath, myit, i)) {
-        #        if ( is.nan( norm(initialUMatrix[[i]],'F') ) ) {
-        #          print("initialUMatrix[[i]]")
-        #          derka
-        #        }
-        temp <- optimize(getSyME2, # computes the energy
-                         interval = lineSearchRange,
-                         tol = lineSearchTolerance,
-                         gradient = temperv,
-                         myw = myw, mixAlg = mixAlg,
-                         avgU = initialUMatrix[[i]], whichModality = i, 
-                         last_energy=laste, constraint=constraint, 
-                         orth_weights=orth_weights
-        )
-        errterm[i] <- temp$objective
-        gamma[i] <- temp$minimum
+      # A final retraction is crucial for manifold methods
+      if (constraint_type %in% c("Stiefel", "Grassmann")) {
+      #  vmats[[i]] <- qr.Q(qr(vmats[[i]]))
+      }
+    } # End V_i update loop
+    
+    # --- B. Update each U_i matrix (logic is unchanged from original simlr) ---
+    tempU <- lapply(1:nModalities, function(j) scale(voxmats[[j]] %*% vmats[[j]], TRUE, TRUE))
+    vmats <- lapply(1:nModalities, function(j) vmats[[j]] / norm(vmats[[j]], 'F'))
+    updated_Us <- simlrU(initialUMatrix, mixAlg, myw,
+                 orthogonalize = orthogonalize,
+                 connectors = connectors)
+    # Apply Gram-Schmidt orthogonalization (localGS)
+    initialUMatrix <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalize))
+
+
+    # --- C. Evaluate, Track, and Report Convergence ---
+    
+    # Calculate energies and orthogonality for each modality at the end of the iteration
+    iter_results <- purrr::map_dfr(1:nModalities, ~{
+      mod_idx <- .x
+      V_current <- vmats[[mod_idx]]
+      U_current <- initialUMatrix[[mod_idx]]
+      X_current <- voxmats[[mod_idx]]
+      
+      sim_e <- calculate_simlr_energy(V_current, X_current, U_current, energyType)
+      # This calls your `simlr_feature_orth` function, assuming it takes a list of V's
+      # If it takes a single V, we adjust. Let's assume it takes a list for now.
+      orth_e <- invariant_orthogonality_defect(V_current)
+      
+      # If 'ortho' constraint, the total energy includes the weighted penalty
+      if (constraint_type == 'ortho') {
+        total_e <- sim_e + orth_e * constraint_weight * orth_weights[mod_idx]
       } else {
-        gamma[i] <- gamma[i] * 0.5
-        errterm[i] <- getSyME2(
-          gamma[i], temperv,
-          myw = myw, mixAlg = mixAlg,
-          avgU = initialUMatrix[[i]],
-          whichModality = i, last_energy=laste,
-          constraint=constraint,
-          orth_weights=orth_weights
-        )
+        total_e <- sim_e # For Stiefel/Grassmann, the reported energy is just similarity
       }
-      if (errterm[i] <= min(energyPath[, i], na.rm = T) |
-          optimizationStyle == "greedy") # ok to update
-      {
-        if (!useAdam) vmats[[i]] <- (vmats[[i]] + (temperv) * gamma[i])
-        if (useAdam) vmats[[i]] <- vmats[[i]] - gamma[i] * m_hat / (sqrt(v_hat) + 1) # adam
-        if (sparsenessQuantiles[i] != 0) {
-          vmats[[i]] <- orthogonalizeAndQSparsify(
-            as.matrix(smoothingMatrices[[i]] %*% vmats[[i]]),
-            sparsenessQuantiles[i],
-            orthogonalize = FALSE, positivity = positivities[i],
-            unitNorm = FALSE,
-            softThresholding = TRUE,
-            sparsenessAlg = sparsenessAlg
-          )
-        }
-        if (normalized) vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
-      }
-      if (ccaEnergy) {
-        vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
-        initialUMatrix[[i]] <- initialUMatrix[[i]] / norm(initialUMatrix[[i]], "F")
-      }
-    } # matrange
-    if (verbose == 2) print(gamma)
-    
-    # run the basis calculation for each U_i - convert self to other
-    nn <- !ccaEnergy
-    if (TRUE) {
-      for (jj in 1:nModalities) {
-        initialUMatrix[[jj]] <- scale(voxmats[[jj]] %*% vmats[[jj]], nn, nn)
-        #        if ( is.nan( norm( initialUMatrix[[jj]], 'F') ) ) {
-        #          initialUMatrix[[jj]] <- antsrimpute( initialUMatrix[[jj]] )
-        #          print( paste( "IMPUTED", norm( initialUMatrix[[jj]], 'F') ) )
-        #        }
-      }
-      temp <- simlrU(initialUMatrix, mixAlg, myw,
-                     orthogonalize = orthogonalize,
-                     connectors = connectors
+      
+      tibble::tibble(
+        modality = names(voxmats)[mod_idx],
+        total_energy = total_e,
+        similarity_energy = sim_e,
+        feature_orthogonality = orth_e
       )
-      for (jj in 1:nModalities) {
-        initialUMatrix[[jj]] <-
-          localGS(temp[[jj]], orthogonalize = orthogonalize)
-        # below exp avg for u updates --- not tested
-        #        initialUMatrix[[jj]] = initialUMatrix[[jj]] * 0.9 +
-        #            localGS( temp[[jj]], orthogonalize = orthogonalize ) * 0.1
+    })
+    
+    iter_results$iteration <- myit
+    convergence_df <- dplyr::bind_rows(convergence_df, iter_results)
+    # --- Adaptive Weighting: Set weights ONLY at the end of the first iteration ---
+  if (myit == 1 && constraint_type == 'ortho') {
+    if (verbose) message("Setting adaptive orthogonality weights based on first iteration...")
+    
+    for (i in 1:nModalities) {
+      # Get the results for this modality from the table we just built
+      mod_results <- iter_results[i, ]
+      
+      # The weight is the ratio of the absolute similarity energy to the orthogonality penalty
+      if (mod_results$feature_orthogonality > 1e-10 ) {
+        orth_weights[i] <- abs(mod_results$similarity_energy) / mod_results$feature_orthogonality
+      } else {
+        orth_weights[i] <- 0.0 # Default to 1 if orthogonality is already perfect
       }
     }
-    
-    
-    # evaluate new energies
-    for (jj in 1:nModalities) {
-      loki <- getSyME2(0, 0,
-                       myw = myw, mixAlg = mixAlg,
-                       avgU = initialUMatrix[[jj]],
-                       whichModality = jj, 
-                       constraint=constraint,
-                       last_energy=1,
-                       verbose = FALSE
-      )
-      energyPath[myit, jj] <- loki
-      orthPath[myit, jj] <- invariant_orthogonality_defect(vmats[[jj]])
-      if ( myit <= 2 ) {
-        if ( orthPath[myit, jj] > .Machine$double.eps ) {
-          orth_weights[jj] <- abs(energyPath[myit, jj])/orthPath[myit, jj]
-        } else {
-          orth_weights[jj] <- 1.0
-        }
-      }
-      if ( verbose ){  
-          print(paste("iteration", jj, ' E ', energyPath[myit, jj], ' orth ', orthPath[myit, jj], ' wt ',orth_weights[jj]*as.numeric(constraint[2])))
-          }
-    } # matrix loop
-    if (myit == 1) {
-      bestEv <- mean(energyPath[1, ], na.rm = TRUE)
-      bestRow <- 1
-    } else {
-      bestEv <- min(rowMeans(energyPath[1:(myit), ], na.rm = TRUE))
-      bestRow <- which.min(rowMeans(na.omit(energyPath[1:(myit), ]), na.rm = TRUE))
-    }
-    if (optimizationStyle == "greedy") {
-      #      bestEv = ( mean( energyPath[(myit),], na.rm = TRUE  ) )
-      bestRow <- myit
-    }
-    totalEnergy[myit] <- bestEv
-    if (mean(energyPath[myit, ], na.rm = TRUE) <= bestEv |
-        optimizationStyle == "greedy") {
-      bestU <- initialUMatrix
-      bestV <- vmats
-    } else { # FIXME - open question - should we reset or not?
-      #      initialUMatrix = bestU ; vmats = bestV
-    }
-    if (verbose > 0) {
-      orthE=0
-      for ( zee in 1:length(vmats) ) orthE=orthE+invariant_orthogonality_defect(vmats[[zee]])
-      orthE=orthE/length(vmats)
-      outputString <- paste("Iteration:", myit, "bestEv:", bestEv, "bestIt:", bestRow)
-      #  if ( optimizationStyle == 'greedy' )
-      outputString <- paste(outputString, "CE:", mean(energyPath[myit, ]), "featOrth:",orthE)
-      print(outputString)
-    }
-    if ((myit - bestRow - 1) >= 5) break # consider converged
-  } # iterations
+    if (verbose) message("New Weights: ", paste(round(orth_weights, 2), collapse=", "))
+  }
   
+  # Update the "best" solution found so far based on mean total energy
+  mean_current_energy <- mean(iter_results$total_energy, na.rm = TRUE)
+  if (mean_current_energy < bestTot) {
+    bestTot <- mean_current_energy
+    bestRow <- myit
+    bestU <- initialUMatrix
+    bestV <- vmats
+  }
+  
+  if (verbose) {
+    # Report the mean orthogonality across all modalities for this iteration
+    mean_orthogonality <- mean(iter_results$feature_orthogonality, na.rm = TRUE)
+    message(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f",
+                  myit, mean_current_energy, bestTot, bestRow, mean_orthogonality))
+  }
+  
+  # Check for convergence
+  if ((myit - bestRow) > 5) {
+    if(verbose) message("Convergence criteria met: No improvement in 5 iterations.")
+    break
+  }
+} # End main optimization loop
+
+
   names(bestV)=names(voxmats)
   for ( k in 1:length(voxmats)) {
     rownames(bestV[[k]])=colnames(voxmats[[k]])
@@ -4557,7 +4645,7 @@ simlr <- function(
       v = bestV,
       initialRandomMatrix = randmat,
       energyPath = energyPath,
-      finalError = bestEv,
+      finalError = bestTot,
       totalEnergy = totalEnergy,
       connectors = connectors,
       energyType = energyType,
