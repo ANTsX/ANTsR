@@ -4169,7 +4169,7 @@ simlr <- function(
     mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
     orthogonalize = FALSE,
     repeatedMeasures = NA,
-    lineSearchRange = c(-1.0, 1.0),
+    lineSearchRange = c(-50.0, 50.0),
     lineSearchTolerance = 1e-8,
     randomSeed=0,
     constraint = c( "Grassmannx0.05", "Stiefelx0.05", "orthox0.05", "none"),
@@ -4611,7 +4611,6 @@ for (myit in 1:iterations) {
       for ( oo in 1:length(vmats)) {
         vmats[[oo]]=t(sparsify_by_column_winner(t(vmats[[oo]]), positivities[oo], positivities[oo]))
       }
-      print(paste("Retraction complete for constraint type:", constraint_type ))
     }
 
 
@@ -4933,7 +4932,7 @@ simlrU <- function(
 simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
                        positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
                                                                 "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
-                       repeatedMeasures = NA, lineSearchRange = c(-1.0, 1.0), 
+                       repeatedMeasures = NA, lineSearchRange = c(-50.0, 50.0), 
                        lineSearchTolerance = 1e-08, randomSeed, constraint = c("none", 
                                                                                "Grassmann", "Stiefel"), 
                       energyType = c("cca", "regression","normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation'), 
