@@ -3824,7 +3824,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
 
   # --- 4. Compute the Final Energy ---
   # The energy is the squared norm of the residual, scaled by the norm of X.
-  energy <- sum(residual^2) / norm_X_sq
+  energy <- sum(residual^2) / ( norm_X_sq + 1e-2)
   
   return(energy)
 }
@@ -3846,7 +3846,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
   
   # --- 1. Calculate the scaling factor from the energy function ---
   # The factor is 2 / ||X||_F^2.
-  norm_X_sq <- sum(X^2)
+  norm_X_sq <- sum(X^2) + 1e-2
   if (norm_X_sq < .Machine$double.eps) {
     return(V * 0) # Gradient is zero if data matrix is zero
   }
