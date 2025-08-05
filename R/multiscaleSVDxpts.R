@@ -4576,7 +4576,7 @@ simlr <- function(
 if ( energyType %in% c("reg","regression") ) {
   optimizer = "adam" # use adam for cca-like energies
 } else {
-  optimizer = "sgd_momentum" # default to SGD with momentum
+  optimizer = "adam" # default to SGD with momentum
 }
 
 # --- 1. Setup before the loop ---
