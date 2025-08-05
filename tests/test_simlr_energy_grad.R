@@ -245,7 +245,7 @@ ground_truth_data <- generate_3view_ground_truth(
   n_subjects = 200,
   n_features = c(40, 250, 600),
   k_true = 3,
-  noise_level = 0.05 # Low noise for a clear signal
+  noise_level = 0.15 # Low noise for a clear signal
 )
 # Pre-process the data as we would in a real analysis
 scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
@@ -336,8 +336,8 @@ tabulate_simlr_performance <- function() {
   # --- Setup: Generate Ground Truth Data ---
   set.seed(42)
   ground_truth_data <- generate_3view_ground_truth(
-    n_subjects = 220,
-    n_features = c(250, 98, 606),
+    n_subjects = 100,
+    n_features = c(250, 1098, 606),
     k_true = 3,
     noise_level = 0.25
   )

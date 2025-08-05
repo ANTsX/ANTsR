@@ -3875,6 +3875,109 @@ gradient_invariant_orthogonality_salad<- function(A) {
 }
 
 
+#' Clip a Gradient Matrix by its Frobenius Norm
+#'
+#' This function prevents exploding gradients by rescaling any gradient whose
+#' Frobenius norm exceeds a specified threshold. The direction of the gradient
+#' is preserved.
+#'
+#' @param gradient The gradient matrix to be clipped.
+#' @param threshold The maximum allowed Frobenius norm for the gradient.
+#'
+#' @return A gradient matrix whose Frobenius norm is guaranteed to be less
+#'   than or equal to the threshold.
+#'
+clip_gradient_norm <- function(gradient, threshold = 1.0) {
+  # Calculate the Frobenius norm of the gradient
+  grad_norm <- sqrt(sum(gradient^2))
+  
+  # If the norm exceeds the threshold, compute the scaling factor
+  if (grad_norm > threshold) {
+    # The factor is threshold / current_norm
+    clipping_factor <- threshold / grad_norm
+    # Rescale the gradient
+    gradient <- gradient * clipping_factor
+  }
+  
+  return(gradient)
+}
+
+
+#' Clip a Gradient Matrix by a Quantile of its Values
+#'
+#' This function provides an adaptive method for controlling gradient magnitudes.
+#' It calculates a threshold based on a specified quantile of the absolute values
+#' within the gradient matrix itself. Any value exceeding this dynamic threshold
+#' is "clipped" or shrunk back to the threshold, preserving its original sign.
+#'
+#' This is more robust than a fixed threshold as it automatically adapts to the
+#' scale of the gradients at each optimization step.
+#'
+#' @param gradient The gradient matrix to be clipped.
+#' @param quantile The quantile to use for determining the clipping threshold.
+#'   For example, a value of `0.98` means that any gradient value larger in
+#'   magnitude than the 98th percentile of all absolute gradient values will be
+#'   clipped. Must be between 0 and 1.
+#'
+#' @return A new gradient matrix with extreme values clipped.
+#' @export
+#' @examples
+#' # Create a gradient with some large outlier values
+#' set.seed(123)
+#' grad_matrix <- matrix(rnorm(100, mean = 0, sd = 1), 10, 10)
+#' grad_matrix[1, 1] <- 10  # Large positive outlier
+#' grad_matrix[5, 5] <- -12 # Large negative outlier
+#'
+#' # Clip at the 80th percentile. This will tame the outliers.
+#' clipped_grad <- clip_gradient_by_quantile(grad_matrix, quantile = 0.80)
+#'
+#' cat("Original Gradient Range:\n")
+#' print(range(grad_matrix))
+#'
+#' cat("\n80th Percentile Threshold:\n")
+#' # The threshold will be the 80th percentile of the absolute values
+#' print(quantile(abs(grad_matrix), probs = 0.80))
+#'
+#' cat("\nClipped Gradient Range:\n")
+#' # The new range will be capped at the threshold
+#' print(range(clipped_grad))
+#'
+clip_gradient_by_quantile <- function(gradient, quantile = 0.80) {
+  
+  # --- 1. Input Validation ---
+  stopifnot(is.matrix(gradient), is.numeric(gradient))
+  stopifnot(quantile > 0 && quantile < 1)
+  
+  # --- 2. Calculate the Clipping Threshold ---
+  
+  # First, get the absolute values of all elements in the gradient matrix
+  abs_gradient_values <- abs(gradient)
+  
+  # Calculate the threshold using the specified quantile of these absolute values
+  threshold <- quantile(abs_gradient_values, probs = quantile, na.rm = TRUE)
+  
+  # Handle the edge case where the threshold is zero (e.g., for a zero matrix)
+  if (threshold < .Machine$double.eps) {
+    return(gradient) # No clipping needed if threshold is zero
+  }
+  
+  # --- 3. Perform Clipping (Vectorized) ---
+  
+  # This is a robust way to clip while preserving the sign of the original values.
+  # 1. Get the signs of the original gradient (-1, 0, or 1)
+  gradient_signs <- sign(gradient)
+  
+  # 2. Find which values have a magnitude greater than the threshold
+  #    pmin() takes two vectors and returns the element-wise minimum.
+  #    This effectively caps the absolute values at the threshold.
+  clipped_magnitudes <- pmin(abs_gradient_values, threshold)
+  
+  # 3. Re-apply the original signs to the clipped magnitudes
+  clipped_gradient <- clipped_magnitudes * gradient_signs
+  
+  return(clipped_gradient)
+}
+
 #' Calculate SIMLR Similarity Energy
 #'
 #' This dispatcher calculates the similarity/reconstruction part of the
@@ -3915,10 +4018,11 @@ calculate_simlr_energy <- function(V, X, U, energy_type) {
 #' @param X The data matrix for the modality [n x p].
 #' @param U The shared basis matrix [n x k].
 #' @param energy_type A string specifying the similarity objective.
+#' @param clipping_threshold Optional numeric value for gradient clipping.
 #'
 #' @return A matrix [p x k] representing the descent direction.
 #' @export
-calculate_simlr_gradient <- function(V, X, U, energy_type) {
+calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = NULL) {
 
   # Each helper function is now defined to return a descent direction
   # for its corresponding energy function.
@@ -3938,6 +4042,12 @@ calculate_simlr_gradient <- function(V, X, U, energy_type) {
     
     stop(paste("Unknown energy_type in calculate_simlr_gradient:", energy_type))
   )
+
+  # Apply gradient clipping if a threshold is provided
+  if (!is.null(clipping_threshold) && clipping_threshold > 0) {
+    gradient <- clip_gradient_by_quantile( gradient )
+  }
+  
   
   return(gradient)
 }
@@ -4059,7 +4169,7 @@ simlr <- function(
     mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
     orthogonalize = FALSE,
     repeatedMeasures = NA,
-    lineSearchRange = c(-1e10, 1e10),
+    lineSearchRange = c(-1.0, 1.0),
     lineSearchTolerance = 1e-8,
     randomSeed=0,
     constraint = c( "Grassmannx0.05", "Stiefelx0.05", "orthox0.05", "none"),
@@ -4364,108 +4474,150 @@ simlr <- function(
     }
   }
 
-# --- 3. Main Optimization Loop ---
-  energyPath <- matrix(Inf, nrow = iterations, ncol = nModalities)
-  bestTot <- Inf
-  bestRow <- 1
-  bestU <- initialUMatrix
-  bestV <- vmats
-  gamma <- rep(0.01, nModalities) # Start with a reasonable default step size
+# ==============================================================================
+#      High-Performance SIMLR Loop (Hybrid: Adam/SGD + Line Search)
+# ==============================================================================
+# This replaces the original `for (myit in 1:iterations)` block.
 
-  # Initialize tracking data frames
-  convergence_df <- tibble::tibble(
-    iteration = integer(),
-    modality = character(),
-    total_energy = numeric(),
-    similarity_energy = numeric(),
-    feature_orthogonality = numeric()
-  )
+# --- Add this parameter to your main simlr() function signature ---
+# optimizer = c("adam", "sgd_momentum")
+optimizer = "adam"
+# Note: `learning_rate` is no longer needed, as the line search finds it.
 
-  # Initialize the adaptive orthogonality weights (will be set on first iteration)
-  orth_weights <- rep(0.0, nModalities)
-  names(orth_weights) <- names(voxmats)
+# --- 1. Setup before the loop ---
+bestTot <- Inf
+bestRow <- 1
+bestU <- initialUMatrix
+bestV <- vmats
 
-  for (myit in 1:iterations) {
+convergence_df <- tibble::tibble()
+
+# Initialize optimizer state (for Adam/AMSGrad and SGD w/ Momentum)
+optimizer_state <- if (optimizer == "adam") {
+  lapply(vmats, function(v) list(m = v*0, v = v*0, v_max = v*0))
+} else { # "sgd_momentum"
+  lapply(vmats, function(v) list(momentum = v*0))
+}
+
+# Hyperparameters for optimizers
+beta1 <- 0.9; beta2 <- 0.999; epsilon <- 1e-8; sgd_momentum_beta <- 0.9
+
+# Initialize adaptive orthogonality weights
+orth_weights <- rep(1.0, nModalities)
+names(orth_weights) <- names(voxmats)
+
+# --- 2. Main Optimization Loop ---
+for (myit in 1:iterations) {
+  
+  # --- A. Update each V_i matrix ---
+  for (i in 1:nModalities) {
     
-    # --- A. Update each V_i matrix ---
-    for (i in 1:nModalities) {
+    # 1. Calculate the total Euclidean gradient (a descent direction)
+    similarity_gradient <- calculate_simlr_gradient(
+      V = vmats[[i]], X = voxmats[[i]], U = initialUMatrix[[i]],
+      energy_type = energyType
+    )
+    
+    orthogonality_gradient <- 0
+    constraint_type=constraint[1]
+    constraint_weight=as.numeric(constraint[2])
+    if (is.na(constraint_weight)) constraint_weight = 1e-5
+    if (constraint_type == 'ortho') {
+      ortho_grad_unweighted <- gradient_invariant_orthogonality_defect(vmats[[i]])
+      orthogonality_gradient <- ortho_grad_unweighted * constraint_weight * orth_weights[i]
+    }
+    total_gradient <- similarity_gradient - orthogonality_gradient
+    
+    # 2. Project to get the Riemannian descent gradient
+    riemannian_descent_grad <- constrainG(total_gradient, i, constraint_type)
+    
+    # 3. Use the chosen optimizer to determine the OPTIMAL SEARCH DIRECTION
+    current_state <- optimizer_state[[i]]
+    if (optimizer == "adam") {
+      # Adam uses the raw gradient to update its internal state
+      current_state$m <- beta1 * current_state$m + (1 - beta1) * riemannian_descent_grad
+      current_state$v <- beta2 * current_state$v + (1 - beta2) * (riemannian_descent_grad^2)
+      current_state$v_max <- pmax(current_state$v_max, current_state$v)
       
-      # 1. Calculate the full gradient of the objective E = E_sim + lambda * E_ortho
-      similarity_gradient <- calculate_simlr_gradient(
-        V = vmats[[i]], X = voxmats[[i]], U = initialUMatrix[[i]], energy_type = energyType
-      )
+      # The search direction is the Adam-proposed update vector
+      search_direction <- current_state$m / (sqrt(current_state$v_max) + epsilon)
       
-      orthogonality_gradient <- 0
-      constraint_type = constraint[1]
-      constraint_weight = as.numeric( constraint[2] )
-      if ( is.na(constraint_weight) || is.null(constraint_weight) ) {
-        constraint_weight = 0.0
-      }
-      if (constraint_type == 'ortho') {
-        # This is the original logic for the soft penalty gradient
-        ortho_grad_unweighted <- gradient_invariant_orthogonality_defect(vmats[[i]])
-        if (norm(ortho_grad_unweighted, "F") > 0) {
-          orthogonality_gradient <- ortho_grad_unweighted * constraint_weight * orth_weights[i]
-        }
-      }
-      
-      total_gradient <- similarity_gradient - 0.01 * orthogonality_gradient
-      
-      # 2. Project to get the Riemannian gradient (the valid update direction)
-      # This uses your original `constrainG` function
-      riemannian_direction = constrainG( total_gradient, i, constraint_type)
-      
-      # 3. Perform Line Search to find the optimal step size (gamma)
-      line_search_result <- optimize(
-        f = function(step_size) {
-          V_candidate <- vmats[[i]] + riemannian_direction * step_size
-          
-          # Apply sparsity (unchanged from original code)
-          if (sparsenessQuantiles[i] != 0) {
-            V_candidate <- as.matrix(smoothingMatrices[[i]] %*% V_candidate)
-            V_candidate <- orthogonalizeAndQSparsify(V_candidate, sparsenessQuantiles[i], 
-              positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
-              softThresholding = TRUE, sparsenessAlg = sparsenessAlg
-            )
-          }
-          
-          # Calculate total energy for this candidate
-          similarity_energy <- calculate_simlr_energy(V_candidate, voxmats[[i]], initialUMatrix[[i]], energyType)
-          ortho_penalty <- 0
-          if (constraint_type == 'ortho') {
-            ortho_penalty <- invariant_orthogonality_defect(V_candidate) * constraint_weight * orth_weights[i]
-          } else if (constraint_type %in% c("Stiefel", "Grassmann")) {
-             # For hard constraints, we can still add the defect to the *reported* energy
-             ortho_penalty <- invariant_orthogonality_defect(V_candidate) * constraint_weight
-          }
-          
-          return(similarity_energy + ortho_penalty)
-        },
-        interval = lineSearchRange,
-        tol = lineSearchTolerance
-      )
-      
-      # 4. Update V_i with the optimal step
-      gamma[i] <- line_search_result$minimum
-      vmats[[i]] <- vmats[[i]] + riemannian_direction * gamma[i]
-      
+    } else { # sgd_momentum
+      current_state$momentum <- sgd_momentum_beta * current_state$momentum + riemannian_descent_grad
+      search_direction <- current_state$momentum
+    }
+    optimizer_state[[i]] <- current_state # Save the updated state
+
+    # 4. Perform a Line Search ALONG THE OPTIMIZER'S PROPOSED DIRECTION
+    # This finds the best scalar step size `gamma` to take.
+    line_search_result <- tryCatch({
+        optimize(
+          f = function(step_size) {
+            # Take a step along the proposed descent direction
+            V_candidate <- vmats[[i]] - step_size * search_direction
+            
+            # A retraction must be performed inside the line search for manifold methods
+            if (constraint_type %in% c("Stiefel", "Grassmann")) {
+                # V_candidate <- qr.Q(qr(V_candidate))
+            }
+            
+            # Apply sparsity (unchanged from original code)
+            if (sparsenessQuantiles[i] != 0) {
+              V_candidate <- as.matrix(smoothingMatrices[[i]] %*% V_candidate)
+              V_candidate <- orthogonalizeAndQSparsify(V_candidate, sparsenessQuantiles[i] , 
+                positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
+                softThresholding = TRUE, sparsenessAlg = sparsenessAlg)
+            }
+            
+            # Calculate total energy for this candidate
+            sim_e <- calculate_simlr_energy(V_candidate, voxmats[[i]], initialUMatrix[[i]], energyType)
+            ortho_e <- 0
+            if (constraint_type %in% c('ortho', 'Stiefel', 'Grassmann')) {
+              ortho_e <- invariant_orthogonality_defect(V_candidate) * constraint_weight * orth_weights[i]
+            }
+            
+            return(sim_e + ortho_e)
+          },
+          interval = lineSearchRange, # Use the range provided to simlr
+          tol = lineSearchTolerance
+        )
+    }, error = function(e) {
+        # Fallback if optimize fails (e.g., flat landscape)
+        warning(paste("Line search failed for modality", i, "at iteration", myit, ". Using small step."))
+        return(list(minimum = 1e-6, objective = NA))
+    })
+    
+    # 5. Perform the Final Update using the optimal step size
+    optimal_step_size <- line_search_result$minimum
+    
+    # Update along the search direction
+    vmats[[i]] <- vmats[[i]] - optimal_step_size * search_direction
+
       # 5. Apply final constraints (Sparsity and Retraction)
       if (sparsenessQuantiles[i] != 0) {
         vmats[[i]] <- as.matrix(smoothingMatrices[[i]] %*% vmats[[i]])
         vmats[[i]] <- orthogonalizeAndQSparsify(vmats[[i]], sparsenessQuantiles[i], 
           positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
           softThresholding = TRUE, sparsenessAlg = sparsenessAlg)
-      }
-      # A final retraction is crucial for manifold methods
-      if (constraint_type %in% c("Stiefel", "Grassmann")) {
-        vmats[[i]] = t( sparsify_by_column_winner( t(vmats[[i]]), positivities[i], positivities[i] ))
+        }
+      if ( !(energyType %in% c('acc','cca','regression','reg') ) ) {
+        vmats[[i]]=l1_normalize_features(vmats[[i]])
       }
     } # End V_i update loop
-    
+
+    # A final retraction is crucial for manifold methods
+    if (constraint_type %in% c("Stiefel", "Grassmann")) {
+      vmats = orthogonalize_feature_space( vmats, 500, 0.2, verbose=FALSE )
+      for ( oo in 1:length(vmats)) {
+        vmats[[oo]]=t(sparsify_by_column_winner(t(vmats[[oo]]), positivities[oo], positivities[oo]))
+      }
+      print(paste("Retraction complete for constraint type:", constraint_type ))
+    }
+
+
     # --- B. Update each U_i matrix (logic is unchanged from original simlr) ---
-    if ( energyType != 'regression' ) {
-      tempU <- lapply(1:nModalities, function(j) scale(voxmats[[j]] %*% vmats[[j]], TRUE, TRUE))
-      vmats <- lapply(1:nModalities, function(j) vmats[[j]] / norm(vmats[[j]], 'F'))
+    if ( !(energyType %in% c('regression','reg')) ) {
+      tempU <- lapply(1:nModalities, function(j) scale(voxmats[[j]] %*% vmats[[j]], TRUE, FALSE))
       } else {
         tempU <- lapply(1:nModalities, function(j) voxmats[[j]] %*% vmats[[j]])
       }
@@ -4508,10 +4660,10 @@ simlr <- function(
     iter_results$iteration <- myit
     convergence_df <- dplyr::bind_rows(convergence_df, iter_results)
     # --- Adaptive Weighting: Set weights ONLY at the end of the first iteration ---
-  if (myit == 1 && constraint_type %in% c('ortho','Stiefel','Grassmann')) {
+  if (myit <= 3 && constraint_type %in% c('ortho','Stiefel','Grassmann')) {
     if (verbose) {
-      message("Setting adaptive orthogonality weights based on first iteration...")
-      print("Setting adaptive orthogonality weights based on first iteration...")
+      message("Setting adaptive orthogonality weights based on first few iterations...")
+      print("Setting adaptive orthogonality weights based on first few iterations...")
     }
     
     for (i in 1:nModalities) {
@@ -4540,7 +4692,9 @@ simlr <- function(
   if (verbose) {
     # Report the mean orthogonality across all modalities for this iteration
     mean_orthogonality <- mean(iter_results$feature_orthogonality, na.rm = TRUE)
-    message(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f",
+#    message(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f",
+#                  myit, mean_current_energy, bestTot, bestRow, mean_orthogonality))
+    print(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f",
                   myit, mean_current_energy, bestTot, bestRow, mean_orthogonality))
   }
   
@@ -4779,7 +4933,7 @@ simlrU <- function(
 simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
                        positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
                                                                 "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
-                       repeatedMeasures = NA, lineSearchRange = c(-1e+10, 1e+10), 
+                       repeatedMeasures = NA, lineSearchRange = c(-1.0, 1.0), 
                        lineSearchTolerance = 1e-08, randomSeed, constraint = c("none", 
                                                                                "Grassmann", "Stiefel"), 
                       energyType = c("cca", "regression","normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation'), 
@@ -6575,14 +6729,14 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   if ( verbose ) print( paste( "maxits",maxits) )
   ebber = 0.99
   pizzer = rep( "positive", length(mats) )
-  mixer = 'svd'
+  mixer = 'pca'
   if ( missing( constraint ) )
-    constraint='Stiefelx0.01x0.01'
+    constraint='Stiefelx0'
   if ( grepl("reg", energy ) ) {
     mixer = 'svd'
-  } 
+  }
   if ( energy %in% c("lrr", "lowRankRegression","nc","normalized_correlation") ) {
-    mixer = 'svd'
+    mixer = 'pca'
   }
   if ( verbose ) print("sparseness begin")
   sparval = rep( 0.8, length( mats ))
@@ -7191,4 +7345,129 @@ antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet",
 
   names(plist) <- names(voxmats)
   return(plist)
+}
+
+
+#' Orthogonalize a List of Matrices via Gradient Descent with Convergence Check
+#'
+#' This function takes a list of matrices (with the same number of columns) and
+#' iteratively updates them to make the columns within each matrix more orthogonal.
+#' It stops when the change in the total orthogonality error is below a given
+#' tolerance or when the maximum number of iterations is reached.
+#'
+#' @param matrix_list A list of numeric matrices. All matrices must have the
+#'   same number of columns (e.g., k components).
+#' @param max_iterations The maximum number of gradient descent iterations to perform.
+#' @param learning_rate The step size for each update.
+#' @param tolerance The convergence threshold. The algorithm stops if the absolute
+#'   change in the total orthogonality defect between iterations is less than this
+#'   value.
+#' @param verbose If TRUE, prints the orthogonality error at each iteration.
+#'
+#' @return A list of orthogonalized matrices with the same dimensions as the input.
+orthogonalize_feature_space <- function(matrix_list,
+                                        max_iterations = 100, # Increased default for convergence
+                                        learning_rate = 0.1,
+                                        tolerance = 1e-4,
+                                        verbose = TRUE) {
+
+  # --- 1. Input Validation ---
+  stopifnot(is.list(matrix_list), length(matrix_list) > 1)
+  k <- ncol(matrix_list[[1]])
+  if (is.null(k)) stop("Matrices in the list must have columns.")
+  stopifnot(all(sapply(matrix_list, ncol) == k))
+  
+  # --- 2. Helper Functions (as provided by you) ---
+  
+  # This helper calculates the orthogonality penalty for a single matrix
+  # We assume a function `invariant_orthogonality_defect` exists in your environment.
+  calculate_defect <- function(mat) {
+    # Using a placeholder if the real function isn't available
+    if (exists("invariant_orthogonality_defect")) {
+      return(invariant_orthogonality_defect(mat))
+    } else {
+      # A standard implementation of ||A'A - I||^2 (for orthonormal columns)
+      AtA <- crossprod(mat)
+      return(sum((AtA - diag(k))^2))
+    }
+  }
+
+  # This helper calculates the gradient of the orthogonality penalty
+  gradient_invariant_orthogonality_defect <- function(A) {
+    # Normalize A to prevent scale from dominating the update
+    norm_A <- sqrt(sum(A^2))
+    if (norm_A < .Machine$double.eps) return(A * 0)
+    Ap <- A / norm_A
+    AtA <- t(Ap) %*% Ap
+    D <- diag(diag(AtA))
+    orthogonality_diff <- AtA - D
+    # The gradient pushes V to make V'V closer to diagonal
+    gradient <- 4 * (Ap %*% orthogonality_diff)
+    return(gradient)
+  }
+
+  # --- 3. Optimization Loop ---
+  if (verbose) message("Starting feature space orthogonalization...")
+  
+  # Initialize the previous total defect to a large number
+  previous_total_defect <- Inf
+  
+  for (i in 1:max_iterations) {
+    
+    # Update each matrix in the list
+    matrix_list <- lapply(matrix_list, function(mat) {
+      grad <- gradient_invariant_orthogonality_defect(mat)
+      mat_updated <- mat - learning_rate * grad
+      return(mat_updated)
+    })
+    
+    # --- Convergence Check ---
+    
+    # Calculate the total defect for the current iteration
+    current_total_defect <- sum(sapply(matrix_list, calculate_defect))
+    
+    # Calculate the absolute change from the previous iteration
+    change_in_defect <- abs(previous_total_defect - current_total_defect)
+    
+    if (verbose) {
+      message(sprintf(
+        "Iter: %d | Total Defect: %.6f | Change: %.2e",
+        i, current_total_defect, change_in_defect
+      ))
+    }
+    
+    # Check if the change is below the tolerance threshold
+    if (change_in_defect < tolerance) {
+      if (verbose) message(paste("Convergence reached after", i, "iterations."))
+      # Break the loop early
+      break
+    }
+    
+    # Update the previous defect for the next iteration's comparison
+    previous_total_defect <- current_total_defect
+  }
+  
+  if (i == max_iterations) {
+    warning("Reached maximum iterations without converging to the specified tolerance.")
+  }
+  
+  if (verbose) message("Orthogonalization complete.")
+  return(matrix_list)
+}
+
+
+
+
+.unit_inner_product <- function(x, y) {
+  # Check that vectors are of same length
+  if (length(x) != length(y)) {
+    stop("Vectors x and y must be the same length.")
+  }
+
+  # Compute unit vectors
+  x_unit <- x / sqrt(sum(x^2))
+  y_unit <- y / sqrt(sum(y^2))
+
+  # Return their inner product
+  sum(x_unit * y_unit)
 }
