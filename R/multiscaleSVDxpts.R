@@ -4086,7 +4086,7 @@ calculate_simlr_energy <- function(V, X, U, energy_type) {
   # optimizer's goal is always to MINIMIZE the returned energy.
   energy <- switch(energy_type,
     "regression" = .calculate_regression_error(X, U, V),
-    # "normalized" = .calculate_regression_error(X / sqrt(sum(X^2)), U, V, center_prediction = FALSE),
+    "reconorm" = .calculate_normed_regression_error(X, U, V),
     # "lowRank" = .calculate_lowrank_norm_error(X, U, V), # Assuming this helper exists
     "lowRankRegression" = .calculate_angular_distance(X, U, V),
     "lrr" = .calculate_angular_distance(X, U, V),
@@ -4118,7 +4118,7 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
   # for its corresponding energy function.
   gradient <- switch(energy_type,
     "regression" = .calculate_regression_gradient(X, U, V),
-    "normalized" = .calculate_regression_gradient(X / sqrt(sum(X^2)), U, V),
+    "reconorm" = .calculate_normed_regression_error_gradient(X, U, V),
     "lowRankRegression" = .calculate_angular_distance_gradient(X, U, V),
     "lrr" = .calculate_angular_distance_gradient(X, U, V),
     
@@ -4264,7 +4264,7 @@ simlr <- function(
     lineSearchTolerance = 1e-1,
     randomSeed=0,
     constraint = c( "Grassmannx0", "Stiefelx0", "orthox0.01", "none"),
-    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc', 'lrr'),
+    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc', 'lrr', 'reconorm'),
     vmats,
     connectors = NULL,
     optimizationStyle = c("lineSearch", "mixed", "greedy"),
@@ -4573,7 +4573,7 @@ simlr <- function(
 # --- Add this parameter to your main simlr() function signature ---
 # optimizer = c("adam", "sgd_momentum")
 # if ( energyType %in% c("acc", "cca","reg","regression") ) {
-if ( energyType %in% c("reg","regression") ) {
+if ( energyType %in% c("reg","regression","reconorm") ) {
   optimizer = "adam" # use adam for cca-like energies
 } else {
   optimizer = "adam" # default to SGD with momentum
@@ -4694,7 +4694,8 @@ for (myit in 1:iterations) {
           positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
           softThresholding = TRUE, sparsenessAlg = sparsenessAlg)
         }
-      if ( !(energyType %in% c('regression','reg') ) ) 
+#      if ( !(energyType %in% c('regression','reg','reconorm') ) ) 
+      if ( (energyType %in% c('acc','cca','nc','normalized_correlation','lowRankRegression','lrr') ) ) 
         {
         vmats[[i]]=l1_normalize_features(vmats[[i]])
         }
@@ -4702,7 +4703,7 @@ for (myit in 1:iterations) {
 
     # A final retraction is crucial for manifold methods
     if (constraint_type %in% c("Stiefel", "Grassmann")) {
-      vmats = orthogonalize_feature_space( vmats, 5, 0.2, verbose=FALSE )
+      # vmats = orthogonalize_feature_space( vmats, 5, 0.2, verbose=FALSE )
       for ( oo in 1:length(vmats)) {
         vmats[[oo]]=t(sparsify_by_column_winner(t(vmats[[oo]]), positivities[oo], positivities[oo]))
       }

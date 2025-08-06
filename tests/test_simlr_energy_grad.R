@@ -186,40 +186,192 @@ library(dplyr)
 # simlr can successfully recover that signal under various configurations.
 # ==============================================================================
 
+
+compare_v_matrices <- function(V_true_list, V_found_list) {
+  
+  if (length(V_true_list) != length(V_found_list)) {
+    stop("Input lists must have the same number of modalities.")
+  }
+  
+  # Helper function to calculate cosine similarity between two vectors
+  cosine_sim <- function(a, b) {
+    sum(a * b) / (sqrt(sum(a^2)) * sqrt(sum(b^2)))
+  }
+  
+  # Use purrr::map2_dfr for a clean, parallel iteration over both lists
+  summary_df <- purrr::map2_dfr(V_true_list, V_found_list, .id = "modality", ~{
+    V_true <- .x
+    V_found <- .y
+    
+    k <- ncol(V_true)
+    
+    if (is.null(V_found) || ncol(V_found) != k) {
+      # Handle cases where a run failed or produced wrong dimensions
+      return(tibble::tibble(
+        mean_cosine_similarity = NA_real_,
+        permutation_map = "mismatch"
+      ))
+    }
+    
+    # --- 1. Find the Best Permutation ---
+    
+    # Calculate the k x k matrix of absolute correlations
+    correlation_matrix <- abs(cor(V_true, V_found))
+    
+    # Use a greedy approach to find the best permutation. This is effective
+    # and simple. For perfect guarantees, the Hungarian algorithm could be used.
+    permutation_map <- numeric(k)
+    remaining_found_cols <- 1:k
+    
+    for (i in 1:k) {
+      # Find the best match for true column `i` among the remaining found columns
+      best_match_idx <- which.max(correlation_matrix[i, remaining_found_cols])
+      best_match_col <- remaining_found_cols[best_match_idx]
+      
+      permutation_map[i] <- best_match_col
+      
+      # Remove this column from the pool of available matches
+      remaining_found_cols <- setdiff(remaining_found_cols, best_match_col)
+    }
+    
+    # Reorder the V_found matrix according to the permutation map
+    V_found_permuted <- V_found[, permutation_map]
+    
+    # --- 2. Align Signs ---
+    
+    # Calculate the signs of the correlations of the matched pairs
+    original_correlations <- diag(cor(V_true, V_found_permuted))
+    signs_to_flip <- sign(original_correlations)
+    
+    # Apply the sign flip. diag(signs) creates the sign-flipping matrix
+    V_found_aligned <- V_found_permuted %*% diag(signs_to_flip)
+    
+    # --- 3. Calculate Final Similarity Metric ---
+    
+    # Now that V_found is aligned, calculate the cosine similarity for each pair
+    final_similarities <- sapply(1:k, function(i) {
+      cosine_sim(V_true[, i], V_found_aligned[, i])
+    })
+    
+    # The final summary metric is the mean of these similarities
+    mean_cosine_similarity <- mean(final_similarities)
+    
+    # Create a readable string for the permutation map
+    permutation_string <- paste(sprintf("%d->%d", 1:k, permutation_map), collapse = ", ")
+    
+    tibble::tibble(
+      mean_cosine_similarity = mean_cosine_similarity,
+      permutation_map = permutation_string
+    )
+  })
+  
+  return(summary_df)
+}
+
 # --- 1. Ground Truth Data Generation ---
 
-#' Generate a simulated 3-view dataset for testing simlr
+#' Generate a Simulated Multi-View Dataset for Testing SIMLR
 #'
-#' @param n_subjects Number of subjects.
-#' @param n_features A vector of 3 integers for the number of features in each view.
-#' @param k_true The true number of latent components (shared signal).
+#' This function creates simulated multi-view data with a known underlying
+#' latent structure. It can generate data based on a "fully_shared" model or a
+#' more realistic "partially_shared" model.
+#'
+#' @param n_subjects Number of subjects (rows).
+#' @param n_features A vector of integers specifying the number of features for each view.
+#' @param k_shared The number of latent components that are common to ALL views.
 #' @param noise_level The standard deviation of the Gaussian noise added.
-#' @return A list containing `modality_matrices` and the ground-truth `U_true`.
-generate_3view_ground_truth <- function(n_subjects = 100,
-                                        n_features = c(50, 80, 60),
-                                        k_true = 4,
-                                        noise_level = 0.5) {
+#' @param simulation_type The model for the ground truth.
+#' @param k_unique_per_view An integer specifying how many unique components to
+#'   generate for EACH view. Only used with `simulation_type = "partially_shared"`.
+#'
+#' @return A list containing:
+#'   \item{modality_matrices}{The final list of [n x p] data matrices.}
+#'   \item{U_true}{The full ground truth basis [n x (k_shared + k_unique*n_views)]
+#'     that was used to generate the data.}
+#'   \item{U_shared}{The ground truth basis for ONLY the shared components [n x k_shared].
+#'     This is what `simlr` should ideally recover.}
+#'   \item{V_shared_mats}{A list of the ground truth loading matrices corresponding
+#'     to ONLY the shared components. Each matrix is [p x k_shared]. This is
+#'     what the recovered `result$v` should be compared against.}
+#'
+#' @export
+generate_multiview_ground_truth <- function(n_subjects = 100,
+                                            n_features = c(50, 80, 60),
+                                            k_shared = 4,
+                                            noise_level = 0.5,
+                                            simulation_type = c("fully_shared", "partially_shared"),
+                                            k_unique_per_view = 1) {
+
+  simulation_type <- match.arg(simulation_type)
+  n_modalities <- length(n_features)
   
-  # a) Create the true shared latent signal (U_true)
-  U_true <- qr.Q(qr(matrix(rnorm(n_subjects * k_true), n_subjects, k_true)))
+  # --- Create the Shared Signal Component (common to both models) ---
+  U_shared <- qr.Q(qr(matrix(rnorm(n_subjects * k_shared), n_subjects, k_shared)))
   
-  # b) Create true, sparse loading matrices (V_true) for each modality
-  V_true_mats <- lapply(n_features, function(p) {
-    V <- matrix(rnorm(p * k_true), p, k_true)
-    V[sample(length(V), size = floor(0.8 * length(V)))] <- 0 # 80% sparse
+  # Create the loading matrices for the shared part
+  V_shared_mats <- lapply(n_features, function(p) {
+    V <- matrix(rnorm(p * k_shared), p, k_shared)
+    # Make them sparse for realism
+#    V[sample(length(V), size = floor(0.8 * length(V)))] <- 0
     return(V)
   })
   
-  # c) Generate the observed data matrices (X = U_true * V_true' + Noise)
-  modality_matrices <- mapply(function(V, p) {
-    signal <- U_true %*% t(V)
-    noise <- matrix(rnorm(n_subjects * p, sd = noise_level), n_subjects, p)
-    return(signal + noise)
-  }, V_true_mats, n_features, SIMPLIFY = FALSE)
+  # --- Generate Data Based on Simulation Type ---
+  if (simulation_type == "fully_shared") {
+    
+    U_true <- U_shared # In this model, the full truth is just the shared part
+    
+    modality_matrices <- mapply(function(V_s, p) {
+      signal <- U_shared %*% t(V_s)
+      noise <- matrix(rnorm(n_subjects * p, sd = noise_level), n_subjects, p)
+      return(signal + noise)
+    }, V_shared_mats, n_features, SIMPLIFY = FALSE)
+
+  } else { # "partially_shared"
+    
+    # a) Create the unique signals
+    U_unique_list <- lapply(1:n_modalities, function(i) {
+      qr.Q(qr(matrix(rnorm(n_subjects * k_unique_per_view), n_subjects, k_unique_per_view)))
+    })
+    
+    # b) Combine shared and unique U's to form the full generative basis
+    U_true <- do.call(cbind, c(list(U_shared), U_unique_list))
+    
+    # c) Create the full, block-sparse V matrices needed for data generation
+    V_generative_mats <- lapply(1:n_modalities, function(i) {
+      p <- n_features[i]
+      v_blocks <- list()
+      
+      # The first block is the shared loadings we already created
+      v_blocks$shared <- V_shared_mats[[i]]
+      
+      # Create the unique and zero blocks
+      for (j in 1:n_modalities) {
+        if (i == j) {
+          v_blocks[[paste0("unique_", j)]] <- matrix(rnorm(p * k_unique_per_view), p, k_unique_per_view)
+        } else {
+          v_blocks[[paste0("unique_", j)]] <- matrix(0, nrow = p, ncol = k_unique_per_view)
+        }
+      }
+      return(do.call(cbind, v_blocks))
+    })
+    
+    # d) Generate the final data matrices
+    modality_matrices <- mapply(function(V_gen, p) {
+      signal <- U_true %*% t(V_gen)
+      noise <- matrix(rnorm(n_subjects * p, sd = noise_level), n_subjects, p)
+      return(signal + noise)
+    }, V_generative_mats, n_features, SIMPLIFY = FALSE)
+  }
   
   names(modality_matrices) <- paste0("View", 1:length(n_features))
   
-  return(list(modality_matrices = modality_matrices, U_true = U_true))
+  return(list(
+    modality_matrices = modality_matrices,
+    U_true = U_true,
+    U_shared = U_shared,
+    V_shared_mats = V_shared_mats # THE NEW, CONTROLLABLE OUTPUT
+  ))
 }
 
 
@@ -242,11 +394,13 @@ preprocess_for_simlr <- function(modality_list) {
 }
 # --- Setup: Generate the data once for all tests in this context ---
 set.seed(42)
-ground_truth_data <- generate_3view_ground_truth(
+ground_truth_data <- generate_multiview_ground_truth(
   n_subjects = 300,
-  n_features = c(40, 565, 60),
-  k_true = 3,
-  noise_level = 0.35 # Low noise for a clear signal
+  n_features = c(40, 80, 60),
+  k_shared = 3,
+  k_unique_per_view = 2,
+  simulation_type="partially_shared",
+  noise_level = 0.1 # Low noise for a clear signal
 )
 # Pre-process the data as we would in a real analysis
 scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
@@ -264,11 +418,11 @@ scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
 #' @param scaled_mats The list of preprocessed input matrices.
 #' @param U_true The ground truth U matrix.
 #' @return A tibble with one row summarizing the results for this configuration.
-run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, scaled_mats, U_true) {
+run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, scaled_mats, U_true, V_true ) {
   
   # Set up parameters for the run
   mixAlg <- 'pca'
-  if (energy %in% c("regression")) mixAlg <- 'ica'
+  if (energy %in% c("regression","reconorm")) mixAlg <- 'ica'
   initu = initializeSimlr(scaled_mats, k_to_find, uAlgorithm='pca' )
   # We still use tryCatch to handle potential errors in any single run gracefully
   result <- tryCatch({
@@ -282,6 +436,7 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
       positivities = rep("positive", length(scaled_mats)), # Corrected this
       sparsenessAlg = sparsenessAlg,
       randomSeed=808,
+      expBeta = 0.99,
       verbose = T
     )
   }, error = function(e) {
@@ -301,27 +456,34 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
       status = "failed"
     ))
   }
+
+  v_comparison=( compare_v_matrices( V_true, result$v ) )
+  overall_mean_similarity <- mean(v_comparison$mean_cosine_similarity, na.rm = TRUE)
   
   # --- Evaluation ---
-  U_found <- Reduce("+", result$u) / length(result$u)
-  
-  correlation_matrix <- abs(cor(U_true, U_found))
-  best_matches <- max.col(correlation_matrix, "first")
-  
-  mean_recovery_correlation <- mean(correlation_matrix[cbind(1:k_to_find, best_matches)])
-  
+#  projected_mats <- mapply(function(X, V) {
+#      # This is the correct operation: X_i %*% V_i
+#      X %*% V
+#    }, scaled_mats, result$v, SIMPLIFY = FALSE)
+#  U_found <- Reduce("+", projected_mats) / length(projected_mats)
+#  correlation_matrix <- abs(cor(U_true, U_found))
+#  best_matches <- max.col(correlation_matrix, "first")
+#  mean_recovery_correlation <- mean(correlation_matrix[cbind(1:k_to_find, best_matches)])
+
   # Assuming you have a function `simlr_feature_orth`
   orth_error <- simlr_feature_orth(result$v)
-  
+
   # Return a clean, one-row tibble
-  tibble(
+  tabres=tibble(
     energy_type = energy,
     constraint = constraint_type,
     sparsity_alg = ifelse(is.na(sparsenessAlg), "none", sparsenessAlg),
-    mean_correlation = mean_recovery_correlation,
+    mean_correlation = overall_mean_similarity,
     feature_orthogonality = orth_error,
     status = "success"
   )
+  print(tabres)
+  return(tabres)
 }
 
 
@@ -336,22 +498,16 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
 tabulate_simlr_performance <- function() {
   
   # --- Setup: Generate Ground Truth Data ---
-  set.seed(42)
-  ground_truth_data <- generate_3view_ground_truth(
-    n_subjects = 100,
-    n_features = c(250, 1098, 606),
-    k_true = 3,
-    noise_level = 0.25
-  )
-  
+  set.seed(42)  
   # Pre-process the data
   scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
   U_true <- ground_truth_data$U_true
+  U_shared = ground_truth_data$U_shared
   k_to_find <- 3
   
   # --- Define Parameter Grid ---
   param_grid <- expand.grid(
-    energy = c("normalized_correlation", "lrr", "acc", "regression"),
+    energy = c( "reconorm", "normalized_correlation", "lrr", "acc", "regression"),
     constraint = c(  "Stiefelx0", "Grassmannx0",  "orthox0.2", "orthox0.15", "orthox0.1","orthox0.08", "orthox0.06","orthox0.04","orthox0.02", "orthox0.01",  "orthox0.005", "orthox0.001", "none" ),
     sparsity = c(NA), # c(NA, 'spmp'),
     stringsAsFactors = FALSE
@@ -365,14 +521,14 @@ tabulate_simlr_performance <- function() {
   results_table <- purrr::pmap_dfr(param_grid, function(energy, constraint, sparsity) {
     
     cat(".") # Print a dot for progress
-    
     run_simlr_config(
       energy = energy,
       constraint_type = constraint,
       k_to_find = k_to_find,
       sparsenessAlg = sparsity,
       scaled_mats = scaled_mats,
-      U_true = U_true
+      U_true = U_shared,
+      V_true = ground_truth_data$V_shared_mats
     )
   })
   
@@ -392,8 +548,8 @@ top_performers <- performance_summary %>%
   filter(status == "success") %>%
   arrange(desc(mean_correlation))
 
-print("Top 5 Performing Configurations:")
-print(head(top_performers, 5))
+print("Top K Performing Configurations:")
+print(head(top_performers, 10))
 
 
 # Analyze the trade-off between correlation and orthogonality
