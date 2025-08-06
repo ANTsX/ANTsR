@@ -19,7 +19,7 @@ simlr(
   randomSeed = 0,
   constraint = c("Grassmannx0", "Stiefelx0", "orthox0.01", "none"),
   energyType = c("cca", "regression", "normalized", "ucca", "lowRank",
-    "lowRankRegression", "normalized_correlation", "acc", "nc", "lrr"),
+    "lowRankRegression", "normalized_correlation", "acc", "nc", "lrr", "reconorm"),
   vmats,
   connectors = NULL,
   optimizationStyle = c("lineSearch", "mixed", "greedy"),
