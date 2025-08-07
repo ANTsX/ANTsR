@@ -10,6 +10,8 @@ simlr_sparseness(
   smoothing_matrix = NULL,
   positivity = "positive",
   sparseness_quantile = 0.8,
+  constraint_weight = NA,
+  constraint_iterations = 10,
   sparseness_alg = NA,
   energy_type = "acc"
 )
@@ -24,6 +26,10 @@ simlr_sparseness(
 \item{positivity}{Character positive, negative or either.}
 
 \item{sparseness_quantile}{Numeric between 0 and 1. Fraction of elements to sparsify using quantile thresholding.}
+
+\item{constraint_weight}{Numeric. Weight for the constraint, used in orthogonalization.}
+
+\item{constraint_iterations}{Numeric. Number of iterations for the orthogonalization optimization.}
 
 \item{sparseness_alg}{Character. Sparsity algorithm to use (passed to \code{orthogonalizeAndQSparsify}).}
 

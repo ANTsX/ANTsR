@@ -4033,7 +4033,8 @@ clip_gradient_norm <- function(gradient, threshold = 1.0) {
 #' print(range(clipped_grad))
 #'
 clip_gradient_by_quantile <- function(gradient, quantile = 0.80) {
-  
+  if (quantile >= 1) return(gradient)
+
   # --- 1. Input Validation ---
   stopifnot(is.matrix(gradient), is.numeric(gradient))
   stopifnot(quantile > 0 && quantile < 1)
@@ -4112,7 +4113,7 @@ calculate_simlr_energy <- function(V, X, U, energy_type) {
 #'
 #' @return A matrix [p x k] representing the descent direction.
 #' @export
-calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = NULL) {
+calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = NULL ) {
 
   # Each helper function is now defined to return a descent direction
   # for its corresponding energy function.
@@ -4260,15 +4261,15 @@ simlr <- function(
     mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
     orthogonalize = FALSE,
     repeatedMeasures = NA,
-    lineSearchRange = c(-5e5, 5e5),
-    lineSearchTolerance = 1e-1,
+    lineSearchRange = c(-5e2, 5e2),
+    lineSearchTolerance = 1e-12,
     randomSeed=0,
     constraint = c( "Grassmannx0", "Stiefelx0", "orthox0.01", "none"),
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc', 'lrr', 'reconorm'),
     vmats,
     connectors = NULL,
-    optimizationStyle = c("lineSearch", "mixed", "greedy"),
-    scale = c("centerAndScale", "sqrtnp", "np", "center", "norm", "none", "impute", "eigenvalue", "robust", 'whiten', 'lowrank', 'rank'  ),
+    optimizationStyle = "greedy",
+    scale = c("center",  "eigenvalue" ),
     expBeta = 0.0,
     jointInitialization = TRUE,
     sparsenessAlg = NA,
@@ -4281,16 +4282,16 @@ simlr <- function(
     return(c(temp[1], as.numeric(num1), as.numeric(num2)))
   }
   if (missing(scale)) scale <- c("centerAndScale")
-  if (missing(energyType)) energyType <- "cca"
-  if (missing(mixAlg)) mixAlg <- "svd"
-  if (missing(optimizationStyle)) optimizationStyle <- "lineSearch"
+  if (missing(energyType)) energyType <- "acc"
+  if (missing(mixAlg)) mixAlg <- "pca"
   if (!missing("randomSeed")) set.seed(randomSeed) #  else set.seed( 0 )
   energyType <- match.arg(energyType)
   if ( energyType == 'nc') energyType <- 'normalized_correlation'
   if ( energyType == 'lrr') energyType <- 'lowRankRegression'
   constraint <- parse_constraint( constraint[1] )
-  if ( verbose ) print(constraint)
-  optimizationStyle <- match.arg(optimizationStyle)
+  constraint_weight=as.numeric(constraint[2])
+  constraint_iterations=as.numeric(constraint[3])
+  constraint_type=constraint[1]
   scalechoices = c(
     "sqrtnp", "np", "centerAndScale",
     "norm", "none", "impute", "eigenvalue", "center", "robust", 'lowrank','whiten','rank'
@@ -4298,11 +4299,9 @@ simlr <- function(
   scaleList <- c()
   if (length(scale) == 1) {
     scaleList[1] <- match.arg(scale[1], choices = scalechoices )
-  }
-  if (length(scale) > 1) {
+  } else if (length(scale) > 1) {
     for (kk in 1:length(scale)) {
-      scaleList[kk] <- match.arg(scale[kk],
-                                 choices = scalechoices
+      scaleList[kk] <- match.arg(scale[kk], choices = scalechoices
       )
     }
   }
@@ -4310,15 +4309,9 @@ simlr <- function(
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
   #
   constrainG <- function(vgrad, i, constraint) {
-    if (constraint == "GrassmannInv") {
-      # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
-      temp = vmats[[i]] / norm( vmats[[i]], "F")
-      projjer <- diag(ncol(vgrad)) - t(temp) %*% temp
-      return(vgrad %*% projjer)
-    }
+    # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
+    # Edelman, A., Arias, T. A., & Smith, S. T. (1998). The geometry of algorithms with orthogonality constraints. SIAM journal on Matrix Analysis and Applications, 20(2), 303-353.
     if (constraint == "Grassmann") {
-      # grassmann manifold - see https://stats.stackexchange.com/questions/252633/optimization-with-orthogonal-constraints
-      # Edelman, A., Arias, T. A., & Smith, S. T. (1998). The geometry of algorithms with orthogonality constraints. SIAM journal on Matrix Analysis and Applications, 20(2), 303-353.
       projjer <- diag(ncol(vgrad)) - t(vmats[[i]]) %*% vmats[[i]]
       return(vgrad %*% projjer)
     }
@@ -4328,8 +4321,6 @@ simlr <- function(
     return(vgrad)
   }
   
-  normalized <- FALSE
-  ccaEnergy <- FALSE
   nModalities <- length(voxmats)
   if (missing(connectors)) {
     temp <- 1:nModalities
@@ -4338,17 +4329,8 @@ simlr <- function(
       connectors[[i]] <- temp[-i]
     }
   }
-  if (energyType == "normalized") {
-    normalized <- TRUE
-    ccaEnergy <- FALSE
-  }
-  if (energyType == "cca" | energyType == "ucca"| energyType == "acc") {
-    normalized <- FALSE
-    ccaEnergy <- TRUE
-  }
   mixAlg <- match.arg(mixAlg)
   # 0.0 adjust length of input data
-  gamma <- rep(1, nModalities)
   if (missing(positivities)) {
     positivities <- rep("positive", nModalities)
   }
@@ -4498,7 +4480,7 @@ simlr <- function(
   buildV <- FALSE
   if (missing(vmats)) buildV <- TRUE else if (is.null(vmats)) buildV <- TRUE
   if (buildV) {
-    if (verbose) print("     <0> BUILD-V <0> BUILD-V <0> BUILD-V <0> BUILD-V <0>    ")
+#    if (verbose) cat("-------<00>--BEGIN--<00>-------\n")
     vmats <- list()
     for (i in 1:nModalities) {
       vmats[[i]] <- t(voxmats[[i]]) %*% initialUMatrix[[i]]
@@ -4515,25 +4497,22 @@ simlr <- function(
 
   energyPath <- matrix(Inf, nrow = iterations, ncol = nModalities)
   orthPath = matrix(Inf, nrow = iterations, ncol = nModalities)
-  initialEnergy <- 0
-  
-  for (i in 1:nModalities) {
-    loki <- calculate_simlr_energy(
-        V = vmats[[i]], 
-        X = voxmats[[i]], 
-        U = initialUMatrix[[i]],
-        energy_type = energyType
-      )
-    initialEnergy <- initialEnergy + loki / nModalities
-  }
   bestU <- initialUMatrix
   bestV <- vmats
-  totalEnergy <- c(initialEnergy)
+  line_search=optimizationStyle=="lineSearch"
   if (verbose) {
-    print(paste(
-      "initialDataTerm:", initialEnergy,
-      " <o> mixer:", mixAlg, " <o> E: ", energyType,  " <o> sparsenessAlg: ", sparsenessAlg, " <o> expBeta: ", expBeta
-    ))
+    cat(sprintf("
+      --- Method Summary ---
+        • Mixer Algorithm  : %s
+        • Energy Type      : %s
+        • Sparseness Alg.  : %s
+        • expBeta          : %s
+        • constraint       : %s
+        • constraint-it    : %s
+        • constraint-wt    : %s
+        • line_search      : %s
+      ----------------------
+      ", mixAlg, energyType, sparsenessAlg, expBeta, constraint_type, constraint_iterations, constraint_weight, line_search))
   }
   
   # 2.0 Define Logic for Optimization Style
@@ -4570,149 +4549,129 @@ simlr <- function(
 # ==============================================================================
 # This replaces the original `for (myit in 1:iterations)` block.
 
-# --- Add this parameter to your main simlr() function signature ---
-# optimizer = c("adam", "sgd_momentum")
-# if ( energyType %in% c("acc", "cca","reg","regression") ) {
-if ( energyType %in% c("reg","regression","reconorm") ) {
-  optimizer = "adam" # use adam for cca-like energies
-} else {
-  optimizer = "adam" # default to SGD with momentum
-}
-
 # --- 1. Setup before the loop ---
 bestTot <- Inf
 bestRow <- 1
 bestU <- initialUMatrix
 bestV <- vmats
-
 convergence_df <- tibble::tibble()
-
-# Initialize optimizer state (for Adam/AMSGrad and SGD w/ Momentum)
-optimizer_state <- if (optimizer == "adam") {
-  lapply(vmats, function(v) list(m = v*0, v = v*0, v_max = v*0))
-} else { # "sgd_momentum"
-  lapply(vmats, function(v) list(momentum = v*0))
-}
-
 # Hyperparameters for optimizers
 beta1 <- 0.9; beta2 <- 0.999; epsilon <- 1e-8; sgd_momentum_beta <- 0.9
-
+initial_learning_rate = 1e-4 # A good default starting point
+final_learning_rate = 1e-8 # A small value for fine-tuning at the end
+# --- Learning Rate Schedule Setup ---
+# We will decay the learning rate exponentially from initial to final
+# over the course of the iterations. This is more stable than a fixed LR.
+converged=0
+if (iterations > 1) {
+    lr_decay_factor <- (final_learning_rate / initial_learning_rate)^(1 / (iterations - 1))
+  } else {
+    lr_decay_factor <- 1.0
+  }
+current_learning_rate <- initial_learning_rate
 # Initialize adaptive orthogonality weights
-orth_weights <- rep(1.0, nModalities)
-names(orth_weights) <- names(voxmats)
-
+orth_weights <- rep(0.0, nModalities)
+normalizing_weights = rep( 1.0, nModalities )
+names( orth_weights ) = names( normalizing_weights ) = names( voxmats )
+optimizer='adam' # Default optimizer
+optimizer_state <- if (optimizer == "adam") {
+  lapply(vmats, function(v) list(m = v*0, v = v*0, v_max = v*0))
+  }
+clipper = 0.1
 # --- 2. Main Optimization Loop ---
 for (myit in 1:iterations) {
-  
   # --- A. Update each V_i matrix ---
   for (i in 1:nModalities) {
-    
     # 1. Calculate the total Euclidean gradient (a descent direction)
     similarity_gradient <- calculate_simlr_gradient(
       V = vmats[[i]], X = voxmats[[i]], U = initialUMatrix[[i]],
-      energy_type = energyType
-    )
-    
+      energy_type = energyType, clipper
+    ) * normalizing_weights[i]
     orthogonality_gradient <- 0
-    constraint_type=constraint[1]
-    constraint_weight=as.numeric(constraint[2])
-    if (is.na(constraint_weight)) constraint_weight = 1e-5
-    if (constraint_type == 'ortho') {
-      ortho_grad_unweighted <- gradient_invariant_orthogonality_defect(vmats[[i]])
+    if (constraint_type == 'ortho' ) {
+      ortho_grad_unweighted = clip_gradient_by_quantile( 
+        gradient_invariant_orthogonality_defect(vmats[[i]]), clipper )
       orthogonality_gradient <- ortho_grad_unweighted * constraint_weight * orth_weights[i]
     }
-    total_gradient <- similarity_gradient + orthogonality_gradient
+    total_gradient <- similarity_gradient - orthogonality_gradient
     
     # 2. Project to get the Riemannian descent gradient
     riemannian_descent_grad <- constrainG(total_gradient, i, constraint_type)
-    
-    # 3. Use the chosen optimizer to determine the OPTIMAL SEARCH DIRECTION
-    current_state <- optimizer_state[[i]]
-    if (optimizer == "adam") {
-      # Adam uses the raw gradient to update its internal state
-      current_state$m <- beta1 * current_state$m + (1 - beta1) * riemannian_descent_grad
-      current_state$v <- beta2 * current_state$v + (1 - beta2) * (riemannian_descent_grad^2)
-      current_state$v_max <- pmax(current_state$v_max, current_state$v)
-      
-      # The search direction is the Adam-proposed update vector
-      search_direction <- current_state$m / (sqrt(current_state$v_max) + epsilon)
-      
-    } else { # sgd_momentum
-      current_state$momentum <- sgd_momentum_beta * current_state$momentum + riemannian_descent_grad
-      search_direction <- current_state$momentum
-    }
-    optimizer_state[[i]] <- current_state # Save the updated state
-
+    #############################
+    state <- optimizer_state[[i]]
+    state$m <- beta1 * state$m + (1 - beta1) * riemannian_descent_grad
+    state$v <- beta2 * state$v + (1 - beta2) * (riemannian_descent_grad^2)
+    state$v_max <- pmax(state$v_max, state$v) # AMSGrad correction for stability
+    optimizer_state[[i]] <- state
+    # 1d. Perform bias correction for the current iteration
+    # This is important for stability in the early stages of optimization.
+    m_hat <- state$m / (1 - beta1^myit)
+    v_hat <- state$v_max / (1 - beta2^myit)
+    # 1e. Calculate the Adam update vector
+    search_direction <- m_hat / (sqrt(v_hat) + epsilon)
     # 4. Perform a Line Search ALONG THE OPTIMIZER'S PROPOSED DIRECTION
-    # This finds the best scalar step size `gamma` to take.
-    line_search_result <- tryCatch({
+    if ( line_search ) {
+      line_search_result <- tryCatch({
         optimize(
           f = function(step_size) {
             # Take a step along the proposed descent direction
-            V_candidate <- vmats[[i]] - step_size * search_direction
-                        
-            # Apply sparsity (unchanged from original code)
-            if (sparsenessQuantiles[i] != 0) {
-              V_candidate <- as.matrix(smoothingMatrices[[i]] %*% V_candidate)
-              V_candidate <- orthogonalizeAndQSparsify(V_candidate, sparsenessQuantiles[i] , 
-                positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
-                softThresholding = TRUE, sparsenessAlg = sparsenessAlg)
-            }
-            # A retraction must be performed inside the line search for manifold methods
-            if (constraint_type %in% c("Stiefel", "Grassmann")) {
-              V_candidate=t(sparsify_by_column_winner(t(V_candidate), positivities[i], positivities[i]))
-            }
-            
+            V_candidate <- vmats[[i]] + step_size * search_direction
+            V_candidate <- simlr_sparseness(
+                  V_candidate,
+                  constraint_type = constraint_type,
+                  smoothing_matrix = smoothingMatrices[[i]],
+                  positivity = positivities[i],
+                  sparseness_quantile = sparsenessQuantiles[i],
+                  constraint_iterations = constraint_iterations,
+                  constraint_weight = constraint_weight,
+                  sparseness_alg = sparsenessAlg
+                )            
             # Calculate total energy for this candidate
-            sim_e <- calculate_simlr_energy(V_candidate, voxmats[[i]], initialUMatrix[[i]], energyType)
+            sim_e <- calculate_simlr_energy(V_candidate, voxmats[[i]],
+              initialUMatrix[[i]], energyType) * normalizing_weights[i]
             ortho_e <- 0
-            if (constraint_type %in% c('ortho')) {
+            if (constraint_type %in% c('ortho') ) {
               ortho_e <- invariant_orthogonality_defect(V_candidate) * constraint_weight * orth_weights[i]
             }
             
             return(sim_e + ortho_e)
           },
-          interval = lineSearchRange, # Use the range provided to simlr
-          tol = lineSearchTolerance
+          interval = c(0.0,1.e2),# *current_learning_rate, # Use the range provided to simlr
+          tol = 0.01
         )
-    }, error = function(e) {
+      }, error = function(e) {
         # Fallback if optimize fails (e.g., flat landscape)
         warning(paste("Line search failed for modality", i, "at iteration", myit, ". Using small step."))
         return(list(minimum = 1e-6, objective = NA))
-    })
-    
-    # 5. Perform the Final Update using the optimal step size
-    optimal_step_size <- line_search_result$minimum
-    
-    # Update along the search direction
-    vmats[[i]] <- vmats[[i]] - optimal_step_size * search_direction
-
-      # 5. Apply final constraints (Sparsity and Retraction)
-      if (sparsenessQuantiles[i] != 0) {
-        vmats[[i]] <- as.matrix(smoothingMatrices[[i]] %*% vmats[[i]])
-        vmats[[i]] <- orthogonalizeAndQSparsify(vmats[[i]], sparsenessQuantiles[i], 
-          positivity = positivities[i], orthogonalize = FALSE, unitNorm = FALSE,
-          softThresholding = TRUE, sparsenessAlg = sparsenessAlg)
-        }
-#      if ( !(energyType %in% c('regression','reg','reconorm') ) ) 
-      if ( (energyType %in% c('acc','cca','nc','normalized_correlation','lowRankRegression','lrr') ) ) 
-        {
-        vmats[[i]]=l1_normalize_features(vmats[[i]])
-        }
-    } # End V_i update loop
-
-    # A final retraction is crucial for manifold methods
-    if (constraint_type %in% c("Stiefel", "Grassmann")) {
-      # vmats = orthogonalize_feature_space( vmats, 5, 0.2, verbose=FALSE )
-      for ( oo in 1:length(vmats)) {
-        vmats[[oo]]=t(sparsify_by_column_winner(t(vmats[[oo]]), positivities[oo], positivities[oo]))
-      }
+      })
+    } else {
+      # If line search is disabled, use a fixed step size
+      line_search_result <- list(minimum = current_learning_rate, objective = NA)
     }
+    # Update along the search direction
+    if ( verbose > 1 ) {
+      message("Updating modality ", names(voxmats)[i], " with step size ", line_search_result$minimum)
+      }
+    updatevmats = line_search_result$minimum * search_direction
+    # print( tibble( head(updatevmats,5)) )
+    if ( myit == 1 ) update = 0.0
+    vmats[[i]] <- simlr_sparseness(
+                  vmats[[i]] + updatevmats,
+                  constraint_type = constraint_type,
+                  smoothing_matrix = smoothingMatrices[[i]],
+                  positivity = positivities[i],
+                  sparseness_quantile = sparsenessQuantiles[i],
+                  constraint_weight = constraint_weight,
+                  constraint_iterations = constraint_iterations,
+                  sparseness_alg = sparsenessAlg
+                )         
 
+    } # End V_i update loop
+    current_learning_rate <- current_learning_rate * lr_decay_factor
 
     # --- B. Update each U_i matrix (logic is unchanged from original simlr) ---
     if ( !(energyType %in% c('regression','reg')) ) {
-      tempU <- lapply(1:nModalities, function(j) scale(voxmats[[j]] %*% vmats[[j]], TRUE, FALSE))
+        tempU <- lapply(1:nModalities, function(j) scale(voxmats[[j]] %*% vmats[[j]], TRUE, FALSE))
       } else {
         tempU <- lapply(1:nModalities, function(j) voxmats[[j]] %*% vmats[[j]])
       }
@@ -4732,7 +4691,7 @@ for (myit in 1:iterations) {
       U_current <- initialUMatrix[[mod_idx]]
       X_current <- voxmats[[mod_idx]]
       
-      sim_e <- calculate_simlr_energy(V_current, X_current, U_current, energyType)
+      sim_e <- calculate_simlr_energy(V_current, X_current, U_current, energyType) * normalizing_weights[mod_idx]
       # This calls your `simlr_feature_orth` function, assuming it takes a list of V's
       # If it takes a single V, we adjust. Let's assume it takes a list for now.
       orth_e <- invariant_orthogonality_defect(V_current)
@@ -4741,7 +4700,7 @@ for (myit in 1:iterations) {
       if (constraint_type %in% c('ortho')) {
         total_e <- sim_e + orth_e * constraint_weight * orth_weights[mod_idx]
       } else {
-        total_e <- sim_e # For Stiefel/Grassmann, the reported energy is just similarity
+        total_e <- sim_e # For Stiefel/Grassmann/none, the reported energy is just similarity
       }
       
       tibble::tibble(
@@ -4755,53 +4714,64 @@ for (myit in 1:iterations) {
     iter_results$iteration <- myit
     convergence_df <- dplyr::bind_rows(convergence_df, iter_results)
     # --- Adaptive Weighting: Set weights ONLY at the end of the first iteration ---
-  if (myit <= 1 && constraint_type %in% c('ortho')) {
+  if ( myit <= 1 ) {
     if (verbose) {
-      message("Setting adaptive orthogonality weights based on first few iterations...")
-      print("Setting adaptive orthogonality weights based on first few iterations...")
+      message("Setting adaptive orthogonality/energy weights based on first few iterations...")
+      print("Setting adaptive orthogonality/energy weights based on first few iterations...")
     }
-    
     for (i in 1:nModalities) {
       # Get the results for this modality from the table we just built
       mod_results <- iter_results[i, ]
-      
+      normalizing_weights[i]=1.0/ ( abs(mod_results$similarity_energy) * nModalities )
       # The weight is the ratio of the absolute similarity energy to the orthogonality penalty
-      if (mod_results$feature_orthogonality > 1e-10 ) {
-        orth_weights[i] <- abs(mod_results$similarity_energy) / mod_results$feature_orthogonality
-      } else {
-        orth_weights[i] <- 0.0 # Default to 1 if orthogonality is already perfect
+      if ( !is.na(mod_results$feature_orthogonality)) {
+        if (mod_results$feature_orthogonality > 1e-10 ) {
+          orth_weights[i] <- abs(mod_results$similarity_energy) / mod_results$feature_orthogonality
+        } else {
+          orth_weights[i] <- 0.0 # Default to 1 if orthogonality is already perfect
+        }
       }
     }
-    if (verbose) message("New Weights: ", paste(round(orth_weights, 2), collapse=", "))
+    if (verbose) {
+      message("Norm Weights: ", paste(round(normalizing_weights, 3), collapse=", "))
+      message("Orth Weights: ", paste(round(orth_weights, 2), collapse=", "))
+    }
   }
   
   # Update the "best" solution found so far based on mean total energy
   mean_current_energy <- mean(iter_results$total_energy, na.rm = TRUE)
+  printit=FALSE
   if (mean_current_energy < bestTot) {
     bestTot <- mean_current_energy
     bestRow <- myit
     bestU <- initialUMatrix
     bestV <- vmats
+    printit=TRUE
+    converged=myit
   }
   
-  if (verbose) {
+  if (verbose & printit ) {
     # Report the mean orthogonality across all modalities for this iteration
     mean_orthogonality <- mean(iter_results$feature_orthogonality, na.rm = TRUE)
 #    message(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f",
 #                  myit, mean_current_energy, bestTot, bestRow, mean_orthogonality))
-    print(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f",
+    cat(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f \n",
                   myit, mean_current_energy, bestTot, bestRow, mean_orthogonality))
   }
   
   # Check for convergence
-  maxitnoimp=5
+  if ( ! line_search ) maxitnoimp=100 else maxitnoimp=10
   if ((myit - bestRow) > maxitnoimp) {
-    if(verbose) message(paste("Convergence criteria met: No improvement in", maxitnoimp, "iterations."))
+    if(verbose) message(paste("Convergence criteria met @ ",myit," : No improvement over", maxitnoimp, "iterations with line_search =", line_search))
     break
   }
 } # End main optimization loop
 
-
+if ( converged > 1) {
+  message(paste("Converged at", converged, "iterations."))
+} else {
+  message(paste("Did not converge after", myit, "iterations."))
+}
 names(bestV)=names(voxmats)
 for ( k in 1:length(voxmats)) {
     rownames(bestV[[k]])=colnames(voxmats[[k]])
@@ -4816,10 +4786,10 @@ return(
       initialRandomMatrix = randmat,
       energyPath = convergence_df,
       finalError = bestTot,
-      totalEnergy = totalEnergy,
       connectors = connectors,
       energyType = energyType,
-      optimizationStyle = optimizationStyle
+      optimizationStyle = optimizationStyle,
+      converged_at = converged
     )
   )
 }
@@ -5028,14 +4998,13 @@ simlrU <- function(
 simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
                        positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
                                                                 "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
-                       repeatedMeasures = NA, lineSearchRange = c(-5e5, 5e5), 
-                       lineSearchTolerance = 1e-1, randomSeed, constraint = c("none", 
+                       repeatedMeasures = NA, lineSearchRange = c(-5e2, 5e2), 
+                       lineSearchTolerance = 1e-12, randomSeed, constraint = c("none", 
                                                                                "Grassmann", "Stiefel"), 
                       energyType = c("cca", "regression","normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation'), 
                        vmats, connectors = NULL, optimizationStyle = c("lineSearch", 
-                                                                       "mixed", "greedy"), scale = c("centerAndScale", "sqrtnp", 
-                                                                                                     "np", "center", "norm", "none", "impute", "eigenvalue", 
-                                                                                                     "robust"), expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
+                                                                       "mixed", "greedy"), 
+                       scale = c("center", "eigenvalue"), expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
                        verbose = FALSE, nperms = 50, FUN='mean') {
   
   # Set up permutations
@@ -6798,8 +6767,8 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     energy='lowRankRegression'
   } else if ( energy == 'nc' ) {
     energy='normalized_correlation'
-  } else if ( energy == 'acc' ) {
-    energy='cca'
+  } else if ( energy == 'cca' ) {
+    energy='acc'
   }
   
   #  if ( !doperm )
@@ -6816,8 +6785,8 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   }
   if ( verbose ) print("loopmatdone")
   ########### zzz ############
-  myjr = T
-  prescaling = c( 'center', 'np' )
+  myjr = FALSE # jointReduction
+  prescaling = c( 'center', 'eigenvalue' )
   optimus = 'lineSearch'
   maxits = 1000
   if ( ! is.null( iterations ) ) maxits = iterations
@@ -6913,7 +6882,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     }
   }
   
-  if ( verbose ) print('simlr done')
+  if ( verbose ) cat('--------simlr done--------\n')
   #################
   nsimx=nsimlr
   nms = names( simlrX$v ) = names(mats)
@@ -7462,12 +7431,12 @@ antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet",
 #' @return A list of orthogonalized matrices with the same dimensions as the input.
 orthogonalize_feature_space <- function(matrix_list,
                                         max_iterations = 100, # Increased default for convergence
-                                        learning_rate = 0.1,
+                                        learning_rate = 0.05,
                                         tolerance = 1e-4,
                                         verbose = TRUE) {
 
   # --- 1. Input Validation ---
-  stopifnot(is.list(matrix_list), length(matrix_list) > 1)
+  stopifnot(is.list(matrix_list), length(matrix_list) > 0)
   k <- ncol(matrix_list[[1]])
   if (is.null(k)) stop("Matrices in the list must have columns.")
   stopifnot(all(sapply(matrix_list, ncol) == k))
@@ -7485,20 +7454,6 @@ orthogonalize_feature_space <- function(matrix_list,
       AtA <- crossprod(mat)
       return(sum((AtA - diag(k))^2))
     }
-  }
-
-  # This helper calculates the gradient of the orthogonality penalty
-  gradient_invariant_orthogonality_defect <- function(A) {
-    # Normalize A to prevent scale from dominating the update
-    norm_A <- sqrt(sum(A^2))
-    if (norm_A < .Machine$double.eps) return(A * 0)
-    Ap <- A / norm_A
-    AtA <- t(Ap) %*% Ap
-    D <- diag(diag(AtA))
-    orthogonality_diff <- AtA - D
-    # The gradient pushes V to make V'V closer to diagonal
-    gradient <- 4 * (Ap %*% orthogonality_diff)
-    return(gradient)
   }
 
   # --- 3. Optimization Loop ---
@@ -7543,7 +7498,7 @@ orthogonalize_feature_space <- function(matrix_list,
   }
   
   if (i == max_iterations) {
-    warning("Reached maximum iterations without converging to the specified tolerance.")
+#    warning("Reached maximum iterations without converging to the specified tolerance.")
   }
   
   if (verbose) message("Orthogonalization complete.")
@@ -7566,3 +7521,165 @@ orthogonalize_feature_space <- function(matrix_list,
   # Return their inner product
   sum(x_unit * y_unit)
 }
+
+
+
+#' Apply SIMLR Sparseness and Normalize Features
+#'
+#' Applies smoothing and sparsity constraints to a matrix or vector as used in SIMLR or manifold learning,
+#' followed by optional L1 feature normalization depending on the energy type.
+#'
+#' @param v A numeric matrix or vector to be transformed.
+#' @param constraint_type Character. Type of manifold constraint; one of `"Stiefel"`, `"Grassmann"`, or `"None"`.
+#' @param smoothing_matrix Optional numeric matrix. If provided, \code{v} is left-multiplied by this matrix.
+#' @param positivity Character positive, negative or either.
+#' @param sparseness_quantile Numeric between 0 and 1. Fraction of elements to sparsify using quantile thresholding.
+#' @param constraint_weight Numeric. Weight for the constraint, used in orthogonalization.
+#' @param constraint_iterations Numeric. Number of iterations for the orthogonalization optimization.
+#' @param sparseness_alg Character. Sparsity algorithm to use (passed to \code{orthogonalizeAndQSparsify}).
+#' @param energy_type Character. If set to one of `"acc"`, `"cca"`, `"nc"`, `"normalized_correlation"`, `"lowRankRegression"`, or `"lrr"`,
+#'        then the returned matrix is normalized using \code{l1_normalize_features}.
+#'
+#' @return A numeric matrix of the same dimensions as \code{v}, with applied smoothing, sparsity, and optional normalization.
+#' @export
+#'
+#' @examples
+#' v <- matrix(rnorm(100), nrow = 10)
+#' L <- diag(10) # Identity as placeholder smoothing matrix
+#' simlr_sparseness(v, constraint_type = "Stiefel", smoothing_matrix = L, positivity = 0.8, energy_type = "cca")
+simlr_sparseness <- function(v, 
+                             constraint_type = c("Stiefel", "Grassmann", "none", "ortho"),
+                             smoothing_matrix = NULL,
+                             positivity = 'positive',
+                             sparseness_quantile = 0.8,
+                             constraint_weight = NA,
+                             constraint_iterations = 10,
+                             sparseness_alg = NA,
+                             energy_type = 'acc') {
+  v <- as.matrix(v)
+  constraint_type <- match.arg(constraint_type)
+
+  # Apply smoothing
+  if (!is.null(smoothing_matrix)) {
+    v <- smoothing_matrix %*% v
+  }
+
+  # Apply sparsity
+  if (constraint_type %in% c("Stiefel", "Grassmann")) {
+    v <- t(sparsify_by_column_winner(t(v), positivity, positivity))
+  } else {
+    if ( constraint_type == "ortho"){
+      v = orthogonalize_feature_space( list(v), 
+        max_iterations=constraint_iterations, 
+        learning_rate=0.05, verbose=FALSE )[[1]]
+    }
+    if (sparseness_quantile != 0) {
+      v <- orthogonalizeAndQSparsify(
+        v,
+        sparsenessQuantile = sparseness_quantile,
+        positivity = positivity,
+        orthogonalize = FALSE,
+        unitNorm = FALSE,
+        softThresholding = TRUE,
+        sparsenessAlg = sparseness_alg
+      )
+    }
+  }
+
+  # Optional L1 normalization
+  normalize_energy_types <- c("acc", "cca", "nc", "normalized_correlation", "lowRankRegression", "lrr")
+  if (!is.null(energy_type) && energy_type %in% normalize_energy_types) {
+    v <- l1_normalize_features(v)
+  }
+
+  return(v)
+}
+
+
+
+#' Compute Dice overlap for sparse vectors with optional quantile thresholding
+#'
+#' This function computes the Dice similarity coefficient for two vectors,
+#' either using a soft binary threshold (non-zero = 1), or by thresholding
+#' values by quantile.
+#'
+#' @param x Numeric vector.
+#' @param y Numeric vector of the same length as `x`.
+#' @param quantile Numeric between 0 and 1. If > 0, values below the given quantile
+#'        (based on absolute value) are set to 0 before computing Dice.
+#'
+#' @return Dice similarity coefficient (between 0 and 1).
+#' @examples
+#' dice_overlap_soft_vector(c(0,1,0,2), c(3,1,0,0))  # returns 0.5
+#' dice_overlap_soft_vector(c(0,0,0,0), c(0,0,0,0))  # returns 1
+#' dice_overlap_soft_vector(c(1,2,3,4), c(1,0,0,4), quantile=0.5)  # uses threshold
+#' @export
+dice_overlap_soft_vector <- function(x, y, quantile=0.5) {
+ stopifnot(length(x) == length(y))
+  stopifnot(is.numeric(quantile), quantile >= 0, quantile <= 1)
+
+  # Threshold by quantile if specified
+  if (quantile > 0) {
+    thresh_x <- stats::quantile(abs(x), probs = quantile)
+    thresh_y <- stats::quantile(abs(y), probs = quantile)
+    x_bin <- as.integer(abs(x) >= thresh_x)
+    y_bin <- as.integer(abs(y) >= thresh_y)
+  } else {
+    # Default: soft binary thresholding
+    x_bin <- as.integer(x != 0)
+    y_bin <- as.integer(y != 0)
+  }
+
+  intersection <- sum(x_bin & y_bin)
+  size_x <- sum(x_bin)
+  size_y <- sum(y_bin)
+
+  if (size_x + size_y == 0) {
+    return(1)  # Define overlap as 1 if both are all zeros
+  }
+
+  dice <- (2 * intersection) / (size_x + size_y)
+  return(dice)
+}
+
+
+#' Compute pairwise Dice overlaps for matrix rows or columns
+#'
+#' Calculates Dice similarity coefficients between corresponding rows or columns
+#' of two matrices, treating all non-zero values as 1 (soft binary overlap).
+#'
+#' @param A Numeric matrix.
+#' @param B Numeric matrix of the same dimensions as `A`.
+#' @param margin Integer: 1 for row-wise comparison, 2 for column-wise comparison.
+#'
+#' @return A numeric vector of Dice coefficients (length = nrow(A) or ncol(A)).
+#' @examples
+#' mat1 <- matrix(c(0,1,0,2, 1,0,0,0), nrow=2, byrow=TRUE)
+#' mat2 <- matrix(c(1,1,0,0, 0,0,1,0), nrow=2, byrow=TRUE)
+#' dice_overlap_soft_matrix(mat1, mat2, margin = 1)
+#' dice_overlap_soft_matrix(t(mat1), t(mat2), margin = 2)
+#' @export
+dice_overlap_soft_matrix <- function(A, B, margin = 1) {
+  # Check dimensions
+  if (is.null(dim(A))) {
+    stop("A must be a matrix, not a vector or NULL.")
+  }
+  if (is.null(dim(B))) {
+    stop("B must be a matrix, not a vector or NULL.")
+  }
+  stopifnot(all(dim(A) == dim(B)))
+  stopifnot(margin %in% c(1, 2))
+
+  n <- if (margin == 1) nrow(A) else ncol(A)
+  
+  out <- numeric(n)
+  for (i in seq_len(n)) {
+    a <- if (margin == 1) A[i, ] else A[, i]
+    b <- if (margin == 1) B[i, ] else B[, i]
+    out[i] <- dice_overlap_soft_vector(a, b)
+  }
+  return(out)
+}
+
+
+

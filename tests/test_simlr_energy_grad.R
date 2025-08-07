@@ -252,15 +252,21 @@ compare_v_matrices <- function(V_true_list, V_found_list) {
     final_similarities <- sapply(1:k, function(i) {
       cosine_sim(V_true[, i], V_found_aligned[, i])
     })
-    
+
+    final_dice <- sapply(1:k, function(i) {
+      dice_overlap_soft_vector(V_true[, i], V_found_aligned[, i], quantile=0.66 )
+    })
+
     # The final summary metric is the mean of these similarities
     mean_cosine_similarity <- mean(final_similarities)
+    mean_dice <- mean(final_dice)
     
     # Create a readable string for the permutation map
     permutation_string <- paste(sprintf("%d->%d", 1:k, permutation_map), collapse = ", ")
     
     tibble::tibble(
       mean_cosine_similarity = mean_cosine_similarity,
+      mean_dice = mean_dice,
       permutation_map = permutation_string
     )
   })
@@ -311,6 +317,7 @@ generate_multiview_ground_truth <- function(n_subjects = 100,
   # Create the loading matrices for the shared part
   V_shared_mats <- lapply(n_features, function(p) {
     V <- matrix(rnorm(p * k_shared), p, k_shared)
+#    V = simlr_sparseness(V, constraint_type = "none", positivity = 'positive', sparseness_quantile = 0.8, sparseness_alg = NA, energy_type = 'acc' )
     # Make them sparse for realism
 #    V[sample(length(V), size = floor(0.8 * length(V)))] <- 0
     return(V)
@@ -394,13 +401,15 @@ preprocess_for_simlr <- function(modality_list) {
 }
 # --- Setup: Generate the data once for all tests in this context ---
 set.seed(42)
+featp=c(40, 80, 120)*3
+kuniq=20
 ground_truth_data <- generate_multiview_ground_truth(
-  n_subjects = 300,
-  n_features = c(40, 80, 60),
+  n_subjects = 200,
+  n_features = featp,
   k_shared = 3,
-  k_unique_per_view = 2,
+  k_unique_per_view = kuniq, # More unique components for realism
   simulation_type="partially_shared",
-  noise_level = 0.1 # Low noise for a clear signal
+  noise_level = 0.05 # Low noise for a clear signal
 )
 # Pre-process the data as we would in a real analysis
 scaled_mats <- preprocess_for_simlr(ground_truth_data$modality_matrices)
@@ -423,21 +432,24 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
   # Set up parameters for the run
   mixAlg <- 'pca'
   if (energy %in% c("regression","reconorm")) mixAlg <- 'ica'
-  initu = initializeSimlr(scaled_mats, k_to_find, uAlgorithm='pca' )
+  mixAlg <- 'svd'
+  initu = initializeSimlr(scaled_mats, k_to_find, uAlgorithm='pca', jointReduction=FALSE )
   # We still use tryCatch to handle potential errors in any single run gracefully
   result <- tryCatch({
     simlr(
       voxmats = scaled_mats,
-      iterations = 500,
+      iterations = 1000,
       energyType = energy,
       constraint = constraint_type,
       mixAlg = mixAlg,
       initialUMatrix = initu, # Assuming simlr handles integer initialization
       positivities = rep("positive", length(scaled_mats)), # Corrected this
       sparsenessAlg = sparsenessAlg,
+      scale = c(  "centerAndScale" ),
       randomSeed=808,
-      expBeta = 0.99,
-      verbose = T
+      expBeta = 0.9,
+      optimizationStyle = "lineSearch", # Use Adam optimizer
+      verbose = 0
     )
   }, error = function(e) {
     # If a run fails, return NULL so we can filter it out later
@@ -450,15 +462,17 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
     return(tibble(
       energy_type = energy,
       constraint = constraint_type,
-      sparsity_alg = ifelse(is.na(sparsenessAlg), "none", sparsenessAlg),
+      converged_at = NA_integer_,
       mean_correlation = NA_real_,
       feature_orthogonality = NA_real_,
+      sparsity_alg = ifelse(is.na(sparsenessAlg), "none", sparsenessAlg),
       status = "failed"
     ))
   }
 
   v_comparison=( compare_v_matrices( V_true, result$v ) )
   overall_mean_similarity <- mean(v_comparison$mean_cosine_similarity, na.rm = TRUE)
+  overall_mean_dice = mean( v_comparison$mean_dice, na.rm = TRUE)
   
   # --- Evaluation ---
 #  projected_mats <- mapply(function(X, V) {
@@ -477,9 +491,11 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
   tabres=tibble(
     energy_type = energy,
     constraint = constraint_type,
-    sparsity_alg = ifelse(is.na(sparsenessAlg), "none", sparsenessAlg),
+    converged_at = result$converged_at,
     mean_correlation = overall_mean_similarity,
+    mean_dice = overall_mean_dice,
     feature_orthogonality = orth_error,
+    sparsity_alg = ifelse(is.na(sparsenessAlg), "none", sparsenessAlg),
     status = "success"
   )
   print(tabres)
@@ -505,11 +521,17 @@ tabulate_simlr_performance <- function() {
   U_shared = ground_truth_data$U_shared
   k_to_find <- 3
   
+
+  mycs = c(  "Stiefelx0", "Grassmannx0",  "orthox0.2x50", "orthox0.15x50", "orthox0.1x50","orthox0.08x50", "orthox0.06x50","orthox0.04x50","orthox0.02x50", "orthox0.01x50",  "orthox0.005x50", "orthox0.001x50", "none" )
+  mycs = c( "Grassmannx0", "Stiefelx0", "orthox0.1x50",  "none" )
+  mycs = c( "Grassmannx0", "Stiefelx0", "orthox0.01x100", "orthox0.1x100", "orthox0.1x5",   "none" )
+  eggs = c(  "regression", "reconorm", "normalized_correlation", "lrr", "acc")
   # --- Define Parameter Grid ---
   param_grid <- expand.grid(
-    energy = c( "reconorm", "normalized_correlation", "lrr", "acc", "regression"),
-    constraint = c(  "Stiefelx0", "Grassmannx0",  "orthox0.2", "orthox0.15", "orthox0.1","orthox0.08", "orthox0.06","orthox0.04","orthox0.02", "orthox0.01",  "orthox0.005", "orthox0.001", "none" ),
-    sparsity = c(NA), # c(NA, 'spmp'),
+    energy = eggs,
+    constraint = mycs,
+    sparsity = c(NA),
+#    sparsity = c('spmp'),
     stringsAsFactors = FALSE
   )
   
@@ -549,31 +571,46 @@ top_performers <- performance_summary %>%
   arrange(desc(mean_correlation))
 
 print("Top K Performing Configurations:")
-print(head(top_performers, 10))
+print(head(data.frame(top_performers), 5))
 
 
-# Analyze the trade-off between correlation and orthogonality
 library(ggplot2)
-print( 
-  ggplot(performance_summary, aes(x = feature_orthogonality, y = mean_correlation, color = energy_type)) +
-    geom_point(alpha = 0.8) +
-    facet_wrap(~constraint, scales = "free_x") +
-    theme_bw() +
-    labs(title = "SIMLR Performance: Correlation vs. Orthogonality",
-          x = "Feature Orthogonality Error (Lower is Better)",
-          y = "Mean Correlation with Ground Truth (Higher is Better)")
-)
+library(ggrepel)
+library(viridis)  # for better color palettes
+performance_summary <- performance_summary %>%
+  mutate(
+    orth.wt = case_when(
+      constraint == "none" ~ 0,
+      grepl("x0$", constraint) ~ 1,
+      TRUE ~ as.numeric(sub(".*x", "", constraint))
+    )
+  )
 
+library(ggplot2)
+library(ggrepel)
 
+print(
+ggplot(performance_summary, aes(
+    x = feature_orthogonality,
+    y = mean_correlation,
+    color = orth.wt,
+    label = constraint
+  )) +
+  geom_point(size = 4, alpha = 0.85) +
+  geom_text_repel(size = 3, max.overlaps = 30, seed = 42) +
+  facet_wrap(~energy_type, scales = "free_x") +
+  scale_color_viridis_c(option = "turbo", name = "Orthogonality\nWeight") +
+  theme_bw(base_size = 14) +
+  labs(
+    title = "SIMLR Performance: Dice vs. Orthogonality",
+    x = "Feature Orthogonality Error (Lower is Better)",
+    y = "Quantized Dice with Ground Truth (Higher is Better)"
+  ) +
+  theme(
+    legend.position = "right",
+    strip.text = element_text(size = 12),
+    axis.text = element_text(size = 10),
+    plot.title = element_text(size = 16, face = "bold")
+  ) )
 
-# Analyze the trade-off between correlation and orthogonality
-print( 
-  ggplot(performance_summary, aes(x = feature_orthogonality, y = mean_correlation, color = constraint)) +
-    geom_point(alpha = 0.8) +
-    facet_wrap(~energy_type, scales = "free_x") +
-    theme_bw() +
-    labs(title = "SIMLR Performance: Correlation vs. Orthogonality",
-          x = "Feature Orthogonality Error (Lower is Better)",
-          y = "Mean Correlation with Ground Truth (Higher is Better)")
-)
-
+  # ggsave("simlr_performance_scatter.png", width = 12, height = 8, dpi = 300)

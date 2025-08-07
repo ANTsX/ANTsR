@@ -7,7 +7,7 @@
 orthogonalize_feature_space(
   matrix_list,
   max_iterations = 100,
-  learning_rate = 0.1,
+  learning_rate = 0.05,
   tolerance = 1e-04,
   verbose = TRUE
 )
