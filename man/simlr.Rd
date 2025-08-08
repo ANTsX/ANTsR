@@ -7,7 +7,7 @@
 simlr(
   voxmats,
   smoothingMatrices,
-  iterations = 10,
+  iterations = 500,
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
@@ -22,7 +22,7 @@ simlr(
     "lowRankRegression", "normalized_correlation", "acc", "nc", "lrr", "reconorm"),
   vmats,
   connectors = NULL,
-  optimizationStyle = "greedy",
+  optimizationStyle = "adam",
   scale = c("center", "eigenvalue"),
   expBeta = 0,
   jointInitialization = TRUE,
@@ -69,7 +69,7 @@ allow estimates of per identifier intercept.}
 \item{connectors}{a list ( length of projections or number of modalities )
 that indicates which modalities should be paired with current modality}
 
-\item{optimizationStyle}{one of \code{c("mixed","greedy","linesearch")}}
+\item{optimizationStyle}{the simlr optimizer}
 
 \item{scale}{options to standardize each matrix. e.g. divide by the square root
 of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide

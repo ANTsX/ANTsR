@@ -22,7 +22,7 @@ simlr.perm(
     "lowRankRegression", "normalized_correlation"),
   vmats,
   connectors = NULL,
-  optimizationStyle = c("lineSearch", "mixed", "greedy"),
+  optimizationStyle = NULL,
   scale = c("center", "eigenvalue"),
   expBeta = 0,
   jointInitialization = TRUE,
@@ -65,7 +65,7 @@ simlr.perm(
 
 \item{connectors}{List of connectors. Default is NULL.}
 
-\item{optimizationStyle}{The optimization style. Default is 'lineSearch'.}
+\item{optimizationStyle}{The simlr optimizer.}
 
 \item{scale}{Scaling method. Default is 'centerAndScale'.}
 
