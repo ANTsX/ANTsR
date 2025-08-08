@@ -432,7 +432,7 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
   # Set up parameters for the run
   mixAlg <- 'pca'
   if (energy %in% c("regression","reconorm")) mixAlg <- 'ica'
-  mixAlg <- 'svd'
+#  mixAlg <- 'svd'
   initu = initializeSimlr(scaled_mats, k_to_find, uAlgorithm='pca', jointReduction=FALSE )
   # We still use tryCatch to handle potential errors in any single run gracefully
   result <- tryCatch({
@@ -448,7 +448,7 @@ run_simlr_config <- function(energy, constraint_type, k_to_find, sparsenessAlg, 
       scale = c(  "centerAndScale" ),
       randomSeed=808,
       expBeta = 0.9,
-      optimizationStyle = "lineSearch", # Use Adam optimizer
+      optimizationStyle = "greedy", # Use Adam optimizer
       verbose = 0
     )
   }, error = function(e) {
@@ -522,9 +522,9 @@ tabulate_simlr_performance <- function() {
   k_to_find <- 3
   
 
-  mycs = c(  "Stiefelx0", "Grassmannx0",  "orthox0.2x50", "orthox0.15x50", "orthox0.1x50","orthox0.08x50", "orthox0.06x50","orthox0.04x50","orthox0.02x50", "orthox0.01x50",  "orthox0.005x50", "orthox0.001x50", "none" )
   mycs = c( "Grassmannx0", "Stiefelx0", "orthox0.1x50",  "none" )
   mycs = c( "Grassmannx0", "Stiefelx0", "orthox0.01x100", "orthox0.1x100", "orthox0.1x5",   "none" )
+  mycs = c(  "Stiefelx0", "Grassmannx0",  "orthox0.2x1", "orthox0.2x5", "orthox0.1x50","orthox0.08x50", "orthox0.06x50","orthox0.04x50","orthox0.02x50", "orthox0.01x50",  "orthox0.005x50", "orthox0.001x50")#, "none" )
   eggs = c(  "regression", "reconorm", "normalized_correlation", "lrr", "acc")
   # --- Define Parameter Grid ---
   param_grid <- expand.grid(

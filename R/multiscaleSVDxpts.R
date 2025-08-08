@@ -4557,8 +4557,8 @@ bestV <- vmats
 convergence_df <- tibble::tibble()
 # Hyperparameters for optimizers
 beta1 <- 0.9; beta2 <- 0.999; epsilon <- 1e-8; sgd_momentum_beta <- 0.9
-initial_learning_rate = 1e-4 # A good default starting point
-final_learning_rate = 1e-8 # A small value for fine-tuning at the end
+initial_learning_rate = 1e-1 # A good default starting point
+final_learning_rate = 1e-5 # A small value for fine-tuning at the end
 # --- Learning Rate Schedule Setup ---
 # We will decay the learning rate exponentially from initial to final
 # over the course of the iterations. This is more stable than a fixed LR.
@@ -4577,10 +4577,15 @@ optimizer='adam' # Default optimizer
 optimizer_state <- if (optimizer == "adam") {
   lapply(vmats, function(v) list(m = v*0, v = v*0, v_max = v*0))
   }
-clipper = 0.1
+clipper = 0.8
 # --- 2. Main Optimization Loop ---
 for (myit in 1:iterations) {
   # --- A. Update each V_i matrix ---
+  decay_progress <- (myit - 1) / (iterations - 1)
+  cosine_decay <- 0.5 * (1 + cos(pi * decay_progress))
+  current_learning_rate <- final_learning_rate + 0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
+
+
   for (i in 1:nModalities) {
     # 1. Calculate the total Euclidean gradient (a descent direction)
     similarity_gradient <- calculate_simlr_gradient(
@@ -4607,8 +4612,10 @@ for (myit in 1:iterations) {
     # This is important for stability in the early stages of optimization.
     m_hat <- state$m / (1 - beta1^myit)
     v_hat <- state$v_max / (1 - beta2^myit)
+    # Nesterov momentum part: apply momentum to the bias-corrected m_hat
+    nesterov_m <- (beta1 * m_hat) + ((1 - beta1) * riemannian_descent_grad) / (1 - beta1^myit)
     # 1e. Calculate the Adam update vector
-    search_direction <- m_hat / (sqrt(v_hat) + epsilon)
+    # search_direction <- m_hat / (sqrt(v_hat) + epsilon)
     # 4. Perform a Line Search ALONG THE OPTIMIZER'S PROPOSED DIRECTION
     if ( line_search ) {
       line_search_result <- tryCatch({
@@ -4652,11 +4659,14 @@ for (myit in 1:iterations) {
     if ( verbose > 1 ) {
       message("Updating modality ", names(voxmats)[i], " with step size ", line_search_result$minimum)
       }
-    updatevmats = line_search_result$minimum * search_direction
+#    updatevmats = line_search_result$minimum * search_direction
+    epsilon=1e-8
+    V_updated <- vmats[[i]] + current_learning_rate * nesterov_m / (sqrt(v_hat) + epsilon)
+
     # print( tibble( head(updatevmats,5)) )
     if ( myit == 1 ) update = 0.0
     vmats[[i]] <- simlr_sparseness(
-                  vmats[[i]] + updatevmats,
+                  V_updated,
                   constraint_type = constraint_type,
                   smoothing_matrix = smoothingMatrices[[i]],
                   positivity = positivities[i],
@@ -4667,7 +4677,6 @@ for (myit in 1:iterations) {
                 )         
 
     } # End V_i update loop
-    current_learning_rate <- current_learning_rate * lr_decay_factor
 
     # --- B. Update each U_i matrix (logic is unchanged from original simlr) ---
     if ( !(energyType %in% c('regression','reg')) ) {
