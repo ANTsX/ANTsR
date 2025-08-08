@@ -6514,6 +6514,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param iterations int value to set max iterations
 #' @param path_modeling the result of a call to \code{simlr_path_models(n)}
 #' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
+#' @param optimizationStyle see \code{list_simlr_optimizers}
 #' @param verbose boolean
 #' @return A list containing the results of the similarity analysis and related data.
 #' @export
@@ -6524,8 +6525,11 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
                            energy, nsimlr, constraint, 
                            covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
                            resnetGradeThresh=1.02, doperm=FALSE, 
-                           exclusions=NULL, inclusions=NULL, sparseness=NULL, iterations=NULL, path_modeling=NULL, 
-                           sparsenessAlg=NA, verbose=FALSE ) 
+                           exclusions=NULL, inclusions=NULL, 
+                           sparseness=NULL, iterations=NULL, path_modeling=NULL, 
+                           sparsenessAlg=NA,
+                           optimizationStyle=NULL,
+                           verbose=FALSE ) 
 {
   if ( missing( nsimlr ) ) nsimlr = 5
   safegrep <- function(pattern, x, ...) {
@@ -6535,6 +6539,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     }
     return(result)
   }
+  if ( is.null( optimizationStyle ) ) optimizationStyle='nadam'
   myenergies = c('cca','acc','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation", 'nc', 'acc' )
   if ( !energy %in% myenergies ) {
     message( paste0("energy should be one of ", paste(myenergies, collapse=", ")))
