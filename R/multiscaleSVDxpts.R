@@ -6539,7 +6539,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     }
     return(result)
   }
-  if ( is.null( optimizationStyle ) ) optimizationStyle='nadam'
+  if ( is.null( optimizationStyle ) ) optimizationStyle='ls_nadam'
   myenergies = c('cca','acc','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation", 'nc', 'acc' )
   if ( !energy %in% myenergies ) {
     message( paste0("energy should be one of ", paste(myenergies, collapse=", ")))
@@ -6762,7 +6762,6 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
   ########### zzz ############
   myjr = FALSE # jointReduction
   prescaling = c( 'center', 'eigenvalue' )
-  optimus = 'lineSearch'
   maxits = 1000
   if ( ! is.null( iterations ) ) maxits = iterations
   if ( verbose ) print( paste( "maxits",maxits) )
@@ -6845,7 +6844,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
                   positivities = pizzer, 
                   connectors=clist,
                   constraint=constraint,
-                  optimizationStyle=optimus,
+                  optimizationStyle=optimizationStyle,
                   sparsenessAlg=sparsenessAlg,
                   initialUMatrix=initu )
   for ( kk in 1:length(mats) ) {
