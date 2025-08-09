@@ -4719,13 +4719,21 @@ for (myit in 1:iterations) {
     bestV <- vmats
     printit=TRUE
     converged=myit
-    is_small_reduction <- function(bestTot, lastBest, threshold = 1e-2) {
-      reduction <- abs(lastBest - bestTot) / max(abs(lastBest), abs(bestTot), 1e-12)
-      return(reduction < threshold)
+    pct_reduction_less_than <- function(old_val, new_val, threshold_pct) {
+      if (!is.numeric(old_val) || !is.numeric(new_val)) {
+        stop("Values must be numeric")
+      }
+      if (old_val == 0) {
+        stop("Old value cannot be zero for percentage reduction calculation")
+      }
+      
+      pct_change <- abs((old_val - new_val) / old_val) * 100
+      return( c(pct_change < threshold_pct, pct_change ) )
     }
     if ( myit > 5 ) {
-      if ( is_small_reduction( bestTot, lastBest, 1e-3) ) {
-        message(paste("\nbestTot ", bestTot, " lastBest ", lastBest, "bestTot / lastBest ",bestTot / lastBest))
+      change_detector = pct_reduction_less_than( bestTot, lastBest, 0.01 )
+      if (  change_detector[1] ) {
+        message(paste("~~Small.delt: E ", round(bestTot,4), " E-1 ", round(lastBest, 4),"E / E-1 ",round(change_detector[2],4)))
         myit=iterations
       }
     }
@@ -4750,7 +4758,7 @@ for (myit in 1:iterations) {
 } # End main optimization loop
 
 if ( converged > 2) {
-  message(paste("Converged at", converged-1, "iterations."))
+  message(paste("~~Converged at", converged-1, "iterations."))
 } else {
   message(paste("Did not converge after", myit, "iterations."))
 }

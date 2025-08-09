@@ -97,8 +97,10 @@ run_and_evaluate_simlr <- function(params, data_list, ground_truth) {
 
 tabulate_simlr_performance <- function(k_shared_true, k_unique_per_view) {
   set.seed(42)
+  fbig=c(201, 499, 666)
+  fsmall=round(fbig*0.05)
   ground_truth <- generate_structured_multiview_data(
-    n_subjects = 200, n_features = c(201, 499, 666),
+    n_subjects = 200, n_features = fsmall,
     k_shared = k_shared_true, k_specific = k_unique_per_view, noise_sd = 0.0
   )
   preprocessed_data <- preprocess_for_simlr(ground_truth$data_list)
