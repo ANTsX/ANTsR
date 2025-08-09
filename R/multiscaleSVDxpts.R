@@ -5670,16 +5670,11 @@ print(
     pizzer <- vector_to_df(pizzer, 'positivity')
     parameters <- cbind(parameters, prescaling, sparval, pizzer, simlrX$significance[1, -1])
     
-    print("BUTT")
     if (is.null(options_df_final)) {
       options_df_final <- parameters
     } else {
-    print("BUTT2")
       options_df_final <- myrbind.fill(options_df_final, parameters)
-    print("BUTT3")
     }
-        print("BUTT9")
-
     if (nrow(options_df_final) >= 1) {
       rowsel <- 1:(nrow(options_df_final) - 1)
       if (nrow(options_df_final) == 1) {
