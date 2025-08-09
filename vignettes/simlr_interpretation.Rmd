@@ -323,7 +323,6 @@ In this step, the simlr.parameters function is called to create a parameter list
 * `num_samples` : The number of samples to evaluate during the search.
 
 ```{r grassmann0}
-library(ggiraph) # For interactive plots
 
 paster <- function(vec1, vec2) {
   paste0(rep(vec1, each = length(vec2)), vec2)
@@ -461,49 +460,6 @@ print(plot_ranking)
 plot_data_interactive <- performance_data %>%
   slice_head(n = 30)
 
-# Create the ggplot object with interactive aesthetics
-p_interactive <- ggplot(
-    plot_data_interactive,
-    aes(
-      x = RV_12, y = RV_13, color = Mean_RV, size = -SD_RV, shape = Mixer,
-      tooltip = paste(
-        "<b>", Configuration, "</b><br>",
-        "------------------<br>",
-        "Mean RV: ", round(Mean_RV, 3), "<br>",
-        "SD of RVs: ", round(SD_RV, 3), "<br>",
-        "RV(1,2): ", round(RV_12, 3), "<br>",
-        "RV(1,3): ", round(RV_13, 3), "<br>",
-        "RV(2,3): ", round(RV_23, 3)
-      ),
-      data_id = Configuration
-    )
-  ) +
-  geom_point(alpha = 0.8) + # Standard geom_point
-  scale_color_viridis_c(option = "plasma", name = "Mean RV\n(Higher is Better)") +
-  scale_size_continuous(range = c(2.5, 8), name = "Balance (1/SD)\n(Larger is Better)") +
-  scale_shape_manual(name = "Mixer Algorithm", values = c("ica" = 17, "pca" = 16)) +
-  facet_wrap(~Constraint, labeller = label_wrap_gen(width=15)) +
-  theme_bw(base_size = 14) +
-  labs(
-    title = "SIMLR Performance: Exploring Inter-Modality Correlations",
-    subtitle = "Best solutions are top-right and large. Hover for details.",
-    x = "RV-Coefficient between View 1 & 2",
-    y = "RV-Coefficient between View 1 & 3"
-  ) +
-  theme(legend.position = "bottom", plot.title.position = "plot")
-
-# Convert the ggplot object to an interactive girafe object
-interactive_plot <- girafe(
-  ggobj = p_interactive,
-  options = list(
-    opts_tooltip(css = "background-color:black;color:white;padding:5px;border-radius:5px;font-family:sans-serif;"),
-    opts_hover(css = "fill:cyan;stroke:black;stroke-width:2px;"),
-    opts_zoom(min = 1, max = 4)
-  )
-)
-
-# View the interactive plot (will show up in RStudio's Viewer pane)
-print(interactive_plot)
 
 ```
 
