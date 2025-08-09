@@ -28,6 +28,7 @@ Depends:
 Imports:
     ANTsRCore (>= 0.8.1),
     dplyr,
+    ggplot2,
     graphics,
     grDevices,
     magrittr,
@@ -51,7 +52,6 @@ Suggests:
     fastICA,
     fpc,
     GGally,
-    ggplot2,
     glasso,
     ggpubr,
     ggdendro,

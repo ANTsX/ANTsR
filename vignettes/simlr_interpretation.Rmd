@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 ## Introduction
 
-Similarity-driven multi-view linear reconstruction (SiMLR) is an algorithm that exploits inter-modality relationships to transform large scientific datasets into a smaller joint space. 
+Modern science generates data from multiple sources (e.g., genetics, imaging, behavior), yet integrating these 'views' to find a single, coherent underlying signal is a major statistical challenge. Similarity-driven multi-view linear reconstruction (SiMLR) addresses this by exploiting inter-modality relationships to transform large scientific datasets into a smaller joint space. 
 The link between the original data $X_i$ ($n \times p$) and the reduced embedding space is a sparse set of features $v_i$ ( $p \times k$ ).  Standard statistical tools may then be applied on the embeddings $s_i=X_i v_i$.
 
 SiMLR may be used in a variety of other ways. We will cover a basic example and follow with different use cases.  These examples are perhaps less involved than those given in the [original publication's](https://www.nature.com/articles/s43588-021-00029-8) cloud computing [examples](https://doi.org/10.24433/CO.3087836.v2) but illustrate new functionality.
@@ -323,6 +323,8 @@ In this step, the simlr.parameters function is called to create a parameter list
 * `num_samples` : The number of samples to evaluate during the search.
 
 ```{r grassmann0}
+library(ggiraph) # For interactive plots
+
 paster <- function(vec1, vec2) {
   paste0(rep(vec1, each = length(vec2)), vec2)
 }
@@ -332,16 +334,16 @@ simparms = simlr.parameters(
     nsimlr_options = list( 2 ),
     prescaling_options = list( 
             c( "robust", "centerAndScale",  "np") ),
-    objectiver_options = list("regression",'acc','normalized_correlation'),
+    objectiver_options = list("regression",'acc','normalized_correlation','reconorm','lrr'),
     mixer_options=list("ica",'pca'), 
     sparval_options=list(  c(0.5,0.5,0.5) ),
     expBeta_options = list( c(0.0) ),
     positivities_options = list(
             c("positive","positive","positive")),
-    optimus_options=list( "adam","nadam","rmsprop"),
+    optimus_options=list( "adam","nadam","rmsprop", 'ls_adam', 'adagrad' ),
     constraint_options=csearch,
-    search_type="random",
-    num_samples=3
+    search_type="full",  # full or random
+    num_samples=5
     )
 ``` 
 
@@ -357,7 +359,7 @@ plot( image( regs[[2]] ) )
 The `simlr.search` function performs the grid search over the parameter space defined in `simparms`. It takes the matrices matlist and regs as input. The `nperms` specifies the number of permutations to evaluate for robustness. The `verbose` parameter controls the level of detail in the output during the search process.
 
 
-```{r grassmann2}
+```{r grassmann2, eval=!exists("simlrXs")}
 simlrXs=simlr.search(
         matlist,
         regs=regs,
@@ -365,12 +367,146 @@ simlrXs=simlr.search(
         nperms=5, # just fast for vignette
         verbose=4
         )
-simlrXs$paramsearch
+# simlrXs$paramsearch
 ```
 
 Finally, `simlrXs$paramsearch` retrieves the results of the parameter search. This will show the performance of different parameter combinations, helping to identify the optimal settings for the SiMLR algorithm.  The "best" result here will have the highest value for `final_energy` and its parameters are stored in the `parameters` slot.
 
-This section of the vignette demonstrates how to set up a comprehensive parameter search for the SiMLR algorithm. It shows how to create custom constraints, define a parameter grid, regularize the model, and execute the search. The result is an optimized set of parameters that can be used to enhance the performance of the SiMLR model on your data.
+```{r visparam,echo=FALSE,fig.width=12,fig.height=8}
+library(tidyverse)
+# --- Data Preparation ---
+# 1. Rename columns for clarity
+# 2. Calculate a composite performance score
+# 3. Pivot the data into a "long" format for easy plotting
+simlrXs_paramsearch = simlrXs$paramsearch
+performance_data <- simlrXs_paramsearch %>%
+  # Select and rename columns
+  select(
+    Objective = objectiver,
+    Mixer = mixer,
+    Constraint = constraint,
+    Optimizer = optimus,
+    RV_12 = rvcoef_m1_m2,
+    RV_13 = rvcoef_m1_m3,
+    RV_23 = rvcoef_m2_m3
+  ) %>%
+  # Calculate summary metrics
+  mutate(
+    # Mean RV is a good measure of overall shared signal
+    Mean_RV = (RV_12 + RV_13 + RV_23) / 3,
+    # Std Dev of RV measures how balanced the solution is
+    # A low SD means all pairs are equally correlated (good)
+    SD_RV = apply(select(., RV_12, RV_13, RV_23), 1, sd),
+    
+    # Create a unique ID for each experimental run
+    Configuration = paste(Objective, Mixer, Constraint, Optimizer, sep = " | ")
+  ) %>%
+  # Arrange by the best overall performance
+  arrange(desc(Mean_RV))
+
+# --- Plot 2: Ranked Heatmap of Mean RV ---
+
+# We first need to summarize the data
+heatmap_data <- performance_data %>%
+  group_by(Objective, Constraint, Mixer) %>%
+  # Find the best score achieved for each combination
+  summarise(Best_Mean_RV = max(Mean_RV, na.rm = TRUE), .groups = "drop") %>%
+  # Order the factors for a clean plot
+  mutate(
+    Objective = fct_reorder(Objective, Best_Mean_RV, .fun = median, .desc = TRUE),
+    Constraint = fct_reorder(Constraint, Best_Mean_RV, .fun = median, .desc = TRUE)
+  )
+
+plot2 <- ggplot(heatmap_data, aes(x = Constraint, y = Objective, fill = Best_Mean_RV)) +
+  geom_tile(color = "white", linewidth = 1.5) +
+  geom_text(aes(label = round(Best_Mean_RV, 2)), color = "white", size = 4, fontface = "bold") +
+  facet_wrap(~Mixer) +
+  scale_fill_viridis_c(option = "inferno", name = "Best Mean\nRV Score", limits = c(0,1)) +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "SIMLR Performance Heatmap",
+    subtitle = "Comparing the best performance for each configuration",
+    x = "Constraint Type",
+    y = "Objective Function"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+    panel.grid = element_blank(),
+    strip.text = element_text(face = "bold", size = 12)
+  )
+
+print(plot2)
+
+
+plot_ranking <- ggplot(
+    performance_data %>% slice_head(n = 20), # Show top 20
+    aes(x = Mean_RV, y = fct_reorder(Configuration, Mean_RV), color = Objective)
+  ) +
+  geom_segment(aes(x = 0, xend = Mean_RV, yend = fct_reorder(Configuration, Mean_RV)), linewidth = 0.8, alpha = 0.5) +
+  geom_point(aes(shape = Mixer), size = 4) +
+  scale_color_viridis_d(option = "cividis", name = "Objective") +
+  scale_shape_manual(name = "Mixer", values = c("ica" = 17, "pca" = 16)) +
+  theme_minimal(base_size = 12) +
+  labs(
+    title = "Top 20 SIMLR Configurations by Mean RV",
+    x = "Mean RV-Coefficient (Higher is Better)",
+    y = "Configuration (Objective | Mixer | Constraint | Optimizer)"
+  ) +
+  theme(panel.grid.major.y = element_line(linetype = "dashed", color = "gray85"))
+
+print(plot_ranking)
+
+
+
+plot_data_interactive <- performance_data %>%
+  slice_head(n = 30)
+
+# Create the ggplot object with interactive aesthetics
+p_interactive <- ggplot(
+    plot_data_interactive,
+    aes(
+      x = RV_12, y = RV_13, color = Mean_RV, size = -SD_RV, shape = Mixer,
+      tooltip = paste(
+        "<b>", Configuration, "</b><br>",
+        "------------------<br>",
+        "Mean RV: ", round(Mean_RV, 3), "<br>",
+        "SD of RVs: ", round(SD_RV, 3), "<br>",
+        "RV(1,2): ", round(RV_12, 3), "<br>",
+        "RV(1,3): ", round(RV_13, 3), "<br>",
+        "RV(2,3): ", round(RV_23, 3)
+      ),
+      data_id = Configuration
+    )
+  ) +
+  geom_point(alpha = 0.8) + # Standard geom_point
+  scale_color_viridis_c(option = "plasma", name = "Mean RV\n(Higher is Better)") +
+  scale_size_continuous(range = c(2.5, 8), name = "Balance (1/SD)\n(Larger is Better)") +
+  scale_shape_manual(name = "Mixer Algorithm", values = c("ica" = 17, "pca" = 16)) +
+  facet_wrap(~Constraint, labeller = label_wrap_gen(width=15)) +
+  theme_bw(base_size = 14) +
+  labs(
+    title = "SIMLR Performance: Exploring Inter-Modality Correlations",
+    subtitle = "Best solutions are top-right and large. Hover for details.",
+    x = "RV-Coefficient between View 1 & 2",
+    y = "RV-Coefficient between View 1 & 3"
+  ) +
+  theme(legend.position = "bottom", plot.title.position = "plot")
+
+# Convert the ggplot object to an interactive girafe object
+interactive_plot <- girafe(
+  ggobj = p_interactive,
+  options = list(
+    opts_tooltip(css = "background-color:black;color:white;padding:5px;border-radius:5px;font-family:sans-serif;"),
+    opts_hover(css = "fill:cyan;stroke:black;stroke-width:2px;"),
+    opts_zoom(min = 1, max = 4)
+  )
+)
+
+# View the interactive plot (will show up in RStudio's Viewer pane)
+print(interactive_plot)
+
+```
+
 
 ## Path modeling
 

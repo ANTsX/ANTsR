@@ -1,6 +1,7 @@
 
 set.seed(42)
 library(ANTsR)
+library(ggplot2)
 myksh=8
 myku=3
 hard_case_data <- generate_structured_multiview_data(

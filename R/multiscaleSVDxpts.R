@@ -5644,16 +5644,7 @@ simlr.search <- function(
       finalE <- sum(-log10(simlrX$significance[wtest, -c(1:2)]))
     }
     finalE <- finalE * 1.0 / length(mats) # Don't ask...
-    
-print(nsimlr)
-print(objectiver)
-print(mixer)
-print(optimus)
-print(constraint)
-print(as.numeric(finalE))
-print(
-  "SS"
-)
+    if ( is.na( finalE ) ) finalE=Inf
 
     parameters <- data.frame(
       nsimlr = nsimlr,
@@ -5681,7 +5672,7 @@ print(
         bestresult <- simlrX$simlr_result
         bestsig <- simlrX$significance
         bestparams <- parameters
-      } else if (all(finalE > options_df_final$final_energy[rowsel])) {
+      } else if ( all(finalE > options_df_final$final_energy[rowsel])) {
         bestresult <- simlrX$simlr_result
         bestsig <- simlrX$significance
         bestparams <- parameters
@@ -7553,11 +7544,6 @@ orthogonalize_feature_space <- function(matrix_list,
 #'
 #' @return A numeric matrix of the same dimensions as \code{v}, with applied smoothing, sparsity, and optional normalization.
 #' @export
-#'
-#' @examples
-#' v <- matrix(rnorm(100), nrow = 10)
-#' L <- diag(10) # Identity as placeholder smoothing matrix
-#' simlr_sparseness(v, constraint_type = "Stiefel", smoothing_matrix = L, positivity = 0.8, energy_type = "cca")
 simlr_sparseness <- function(v, 
                              constraint_type = c("Stiefel", "Grassmann", "none", "ortho"),
                              smoothing_matrix = NULL,

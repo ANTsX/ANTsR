@@ -28,7 +28,13 @@ compare_feature_loadings <- function(V_true, V_found) {
   if (k_comp == 0) return(NA_real_)
   V_true_comp <- V_true[, 1:k_comp, drop = FALSE]; V_found_comp <- V_found[, 1:k_comp, drop = FALSE]
   cosine_sim <- function(a, b) { sum(a * b) / (sqrt(sum(a^2)) * sqrt(sum(b^2))) }
-  correlation_matrix <- abs(cor(V_true_comp, V_found_comp))
+  correlation_matrix <- (abs(cor(V_true_comp, V_found_comp)))
+  if ( any(is.na(correlation_matrix))) {
+    print(V_true_comp)
+    message("imputing")
+    print(correlation_matrix)
+    correlation_matrix <- antsrimpute(correlation_matrix)
+  }
   permutation_map <- as.vector(clue::solve_LSAP(correlation_matrix, maximum = TRUE))
   V_found_permuted <- V_found_comp[, permutation_map, drop = FALSE]
   signs_to_flip <- sign(diag(cor(V_true_comp, V_found_permuted))); signs_to_flip[signs_to_flip == 0] <- 1
@@ -58,7 +64,7 @@ compare_latent_spaces <- function(U_true, U_found) {
 
 run_and_evaluate_simlr <- function(params, data_list, ground_truth) {
   result_row <- as_tibble(params)
-  init_u <- initializeSimlr(data_list, k = params$k_to_find, uAlgorithm = 'pca', jointReduction = FALSE)
+  init_u <- initializeSimlr(data_list, k = params$k_to_find, uAlgorithm = 'pca', jointReduction = TRUE )
   mixer <- if (params$energy %in% c("regression", "reg")) 'ica' else 'pca'
 
   result <- tryCatch({
@@ -98,7 +104,7 @@ run_and_evaluate_simlr <- function(params, data_list, ground_truth) {
 tabulate_simlr_performance <- function(k_shared_true, k_unique_per_view) {
   set.seed(42)
   fbig=c(201, 499, 666)
-  fsmall=round(fbig*0.05)
+  fsmall=round(fbig*0.1)
   ground_truth <- generate_structured_multiview_data(
     n_subjects = 400, n_features = fsmall,
     k_shared = k_shared_true, k_specific = k_unique_per_view, noise_sd = 0.1
@@ -111,7 +117,7 @@ tabulate_simlr_performance <- function(k_shared_true, k_unique_per_view) {
   param_grid <- expand.grid(
     energy = c("normalized_correlation", "regression", "acc", "lrr"),
     constraint = c("Stiefelx0", "Grassmannx0", "none"),
-    optimizer = c("adam", "nadam", "rmsprop"),
+    optimizer = c("adam", "nadam", "adagrad"),
     k_to_find = c(k_to_find1, k_to_find2),
     stringsAsFactors = FALSE
   )

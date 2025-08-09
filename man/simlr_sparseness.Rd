@@ -43,8 +43,3 @@ A numeric matrix of the same dimensions as \code{v}, with applied smoothing, spa
 Applies smoothing and sparsity constraints to a matrix or vector as used in SIMLR or manifold learning,
 followed by optional L1 feature normalization depending on the energy type.
 }
-\examples{
-v <- matrix(rnorm(100), nrow = 10)
-L <- diag(10) # Identity as placeholder smoothing matrix
-simlr_sparseness(v, constraint_type = "Stiefel", smoothing_matrix = L, positivity = 0.8, energy_type = "cca")
-}
