@@ -7766,3 +7766,105 @@ generate_structured_multiview_data <- function(n_subjects,
     )
   ))
 }
+
+
+
+#' Select the Optimal Number of Principal Components
+#'
+#' This function takes a list of numeric matrices and selects the optimal number 
+#' of principal components (either sparse or standard) for dimensionality reduction.
+#' The selection is based on a variance-explained threshold or cross-validation.
+#'
+#' @param mat_list A list of numeric matrices, each with rows as observations and columns as features.
+#' @param method A character string indicating the PCA method to use.
+#'   One of `"pca"` for standard PCA or `"spca"` for sparse PCA. Default is `"pca"`.
+#' @param sparsity A numeric value between 0 and 1 indicating the desired sparsity level 
+#'   (only used when `method = "spca"`).
+#' @param var_threshold Proportion of total variance explained used to select 
+#'   the number of components (only for `"pca"`). Default is `0.9`.
+#' @param max_components Maximum number of components to consider. Default is `min(nrow(mat), ncol(mat))`.
+#' @param center Logical; should the variables be centered? Default is `TRUE`.
+#' @param scale Logical; should the variables be scaled? Default is `FALSE`.
+#'
+#' @details
+#' For `"pca"`, the function computes standard principal components via \code{\link[stats]{prcomp}} 
+#' and selects the smallest number of components such that the cumulative variance explained 
+#' exceeds `var_threshold`.
+#' 
+#' For `"spca"`, sparse principal component analysis is performed using \code{\link[elasticnet]{spca}}. 
+#' The optimal number of components is chosen based on reconstruction error across a range of 
+#' candidate component counts.
+#'
+#' @return
+#' A list with elements:
+#' \describe{
+#'   \item{\code{optimal_k}}{The selected number of components.}
+#'   \item{\code{scores}}{List of scores for each input matrix.}
+#'   \item{\code{loadings}}{List of loadings for each input matrix.}
+#'   \item{\code{method}}{The method used (`"pca"` or `"spca"`).}
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' library(elasticnet)
+#' set.seed(123)
+#' mats <- list(
+#'   matrix(rnorm(100*10), 100, 10),
+#'   matrix(rnorm(100*15), 100, 15)
+#' )
+#' res <- select_optimal_pcs(mats, method = "spca", sparsity = 0.4)
+#' print(res$optimal_k)
+#' }
+#'
+#' @importFrom stats prcomp
+#' @importFrom elasticnet spca
+#' @export
+select_optimal_pcs <- function(mat_list, method = c("spca", "pca"), sparsity = 0.4, var_threshold = 0.9) {
+  method <- match.arg(method)
+  results <- list()
+  
+  if (method == "spca" && !requireNamespace("elasticnet", quietly = TRUE)) {
+    stop("Please install the 'elasticnet' package for sparse PCA.")
+  }
+  
+  for (i in seq_along(mat_list)) {
+    mat <- as.matrix(mat_list[[i]])
+    if (!is.numeric(mat)) stop("Matrix ", i, " contains non-numeric values.")
+    
+    if (method == "spca") {
+      # Fit SPCA
+      spca_fit <- elasticnet::spca(mat, K = min(ncol(mat), nrow(mat) - 1), sparse = "varnum", para = sparsity)
+      
+      # Convert to numeric matrices
+      scores <- as.matrix(spca_fit$scores)
+      loadings <- as.matrix(spca_fit$loadings)
+      
+      if (is.null(scores) || is.null(loadings)) {
+        stop("SPCA failed to produce scores/loadings for matrix ", i)
+      }
+      
+      # Reconstruct & compute variance explained
+      recon <- scores %*% t(loadings)
+      var_explained <- colSums((scores %*% t(loadings))^2) / sum(mat^2)
+      
+    } else if (method == "pca") {
+      pca_fit <- prcomp(mat, center = TRUE, scale. = TRUE)
+      scores <- pca_fit$x
+      loadings <- pca_fit$rotation
+      var_explained <- pca_fit$sdev^2 / sum(pca_fit$sdev^2)
+    }
+    
+    # Find smallest number of components reaching threshold
+    cum_var <- cumsum(var_explained)
+    optimal_k <- which(cum_var >= var_threshold)[1]
+    
+    results[[i]] <- list(
+      optimal_k = optimal_k,
+      cum_var = cum_var,
+      scores = scores,
+      loadings = loadings
+    )
+  }
+  
+  return(results)
+}

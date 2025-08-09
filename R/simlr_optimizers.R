@@ -328,7 +328,7 @@ step.ls_adam <- function(optimizer, i, V_current, descent_gradient, full_energy_
   lineSearchRange <- params$lineSearchRange %||% c(-1e2, 1e2)
   lineSearchTolerance <- params$lineSearchTolerance %||% 1e-3
   lineSearchTolerance <- params$lineSearchTolerance %||% 1e-3
-  lineSearchRange = c( 0, 1. ) * 1e5 * state$last_step_size
+  lineSearchRange = c( -1, 1. ) * 1e2 # * state$last_step_size
 
   line_search_result <- tryCatch({
       optimize(
@@ -377,7 +377,7 @@ step.ls_rmsprop <- function(optimizer, i, V_current, descent_gradient, full_ener
   lineSearchRange = params$lineSearchRange %||% c(-1e2, 1e2)
   lineSearchTolerance = params$lineSearchTolerance %||% 1e-3
   lineSearchTolerance <- params$lineSearchTolerance %||% 1e-3
-  lineSearchRange = c( 0, 1. ) * 1e5 * state$last_step_size
+  lineSearchRange = c( -1, 1. ) * 1e2 # * state$last_step_size
 
   line_search_result <- tryCatch({
       optimize(
@@ -437,7 +437,7 @@ step.ls_nadam <- function(optimizer, i, V_current, descent_gradient, full_energy
   # Get search range and tolerance from params, with sensible defaults
   lineSearchRange <- params$lineSearchRange %||% c(0, 1e4)
   lineSearchTolerance <- params$lineSearchTolerance %||% 1e-3
-  lineSearchRange = c( 0, 1. ) * 1e5 * state$last_step_size
+  lineSearchRange = c( -1, 1. ) * 1e2 # * state$last_step_size
   line_search_result <- tryCatch({
       optimize(
         f = function(step_size) {

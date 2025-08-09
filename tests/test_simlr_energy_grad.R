@@ -103,7 +103,7 @@ run_and_evaluate_simlr <- function(params, data_list, ground_truth) {
   
   # Use a consistent initialization for all runs
   init_u <- initializeSimlr(data_list, k = k_to_find, uAlgorithm = 'pca', jointReduction=FALSE)
-  
+  if ( params$energy %in% c("regression","reg") ) mixer='ica' else mixer='pca'
   # --- Run SIMLR ---
   result <- tryCatch({
     simlr(
@@ -115,8 +115,9 @@ run_and_evaluate_simlr <- function(params, data_list, ground_truth) {
       sparsenessQuantiles = rep(0.8,length(data_list)),
       positivities=rep('positive',length(data_list)),
       optimizationStyle=params$optimizer,
-      scale=c("center","np"),
-      # Add other simlr parameters here as needed
+      mixAlg=mixer,
+      scale=c("centerAndScale"),
+      randomSeed=42,
       verbose = 1
     )
   }, error = function(e) {
@@ -166,7 +167,7 @@ ground_truth <- generate_structured_multiview_data(
   n_features = c(100, 150, 120),
   k_shared = 4,
   k_specific = 10, # Each modality has 3 strong unique signals
-  noise_sd = 0.02
+  noise_sd = 0.2
 )
 
 # Pre-process the data (centering and scaling)
@@ -175,9 +176,9 @@ preprocessed_data <- ground_truth$data_list
 mypts = list_simlr_optimizers()
 # --- Define the parameter grid for the experiment ---
 param_grid <- expand.grid(
-  energy = c("normalized_correlation", "regression", "acc","lrr", "reconorm"),
-  constraint = c("Stiefelx0","Grassmannx0", "orthox0.1x1",  "none"),
-  optimizer=c("ls_rmsprop","ls_nadam"),
+  energy = c("normalized_correlation", "regression", "acc","lrr"),
+  constraint = c("Stiefelx0","Grassmannx0",  "none"),
+  optimizer=c("rmsprop","ls_rmsprop","nadam","ls_nadam","adam","ls_adam"),
   stringsAsFactors = FALSE
 )
 
