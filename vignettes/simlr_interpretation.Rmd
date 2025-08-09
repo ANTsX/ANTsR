@@ -326,25 +326,22 @@ In this step, the simlr.parameters function is called to create a parameter list
 paster <- function(vec1, vec2) {
   paste0(rep(vec1, each = length(vec2)), vec2)
 }
-csearch = as.list( c("none", 
-  paster( c("Grassmannx","Stiefelx","orthox"), 
-    c("0.0001x0.0001","0.01x0.01"))))
+csearch = list( "none", "Grassmannx0","Stiefelx0","orthox0.1x5")
 # the 10x10 are weights on the optimization term of the energy
 simparms = simlr.parameters( 
     nsimlr_options = list( 2 ),
     prescaling_options = list( 
             c( "robust", "centerAndScale",  "np") ),
-    objectiver_options = list("regression",'cca','normalized_correlation'),
+    objectiver_options = list("regression",'acc','normalized_correlation'),
     mixer_options=list("ica",'pca'), 
     sparval_options=list(  c(0.5,0.5,0.5) ),
-    expBeta_options = list( c(0.99) ),
+    expBeta_options = list( c(0.0) ),
     positivities_options = list(
             c("positive","positive","positive")),
-    optimus_options=list( 'lineSearch'),
+    optimus_options=list( "adam","nadam","rmsprop"),
     constraint_options=csearch,
-#    sparsenessAlg = "spmp",
     search_type="random",
-    num_samples=5
+    num_samples=3
     )
 ``` 
 

@@ -4140,7 +4140,7 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
   }
   
   
-  return(gradient)
+  return( as.matrix( gradient) )
 }
 
 
@@ -4580,7 +4580,7 @@ for (myit in 1:iterations) {
                   constraint_iterations = constraint_iterations,
                   constraint_weight = constraint_weight,
                   sparseness_alg = sparsenessAlg
-                )  
+                )
         raw_e = calculate_simlr_energy(V_sp, voxmats[[i]], initialUMatrix[[i]], energyType)
         if ( return_raw ) return( raw_e )
         sim_e <- raw_e * normalizing_weights[i]
@@ -4609,7 +4609,7 @@ for (myit in 1:iterations) {
               gradient_invariant_orthogonality_defect(V_sp)
         }
         g=clip_gradient_by_quantile( 
-          constrainG( sim_grad - orth_grad, i, constraint_type), clipper )
+          constrainG( as.matrix(sim_grad - orth_grad), i, constraint_type), clipper )
         return(g)
       }
 
@@ -4982,9 +4982,9 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
                                                                 "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
                        repeatedMeasures = NA, lineSearchRange = c(-5e2, 5e2), 
                        lineSearchTolerance = 1e-12, randomSeed, constraint = c("none", 
-                                                                               "Grassmann", "Stiefel"), 
-                      energyType = c("cca", "regression","normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation'), 
-                       vmats, connectors = NULL, optimizationStyle = NULL, 
+                                                                               "Grassmannx0", "Stiefelx0"), 
+                      energyType = c("cca", "regression","normalized", "acc", "lowRank", "lowRankRegression",'normalized_correlation'), 
+                       vmats, connectors = NULL, optimizationStyle = 'adam', 
                        scale = c("center", "eigenvalue"), expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
                        verbose = FALSE, nperms = 50, FUN='mean') {
   
@@ -5352,6 +5352,7 @@ visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1'
 #' @return A matrix with absolute values taken for unsigned columns.
 #' @export
 take_abs_unsigned <- function(m) {
+  m=as.matrix(m)
   if (!is.matrix(m) || !is.numeric(m)) {
     stop("Input must be a numeric matrix.")
   }
@@ -5636,6 +5637,16 @@ simlr.search <- function(
     }
     finalE <- finalE * 1.0 / length(mats) # Don't ask...
     
+print(nsimlr)
+print(objectiver)
+print(mixer)
+print(optimus)
+print(constraint)
+print(as.numeric(finalE))
+print(
+  "SS"
+)
+
     parameters <- data.frame(
       nsimlr = nsimlr,
       objectiver = objectiver,
@@ -5651,12 +5662,16 @@ simlr.search <- function(
     pizzer <- vector_to_df(pizzer, 'positivity')
     parameters <- cbind(parameters, prescaling, sparval, pizzer, simlrX$significance[1, -1])
     
+    print("BUTT")
     if (is.null(options_df_final)) {
       options_df_final <- parameters
     } else {
+    print("BUTT2")
       options_df_final <- myrbind.fill(options_df_final, parameters)
+    print("BUTT3")
     }
-    
+        print("BUTT9")
+
     if (nrow(options_df_final) >= 1) {
       rowsel <- 1:(nrow(options_df_final) - 1)
       if (nrow(options_df_final) == 1) {
@@ -7554,7 +7569,7 @@ simlr_sparseness <- function(v,
 
   # Apply smoothing
   if (!is.null(smoothing_matrix)) {
-    v <- smoothing_matrix %*% v
+    v <- as.matrix( smoothing_matrix %*% v )
   }
 
   # Apply sparsity
@@ -7585,7 +7600,7 @@ simlr_sparseness <- function(v,
     v <- l1_normalize_features(v)
   }
 
-  return(v)
+  return( as.matrix( v ) )
 }
 
 
