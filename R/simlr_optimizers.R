@@ -230,13 +230,10 @@ step.adagrad <- function(optimizer, i, V_current, descent_gradient, ...) {
   # smaller updates, while parameters with small past gradients will have
   # larger updates.
   
-  # THE FIX IS HERE: The update is a standard gradient descent step.
-  # We move AGAINST the descent_gradient, scaled by the adaptive rate.
-  # The original code used `+ lr * update`, which would be an ascent step.
   
   adaptive_denominator <- sqrt(state$g_sum_sq) + epsilon
-  updated_V <- V_current - learning_rate * (descent_gradient / adaptive_denominator)
-  
+  updated_V <- V_current + learning_rate * (descent_gradient / adaptive_denominator)
+    
   # --- 3. Update and return state ---
   optimizer$state[[i]] <- state
   return(list(updated_V = updated_V, optimizer = optimizer))
