@@ -4760,7 +4760,7 @@ for (myit in 1:iterations) {
 if ( converged > 2) {
   message(paste("~~Converged at", converged-1, "iterations."))
 } else {
-  message(paste("Did not converge after", myit, "iterations."))
+  message(paste("--Did not converge after", myit, "iterations."))
 }
 names(bestV)=names(voxmats)
 for ( k in 1:length(voxmats)) {
@@ -7563,7 +7563,7 @@ simlr_sparseness <- function(v,
 
   # Apply sparsity
   if (constraint_type %in% c("Stiefel", "Grassmann")) {
-    v <- t(sparsify_by_column_winner(t(v), positivity, positivity))
+    v <- t(ensembled_sparsity(t(v), positivity))
   } else {
     if ( constraint_type == "ortho"){
       v = orthogonalize_feature_space( list(v), 
@@ -8305,4 +8305,80 @@ estimate_rank_by_permutation_rv <- function(mat_list,
   }
 
   return(list(optimal_k = optimal_k, results = results_df, plot = plot))
+}
+
+
+#' Create a Smoothed Sparse Matrix via Permutation Ensemble Averaging
+#'
+#' This function removes the bias of treating a single column as "special" by
+#' running the `sparsify_by_column_winner` function multiple times. In each run,
+#' the columns of the input matrix are permuted so that a different column is
+#' in the "first" position. The results are un-permuted and then averaged to
+#' produce a stable, unbiased sparse representation.
+#'
+#' @param X A numeric matrix [p_features x k_components].
+#' @param default_constraint The constraint to apply to all other columns.
+#'
+#' @return A single, averaged sparse matrix with the same dimensions as X.
+#' @export
+#' @examples
+#' set.seed(42)
+#' mat <- matrix(rnorm(15), nrow=5, ncol=3)
+#' mat[2,1] <- 10; mat[4,2] <- -12; mat[1,3] <- 14
+#' print("Original Matrix:")
+#' print(round(mat, 2))
+#'
+#' # Keep one column dense, sparsify others by magnitude ('either')
+#' # sparse_ensembled <- ensembled_sparsity(mat,
+#' #  default_constraint = "either"
+#' # )
+#'
+ensembled_sparsity <- function(X, default_constraint = "either") {
+  if ( default_constraint == 'positive' ) X=take_abs_unsigned(X)
+  first_column_constraint = default_constraint
+  k <- ncol(X)
+  if (is.null(k) || k < 1) return(X)
+  if (k == 1) {
+    # If there's only one column, just apply the default constraint
+    return(sparsify_by_column_winner(X, constraints = default_constraint, ensure_row_membership = FALSE))
+  }
+  
+  # Initialize a matrix to accumulate the sum of all permuted results
+  sum_of_matrices <- matrix(0, nrow = nrow(X), ncol = k)
+  
+  # Define the constraints to be applied by the worker function
+  constraints_to_apply <- c(default_constraint, rep(default_constraint, k - 1))
+
+  # --- 1. Loop Through Each Column, Making it "First" ---
+  for (i in 1:k) {
+    
+    # a) Create the permutation order
+    #    e.g., for i=3 and k=5, the order is c(3, 1, 2, 4, 5)
+    permutation_order <- c(i, setdiff(1:k, i))
+    
+    # b) Permute the columns of the original matrix
+    X_permuted <- X[, permutation_order, drop = FALSE]
+    
+    # c) Apply the standard sparsity function to the permuted matrix
+    #    The `first_column_constraint` is now correctly applied to the i-th column.
+    Y_permuted_sparse <- sparsify_by_column_winner(
+      X_permuted,
+      first_column_constraint=default_constraint,
+      default_constraint = default_constraint,
+      ensure_row_membership = FALSE # Disable revival as requested
+    )
+    
+    # d) Un-permute the columns of the result to restore original order
+    #    The `order()` function gives us the inverse permutation.
+    inverse_permutation <- order(permutation_order)
+    Y_unpermuted <- Y_permuted_sparse[, inverse_permutation, drop = FALSE]
+    
+    # e) Add the result to our running total
+    sum_of_matrices <- sum_of_matrices + Y_unpermuted
+  }
+  
+  # --- 2. Average the Results ---
+  averaged_matrix <- sum_of_matrices / k
+  
+  return(averaged_matrix)
 }

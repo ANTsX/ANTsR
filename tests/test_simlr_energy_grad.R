@@ -72,7 +72,8 @@ run_and_evaluate_simlr <- function(params, data_list, ground_truth) {
       voxmats = data_list, initialUMatrix = init_u, 
       energyType = params$energy, constraint = params$constraint,
       scale=c("centerAndScale"),
-      optimizationStyle = params$optimizer, mixAlg = mixer, verbose = FALSE
+      optimizationStyle = params$optimizer, 
+      mixAlg = mixer, verbose = 1
     )
   }, error = function(e) { 
       warning(paste("\nRun failed for:", paste(params, collapse="|"), "\nMessage:", e$message))
@@ -111,13 +112,13 @@ tabulate_simlr_performance <- function(k_shared_true, k_unique_per_view) {
   )
   preprocessed_data <- preprocess_for_simlr(ground_truth$data_list)
   
-  k_to_find1 = estimate_rank_by_permutation_rv( preprocessed_data, n_permutations=0, return_max=FALSE )$optimal_k
-  k_to_find2 = estimate_rank_by_permutation_rv( preprocessed_data, n_permutations=0, return_max=TRUE )$optimal_k
+  k_to_find1 = 2 #estimate_rank_by_permutation_rv( preprocessed_data, n_permutations=0, return_max=FALSE )$optimal_k
+  k_to_find2 = 4 # estimate_rank_by_permutation_rv( preprocessed_data, n_permutations=0, return_max=TRUE )$optimal_k
   print(paste('k_to_find1 ', k_to_find1,k_to_find2))
   param_grid <- expand.grid(
     energy = c("normalized_correlation", "regression", "acc", "lrr"),
     constraint = c("Stiefelx0", "Grassmannx0", "none"),
-    optimizer = c("adam", "nadam", "adagrad"),
+    optimizer = c("adam", "nadam" ),
     k_to_find = c(k_to_find1, k_to_find2),
     stringsAsFactors = FALSE
   )
