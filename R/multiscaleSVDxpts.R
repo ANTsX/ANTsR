@@ -8386,75 +8386,21 @@ estimate_rank_by_permutation_rv <- function(mat_list,
 #' # )
 #'
 ensembled_sparsity <- function(X, default_constraint = "either") {
-  if ( default_constraint == 'positive' ) X=take_abs_unsigned(X)
-  first_column_constraint = default_constraint
+  if (default_constraint == 'positive') {
+    X <- take_abs_unsigned(X)
+  }
+  
   k <- ncol(X)
   if (is.null(k) || k < 1) return(X)
-  if (k == 1) {
-    # If there's only one column, just apply the default constraint
-    return(sparsify_by_column_winner(X, constraints = default_constraint, ensure_row_membership = FALSE))
-  }
   
-  # Initialize a matrix to accumulate the sum of all permuted results
-  sum_of_matrices <- matrix(0, nrow = nrow(X), ncol = k)
+  Y <- sparsify_by_column_winner(
+    X,
+    first_column_constraint = default_constraint,
+    default_constraint = default_constraint,
+    ensure_row_membership = FALSE # As requested, no reviving
+  )
   
-  # Define the constraints to be applied by the worker function
-  constraints_to_apply <- c(default_constraint, rep(default_constraint, k - 1))
-
-  # --- 1. Loop Through Each Column, Making it "First" ---
-  for (i in 1:k) {
-    
-    # a) Create the permutation order
-    #    e.g., for i=3 and k=5, the order is c(3, 1, 2, 4, 5)
-    permutation_order <- c(i, setdiff(1:k, i))
-    
-    # b) Permute the columns of the original matrix
-    X_permuted <- X[, permutation_order, drop = FALSE]
-    
-    # c) Apply the standard sparsity function to the permuted matrix
-    #    The `first_column_constraint` is now correctly applied to the i-th column.
-    Y_permuted_sparse <- sparsify_by_column_winner(
-      X_permuted,
-      first_column_constraint=default_constraint,
-      default_constraint = default_constraint,
-      ensure_row_membership = FALSE # Disable revival as requested
-    )
-    
-    # d) Un-permute the columns of the result to restore original order
-    #    The `order()` function gives us the inverse permutation.
-    inverse_permutation <- order(permutation_order)
-    Y_unpermuted <- Y_permuted_sparse[, inverse_permutation, drop = FALSE]
-    
-    # e) Add the result to our running total
-    sum_of_matrices <- sum_of_matrices + Y_unpermuted
-  }
-  
-  # --- 2. Average the Results ---
-  averaged_matrix <- sum_of_matrices / k
-
-  row_var <- apply(averaged_matrix, 1, var, na.rm = TRUE)
-  col_var <- apply(averaged_matrix, 2, var, na.rm = TRUE)
-
-  zero_var_rows <- which(row_var == 0)
-  zero_var_cols <- which(col_var == 0)
-
-  if (length(zero_var_rows) > 0) {
-    warning(sprintf(
-      "Zero variance in %d rows: %s",
-      length(zero_var_rows),
-      paste(zero_var_rows, collapse = ", ")
-    ))
-  }
-
-  if (length(zero_var_cols) > 0) {
-    warning(sprintf(
-      "Zero variance in %d columns: %s",
-      length(zero_var_cols),
-      paste(zero_var_cols, collapse = ", ")
-    ))
-  }
-
-  return(averaged_matrix)  
+  return(Y)
   }
 
 
