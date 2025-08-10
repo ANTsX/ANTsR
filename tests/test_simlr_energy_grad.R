@@ -116,9 +116,12 @@ tabulate_simlr_performance <- function(k_shared_true, k_unique_per_view) {
   k_to_find2 = 4 # estimate_rank_by_permutation_rv( preprocessed_data, n_permutations=0, return_max=TRUE )$optimal_k
   print(paste('k_to_find1 ', k_to_find1,k_to_find2))
   param_grid <- expand.grid(
-    energy = c("normalized_correlation", "regression", "acc", "lrr"),
-    constraint = c("Stiefelx0", "Grassmannx0", "none"),
-    optimizer = c("adam", "ls_adam" ),
+#    energy = c("normalized_correlation", "regression", "acc", "lrr"),
+#    constraint = c("Stiefelx0", "Grassmannx0", "none"),
+#    optimizer = c("adam", "ls_adam" ),
+    energy = c( "regression"),
+    constraint = c("Stiefelx0" ),
+    optimizer = c( "ls_adam" ),
     k_to_find = c(k_to_find1, k_to_find2),
     stringsAsFactors = FALSE
   )

@@ -180,6 +180,7 @@ ba_svd <- function(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x)), di
     },
     error = function(e) {
       message("svd failed, using rsvd instead")
+      library(rsvd)
       if ( dividebymax) {
         rsvd(x/max(x), nu = nu, nv = nv)
       } else rsvd(x, nu = nu, nv = nv)
@@ -4274,6 +4275,7 @@ simlr <- function(
     jointInitialization = TRUE,
     sparsenessAlg = NA,
     verbose = FALSE) {
+
   parse_constraint <- function(x) {
     num1=num2=NA
     temp=unlist(strsplit( x, "x"))
@@ -4640,7 +4642,6 @@ for (myit in 1:iterations) {
       sparseness_quantile = sparsenessQuantiles[i],
       sparseness_alg = sparsenessAlg
     )
-                     
 
     } # End V_i update loop
 
@@ -4787,6 +4788,80 @@ return(
 }
 
 
+#' Safe PCA with Deterministic Bad-Column Repair
+#'
+#' Performs PCA after automatically detecting and fixing problematic columns
+#' (e.g., zero variance, NA-only, partial NAs) in a deterministic way.
+#' Ensures that the output dimensions match those from a clean dataset.
+#'
+#' @param X A numeric matrix or data frame.
+#' @param nc Number of components to return.
+#' @param center Logical, whether to center columns.
+#' @param scale Logical, whether to scale columns to unit variance.
+#' @return A list with the same structure as \code{\link[stats]{prcomp}},
+#'         with rotation, sdev, x, etc.
+#' @examples
+#' set.seed(123)
+#' mat <- matrix(rnorm(50), nrow = 10)
+#' mat[, 3] <- 1  # zero variance col
+#' mat[, 5] <- NA # all NA col
+#' result <- safe_pca(mat, nc = 3)
+#' result$rotation
+safe_pca <- function(X, nc = min(dim(X)), center = TRUE, scale = TRUE) {
+  X <- as.matrix(X)
+  
+  # Detect bad columns
+  col_var <- apply(X, 2, function(col) var(col, na.rm = TRUE))
+  all_na <- apply(X, 2, function(col) all(is.na(col)))
+  some_na <- apply(X, 2, function(col) any(is.na(col)) && !all(is.na(col)))
+  
+  # Replace bad columns deterministically
+  n <- nrow(X)
+  fix_count <- 0
+  
+  for (j in seq_len(ncol(X))) {
+    if (all_na[j]) {
+      # Replace all-NA col with fixed ±1 pattern
+      X[, j] <- rep(c(-1, 1), length.out = n)
+      fix_count <- fix_count + 1
+    } else if (col_var[j] == 0 || is.na(col_var[j])) {
+      # Replace zero-variance col with deterministic sine wave
+      X[, j] <- sin(seq_len(n) * (pi / n) * (j + 1))
+      fix_count <- fix_count + 1
+    } else if (some_na[j]) {
+      # Impute partial NAs with column mean
+      mu <- mean(X[, j], na.rm = TRUE)
+      X[is.na(X[, j]), j] <- mu
+      fix_count <- fix_count + 1
+    }
+  }
+  
+  # Ensure full column rank
+  qr_rank <- qr(X)$rank
+  if (qr_rank < nc) {
+    needed <- nc - qr_rank
+    message("Adding ", needed, " orthogonal synthetic columns to ensure rank.")
+    synth_cols <- matrix(0, nrow = n, ncol = needed)
+    for (k in seq_len(needed)) {
+      synth_cols[, k] <- cos(seq_len(n) * (pi / n) * (k + ncol(X)))
+    }
+    X <- cbind(X, synth_cols)
+  }
+  
+  # Run PCA (deterministic)
+  result <- stats::prcomp(X, center = center, scale. = scale, rank. = nc, retx=TRUE )
+  
+  # Drop any extra synthetic components so rotation is always ncol(X) x nc
+  if (ncol(result$rotation) < nc) {
+    pad <- matrix(0, nrow = ncol(result$rotation), ncol = nc - ncol(result$rotation))
+    result$rotation <- cbind(result$rotation, pad)
+    result$sdev <- c(result$sdev, rep(0, nc - length(result$sdev)))
+  }
+  
+  attr(result, "fixed_columns") <- fix_count
+  result
+}
+
 
 #' Compute the low-dimensional u matrix for simlr
 #'
@@ -4816,11 +4891,10 @@ return(
 #'
 #' @seealso \code{\link{simlr}}
 #' @export
-
 simlrU <- function(
     projections, mixingAlgorithm, initialW,
     orthogonalize = FALSE, connectors = NULL) {
-  # some gram schmidt code
+  
   projectionsU <- projections
   for (kk in 1:length(projections)) {
     mynorm = norm(projectionsU[[kk]], "F")
@@ -4887,25 +4961,8 @@ simlrU <- function(
     nc <- ncol(projectionsU[[1]])
     avgU <- Reduce(cbind, projectionsU[wtobind])
     if (mixAlg == "pca") {
-      basis <- tryCatch(
-        expr = {
-          stats::prcomp(scale(avgU, T, T), retx = FALSE, rank. = nc, scale. = TRUE)$rotation
-        },
-        error = function(e) {
-          message("prcomp failed, using svd instead")
-          tryCatch(
-            expr = {
-              svd(scale(avgU, T, T), nu = nc, nv = 0)$u
-            },
-            error = function(e) {
-              message("svd failed, using rsvd instead")
-              rsvd(scale(avgU, T, T), nu = nc, nv = 0)$u
-            }
-          )
-        }
-      )
-    }
-    if (mixAlg == "rrpca-l") {
+      basis <- safe_pca( avgU, nc = nc )$x
+    } else if (mixAlg == "rrpca-l") {
       basis <- (rsvd::rrpca(avgU, rand = FALSE)$L[, 1:nc])
     } else if (mixAlg == "rrpca-s") {
       basis <- (rsvd::rrpca(avgU, rand = FALSE)$S[, 1:nc])
@@ -4924,13 +4981,6 @@ simlrU <- function(
       basis <- (ba_svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
     }
     colnames(basis)=paste0("PC",1:nc)
-    # print(paste("Basis norm",norm(basis,'F'),'avgUnorm',norm(avgU,'F')))
-    # print(paste("Basis norm",paste(dim(basis),collapse='x'),'avgUnorm',paste(dim(avgU),collapse='x')))
-    # if ( is.nan(norm(basis,'F') ) ) {
-    #  write.csv( avgU, '/tmp/temp.csv',row.names=FALSE )
-    #  write.csv( basis, '/tmp/temp2.csv',row.names=FALSE )
-    #  derka
-    # }
     if (!orthogonalize) {
       return(basis)
     }
@@ -4951,7 +5001,6 @@ simlrU <- function(
   }
   return(outU)
 }
-
 
 
 
@@ -8382,6 +8431,91 @@ ensembled_sparsity <- function(X, default_constraint = "either") {
   
   # --- 2. Average the Results ---
   averaged_matrix <- sum_of_matrices / k
+
+  row_var <- apply(averaged_matrix, 1, var, na.rm = TRUE)
+  col_var <- apply(averaged_matrix, 2, var, na.rm = TRUE)
+
+  zero_var_rows <- which(row_var == 0)
+  zero_var_cols <- which(col_var == 0)
+
+  if (length(zero_var_rows) > 0) {
+    warning(sprintf(
+      "Zero variance in %d rows: %s",
+      length(zero_var_rows),
+      paste(zero_var_rows, collapse = ", ")
+    ))
+  }
+
+  if (length(zero_var_cols) > 0) {
+    warning(sprintf(
+      "Zero variance in %d columns: %s",
+      length(zero_var_cols),
+      paste(zero_var_cols, collapse = ", ")
+    ))
+  }
+
+  return(averaged_matrix)  
+  }
+
+
+
+#' Check a matrix for zero-variance rows and columns
+#'
+#' This function checks a numeric matrix for rows or columns
+#' with zero variance. It reports how many and which ones are affected,
+#' using either their names (if present) or indices.
+#'
+#' @param mat A numeric matrix.
+#'
+#' @return
+#' Boolean checking if any zero-variance rows or columns found.
+#'
+#' @details
+#' Zero variance means all values in a row or column are identical
+#' (after removing \code{NA}s).
+#'
+#' @examples
+#' m <- matrix(c(1, 1, 1,
+#'               2, 3, 4,
+#'               5, 6, 7),
+#'             nrow = 3, byrow = TRUE)
+#' rownames(m) <- c("rowA", "rowB", "rowC")
+#' colnames(m) <- c("colX", "colY", "colZ")
+#' check_zero_variance(m)
+#'
+#' @export
+check_zero_variance <- function(mat) {
+  if (!is.matrix(mat)) {
+    stop("Input must be a matrix.")
+  }
   
-  return(averaged_matrix)
+  # Calculate variance for rows and columns
+  row_var <- apply(mat, 1, var, na.rm = TRUE)
+  col_var <- apply(mat, 2, var, na.rm = TRUE)
+  
+  zero_var_rows <- which(row_var == 0)
+  zero_var_cols <- which(col_var == 0)
+  
+  # Get names if available
+  row_ids <- if (!is.null(rownames(mat))) rownames(mat)[zero_var_rows] else zero_var_rows
+  col_ids <- if (!is.null(colnames(mat))) colnames(mat)[zero_var_cols] else zero_var_cols
+  outputter = c(FALSE,FALSE)
+  if (length(zero_var_rows) > 0) {
+    warning(sprintf(
+      "Zero variance in %d rows: %s",
+      length(zero_var_rows),
+      paste(row_ids, collapse = ", ")
+    ))
+    outputter[1]=TRUE
+  }
+  
+  if (length(zero_var_cols) > 0) {
+    warning(sprintf(
+      "Zero variance in %d columns: %s",
+      length(zero_var_cols),
+      paste(col_ids, collapse = ", ")
+    ))
+    outputter[2]=TRUE
+  }
+  return( outputter )
 }
