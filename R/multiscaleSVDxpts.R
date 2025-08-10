@@ -4571,6 +4571,7 @@ for (myit in 1:iterations) {
 
     # first define the local versions of the energy and gradient 
     smooth_cost <- function(V, return_raw = FALSE) {
+        if ( positivities[i] == 'positive' ) V=take_abs_unsigned(V)
         V_sp = simlr_sparseness(
                   V,
                   constraint_type = constraint_type,
@@ -4592,6 +4593,7 @@ for (myit in 1:iterations) {
       }
       
     smooth_grad <- function(V) {
+        if ( positivities[i] == 'positive' ) V=take_abs_unsigned(V)
         V_sp = simlr_sparseness(
                   V,
                   constraint_type = constraint_type,
@@ -7555,6 +7557,7 @@ simlr_sparseness <- function(v,
                              energy_type = 'acc') {
   v <- as.matrix(v)
   constraint_type <- match.arg(constraint_type)
+  if ( positivity == 'positive') v=take_abs_unsigned(v)
 
   # Apply smoothing
   if (!is.null(smoothing_matrix)) {
