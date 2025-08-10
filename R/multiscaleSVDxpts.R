@@ -4754,7 +4754,7 @@ for (myit in 1:iterations) {
   # Check for convergence
   maxitnoimp = round( 0.1 * iterations )
   if ((myit - bestRow) > maxitnoimp) {
-    if(verbose) message(paste("Convergence criteria met @ ",myit," : No improvement over 10% of max iterations", maxitnoimp))
+    if(verbose) message(paste("~~Convergence criteria met @ ",myit," \n No improvement over 10% of max iterations", maxitnoimp))
     break
   }
 } # End main optimization loop
