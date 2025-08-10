@@ -24,6 +24,7 @@ preprocess_for_simlr <- function(modality_list) {
 
 compare_feature_loadings <- function(V_true, V_found) {
   if (is.null(V_found) || !is.matrix(V_found) || ncol(V_found) == 0) return(NA_real_)
+  V_found=na.omit(V_found)
   k_true <- ncol(V_true); k_found <- ncol(V_found); k_comp <- min(k_true, k_found)
   if (k_comp == 0) return(NA_real_)
   V_true_comp <- V_true[, 1:k_comp, drop = FALSE]; V_found_comp <- V_found[, 1:k_comp, drop = FALSE]
@@ -33,7 +34,7 @@ compare_feature_loadings <- function(V_true, V_found) {
     print(V_true_comp)
     message("imputing")
     print(correlation_matrix)
-    correlation_matrix <- antsrimpute(correlation_matrix)
+    correlation_matrix[is.na(correlation_matrix)]=mean(correlation_matrix,na.rm=TRUE)
   }
   permutation_map <- as.vector(clue::solve_LSAP(correlation_matrix, maximum = TRUE))
   V_found_permuted <- V_found_comp[, permutation_map, drop = FALSE]
@@ -80,12 +81,21 @@ run_and_evaluate_simlr <- function(params, data_list, ground_truth) {
       return(NULL)
   })
 
+
+
+  for ( k in 1:length(result$v) )
+    if ( any( is.na( result$v[[k]] )) )
+      print( result$v[[k]] )
+
+
+
   # --- Corrected Error Handling Block ---
   if (is.null(result) || length(result$u) == 0) {
     return(result_row %>% mutate(
       status = "failed", u_corr = NA_real_, u_subspace_angle = NA_real_, v_cos_sim = NA_real_
     ))
   }
+  
   
   U_found_consensus <- Reduce("+", result$u) / length(result$u)
   u_eval <- compare_latent_spaces(ground_truth$U_shared, U_found_consensus)
@@ -119,9 +129,9 @@ tabulate_simlr_performance <- function(k_shared_true, k_unique_per_view) {
 #    energy = c("normalized_correlation", "regression", "acc", "lrr"),
 #    constraint = c("Stiefelx0", "Grassmannx0", "none"),
 #    optimizer = c("adam", "ls_adam" ),
-    energy = c( "regression"),
-    constraint = c("Stiefelx0" ),
-    optimizer = c( "ls_adam" ),
+    energy = c( "regression", "acc", "nc", "lrr" ),
+    constraint = c("Grassmannx0", "Stiefelx0" , 'none' ),
+    optimizer = c( "ls_adam", "adam", "ls_nadam", "nadam" ),
     k_to_find = c(k_to_find1, k_to_find2),
     stringsAsFactors = FALSE
   )

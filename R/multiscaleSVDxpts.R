@@ -7615,7 +7615,8 @@ simlr_sparseness <- function(v,
 
   # Apply sparsity
   if (constraint_type %in% c("Stiefel", "Grassmann")) {
-    v <- t(ensembled_sparsity(t(v), positivity))
+#    v <- t(ensembled_sparsity(t(v), positivity))
+     v = project_to_orthonormal_nonnegative( v )
   } else {
     if ( constraint_type == "ortho"){
       v = orthogonalize_feature_space( list(v), 
@@ -8385,7 +8386,7 @@ estimate_rank_by_permutation_rv <- function(mat_list,
 #' #  default_constraint = "either"
 #' # )
 #'
-ensembled_sparsity <- function(X, default_constraint = "either") {
+ensembled_sparsity <- function(X, default_constraint = "positive") {
   if (default_constraint == 'positive') {
     X <- take_abs_unsigned(X)
   }
@@ -8464,4 +8465,119 @@ check_zero_variance <- function(mat) {
     outputter[2]=TRUE
   }
   return( outputter )
+}
+
+
+#' @title Project Non-Negative Matrix to Orthonormal Columns Matrix
+#' @description Iteratively projects a non-negative matrix onto the intersection
+#'              of non-negative matrices and matrices with orthonormal columns.
+#' @param X A square numeric matrix with non-negative entries.
+#' @param max_iter Maximum number of iterations for the alternating projection.
+#' @param tol Tolerance for convergence. The projection stops if the change
+#'            in the matrix norm is below this tolerance, or if max_iter is reached.
+#' @return A matrix Y that is non-negative and whose columns are orthonormal,
+#'         closest to X in a sense defined by the alternating projections.
+#' @examples
+#' @export
+project_to_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-6) {
+  # --- Input Validation ---
+  X=take_abs_unsigned(X)
+  X=pmax(X,0)
+  stopifnot(is.matrix(X))
+  if (any(X < 0)) {
+    stop("Input matrix X must have non-negative entries.")
+  }
+
+  k <- ncol(X)
+  p <- nrow(X)
+
+  if (k == 0 || p == 0) return(X) # Handle empty matrix
+
+  # Ensure matrix is square for the (A^T A)^(-1/2) part to make sense
+  # If not square, the projection space is more complex.
+  # The typical goal here is for the columns to be orthonormal, not necessarily
+  # forming an orthogonal matrix if p != k.
+  # The projection A(A^T A)^{-1/2} works even if A is not square.
+  # If A is p x k, A^T A is k x k, so (A^T A)^(-1/2) is k x k.
+  # The result is p x k.
+
+  Y_prev <- X # Start with the input matrix
+
+  for (iter in 1:max_iter) {
+    # --- Projection 1: Orthonormal Columns ---
+    # This projection is A * (A^T * A)^(-1/2)
+    # First, compute A^T * A
+    AtA <- crossprod(Y_prev) # Equivalent to t(Y_prev) %*% Y_prev
+
+    # Compute the matrix square root of A^T * A
+    # We need to handle potential singularity (if columns are linearly dependent)
+    # Use SVD for robust square root of a matrix.
+    # If AtA is singular, its square root won't be directly invertible.
+    # A safer way for projection onto column space is QR.
+    # Q from QR decomposition gives orthonormal columns spanning the same space.
+    # However, for the specific projection A(A^T A)^{-1/2}, we need the matrix square root.
+
+    # Alternative: Use SVD for the projection onto an orthonormal set of columns
+    # X = U S V^T
+    # Projection Q = U V^T (if square) or U * diag(1, ..., 1, 0, ...) * V^T
+    # The projection A(A^T A)^{-1/2} is more direct for orthonormal columns.
+    # Handle potential singularity of AtA by adding a small epsilon to the diagonal.
+    # This makes the matrix positive definite.
+    epsilon <- 1e-10
+    AtA_reg <- AtA + diag(epsilon, k)
+
+    # Compute the matrix square root of AtA_reg
+    # Using SVD is a robust way: (U S V^T)^(1/2) = U S^(1/2) V^T
+    svd_AtA <- svd(AtA_reg)
+    sqrt_AtA <- svd_AtA$u %*% diag(sqrt(pmax(svd_AtA$d, 0))) %*% t(svd_AtA$v)
+
+    # Compute the inverse of the square root
+    # Handle potential singularity in sqrt_AtA itself
+    inv_sqrt_AtA <- tryCatch({
+      # Use SVD for inverse too for robustness
+      svd_sqrt_AtA <- svd(sqrt_AtA)
+      svd_sqrt_AtA$u %*% diag(1 / pmax(svd_sqrt_AtA$d, 0)) %*% t(svd_sqrt_AtA$v)
+    }, error = function(e) {
+      # Fallback if even after regularization, it's problematic.
+      # This might happen if columns were perfectly collinear initially.
+      # In such cases, the projection space might be lower-dimensional.
+      # For simplicity, we'll return the previous Y_prev if this fails badly,
+      # or try a simpler method like QR's Q.
+      warning("Matrix square root inverse calculation failed. Falling back.")
+      # If we fail here, a simpler fallback might be to just normalize columns individually,
+      # but that doesn't enforce orthonormality between them.
+      # A more robust approach for projection onto a general subspace using QR:
+      qr_decomp <- qr(Y_prev)
+      Q <- qr.Q(qr_decomp, ncol(qr_decomp$rank))
+      return(Q) # This will have orthonormal columns, but might not be closest in Frobenius
+    })
+
+    # Calculate the projection onto orthonormal columns
+    # Ensure Y_prev is not producing issues with dimensions or types for calculations
+    Y_ortho <- Y_prev %*% inv_sqrt_AtA
+
+    # --- Projection 2: Non-Negativity ---
+    Y_new <- pmax(Y_ortho, 0)
+
+    # --- Check for Convergence ---
+    # Calculate the Frobenius norm of the change
+    change_norm <- sqrt(sum((Y_new - Y_prev)^2))
+
+    # Update Y_prev for the next iteration
+    Y_prev <- Y_new
+
+    if (change_norm < tol) {
+      # print(paste("Converged at iteration", iter))
+      break
+    }
+    if (iter == max_iter) {
+      warning("Projection did not converge within max_iter.")
+    }
+  }
+
+  # Final check of the defect
+  # final_defect <- invariant_orthogonality_defect(Y_prev)
+  # print(paste("Final defect:", final_defect))
+
+  return(Y_prev)
 }

@@ -4,7 +4,7 @@
 \alias{ensembled_sparsity}
 \title{Create a Smoothed Sparse Matrix via Permutation Ensemble Averaging}
 \usage{
-ensembled_sparsity(X, default_constraint = "either")
+ensembled_sparsity(X, default_constraint = "positive")
 }
 \arguments{
 \item{X}{A numeric matrix [p_features x k_components].}
