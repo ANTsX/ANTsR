@@ -28,6 +28,7 @@ Depends:
 Imports:
     ANTsRCore (>= 0.8.1),
     dplyr,
+    forcats,
     ggplot2,
     graphics,
     grDevices,

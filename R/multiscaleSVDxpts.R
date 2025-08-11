@@ -4588,7 +4588,7 @@ for (myit in 1:iterations) {
         if ( return_raw ) return( raw_e )
         sim_e <- raw_e * normalizing_weights[i]
         orth_e <- 0
-        if (constraint_type == 'ortho') {
+        if (constraint_type == 'ortho' & FALSE ) {
           orth_e <- invariant_orthogonality_defect(V_sp) * constraint_weight * orth_weights[i]
         }
         return(sim_e + orth_e)
@@ -4608,7 +4608,7 @@ for (myit in 1:iterations) {
                 )  
         sim_grad <- calculate_simlr_gradient(V_sp, voxmats[[i]], initialUMatrix[[i]], energyType ) * normalizing_weights[i]
         orth_grad <- 0
-        if (constraint_type == 'ortho') {
+        if (constraint_type == 'ortho' & FALSE ) {
           orth_grad <-  constraint_weight * orth_weights[i] *            
               gradient_invariant_orthogonality_defect(V_sp)
         }
@@ -4640,6 +4640,7 @@ for (myit in 1:iterations) {
       smoothing_matrix = smoothingMatrices[[i]],
       positivity = positivities[i],
       sparseness_quantile = sparsenessQuantiles[i],
+      constraint_weight = constraint_weight,
       sparseness_alg = sparsenessAlg
     )
 
@@ -6754,7 +6755,7 @@ antspymm_simlr = function( blaster, select_training_boolean, connect_cog,
     return(result)
   }
 
-  if ( missing( nsimlr ) ) {
+  if ( missing( nsimlr ) | is.na(nsimlr) ) {
     k_to_find <- estimate_rank_by_permutation_rv( mats, n_permutations=0, return_max=TRUE )
 #    k_to_find = select_joint_k( mats, method = "pca" )
     print( k_to_find$plot )
@@ -7603,7 +7604,7 @@ simlr_sparseness <- function(v,
                              sparseness_quantile = 0.8,
                              constraint_weight = NA,
                              constraint_iterations = 10,
-                             sparseness_alg = NA,
+                             sparseness_alg = 'soft',
                              energy_type = 'acc') {
   v <- as.matrix(v)
   constraint_type <- match.arg(constraint_type)
@@ -7620,18 +7621,21 @@ simlr_sparseness <- function(v,
   if (constraint_type %in% c("Stiefel", "Grassmann") ) {
     if ( is.na( sparseness_alg )) sparseness_alg = 'nnorth'
     if (sparseness_alg == 'ensemble') v <- t(ensembled_sparsity(t(v), positivity))
-    if (sparseness_alg == 'nnorth') v = project_to_orthonormal_nonnegative( v, constraint=positivity )
+    if (sparseness_alg == 'nnorth') v = project_to_orthonormal_nonnegative( v, 
+      constraint=positivity )
   } else {
     if ( constraint_type == "ortho"){
-      v = orthogonalize_feature_space( list(v), 
-        max_iterations=constraint_iterations, 
-        learning_rate=0.05, verbose=FALSE )[[1]]
-    }
-    if ( na2f.loc( sparseness_alg == 'ensemble') ) {
+      v_orth = project_to_orthonormal_nonnegative( v, 
+        max_iter=constraint_iterations, constraint=positivity)
+      if ( constraint_weight > 1 ) constraint_weight=1
+      if ( constraint_weight < 0 ) constraint_weight=0
+      v = constraint_weight * v_orth/norm(v_orth,'F')+ (1.0-constraint_weight) * v/norm(v,'F')
+    } else if ( na2f.loc( sparseness_alg == 'ensemble') ) {
       v <- t(ensembled_sparsity(t(v), positivity))
     } else if (na2f.loc( sparseness_alg == 'nnorth') ) {
       v = project_to_orthonormal_nonnegative( v, constraint=positivity )
-    } else if (sparseness_quantile != 0) {
+    } 
+    if (sparseness_quantile != 0) {
       v <- orthogonalizeAndQSparsify(
         v,
         sparsenessQuantile = sparseness_quantile,

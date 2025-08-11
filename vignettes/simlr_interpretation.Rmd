@@ -33,6 +33,7 @@ In this section, we explore how SiMLR can be applied to multi-view datasets. We'
 We begin by simulating three different views of data, each representing different modalities or datasets that share some underlying structure.
 
 ```{r step1}
+library(forcats)
 library(ANTsR)
 library(reshape2)
 set.seed(1500)
