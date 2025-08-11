@@ -372,7 +372,7 @@ simlrXs=simlr.search(
 Finally, `simlrXs$paramsearch` retrieves the results of the parameter search. This will show the performance of different parameter combinations, helping to identify the optimal settings for the SiMLR algorithm.  The "best" result here will have the highest value for `final_energy` and its parameters are stored in the `parameters` slot.
 
 ```{r visparam,echo=FALSE,fig.width=12,fig.height=8}
-library(tidyverse)
+library(dplyr)
 # --- Data Preparation ---
 # 1. Rename columns for clarity
 # 2. Calculate a composite performance score
