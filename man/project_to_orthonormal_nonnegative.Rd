@@ -4,7 +4,12 @@
 \alias{project_to_orthonormal_nonnegative}
 \title{Project Non-Negative Matrix to Orthonormal Columns Matrix}
 \usage{
-project_to_orthonormal_nonnegative(X, max_iter = 100, tol = 1e-06)
+project_to_orthonormal_nonnegative(
+  X,
+  max_iter = 100,
+  tol = 1e-04,
+  constraint = "positive"
+)
 }
 \arguments{
 \item{X}{A square numeric matrix with non-negative entries.}
@@ -13,6 +18,8 @@ project_to_orthonormal_nonnegative(X, max_iter = 100, tol = 1e-06)
 
 \item{tol}{Tolerance for convergence. The projection stops if the change
 in the matrix norm is below this tolerance, or if max_iter is reached.}
+
+\item{constraint}{either or positive}
 }
 \value{
 A matrix Y that is non-negative and whose columns are orthonormal,

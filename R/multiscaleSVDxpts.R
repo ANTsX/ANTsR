@@ -7589,7 +7589,8 @@ orthogonalize_feature_space <- function(matrix_list,
 #' @param sparseness_quantile Numeric between 0 and 1. Fraction of elements to sparsify using quantile thresholding.
 #' @param constraint_weight Numeric. Weight for the constraint, used in orthogonalization.
 #' @param constraint_iterations Numeric. Number of iterations for the orthogonalization optimization.
-#' @param sparseness_alg Character. Sparsity algorithm to use (passed to \code{orthogonalizeAndQSparsify}).
+#' @param sparseness_alg Character. Sparsity algorithm to use (relevant for Stiefel and Grassmann).
+#'.   ensemble or nnorth are test options.
 #' @param energy_type Character. If set to one of `"acc"`, `"cca"`, `"nc"`, `"normalized_correlation"`, `"lowRankRegression"`, or `"lrr"`,
 #'        then the returned matrix is normalized using \code{l1_normalize_features}.
 #'
@@ -7607,23 +7608,30 @@ simlr_sparseness <- function(v,
   v <- as.matrix(v)
   constraint_type <- match.arg(constraint_type)
   if ( positivity == 'positive') v=take_abs_unsigned(v)
-
+  na2f.loc <- function (x) {
+    x[is.na(x)] = FALSE
+    x
+  }
   # Apply smoothing
   if (!is.null(smoothing_matrix)) {
     v <- as.matrix( smoothing_matrix %*% v )
   }
-
   # Apply sparsity
-  if (constraint_type %in% c("Stiefel", "Grassmann")) {
-#    v <- t(ensembled_sparsity(t(v), positivity))
-     v = project_to_orthonormal_nonnegative( v )
+  if (constraint_type %in% c("Stiefel", "Grassmann") ) {
+    if ( is.na( sparseness_alg )) sparseness_alg = 'nnorth'
+    if (sparseness_alg == 'ensemble') v <- t(ensembled_sparsity(t(v), positivity))
+    if (sparseness_alg == 'nnorth') v = project_to_orthonormal_nonnegative( v, constraint=positivity )
   } else {
     if ( constraint_type == "ortho"){
       v = orthogonalize_feature_space( list(v), 
         max_iterations=constraint_iterations, 
         learning_rate=0.05, verbose=FALSE )[[1]]
     }
-    if (sparseness_quantile != 0) {
+    if ( na2f.loc( sparseness_alg == 'ensemble') ) {
+      v <- t(ensembled_sparsity(t(v), positivity))
+    } else if (na2f.loc( sparseness_alg == 'nnorth') ) {
+      v = project_to_orthonormal_nonnegative( v, constraint=positivity )
+    } else if (sparseness_quantile != 0) {
       v <- orthogonalizeAndQSparsify(
         v,
         sparsenessQuantile = sparseness_quantile,
@@ -7631,7 +7639,7 @@ simlr_sparseness <- function(v,
         orthogonalize = FALSE,
         unitNorm = FALSE,
         softThresholding = TRUE,
-        sparsenessAlg = sparseness_alg
+        sparsenessAlg = NA
       )
     }
   }
@@ -8475,19 +8483,19 @@ check_zero_variance <- function(mat) {
 #' @param max_iter Maximum number of iterations for the alternating projection.
 #' @param tol Tolerance for convergence. The projection stops if the change
 #'            in the matrix norm is below this tolerance, or if max_iter is reached.
+#' @param constraint either or positive 
 #' @return A matrix Y that is non-negative and whose columns are orthonormal,
 #'         closest to X in a sense defined by the alternating projections.
 #' @examples
 #' @export
-project_to_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-6) {
+project_to_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-4, constraint='positive' ) {
   # --- Input Validation ---
-  X=take_abs_unsigned(X)
-  X=pmax(X,0)
   stopifnot(is.matrix(X))
-  if (any(X < 0)) {
-    stop("Input matrix X must have non-negative entries.")
+  if ( constraint=='positive' ) {
+    X=take_abs_unsigned(X)
+    X=pmax(X,0)
   }
-
+  
   k <- ncol(X)
   p <- nrow(X)
 
@@ -8571,7 +8579,7 @@ project_to_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-6) {
       break
     }
     if (iter == max_iter) {
-      warning("Projection did not converge within max_iter.")
+#      warning("Projection did not converge within max_iter.")
     }
   }
 

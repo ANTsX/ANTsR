@@ -31,7 +31,8 @@ simlr_sparseness(
 
 \item{constraint_iterations}{Numeric. Number of iterations for the orthogonalization optimization.}
 
-\item{sparseness_alg}{Character. Sparsity algorithm to use (passed to \code{orthogonalizeAndQSparsify}).}
+\item{sparseness_alg}{Character. Sparsity algorithm to use (relevant for Stiefel and Grassmann).
+.   ensemble or nnorth are test options.}
 
 \item{energy_type}{Character. If set to one of `"acc"`, `"cca"`, `"nc"`, `"normalized_correlation"`, `"lowRankRegression"`, or `"lrr"`,
 then the returned matrix is normalized using \code{l1_normalize_features}.}
