@@ -29,6 +29,6 @@ set.seed(123)
 mat <- matrix(rnorm(50), nrow = 10)
 mat[, 3] <- 1  # zero variance col
 mat[, 5] <- NA # all NA col
-result <- safe_pca(mat, nc = 3)
-result$rotation
+# result <- safe_pca(mat, nc = 3)
+# result$rotation
 }

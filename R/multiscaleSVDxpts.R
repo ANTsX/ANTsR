@@ -6594,378 +6594,305 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @examples
 #' # Example usage:
 #' # result <- antspymm_simlr(dataframe)
-antspymm_simlr = function( blaster, select_training_boolean, connect_cog,  
-                           energy, nsimlr, constraint, 
-                           covariates='1', myseed=3,  doAsym=TRUE, returnidps=FALSE, restrictDFN=FALSE,
-                           resnetGradeThresh=1.02, doperm=FALSE, 
-                           exclusions=NULL, inclusions=NULL, 
-                           sparseness=NULL, iterations=NULL, path_modeling=NULL, 
-                           sparsenessAlg=NA,
-                           optimizationStyle=NULL,
-                           verbose=FALSE ) 
-{
+antspymm_simlr <- function(blaster,
+                           select_training_boolean,
+                           connect_cog,
+                           energy,
+                           nsimlr,
+                           constraint,
+                           covariates = '1',
+                           myseed = 3,
+                           doAsym = TRUE,
+                           returnidps = FALSE,
+                           restrictDFN = FALSE,
+                           resnetGradeThresh = 1.02,
+                           doperm = FALSE,
+                           exclusions = NULL,
+                           inclusions = NULL,
+                           sparseness = NULL,
+                           iterations = NULL,
+                           path_modeling = NULL,
+                           sparsenessAlg = NA,
+                           optimizationStyle = NULL,
+                           verbose = FALSE) {
+
+  # --- Internal Helper Functions ---
   safegrep <- function(pattern, x, ...) {
     result <- grep(pattern, x, ...)
-    if (length(result) == 0) {
-      return(1:length(x))
-    }
+    if (length(result) == 0) return(1:length(x))
     return(result)
   }
-  if ( is.null( optimizationStyle ) ) optimizationStyle='ls_nadam'
-  myenergies = c('cca','acc','reg','lrr','lowRankRegression','regression',"base.pca" , "base.spca", "base.rand.1", "base.rand.0", "normalized_correlation", 'nc', 'acc' )
-  if ( !energy %in% myenergies ) {
-    message( paste0("energy should be one of ", paste(myenergies, collapse=", ")))
+  
+  safeclean <- function(pattern, x, fixed = FALSE, exclude = TRUE) {
+    mysub <- grep(pattern, x, fixed = fixed)
+    if (length(mysub) == 0) return(x)
+    if (exclude) return(x[-mysub]) else return(x[mysub])
   }
-  safeclean = function( pattern, x,fixed=FALSE, exclude=TRUE) {
-    mysub=grep(pattern,x,fixed=fixed)
-    if ( length(mysub) == 0 ) return( x )
-    if ( exclude ) return( x[-mysub] ) else return( x[mysub] )
+
+  # --- 1. Parameter Initialization and Validation ---
+  if (is.null(optimizationStyle)) optimizationStyle <- 'ls_nadam'
+  
+  myenergies <- c('cca', 'acc', 'reg', 'lrr', 'lowRankRegression', 'regression',
+                  "base.pca", "base.spca", "base.rand.1", "base.rand.0",
+                  "normalized_correlation", 'nc')
+  if (!energy %in% myenergies) {
+    stop(paste0("energy should be one of ", paste(myenergies, collapse = ", ")))
   }
-  idps=antspymm_predictors(blaster,TRUE,TRUE)
-  rsfnames = idps[ grepl("rsfMRI",idps) ]
-  if ( length(rsfnames) > 0 ) rsfnames = rsfnames[ safegrep("_2_",rsfnames)]
-  if ( !all(grepl("rsfMRI", rsfnames )) ) rsfnames=c()
-  if ( !is.null(exclusions)) {
-    for ( x in exclusions ) {
-      idps=safeclean(x,idps)
-      rsfnames=safeclean(x,rsfnames)
+
+  # --- 2. Feature Selection and Filtering (IDPs) ---
+  if (verbose) message("Step 1: Selecting and filtering features (IDPs)...")
+  
+  idps <- antspymm_predictors(blaster, TRUE, TRUE)
+  rsfnames <- idps[grepl("rsfMRI", idps)]
+  if (length(rsfnames) > 0) rsfnames <- rsfnames[safegrep("_2_", rsfnames)]
+  if (!all(grepl("rsfMRI", rsfnames))) rsfnames <- c()
+
+  if (!is.null(exclusions)) {
+    for (x in exclusions) {
+      idps <- safeclean(x, idps)
+      rsfnames <- safeclean(x, rsfnames)
     }
   }
-  if ( !is.null(inclusions)) {
-    for ( x in inclusions ) {
-      idps=safeclean(x,idps,exclude=FALSE)
-      rsfnames=safeclean(x,rsfnames,exclude=FALSE)
+  if (!is.null(inclusions)) {
+    for (x in inclusions) {
+      idps <- safeclean(x, idps, exclude = FALSE)
+      rsfnames <- safeclean(x, rsfnames, exclude = FALSE)
     }
   }
-  idps=idps[ -multigrep(antspymm_nuisance_names()[-3],idps)]
-  if ( doAsym == 0 ) {
-    idps=safeclean("Asym",idps)
+  
+  idps <- idps[-multigrep(antspymm_nuisance_names()[-3], idps)]
+  idps <- safeclean("cleanup|snseg|_deep_|peraf|alff|LRAVGcit168|_l_|_r_", idps)
+  if (doAsym == 0) {
+    idps <- safeclean("Asym", idps)
   } else {
-    idps=safeclean("Asymcit168",idps)
+    idps <- safeclean("Asymcit168", idps)
   }
-  idps=safeclean("cleanup",idps)
-  idps=safeclean("snseg",idps)
-  idps=safeclean("_deep_",idps)
-  idps=safeclean("peraf",idps)
-  idps=safeclean("alff",idps)
-  idps=safeclean("LRAVGcit168",idps)
-  idps=safeclean("_l_",idps,fixed=TRUE)
-  idps=safeclean("_r_",idps,fixed=TRUE)
-  if ( restrictDFN ) {
-    rsfnames = rsfnames[ safegrep("Default",rsfnames)]
+  
+  if (restrictDFN) {
+    rsfnames <- rsfnames[safegrep("Default", rsfnames)]
+  }
+
+  # --- 3. Assembling Modality-Specific Feature Lists ---
+  perfnames <- idps[multigrep(c("perf_cbf_mean_"), idps, intersect = TRUE)]
+  t1names <- idps[multigrep(c("T1Hier"), idps, intersect = TRUE)]
+  dtnames <- unique(c(
+    idps[multigrep(c("mean_fa", "DTI"), idps, intersect = TRUE)],
+    idps[multigrep(c("mean_md", "DTI"), idps, intersect = TRUE)]
+  ))
+  
+  t1asymnames <- c(); dtasymnames <- c(); pfasymnames <- c()
+  if (doAsym == 2) {
+    t1nms <- t1names
+    t1asymnames <- t1nms[grep("Asym", t1nms)]
+    t1names <- t1nms[!(t1nms %in% t1asymnames)]
+    
+    dtnms <- dtnames
+    dtasymnames <- dtnms[grep("Asym", dtnms)]
+    dtnames <- dtnames[!(dtnames %in% dtasymnames)]
+    
+    pfnms <- perfnames
+    pfasymnames <- pfnms[grep("Asym", pfnms)]
+    perfnames <- pfnms[!(pfnms %in% pfasymnames)]
+  }
+  
+  idplist <- list()
+  idplist[["t1"]] <- t1names
+  if (length(dtnames) > 0) idplist[["dt"]] <- dtnames
+  if (length(rsfnames) > 0) idplist[["rsf"]] <- rsfnames
+  if (length(perfnames) > 0) idplist[["perf"]] <- perfnames
+  if (length(t1asymnames) > 0) idplist[["t1a"]] <- t1asymnames
+  if (length(dtasymnames) > 0) idplist[["dta"]] <- dtasymnames
+  if (length(pfasymnames) > 0) idplist[["pfa"]] <- pfasymnames
+  if (!missing(connect_cog)) idplist[["cg"]] <- connect_cog
+  
+  if (verbose) {
+    message(sprintf("Assembled %d feature modalities: %s", length(idplist), paste(names(idplist), collapse = ", ")))
+    total_idps <- length(unique(unlist(idplist)))
+    message(sprintf("Total unique features selected: %d. (Showing 10 random samples)", total_idps))
+    print(sample(unique(unlist(idplist)), min(10, total_idps)))
+  }
+  
+  if (returnidps) return(unique(unlist(idplist)))
+
+  # --- 4. Data Preparation and Subsetting ---
+  if (verbose) message("Step 2: Preparing and subsetting data based on quality checks...")
+  
+  allnna <- select_training_boolean[blaster$T1Hier_resnetGrade >= resnetGradeThresh]
+  blaster2 <- blaster[blaster$T1Hier_resnetGrade >= resnetGradeThresh, ]
+  stopifnot(min(dim(blaster2)) > 3)
+  
+  if (verbose) message(sprintf("Data subset to %d rows after quality control.", nrow(blaster2)))
+
+  # --- 5. Matrix Assembly and Preprocessing ---
+  if (verbose) message("Step 3: Assembling and imputing modality matrices...")
+
+  matsFull <- list()
+  mats <- list()
+  for (kk in 1:length(idplist)) {
+    matsFull[[names(idplist)[kk]]] <- blaster[, idplist[[kk]]]
+    mats[[names(idplist)[kk]]] <- antsrimpute(blaster2[allnna, idplist[[kk]]])
+  }
+  
+  if (doperm) {
+    if (verbose) message("Applying permutations to matrices for null model testing.")
+    set.seed(myseed)
+    for (jj in 1:length(mats)) {
+      mats[[jj]] <- mats[[jj]][sample(1:nrow(mats[[jj]])), ]
+    }
+  }
+
+  # --- 6. Rank Estimation and Covariate Adjustment ---
+  if (missing(nsimlr) || is.na(nsimlr)) {
+    if (verbose) message("Step 4a: Estimating optimal rank (k)...")
+    k_to_find <- estimate_rank_by_permutation_rv(mats, n_permutations = 0, return_max = TRUE)
+    # print(k_to_find$plot) # Optionally show the plot
+    nsimlr <- round(k_to_find$optimal_k)
+    message(sprintf("SIMLR >> Estimated optimal k = %d", nsimlr))
+  }
+  
+  if (verbose) message(sprintf("Step 4b: Adjusting modality matrices for covariates: %s", paste(covariates, collapse = ", ")))
+  for (mycov in covariates) {
+    if (verbose) cat(sprintf("  Adjusting by '%s' for modalities: ", mycov))
+    for (x in 1:length(mats)) {
+      if (verbose) cat(paste0(names(mats)[x], "..."))
+      mats[[x]] <- antspymm_simlr_update_residuals(mats, x, mycov, blaster2, allnna, n.comp = nsimlr)
+      mats[[x]] <- data.matrix(mats[[x]])
+    }
+    if (verbose) cat("Done.\n")
+  }
+  
+  # --- 7. Regularization and Baseline Model Execution ---
+  if (verbose) message("Step 5: Preparing regularization matrices...")
+  regs0 <- lapply(mats, function(mat) {
+    mycor <- cor(mat)
+    mycor[mycor < 0.8] <- 0
+    data.matrix(mycor)
+  })
+  regs <- regs0
+  if (!missing(connect_cog)) {
+    if (verbose) message("  Setting up sparse regularization for 'cg' modality.")
+    regs[["cg"]] <- Matrix::Matrix(regs0[["cg"]], sparse = TRUE)
+  }
+
+  # --- Handle baseline energy types ---
+  if (grepl('base.', energy, fixed = TRUE)) {
+    if (verbose) message(sprintf("Executing baseline model: %s", energy))
+    nsimlrmin <- min(c(nsimlr, unlist(lapply(mats, ncol))))
+    if (nsimlrmin < nsimlr) {
+      message(sprintf("SIMLR >> Dimensionality adjusted for baseline model: k = %d", nsimlrmin))
+    } else {
+      nsimlrmin <- nsimlr
+    }
+    
+    v_result <- switch(energy,
+      'base.rand.0' = antsr_random_features(mats, nsimlr, seed = 0),
+      'base.rand.1' = antsr_random_features(mats, nsimlr, seed = 1),
+      'base.pca' = antsr_pca_features(mats, nsimlrmin),
+      'base.spca' = antsr_spca_features(mats, nsimlrmin),
+      stop("Unknown baseline energy type.")
+    )
+    
+    for (k in 1:length(mats)) {
+      rownames(v_result[[k]]) <- colnames(mats[[k]])
+    }
+    return(list(simlrX = list(v = v_result)))
+  }
+
+  # --- 8. SIMLR Parameter Configuration ---
+  if (verbose) message("Step 6: Configuring SIMLR parameters...")
+  
+  # Map energy aliases
+  energy_map <- c(lrr = 'lowRankRegression', nc = 'normalized_correlation', cca = 'acc')
+  if (energy %in% names(energy_map)) energy <- energy_map[energy]
+  
+  # Configure mixer algorithm
+  mixer <- if (grepl("reg", energy)) 'ica' else 'pca'
+  if (energy %in% c("lowRankRegression", "normalized_correlation")) mixer <- 'pca'
+
+  # Configure sparseness
+  sparval <- rep(0.8, length(mats))
+  if (!is.null(sparseness)) {
+    sparval <- if (length(sparseness) == length(mats)) sparseness else rep(sparseness[1], length(mats))
+    if (verbose) message(sprintf("  Using custom sparseness: %s", paste(round(sparval, 2), collapse = ", ")))
+  }
+  
+  if (nsimlr < 1) {
+    ctit <- sum(unlist(lapply(mats, ncol)))
+    nsimlr_new <- round(ctit * nsimlr)
+    message(sprintf("SIMLR >> Relative k specified. New k = %d (%.2f * %d total features)", nsimlr_new, nsimlr, ctit))
+    nsimlr <- nsimlr_new
+  }
+
+  # Initialize U matrix
+  initu <- initializeSimlr(mats, nsimlr, uAlgorithm = "pca", jointReduction = FALSE)
+  
+  # Configure path modeling
+  if (!is.null(path_modeling)) {
+    clist <- path_modeling
+    if (verbose) {
+      message("  Using custom path modeling (connectors):")
+      print(clist)
+    }
+  } else if (!missing(connect_cog)) {
+    inflammNums <- which(names(mats) == 'cg')
+    clist <- lapply(1:length(mats), function(j) if(j %in% inflammNums) (1:length(mats))[-inflammNums] else inflammNums)
   } else {
-    #    rsfnames = rsfnames[ multigrep( c("imbic","TempPar"),rsfnames)]
-  }
-  perfnames = idps[ multigrep( c("perf_cbf_mean_"),idps,intersect=TRUE)]
-  t1names = idps[ multigrep( c("T1Hier"),idps,intersect=TRUE)]
-  dtnames = unique( c( 
-    idps[ multigrep( c("mean_fa","DTI"),idps,intersect=TRUE)],
-    idps[ multigrep( c("mean_md","DTI"),idps,intersect=TRUE)] ))
-  
-  t1asymnames=c()
-  dtasymnames=c()
-  pfasymnames=c()
-  if ( doAsym == 2 ) {
-    t1nms = t1names
-    t1asymnames = t1nms[ grep("Asym",t1nms)]
-    t1names = t1nms[ !( t1nms %in%  t1asymnames ) ]
-    
-    dtnms = dtnames
-    dtasymnames = dtnms[ grep("Asym",dtnms)]
-    dtnames = dtnames[ !( dtnames %in%  dtasymnames ) ]
-    
-    pfnms = perfnames
-    pfasymnames = pfnms[ grep("Asym",pfnms)]
-    perfnames = pfnms[ !( pfnms %in%  pfasymnames ) ]
+    clist <- NULL
   }
   
-  idps=unique(t1names)
-  idplist = list()
-  idplist[["t1"]]=t1names
-  if ( length(dtnames) > 0 ) {
-    idps = c( idps, unique(dtnames) )
-    idplist[["dt"]]=dtnames
-  }
+  # --- 9. Execute SIMLR ---
+  maxits <- if (!is.null(iterations)) iterations else 1000
+  if (verbose) message(sprintf("Step 7: Executing SIMLR with energy='%s', constraint='%s', k=%d, iterations=%d...",
+                             energy, constraint, nsimlr, maxits))
   
-  if ( length(rsfnames) > 0 ) {
-    idps = c( idps, unique(rsfnames) )
-    idplist[["rsf"]]=rsfnames
-  }
-  if ( length(perfnames) > 0 ) {
-    idps = c( idps, unique(perfnames) )
-    idplist[["perf"]]=perfnames
-  }
-  if ( length(t1asymnames) > 0 ) {
-    idps = c( idps, unique(t1asymnames) )
-    idplist[["t1a"]]=t1asymnames
-  }
-  
-  if ( length(dtasymnames) > 0 ) {
-    idps = c( idps, unique(dtasymnames) )
-    idplist[["dta"]]=dtasymnames
-  }
-  
-  if ( length(pfasymnames) > 0 ) {
-    idps = c( idps, unique(pfasymnames) )
-    idplist[["pfa"]]=pfasymnames
-  }
-  if ( !missing( connect_cog ) ) { 
-    idplist[["cg"]]=connect_cog
-  }
-  if ( verbose ) {
-    print(names(idplist))
-    print(sample(idps,10))
-  }
-  if ( returnidps ) return(idps)
-  allnna=select_training_boolean[  blaster$T1Hier_resnetGrade >= resnetGradeThresh ]
-  blaster2=blaster[  blaster$T1Hier_resnetGrade >= resnetGradeThresh, ]
-  stopifnot( min(dim(blaster2)) > 3 )
-  if ( verbose ) {
-    print("dim( subsetdataframe)")
-    print(dim(blaster2) )
-  }
-  #################################################
-  nperms=0
-  matsFull = list()
-  mats = list()
-  for ( kk in 1:length(idplist)) {
-    matsFull[[ names(idplist)[kk] ]] = blaster[,idplist[[kk]]]
-    mats[[ names(idplist)[kk] ]] = antsrimpute( blaster2[allnna,idplist[[kk]]] )
-  }
-  if ( verbose ) print("mats done")
-  if ( doperm ) {
-    nada=setSeedBasedOnTime()
-    sss=sample( 1:nrow( matsFull[[1]]  ))
-    for ( jj in 1:length( mats ) ) {
-      ss=sample( 1:nrow( mats[[jj]]  ))
-      mats[[jj]]=mats[[jj]][sample( 1:nrow( mats[[jj]]  )),]
-    }
-  }
-  nms = names(mats)
-  regs0 = list()
-  rank_and_scale <- function(mat) {
-    # Function to rank transform and scale a single column
-    rank_and_scale_col <- function(col) {
-      ranked_col <- rank(col, ties.method = "average") # Rank the column
-      scaled_col <- 2 * ((ranked_col - min(ranked_col)) / (max(ranked_col) - min(ranked_col))) - 1 # Scale to range -1 to 1
-      return(scaled_col)
-    }
-    
-    # Apply the rank_and_scale_col function to each column of the matrix
-    result <- apply(mat, 2, rank_and_scale_col)
-    return(result)
-  }
-
-  if ( missing( nsimlr ) | is.na(nsimlr) ) {
-    k_to_find <- estimate_rank_by_permutation_rv( mats, n_permutations=0, return_max=TRUE )
-#    k_to_find = select_joint_k( mats, method = "pca" )
-    print( k_to_find$plot )
-    nsimlr=round(k_to_find$optimal_k)
-    message(paste("Calculated optimal k: ", nsimlr ))
-    }
- 
-  if ( verbose) print("setting up regularization")
-  for ( mycov in covariates ) {
-    if ( verbose ) print(paste("adjust by:",mycov))
-    for ( x in 1:length(mats)) {
-      if ( verbose ) {
-        if ( x == 1 ) print(paste("training n= ",nrow(mats[[x]])))
-        cat(paste0(names(mats)[x],"..."))
-      }
-      mats[[x]]=antspymm_simlr_update_residuals( mats, x, mycov, blaster2, allnna, n.comp=nsimlr )
-      mats[[x]]=data.matrix(mats[[x]])
-    }}
-  for ( x in 1:length(mats)) {
-    mycor = cor( mats[[x]] )
-    mycor[mycor < 0.8]=0
-    regs0[[x]]=data.matrix(mycor)
-  }
-  names(regs0)=names(mats)
-  regs = regs0 # regularizeSimlr( mats, fraction=0.05, sigma=rep(2.0,length(mats)) )
-  if ( verbose ) print("regularizeSimlr done")
-  names(regs0)=names(mats)
-  names(regs)=names(mats)
-  if ( !missing( connect_cog ) ) {
-    regs[["cg"]] = Matrix::Matrix(regs0[["cg"]], sparse = TRUE) 
-    print("regularize cg")
-  }
-
-
-  if (  grepl('base.rand',energy) ) {
-    if ( verbose ) {
-      print(paste("antsr_random_features begin",energy))
-    }
-    get_seed <- function(s) as.integer(sub(".*\\.", "", s))
-    temp = antsr_random_features( mats, nsimlr, seed = get_seed(energy) )
-    for ( k in 1:length(mats)) {
-      rownames(temp[[k]]) = colnames(mats[[k]])
-    }
-    return( list( simlrX=list(v=temp) ))
-  } else if ( energy == 'base.pca' ) {
-    nsimlrmin = min(c(nsimlr,unlist(lapply( mats, ncol))))
-    if ( verbose ) {
-      print(paste("antsr_pca_features begin",energy,nsimlrmin))
-    }
-    if ( nsimlrmin < nsimlr ) {
-      message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
-    } else nsimlrmin=nsimlr
-    return( list( simlrX=list(v=antsr_pca_features( mats, nsimlrmin ) ) ))
-  } else if ( energy == 'base.spca' ) {
-    nsimlrmin = min(c(nsimlr,unlist(lapply( mats, ncol))))
-    if ( verbose ) {
-      print(paste("antsr_spca_features begin",energy,nsimlrmin))
-    }
-    if ( nsimlrmin < nsimlr ) {
-      message(paste("dimensionally adjusted: nsimlr ",nsimlrmin))
-    } else nsimlrmin=nsimlr
-    return( list( simlrX=list(v=antsr_spca_features( mats, nsimlrmin ) ) ))
-  } else if ( energy == 'lrr' ) {
-    energy='lowRankRegression'
-  } else if ( energy == 'nc' ) {
-    energy='normalized_correlation'
-  } else if ( energy == 'cca' ) {
-    energy='acc'
-  }
-  
-  #  if ( !doperm )
-  #    for ( pp in 1:length(regs)) plot(image(regs[[pp]]))
-  
-  if ( verbose ) print("loop mat")
-  for ( k in 1:length(mats)) {
-    if ( ncol(mats[[k]]) != ncol(regs[[k]]) ) {
-      regs[[k]]=Matrix::Matrix(regs0[[k]], sparse = TRUE) 
-      msg=paste("regularization cols not equal",k,ncol(mats[[k]]),ncol(regs[[k]]),names(mats)[k])
-      message(msg)
-      # stop( )
-    }
-  }
-  if ( verbose ) print("loopmatdone")
-  ########### zzz ############
-  myjr = FALSE # jointReduction
-  prescaling = c( 'center', 'eigenvalue' )
-  maxits = 1000
-  if ( ! is.null( iterations ) ) maxits = iterations
-  if ( verbose ) print( paste( "maxits",maxits) )
-  ebber = 0.0 # let adam do its thing
-  pizzer = rep( "positive", length(mats) )
-  mixer = 'pca'
-  if ( missing( constraint ) )
-    constraint='none'
-  if ( grepl("reg", energy ) ) {
-    mixer = 'ica'
-  }
-  if ( energy %in% c("lrr", "lowRankRegression","nc","normalized_correlation") ) {
-    mixer = 'pca'
-  }
-  if ( verbose ) print("sparseness begin")
-  sparval = rep( 0.8, length( mats ))
-  if ( ! is.null( sparseness ) ) {
-    if ( length( sparseness ) == length(mats) ) {
-      sparval = sparseness
-    } else sparval = rep( sparseness[1], length( mats ))
-    if ( verbose ) {
-      print('sparseness')
-      print(sparseness)
-    }
-  }
-  
-  if ( nsimlr < 1 ) {
-    ctit=0
-    for ( jj in 1:length(mats) ) {
-      ctit=ctit+ncol(mats[[jj]])
-      sparval[jj] = 1.0 - 20/ncol(mats[[jj]])
-      if ( sparval[jj] < 0 ) sparval[jj] = 0.5
-    }
-    nsimlr = round( ctit * nsimlr )
-    message(paste("nsimlr",nsimlr))
-    #    print(paste("nsimlr",nsimlr))
-    #    print(sparval)
-  }
-  
-  if ( verbose ) {
-    print("initu begin")
-  }
-  initu = initializeSimlr(
-    mats,
-    nsimlr,
-    jointReduction = myjr,
-    zeroUpper = FALSE,
-    uAlgorithm = "pca",
-    addNoise = 0 )
-  if ( verbose ) print("initu done")
-  
-  # initu = initu[,(ncol(initu)-nsimlr):ncol(initu)]
-  # initu = initu[,1:nsimlr]
-  
-  if ( ! missing( connect_cog ) ) {
-    clist = list()
-    inflammNums=which(names(mats)=='cg')
-    for ( j in 1:length( mats ) ) clist[[j]] = inflammNums
-    for ( j in inflammNums )
-      clist[[j]] = (1:length(mats))[ -inflammNums ]
-  } else clist=NULL
-  
-  if ( !is.null( path_modeling ) ) {
-    clist = path_modeling
-    if ( verbose ) {
-      print('custom path modeling')
-      print( clist )
-    }
-  }
-  
-  simlrX = simlr( mats, regs, 
-                  iterations=maxits, 
-                  verbose= !doperm,
+  simlrX <- simlr(mats, regs,
+                  iterations = maxits,
+                  verbose = !doperm,
                   randomSeed = myseed,
-                  mixAlg=mixer,
-                  energyType=energy,
-                  scale = prescaling,
-                  sparsenessQuantiles=sparval,
-                  expBeta = ebber,
-                  positivities = pizzer, 
-                  connectors=clist,
-                  constraint=constraint,
-                  optimizationStyle=optimizationStyle,
-                  sparsenessAlg=sparsenessAlg,
-                  initialUMatrix=initu )
-  for ( kk in 1:length(mats) ) {
-    rownames(simlrX$v[[kk]])=idplist[[kk]]
-    temp = simlrX$v[[kk]]
-    if ( pizzer[kk] == 'positive' ) {
-      #      for ( n in 1:ncol(temp)) temp[,n]=abs(temp[,n])/max(abs(temp[,n]))
-      #      simlrX$v[[kk]]=eliminateNonUniqueColumns(temp)
-    }
+                  mixAlg = mixer,
+                  energyType = energy,
+                  scale = c('center', 'eigenvalue'),
+                  sparsenessQuantiles = sparval,
+                  expBeta = 0.0,
+                  positivities = rep("positive", length(mats)),
+                  connectors = clist,
+                  constraint = constraint,
+                  optimizationStyle = optimizationStyle,
+                  sparsenessAlg = sparsenessAlg,
+                  initialUMatrix = initu)
+
+  if (verbose) message("SIMLR execution complete.")
+
+  # --- 10. Post-processing and Output Assembly ---
+  if (verbose) message("Step 8: Post-processing results and assembling output...")
+
+  pizzer <- rep("positive", length(mats)) # From original code
+  for (kk in 1:length(mats)) {
+    rownames(simlrX$v[[kk]]) <- idplist[[kk]]
   }
   
-  if ( verbose ) cat('--------simlr done--------\n')
-  #################
-  nsimx=nsimlr
-  nms = names( simlrX$v ) = names(mats)
-  simmat = data.matrix(matsFull[[1]] )%*% abs( simlrX$v[[1]] )
-  colnames( simmat ) = paste0(nms[1],colnames( simmat ))
-  for ( j in 2:length(mats)) {
-    if (names(mats)[j]=='cg' & pizzer[j] != 'positive' ) {
-      temp = data.matrix(matsFull[[j]] ) %*% ( simlrX$v[[j]])
-    } else temp = data.matrix(matsFull[[j]] ) %*% abs( simlrX$v[[j]] )
-    colnames( temp ) = paste0(nms[j],colnames( temp ))
-    simmat = cbind( simmat, temp )
-  }
-  blaster2sim = cbind( blaster, simmat )
-  if ( verbose ) print('bound')
-  nsim = ncol( simlrX$v[[1]] )
-  simnames = colnames(simmat)
-  kk=1
-  nmats=1:length(matsFull)
-  matsB=mats
-  for ( kk in 1:length(mats)) matsB[[kk]]=data.matrix(matsB[[kk]])
-  kk=length(mats)
-  # temp = predictSimlr( matsB, simlrX, targetMatrix=kk, 
-  #      sourceMatrices=nmats[nmats!=kk] )
-  return( list( demog=blaster2sim, mats=matsFull, simnames=simnames, simlrX=simlrX, energy=energy ) )
-  ################
+  nms <- names(simlrX$v) <- names(mats)
+  simmat_list <- lapply(1:length(mats), function(j) {
+    v_mat <- if (names(mats)[j] == 'cg' && pizzer[j] != 'positive') simlrX$v[[j]] else abs(simlrX$v[[j]])
+    temp <- data.matrix(matsFull[[j]]) %*% v_mat
+    colnames(temp) <- paste0(nms[j], colnames(temp))
+    temp
+  })
+  
+  simmat <- do.call(cbind, simmat_list)
+  blaster2sim <- cbind(blaster, simmat)
+  simnames <- colnames(simmat)
+  
+  if (verbose) message("Output assembly complete. Returning results.")
+  
+  return(list(
+    demog = blaster2sim,
+    mats = matsFull,
+    simnames = simnames,
+    simlrX = simlrX,
+    energy = energy
+  ))
 }
-
-
 
 
 #' Write a list of data frames to disk with SiMLR-specific naming convention
