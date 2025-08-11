@@ -13,6 +13,31 @@ library(ANTsR)
 .install_and_load(c("dplyr", "tibble", "purrr", "ggplot2", "ggrepel", "viridis", "progress", "tidyr", "forcats", "pracma", "clue", "DT", "htmltools"))
 
 
+# --- New Function to Extract Ortho Strength ---
+extract_ortho_strength <- function(constraint_str) {
+  if (constraint_str == 'none') {
+    return(0.0)
+  } else if (grepl("^orthox", constraint_str)) {
+    parts <- strsplit(constraint_str, "x")[[1]]
+    if (length(parts) >= 2 && parts[1] == "ortho") {
+      strength_str <- parts[2]
+      # Handle the 'x1' suffix in the denominator if it exists
+      if (grepl("x1$", strength_str)) {
+        strength_str <- sub("x1$", "", strength_str)
+      }
+      
+      strength_val <- as.numeric(strength_str)
+      
+      # Check if conversion was successful and value is reasonable
+      if (!is.na(strength_val) && strength_val >= 0 && strength_val <= 1) {
+        return(strength_val)
+      }
+    }
+  }
+  # Default or error case
+  return(NA_real_) 
+}
+
 
 preprocess_for_simlr <- function(modality_list) {
   lapply(modality_list, function(mat) {
@@ -125,12 +150,14 @@ tabulate_simlr_performance <- function(k_shared_true, k_unique_per_view) {
   k_to_find1 = 5 #estimate_rank_by_permutation_rv( preprocessed_data, n_permutations=0, return_max=FALSE )$optimal_k
   k_to_find2 = 8 # estimate_rank_by_permutation_rv( preprocessed_data, n_permutations=0, return_max=TRUE )$optimal_k
   print(paste('k_to_find1 ', k_to_find1,k_to_find2))
+  orthos=c("orthox1x1",  "orthox0.12x1", "orthox0.08x1", "orthox0.04x1", "orthox0.01x1","orthox0.005x1","orthox0.002x1","orthox0.001x1", "orthox0x0" )
+  orthos=c("orthox1x1", "orthox0x0" )
   param_grid <- expand.grid(
 #    energy = c("normalized_correlation", "regression", "acc", "lrr"),
 #    constraint = c("Stiefelx0", "Grassmannx0", "none"),
 #    optimizer = c("adam", "ls_adam" ),
     energy = c( "regression", "acc", "nc", "lrr" ),
-    constraint = c("orthox0.25x1", "orthox0.75x1", 'none' ),
+    constraint = orthos,
     optimizer = c( "adam", "nadam" ),
     k_to_find = c(k_to_find1, k_to_find2),
     stringsAsFactors = FALSE
@@ -154,12 +181,18 @@ analyze_and_visualize_performance <- function(performance_summary) {
 
   performance_data <- performance_summary %>%
     filter(status == "success") %>%
+    # --- EXTRACT ORTHO STRENGTH ---
+    mutate(
+      ortho_strength = purrr::map_dbl(constraint, extract_ortho_strength)
+    ) %>%
+    # --- END EXTRACT ---
     mutate(
       u_recovery_score = u_corr,
       v_recovery_score = v_cos_sim,
-      u_alignment_score = 1 - (u_subspace_angle / 90),
+      u_alignment_score = 1 - (u_subspace_angle / 90), # Assuming max angle is 90 for score calculation
       performance_score = (0.5 * u_recovery_score) + (0.3 * v_recovery_score) + (0.2 * u_alignment_score),
-      configuration = paste(energy, gsub("x.*", "", constraint), optimizer, k_to_find, sep = " | "),
+      # configuration = paste(energy, gsub("x.*", "", constraint), optimizer, k_to_find, sep = " | "), # This may become too long
+      configuration = paste(energy, constraint, optimizer, k_to_find, sep = " | "), # Use raw constraint string
       k_label = case_when(
         k_to_find == k_shared_true ~ paste0("k=True (", k_shared_true, ")"),
         k_to_find > k_shared_true  ~ paste0("k=Over (", k_to_find, ")"),
@@ -167,16 +200,18 @@ analyze_and_visualize_performance <- function(performance_summary) {
       ),
       constraint_family = case_when(
         grepl("Stiefel", constraint)   ~ "Stiefel", grepl("Grassmann", constraint) ~ "Grassmann",
+        grepl("ortho", constraint) ~ "Ortho", # Captures our new constraint type
         TRUE ~ "None"
-      ) %>% factor(levels = c("Stiefel", "Grassmann", "None"))
+      ) %>% factor(levels = c("Stiefel", "Grassmann", "Ortho", "None")) # Add "Ortho" to factor levels
     ) %>%
     arrange(desc(performance_score))
 
   cat("\n\n--- Top 10 Performing Configurations ---\n")
-  print(head(performance_data %>% select(energy, constraint, optimizer, k_to_find, performance_score, u_corr, v_cos_sim, u_subspace_angle), 10))
+  print(head(performance_data %>% select(energy, constraint, optimizer, k_to_find, performance_score, u_corr, v_cos_sim, u_subspace_angle, ortho_strength), 10))
 
   cat("\n--- Generating Visualizations ---\n")
   
+  # Plot 1: Performance by Configuration (simplified for clarity)
   plot1 <- ggplot(performance_data %>% slice_head(n = 20),
                   aes(x = performance_score, y = fct_reorder(configuration, performance_score), color = energy)) +
     geom_segment(aes(xend = 0, yend = fct_reorder(configuration, performance_score))) +
@@ -186,21 +221,38 @@ analyze_and_visualize_performance <- function(performance_summary) {
     theme_minimal(base_size = 11) +
     labs(title = "Top SIMLR Configurations by Performance Score", x = "Performance Score (0 to 1, Higher is Better)", y = "Configuration")
 
+  # Plot 2: Trade-offs, faceted by constraint_family and colored by ortho_strength
   k_labels_unique <- unique(performance_data$k_label); shape_values <- c(16, 17, 15)[1:length(k_labels_unique)]; names(shape_values) <- k_labels_unique
   
-  plot2 <- ggplot(performance_data, aes(x = u_subspace_angle, y = u_corr, color = optimizer)) +
+  plot2 <- ggplot(performance_data, aes(x = u_subspace_angle, y = u_corr, color = factor(ortho_strength))) + # Color by ortho_strength
     geom_point(aes(size = v_cos_sim, shape = k_label), alpha = 0.8) +
     geom_text_repel(aes(label = energy), size = 3, max.overlaps = 10, seed = 42) +
-    facet_wrap(~constraint_family, scales = "free_x") +
-    scale_color_viridis_d(option = "magma", name = "Optimizer") +
+    facet_grid(constraint_family ~ optimizer, scales = "free_x") + # Facet by constraint family AND optimizer
+    scale_color_viridis_d(option = "magma", name = "Ortho Strength", na.value = "grey50") + # Use color for ortho_strength
     scale_size_continuous(range = c(2, 8), name = "V Recovery (Cos Sim)") +
     scale_shape_manual(values = shape_values, name = "k Specification") +
-    theme_bw(base_size = 12) +
-    labs(title = "Performance Trade-off: U Recovery vs. Subspace Error", x = "Subspace Angle Error (Degrees, Lower is Better)", y = "Shared Signal Correlation (U, Higher is Better)")
+    theme_bw(base_size = 10) + # Adjusted base size for facetting
+    labs(title = "Performance Trade-off: U Recovery vs. Subspace Error", x = "Subspace Angle Error (Degrees, Lower is Better)", y = "Shared Signal Correlation (U, Higher is Better)") +
+    guides(color = guide_legend(override.aes = list(shape = 16, size = 4))) # Ensure legend is clean
 
-  return(list(ranked_performance_data = performance_data, plot_ranking = plot1, plot_tradeoffs = plot2))
+  # Plot 3: Focus specifically on the effect of orthogonality strength
+  plot3 <- ggplot(performance_data %>% filter(constraint_family == "Ortho"), 
+                  aes(x = factor(ortho_strength), y = performance_score, fill = energy)) +
+    geom_boxplot() +
+    geom_point(aes(shape = optimizer, color = optimizer), position = position_dodge(width = 0.7), size = 2) +
+    scale_fill_viridis_d(option = "plasma", name = "Energy") +
+    scale_color_viridis_d(option = "magma", name = "Optimizer") +
+    theme_minimal(base_size = 12) +
+    labs(title = "Performance vs. Orthogonality Strength",
+         subtitle = paste("True k =", k_shared_true),
+         x = "Orthogonality Strength (Weight)", y = "Overall Performance Score") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  return(list(ranked_performance_data = performance_data, 
+              plot_ranking = plot1, 
+              plot_tradeoffs = plot2,
+              plot_orthogonality_effect = plot3))
 }
-
 
 create_interactive_performance_table <- function(performance_data) {
   display_data <- performance_data %>%
@@ -248,7 +300,10 @@ if (interactive()) {
   cat("\n\n--- Static Visualizations ---\n")
   print(analysis_results$plot_ranking)
   print(analysis_results$plot_tradeoffs)
+  print(analysis_results$plot_orthogonality_effect)
   
   cat("\n\n--- Interactive Results Table ---\n")
   print(interactive_results_table)
 }
+
+

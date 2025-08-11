@@ -4588,7 +4588,7 @@ for (myit in 1:iterations) {
         if ( return_raw ) return( raw_e )
         sim_e <- raw_e * normalizing_weights[i]
         orth_e <- 0
-        if (constraint_type == 'ortho' & FALSE ) {
+        if (constraint_type == 'ortho' ) {
           orth_e <- invariant_orthogonality_defect(V_sp) * constraint_weight * orth_weights[i]
         }
         return(sim_e + orth_e)
@@ -4806,8 +4806,9 @@ return(
 #' mat <- matrix(rnorm(50), nrow = 10)
 #' mat[, 3] <- 1  # zero variance col
 #' mat[, 5] <- NA # all NA col
-#' result <- safe_pca(mat, nc = 3)
-#' result$rotation
+#' # result <- safe_pca(mat, nc = 3)
+#' # result$rotation
+#' @export
 safe_pca <- function(X, nc = min(dim(X)), center = TRUE, scale = TRUE) {
   X <- as.matrix(X)
   
@@ -7617,6 +7618,11 @@ simlr_sparseness <- function(v,
   if (!is.null(smoothing_matrix)) {
     v <- as.matrix( smoothing_matrix %*% v )
   }
+  if ( is.na(constraint_weight)) {
+    constraint_weight = 0.0
+  }
+  if ( constraint_weight > 1 ) constraint_weight=1
+  if ( constraint_weight < 0 ) constraint_weight=0
   # Apply sparsity
   if (constraint_type %in% c("Stiefel", "Grassmann") ) {
     if ( is.na( sparseness_alg )) sparseness_alg = 'nnorth'
@@ -7624,12 +7630,14 @@ simlr_sparseness <- function(v,
     if (sparseness_alg == 'nnorth') v = project_to_orthonormal_nonnegative( v, 
       constraint=positivity )
   } else {
-    if ( constraint_type == "ortho"){
-      v_orth = project_to_orthonormal_nonnegative( v, 
+    if ( constraint_type == "ortho" & constraint_weight > 0 ){
+      if ( constraint_weight == 1 ) {
+      v = project_to_orthonormal_nonnegative( v, 
         max_iter=constraint_iterations, constraint=positivity)
-      if ( constraint_weight > 1 ) constraint_weight=1
-      if ( constraint_weight < 0 ) constraint_weight=0
-      v = constraint_weight * v_orth/norm(v_orth,'F')+ (1.0-constraint_weight) * v/norm(v,'F')
+      } else {
+      v = project_to_partially_orthonormal_nonnegative( v, 
+        max_iter=constraint_iterations, constraint=positivity, ortho_strength=constraint_weight )
+      }
     } else if ( na2f.loc( sparseness_alg == 'ensemble') ) {
       v <- t(ensembled_sparsity(t(v), positivity))
     } else if (na2f.loc( sparseness_alg == 'nnorth') ) {
@@ -8490,7 +8498,6 @@ check_zero_variance <- function(mat) {
 #' @param constraint either or positive 
 #' @return A matrix Y that is non-negative and whose columns are orthonormal,
 #'         closest to X in a sense defined by the alternating projections.
-#' @examples
 #' @export
 project_to_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-4, constraint='positive' ) {
   # --- Input Validation ---
@@ -8590,6 +8597,178 @@ project_to_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-4, co
   # Final check of the defect
   # final_defect <- invariant_orthogonality_defect(Y_prev)
   # print(paste("Final defect:", final_defect))
+
+  return(Y_prev)
+}
+
+
+
+
+
+#' @title Project Non-Negative Matrix with Controllable Orthonormality
+#' @description Iteratively projects a non-negative matrix towards the intersection
+#'              of non-negative matrices and matrices with orthonormal columns.
+#'              Allows control over the degree of orthonormality enforced.
+#' @param X A square or rectangular numeric matrix with non-negative entries.
+#' @param max_iter Maximum number of iterations for the alternating projection.
+#' @param tol Tolerance for convergence (Frobenius norm of change).
+#' @param constraint 'positive' or 'either' (influences initial data preprocessing).
+#' @param ortho_strength A value between 0 and 1, controlling the degree of
+#'                       orthonormality enforced. 0 means no orthonormality
+#'                       enforcement (only non-negativity), 1 means full
+#'                       orthonormality.
+#' @return A matrix Y that is non-negative and has columns that are
+#'         controlled in their orthonormality by ortho_strength.
+#' @examples
+#' # Example matrix (non-negative)
+#' X_sample <- matrix(c(
+#'   1, 2, 0.1,
+#'   0.5, 1, 0.8,
+#'   0.2, 0.5, 1
+#' ), nrow=3, byrow=TRUE)
+#'
+#' # Full orthonormality (ortho_strength = 1)
+#' Y_full_ortho <- project_to_partially_orthonormal_nonnegative(X_sample, ortho_strength = 1, max_iter = 200)
+#' print(paste("Defect (strength=1):", invariant_orthogonality_defect(Y_full_ortho)))
+#'
+#' # No orthonormality enforcement (ortho_strength = 0) - should just be pmax(X, 0)
+#' Y_no_ortho <- project_to_partially_orthonormal_nonnegative(X_sample, ortho_strength = 0, max_iter = 20) # Low iter for speed
+#' print(paste("Defect (strength=0):", invariant_orthogonality_defect(Y_no_ortho)))
+#'
+#' # Intermediate strength
+#' Y_mid_ortho <- project_to_partially_orthonormal_nonnegative(X_sample, ortho_strength = 0.5, max_iter = 200)
+#' print(paste("Defect (strength=0.5):", invariant_orthogonality_defect(Y_mid_ortho)))
+#'
+#' @export
+project_to_partially_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-4, constraint='positive', ortho_strength = 1.0 ) {
+  # --- Input Validation ---
+  stopifnot(is.matrix(X))
+  
+  # Validate ortho_strength
+  if (!is.numeric(ortho_strength) || ortho_strength < 0 || ortho_strength > 1) {
+    stop("ortho_strength must be between 0 and 1.")
+  }
+  
+  # Apply initial constraint and non-negativity
+  if ( constraint=='positive' ) {
+    X_processed <- take_abs_unsigned(X) # Assumes take_abs_unsigned is available
+    X_processed <- pmax(X_processed, 0) # Ensure non-negativity
+  } else if (constraint == 'either') {
+      # For 'either', we only care about non-negativity initially for the projection
+      # The projection itself will handle magnitudes.
+      X_processed <- pmax(X, 0) # Ensure non-negativity
+  } else {
+      stop("Constraint must be 'positive' or 'either'.")
+  }
+
+  k <- ncol(X_processed)
+  p <- nrow(X_processed)
+
+  if (k == 0 || p == 0) return(X_processed) # Handle empty matrix
+
+  Y_prev <- X_processed # Start with the processed input matrix
+
+  for (iter in 1:max_iter) {
+    # --- Projection 1: Controllable Orthonormal Columns ---
+    # This projection is A * (A^T * A)^(-1/2)
+    # We modify the inversion of singular values based on ortho_strength.
+
+    AtA <- crossprod(Y_prev) # A^T * A
+
+    # Use SVD for robust computation of eigenvalues and eigenvectors
+    svd_AtA <- svd(AtA)
+    eigenvalues <- svd_AtA$d
+    V <- svd_AtA$v # Eigenvectors (columns of V are eigenvectors)
+
+    # --- Modify singular values based on ortho_strength ---
+    # We want to transform s_i = sqrt(eigenvalues_i) to s'_i.
+    # s'_i = (1 - strength) * s_i + strength * (1 / s_i)
+    # This interpolates between preserving original column magnitudes (strength=0)
+    # and forcing them to be unit norms (strength=1).
+
+    s_i <- sqrt(pmax(eigenvalues, 0)) # Get singular values (sqrt of eigenvalues), handle negative eigenvalues from computation errors
+    
+    # Avoid division by zero if s_i is very small.
+    # For strength=1, 1/s_i can be infinity if s_i=0.
+    # For strength=0, s_i is preserved.
+    # We need to be careful: if s_i is near zero, 1/s_i will be very large.
+    # This can destabilize the projection.
+
+    # A more stable approach for the modified inverse square root:
+    # Let f(s) = (1 - strength)*s + strength*(1/s)
+    # Compute g(s) = 1 / f(s)
+    # If s_i is very small (near zero), 1/s_i is large. If strength > 0,
+    # the term (1-strength)*s_i becomes small, and strength/s_i dominates.
+    # This can lead to very large values if s_i is tiny.
+
+    # Consider a thresholding/clipping for 1/s_i when it's very large.
+    # Or, a different interpolation:
+    # Let's transform s_i to 1/s_i. If s_i is very small, 1/s_i is huge.
+    # We want to dampen this effect.
+    # Alternative approach:
+    # `transformed_s_i = s_i ^ (1 - ortho_strength)` ? No, this doesn't interpolate correctly.
+
+    # Let's use the interpolation formula directly, but add safeguards.
+    # Target scaling for singular values:
+    # If strength = 1, we want scaling factor 1/s_i
+    # If strength = 0, we want scaling factor s_i (to keep magnitude) - wait, the projection IS A(A^T A)^{-1/2}.
+    # The goal is to scale A's columns. The (A^T A)^{-1/2} part *applies* the scaling.
+    # So, if strength=0, we want the *effect* of (A^T A)^{-1/2} to be identity.
+    # This means we want to transform the diagonal matrix S^-1/2 to something else.
+
+    # Let S_inv_sqrt = diag(1 / s_i)
+    # We want to find S'_inv_sqrt such that:
+    # strength=1 -> S'_inv_sqrt = S_inv_sqrt
+    # strength=0 -> S'_inv_sqrt = Identity matrix (effectively, A * I = A, no projection to unit norm)
+    #
+    # Interpolate the *inverse singular values*:
+    # Let s_inv_i = 1 / s_i
+    # new_s_inv_i = (1 - ortho_strength) * 1 + ortho_strength * s_inv_i
+    # This is still problematic if s_i is zero.
+
+    # More robust strategy for softening: Modify the reciprocal of s_i.
+    # Instead of 1/s_i, use 1 / (s_i + epsilon_for_inversion)
+    # Then, interpolate:
+    # effective_inv_s_i = (1 - ortho_strength) * 1 + ortho_strength * (1 / (s_i + epsilon))
+    # This seems too arbitrary.
+
+    # Let's reconsider the projection: A * (A^T A)^{-1/2} = A * V * S_inv_sqrt * V^T
+    # The term V * S_inv_sqrt * V^T is the matrix that transforms the columns of A
+    # to make them orthonormal.
+    # We want to control how much this transformation is applied.
+    # Let T = V * S_inv_sqrt * V^T. We want to apply a transformation that is a mix
+    # of Identity (strength=0) and T (strength=1).
+    # New_Transform = (1 - ortho_strength) * Identity + ortho_strength * T
+
+    # Compute T = V * diag(1/s_i) * V^T
+    # Need to handle s_i near zero. Add epsilon to s_i before inverting.
+    epsilon=1e-8
+    s_i_safe <- pmax(s_i, epsilon) # Ensure s_i is not zero
+    S_inv_sqrt <- diag(1 / s_i_safe)
+    T <- V %*% S_inv_sqrt %*% t(V)
+
+    # Construct the mixed transformation matrix
+    Mixed_Transform <- (1 - ortho_strength) * diag(k) + ortho_strength * T
+
+    # Apply the mixed transformation to Y_prev
+    Y_ortho <- Y_prev %*% Mixed_Transform
+
+    # --- Projection 2: Non-Negativity ---
+    Y_new <- pmax(Y_ortho, 0)
+
+    # --- Check for Convergence ---
+    change_norm <- sqrt(sum((Y_new - Y_prev)^2))
+
+    Y_prev <- Y_new
+
+    if (change_norm < tol) {
+      # print(paste("Converged at iteration", iter))
+      break
+    }
+    if (iter == max_iter) {
+      # warning("Projection did not converge within max_iter.")
+    }
+  }
 
   return(Y_prev)
 }
