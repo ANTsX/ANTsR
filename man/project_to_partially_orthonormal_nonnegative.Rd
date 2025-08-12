@@ -44,15 +44,12 @@ X_sample <- matrix(c(
 ), nrow=3, byrow=TRUE)
 
 # Full orthonormality (ortho_strength = 1)
-Y_full_ortho <- project_to_partially_orthonormal_nonnegative(X_sample, ortho_strength = 1, max_iter = 200)
-print(paste("Defect (strength=1):", invariant_orthogonality_defect(Y_full_ortho)))
+Y_full_ortho = project_to_partially_orthonormal_nonnegative(
+  X_sample, ortho_strength = 1, max_iter = 5)
 
-# No orthonormality enforcement (ortho_strength = 0) - should just be pmax(X, 0)
-Y_no_ortho <- project_to_partially_orthonormal_nonnegative(X_sample, ortho_strength = 0, max_iter = 20) # Low iter for speed
-print(paste("Defect (strength=0):", invariant_orthogonality_defect(Y_no_ortho)))
-
-# Intermediate strength
-Y_mid_ortho <- project_to_partially_orthonormal_nonnegative(X_sample, ortho_strength = 0.5, max_iter = 200)
-print(paste("Defect (strength=0.5):", invariant_orthogonality_defect(Y_mid_ortho)))
+# No orthonormality enforcement (ortho_strength = 0) - 
+    # should just be pmax(X, 0)
+Y_no_ortho <- project_to_partially_orthonormal_nonnegative(
+   X_sample, ortho_strength = 0, max_iter = 5) # Low iter for speed
 
 }
