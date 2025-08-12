@@ -5,7 +5,7 @@
 \title{Assess Significance of SiMLR Call}
 \usage{
 simlr.perm(
-  voxmats,
+  data_matrices,
   smoothingMatrices,
   iterations = 10,
   sparsenessQuantiles,
@@ -33,7 +33,7 @@ simlr.perm(
 )
 }
 \arguments{
-\item{voxmats}{A list of voxel matrices.}
+\item{data_matrices}{A list of voxel matrices.}
 
 \item{smoothingMatrices}{A list of smoothing matrices.}
 

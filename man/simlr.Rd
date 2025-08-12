@@ -5,14 +5,13 @@
 \title{Similarity-driven multiview linear reconstruction model (simlr) for N modalities}
 \usage{
 simlr(
-  voxmats,
+  data_matrices,
   smoothingMatrices,
   iterations = 500,
   sparsenessQuantiles,
   positivities,
   initialUMatrix,
   mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
-  orthogonalize = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c(-500, 500),
   lineSearchTolerance = 1e-12,
@@ -26,13 +25,12 @@ simlr(
   scale = c("center", "eigenvalue"),
   expBeta = 0,
   jointInitialization = TRUE,
-  sparsenessAlg = NA,
+  sparsenessAlg = "soft",
+  orthogonalizeU = FALSE,
   verbose = FALSE
 )
 }
 \arguments{
-\item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
-
 \item{smoothingMatrices}{list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.}
 
 \item{iterations}{number of gradient descent iterations}
@@ -48,8 +46,6 @@ may also pass a single initialization matrix to be used for all matrices.
 If this is set to a scalar, or is missing, a random matrix will be used.}
 
 \item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
-
-\item{orthogonalize}{boolean to control whether we orthogonalize the solutions explicitly}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}
@@ -82,8 +78,12 @@ can be a vector which will apply each strategy in order.}
 
 \item{sparsenessAlg}{NA is default otherwise basic, spmp or orthorank}
 
+\item{orthogonalizeU}{boolean controlling whether we orthogonalize the U matrices}
+
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}
+
+\item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
 }
 \value{
 A list of u, x, y, z etc related matrices.

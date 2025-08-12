@@ -5,14 +5,14 @@
 \title{Generate sparse PCA-based feature projections for a list of voxel matrices}
 \usage{
 antsr_spca_features(
-  voxmats,
+  data_matrices,
   k,
   method = c("default", "elasticnet", "PMA", "sparsepca"),
   para = NULL
 )
 }
 \arguments{
-\item{voxmats}{A list of numeric matrices. Each matrix should be subjects by voxels.}
+\item{data_matrices}{A list of numeric matrices. Each matrix should be subjects by voxels.}
 
 \item{k}{Integer. Number of components to retain.}
 

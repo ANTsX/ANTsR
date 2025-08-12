@@ -4,10 +4,10 @@
 \alias{antsr_pca_features}
 \title{Generate PCA-based feature projections for a list of voxel matrices}
 \usage{
-antsr_pca_features(voxmats, k)
+antsr_pca_features(data_matrices, k)
 }
 \arguments{
-\item{voxmats}{A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).}
+\item{data_matrices}{A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).}
 
 \item{k}{Integer. Number of principal components to retain.}
 }

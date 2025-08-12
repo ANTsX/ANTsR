@@ -4169,7 +4169,6 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
 #' may also pass a single initialization matrix to be used for all matrices.
 #' If this is set to a scalar, or is missing, a random matrix will be used.
 #' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
-#' @param orthogonalize boolean to control whether we orthogonalize the solutions explicitly
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
@@ -4188,6 +4187,7 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
 #' @param expBeta if greater than zero, use exponential moving average on gradient.
 #' @param jointInitialization boolean for initialization options, default TRUE
 #' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
+#' @param orthogonalizeU boolean controlling whether we orthogonalize the U matrices
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
@@ -4253,14 +4253,13 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
 #' @seealso \code{\link{milr}} \code{\link{mild}} \code{\link{simlrU}}
 #' @export simlr
 simlr <- function(
-    voxmats,
+    data_matrices,
     smoothingMatrices,
     iterations = 500,
     sparsenessQuantiles,
     positivities,
     initialUMatrix,
     mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
-    orthogonalize = FALSE,
     repeatedMeasures = NA,
     lineSearchRange = c(-5e2, 5e2),
     lineSearchTolerance = 1e-12,
@@ -4273,7 +4272,8 @@ simlr <- function(
     scale = c("center",  "eigenvalue" ),
     expBeta = 0.0,
     jointInitialization = TRUE,
-    sparsenessAlg = NA,
+    sparsenessAlg = 'soft',
+    orthogonalizeU = FALSE,
     verbose = FALSE) {
 
   parse_constraint <- function(x) {
@@ -4308,7 +4308,6 @@ simlr <- function(
       )
     }
   }
-
   stopifnot( optimizationStyle %in% list_simlr_optimizers())
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t \|^2 + \| G_i \star v_i \|_1
   # \sum_i  \| X_i - \sum_{ j ne i } u_j v_i^t - z_r v_r^ T \|^2 + constraints
@@ -4326,7 +4325,7 @@ simlr <- function(
     return(vgrad)
   }
   
-  nModalities <- length(voxmats)
+  nModalities <- length(data_matrices)
   if (missing(connectors)) {
     temp <- 1:nModalities
     connectors <- list()
@@ -4347,14 +4346,14 @@ simlr <- function(
   }
   matnames <- p <- rep(NA, nModalities)
   for (i in 1:nModalities) {
-    p[i] <- ncol(voxmats[[i]])
+    p[i] <- ncol(data_matrices[[i]])
   }
-  n <- nrow(voxmats[[1]])
+  n <- nrow(data_matrices[[1]])
   if (missing(sparsenessQuantiles)) {
     sparsenessQuantiles <- rep(0.5, nModalities)
   }
   
-  lrbasis = length( voxmats )
+  lrbasis = length( data_matrices )
   if ( ! missing( initialUMatrix ) ) {
     if ( is.integer(initialUMatrix) ) lrbasis=initialUMatrix
     if ( is.matrix( initialUMatrix ) ) lrbasis=ncol(initialUMatrix)
@@ -4365,40 +4364,40 @@ simlr <- function(
   # 1.0 adjust matrix norms
   if (!(any(scaleList == "none"))) {
     for (i in 1:nModalities) {
-      if (any(is.null(voxmats[[i]])) | any(is.na(voxmats[[i]]))) {
+      if (any(is.null(data_matrices[[i]])) | any(is.na(data_matrices[[i]]))) {
         stop(paste("input matrix", i, "is null or NA."))
       }
-      matnames <- names(voxmats)[i]
-      if (any(is.na(voxmats[[i]]))) {
-        voxmats[[i]][is.na(voxmats[[i]])] <- mean(voxmats[[i]], na.rm = T)
+      matnames <- names(data_matrices)[i]
+      if (any(is.na(data_matrices[[i]]))) {
+        data_matrices[[i]][is.na(data_matrices[[i]])] <- mean(data_matrices[[i]], na.rm = T)
       }
       for (j in 1:length(scaleList)) {
         if (scaleList[j] == "norm") {
-          voxmats[[i]] <- voxmats[[i]] / norm(voxmats[[i]], type = "F")
+          data_matrices[[i]] <- data_matrices[[i]] / norm(data_matrices[[i]], type = "F")
         }
         if (scaleList[j] == "np") {
-          voxmats[[i]] <- voxmats[[i]] / prod(dim(voxmats[[i]]))
+          data_matrices[[i]] <- data_matrices[[i]] / prod(dim(data_matrices[[i]]))
         }
         if (scaleList[j] == "sqrtnp") {
-          voxmats[[i]] <- voxmats[[i]] / sqrt(prod(dim(voxmats[[i]])))
+          data_matrices[[i]] <- data_matrices[[i]] / sqrt(prod(dim(data_matrices[[i]])))
         }
         if (scaleList[j] == "center") {
-          voxmats[[i]] <- base::scale(voxmats[[i]], center = TRUE, scale = FALSE)
+          data_matrices[[i]] <- base::scale(data_matrices[[i]], center = TRUE, scale = FALSE)
         }
         if (scaleList[j] == "centerAndScale") {
-          voxmats[[i]] <- base::scale(voxmats[[i]], center = TRUE, scale = TRUE)
+          data_matrices[[i]] <- base::scale(data_matrices[[i]], center = TRUE, scale = TRUE)
         }
         if (scaleList[j] == "eigenvalue") {
-          voxmats[[i]] <- voxmats[[i]] / sum(ba_svd(voxmats[[i]])$d)
+          data_matrices[[i]] <- data_matrices[[i]] / sum(ba_svd(data_matrices[[i]])$d)
         }
         if ( scaleList[j] %in% c("robust","rank") ) {
-          voxmats[[i]] <- robustMatrixTransform(voxmats[[i]])
+          data_matrices[[i]] <- robustMatrixTransform(data_matrices[[i]])
         }
         if (scaleList[j] == "whiten") {
-          voxmats[[i]] <- whiten_matrix( data.matrix(voxmats[[i]]) )$whitened_matrix
+          data_matrices[[i]] <- whiten_matrix( data.matrix(data_matrices[[i]]) )$whitened_matrix
         }
         if (scaleList[j] == "lowrank") {
-          voxmats[[i]] <- lowrankRowMatrix( data.matrix(voxmats[[i]]), lrbasis*2 )
+          data_matrices[[i]] <- lowrankRowMatrix( data.matrix(data_matrices[[i]]), lrbasis*2 )
         }
       }
     }
@@ -4408,7 +4407,7 @@ simlr <- function(
   if (missing(smoothingMatrices)) {
     smoothingMatrices <- list()
     for (i in 1:nModalities) {
-      smoothingMatrices[[i]] <- diag(ncol(voxmats[[i]]))
+      smoothingMatrices[[i]] <- diag(ncol(data_matrices[[i]]))
     }
   }
   for (i in 1:length(smoothingMatrices)) {
@@ -4419,8 +4418,8 @@ simlr <- function(
       Matrix::rowSums(smoothingMatrices[[i]])
   }
   # some gram schmidt code
-  localGS <- function(x, orthogonalize = TRUE) {
-    if (!orthogonalize) {
+  localGS <- function(x, orthogonalizeU = TRUE) {
+    if (!orthogonalizeU) {
       return(x)
     }
     n <- dim(x)[1]
@@ -4461,11 +4460,11 @@ simlr <- function(
     }
   } else if (is.numeric(initialUMatrix)) {
     if (jointInitialization) {
-      temp <- initializeSimlr(voxmats, initialUMatrix, uAlgorithm = mixAlg, jointReduction = jointInitialization)
+      temp <- initializeSimlr(data_matrices, initialUMatrix, uAlgorithm = mixAlg, jointReduction = jointInitialization)
       initialUMatrix <- list()
       for (i in 1:nModalities) initialUMatrix[[i]] <- temp
     } else {
-      initialUMatrix <- initializeSimlr(voxmats, initialUMatrix, uAlgorithm = mixAlg, jointReduction = jointInitialization)
+      initialUMatrix <- initializeSimlr(data_matrices, initialUMatrix, uAlgorithm = mixAlg, jointReduction = jointInitialization)
     }
   }
   
@@ -4488,9 +4487,9 @@ simlr <- function(
 #    if (verbose) cat("-------<00>--BEGIN--<00>-------\n")
     vmats <- list()
     for (i in 1:nModalities) {
-      vmats[[i]] <- t(voxmats[[i]]) %*% initialUMatrix[[i]]
+      vmats[[i]] <- t(data_matrices[[i]]) %*% initialUMatrix[[i]]
       # 0 # svd( temp, nu=basisK, nv=0 )$u
-      # for ( kk in 1:nModalities ) vmats[[ i ]] = vmats[[ i ]] + t(voxmats[[i]]) %*% initialUMatrix[[kk]]
+      # for ( kk in 1:nModalities ) vmats[[ i ]] = vmats[[ i ]] + t(data_matrices[[i]]) %*% initialUMatrix[[kk]]
       #      vmats[[ i ]] = # svd( vmats[[ i ]], nu=basisK, nv=0 )$u
       #        ( stats::prcomp( vmats[[ i ]], retx=TRUE, rank.=basisK, scale.=TRUE )$x )
       vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
@@ -4540,7 +4539,7 @@ simlr <- function(
 # Initialize adaptive orthogonality weights
 orth_weights <- rep(0.0, nModalities)
 normalizing_weights = rep( 1.0, nModalities )
-names( orth_weights ) = names( normalizing_weights ) = names( voxmats )
+names( orth_weights ) = names( normalizing_weights ) = names( data_matrices )
 clipper = 0.80
 bestTot <- Inf
 bestRow <- 1
@@ -4584,7 +4583,7 @@ for (myit in 1:iterations) {
                   constraint_weight = constraint_weight,
                   sparseness_alg = sparsenessAlg
                 )
-        raw_e = calculate_simlr_energy(V_sp, voxmats[[i]], initialUMatrix[[i]], energyType)
+        raw_e = calculate_simlr_energy(V_sp, data_matrices[[i]], initialUMatrix[[i]], energyType)
         if ( return_raw ) return( raw_e )
         sim_e <- raw_e * normalizing_weights[i]
         orth_e <- 0
@@ -4606,7 +4605,7 @@ for (myit in 1:iterations) {
                   constraint_weight = constraint_weight,
                   sparseness_alg = sparsenessAlg
                 )  
-        sim_grad <- calculate_simlr_gradient(V_sp, voxmats[[i]], initialUMatrix[[i]], energyType ) * normalizing_weights[i]
+        sim_grad <- calculate_simlr_gradient(V_sp, data_matrices[[i]], initialUMatrix[[i]], energyType ) * normalizing_weights[i]
         orth_grad <- 0
         if (constraint_type == 'ortho' & FALSE ) {
           orth_grad <-  constraint_weight * orth_weights[i] *            
@@ -4648,15 +4647,15 @@ for (myit in 1:iterations) {
 
     # --- B. Update each U_i matrix (logic is unchanged from original simlr) ---
     if ( !(energyType %in% c('regression','reg')) ) {
-        tempU <- lapply(1:nModalities, function(j) scale(voxmats[[j]] %*% vmats[[j]], TRUE, FALSE))
+        tempU <- lapply(1:nModalities, function(j) scale(data_matrices[[j]] %*% vmats[[j]], TRUE, FALSE))
       } else {
-        tempU <- lapply(1:nModalities, function(j) voxmats[[j]] %*% vmats[[j]])
+        tempU <- lapply(1:nModalities, function(j) data_matrices[[j]] %*% vmats[[j]])
       }
     updated_Us <- simlrU(tempU, mixAlg, myw,
-                   orthogonalize = orthogonalize,
+                   orthogonalize = orthogonalizeU,
                    connectors = connectors)
     # Apply Gram-Schmidt orthogonalization (localGS)
-    initialUMatrix <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalize))
+    initialUMatrix <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalizeU))
 
 
     # --- C. Evaluate, Track, and Report Convergence ---
@@ -4671,7 +4670,7 @@ for (myit in 1:iterations) {
       tot_e <- smooth_cost(V_current  )
       orth_e <- invariant_orthogonality_defect(V_current)
       iter_results_list[[i]] <- tibble::tibble(
-        modality = names(voxmats)[i],
+        modality = names(data_matrices)[i],
         total_energy = tot_e,
         similarity_energy = sim_e,
         feature_orthogonality = orth_e,
@@ -4766,9 +4765,9 @@ if ( converged > 2) {
 } else {
   message(paste("--Did not converge after", myit, "iterations."))
 }
-names(bestV)=names(voxmats)
-for ( k in 1:length(voxmats)) {
-    rownames(bestV[[k]])=colnames(voxmats[[k]])
+names(bestV)=names(data_matrices)
+for ( k in 1:length(data_matrices)) {
+    rownames(bestV[[k]])=colnames(data_matrices[[k]])
     colnames(bestV[[k]])=paste0("PC",1:ncol(bestV[[k]]))
   }
   
@@ -5012,7 +5011,7 @@ simlrU <- function(
 #' This function performs permutation tests to assess the significance of a SiMLR analysis.
 #' For more detail on input parameters, see the original function.
 #'
-#' @param voxmats A list of voxel matrices.
+#' @param data_matrices A list of voxel matrices.
 #' @param smoothingMatrices A list of smoothing matrices.
 #' @param iterations Number of iterations. Default is 10.
 #' @param sparsenessQuantiles A vector of sparseness quantiles.
@@ -5038,7 +5037,7 @@ simlrU <- function(
 #' @param FUN function for summarizing variance explained 
 #' @return A data frame containing p-values for each permutation.
 #' @export
-simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
+simlr.perm <- function(data_matrices, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
                        positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
                                                                 "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
                        repeatedMeasures = NA, lineSearchRange = c(-5e2, 5e2), 
@@ -5053,19 +5052,19 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
   myseeds <- 1:1000000
   
   # Initial SiMLR run
-  simlr_result <- simlr( voxmats, 
+  simlr_result <- simlr( data_matrices, 
                          smoothingMatrices, iterations, sparsenessQuantiles, 
                          positivities, initialUMatrix, mixAlg, orthogonalize, 
                          repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
                          energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
                          jointInitialization, sparsenessAlg, verbose=verbose > 0 )
-  for ( k in 1:length(voxmats)) {
+  for ( k in 1:length(data_matrices)) {
     simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
     simlr_result$v[[k]]=divide_by_column_sum( simlr_result$v[[k]] )
-    rownames(simlr_result$v[[k]])=colnames(voxmats[[k]])
+    rownames(simlr_result$v[[k]])=colnames(data_matrices[[k]])
   }
   
-  refvarxmeans = pairwise_matrix_similarity( voxmats, simlr_result$v, FUN=FUN )
+  refvarxmeans = pairwise_matrix_similarity( data_matrices, simlr_result$v, FUN=FUN )
   simlrpermvarx = data.frame( n=ncol(initialUMatrix), perm=0:nperms ) 
   refvarxmeansnms=names(refvarxmeans)
   simlrpermvarx[1, refvarxmeansnms]=refvarxmeans
@@ -5075,18 +5074,18 @@ simlr.perm <- function(voxmats, smoothingMatrices, iterations = 10, sparsenessQu
     for (nperm in 1:nperms) {
       set.seed(myseeds[nperm])
       
-      voxmats_perm <- lapply(voxmats, function(mat) mat[sample(1:nrow(mat)), ])
+      data_matrices_perm <- lapply(data_matrices, function(mat) mat[sample(1:nrow(mat)), ])
       
-      simlr_result_perm <- simlr(voxmats_perm, smoothingMatrices, iterations, sparsenessQuantiles, 
+      simlr_result_perm <- simlr(data_matrices_perm, smoothingMatrices, iterations, sparsenessQuantiles, 
                                  positivities, initialUMatrix, mixAlg, orthogonalize, 
                                  repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
                                  energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
                                  jointInitialization, sparsenessAlg, verbose=verbose > 3)
-      for ( k in 1:length(voxmats)) {
+      for ( k in 1:length(data_matrices)) {
         simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
         simlr_result_perm$v[[k]] = divide_by_column_sum( simlr_result_perm$v[[k]] )
       }
-      refvarxmeans_perm = pairwise_matrix_similarity( voxmats_perm, simlr_result_perm$v, FUN=FUN )
+      refvarxmeans_perm = pairwise_matrix_similarity( data_matrices_perm, simlr_result_perm$v, FUN=FUN )
       simlrpermvarx[nperm + 1, refvarxmeansnms ] <- refvarxmeans_perm
       if ( verbose > 2 ) {
         print( simlrpermvarx[c(1,nperm+1),])
@@ -6583,7 +6582,8 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param doperm Logical indicating whether to perform permutation tests. Defaults to FALSE.  Will randomize image features in the training data and thus leads to "randomized" but still regularized projections.
 #' @param exclusions vector of strings to exclude from predictors
 #' @param inclusions vector of strings to include in predictors
-#' @param sparseness vector or scalar value to set sparseness
+#' @param sparseness vector or scalar value to set sparseness.
+#' @param mixAlg string 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
 #' @param iterations int value to set max iterations
 #' @param path_modeling the result of a call to \code{simlr_path_models(n)}
 #' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
@@ -6610,6 +6610,7 @@ antspymm_simlr <- function(blaster,
                            exclusions = NULL,
                            inclusions = NULL,
                            sparseness = NULL,
+                           mixAlg = NULL,
                            iterations = NULL,
                            path_modeling = NULL,
                            sparsenessAlg = NA,
@@ -6808,7 +6809,7 @@ antspymm_simlr <- function(blaster,
   # Configure mixer algorithm
   mixer <- if (grepl("reg", energy)) 'ica' else 'pca'
   if (energy %in% c("lowRankRegression", "normalized_correlation")) mixer <- 'pca'
-
+  if ( !is.null( mixAlg ) ) mixer=mixAlg
   # Configure sparseness
   sparval <- rep(0.8, length(mats))
   if (!is.null(sparseness)) {
@@ -7247,25 +7248,25 @@ multiview_pca <- function(views, n_components, sparse = 0.5, max_iter = 100, spa
 #' This function applies random projection to each matrix in a list of voxel matrices.
 #' It uses a fixed seed to ensure reproducibility across runs.
 #'
-#' @param voxmats A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).
+#' @param data_matrices A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).
 #' @param k Integer. Number of projection dimensions (features) to generate.
 #' @param seed Integer. Random seed for reproducibility. Default is 42.
 #'
 #' @return A list of projection matrices, each with dimensions (voxels by k).
 #' @export
-antsr_random_features <- function(voxmats, k, seed = 42) {
-  stopifnot(is.list(voxmats))
-  stopifnot(all(sapply(voxmats, is.matrix)))
+antsr_random_features <- function(data_matrices, k, seed = 42) {
+  stopifnot(is.list(data_matrices))
+  stopifnot(all(sapply(data_matrices, is.matrix)))
   set.seed(seed)
-  plist = lapply(voxmats, function(m) {
+  plist = lapply(data_matrices, function(m) {
     nvox <- ncol(m)
     projection_matrix <- 
     orthogonalizeAndQSparsify( matrix(rnorm(nvox * k), nrow = nvox, ncol = k), 0.8, positivity='positive' )
   })
-  names(plist)=names(voxmats)
-  for ( k in 1:length(voxmats)) {
-    rownames(plist[[k]])=colnames(voxmats[[k]])
-    prefix=paste0(names(voxmats)[k],"PC")
+  names(plist)=names(data_matrices)
+  for ( k in 1:length(data_matrices)) {
+    rownames(plist[[k]])=colnames(data_matrices[[k]])
+    prefix=paste0(names(data_matrices)[k],"PC")
     prefix="PC"
     colnames(plist[[k]])=paste0(prefix,1:ncol(plist[[k]]))
   }
@@ -7277,16 +7278,16 @@ antsr_random_features <- function(voxmats, k, seed = 42) {
 #' This function applies principal component analysis (PCA) to each matrix in a list
 #' of voxel matrices and returns a list of projection matrices (principal axes).
 #'
-#' @param voxmats A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).
+#' @param data_matrices A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).
 #' @param k Integer. Number of principal components to retain.
 #'
 #' @return A named list of projection matrices (voxels by k), one per input matrix.
 #' @export
-antsr_pca_features <- function(voxmats, k) {
-  stopifnot(is.list(voxmats))
-  stopifnot(all(sapply(voxmats, is.matrix)))
+antsr_pca_features <- function(data_matrices, k) {
+  stopifnot(is.list(data_matrices))
+  stopifnot(all(sapply(data_matrices, is.matrix)))
 
-  plist <- lapply(voxmats, function(m) {
+  plist <- lapply(data_matrices, function(m) {
     max_components <- min(nrow(m), ncol(m))
     if (k > max_components) {
       warning(sprintf("Requested k = %d exceeds maximum possible components (%d) for a matrix with dimensions (%d by %d). Using k = %d instead.",
@@ -7299,7 +7300,7 @@ antsr_pca_features <- function(voxmats, k) {
     pca$rotation[, 1:k_adj, drop = FALSE]
   })
 
-  names(plist) <- names(voxmats)
+  names(plist) <- names(data_matrices)
   return(plist)
 }
 
@@ -7310,7 +7311,7 @@ antsr_pca_features <- function(voxmats, k) {
 #' Applies sparse principal component analysis using the selected backend
 #' ("elasticnet", "PMA", or "sparsepca") to each matrix in a list of subject by voxel data.
 #'
-#' @param voxmats A list of numeric matrices. Each matrix should be subjects by voxels.
+#' @param data_matrices A list of numeric matrices. Each matrix should be subjects by voxels.
 #' @param k Integer. Number of components to retain.
 #' @param method Character. Sparse PCA backend to use. One of "default", "elasticnet", "PMA", or "sparsepca".
 #' @param para Sparsity control parameter(s). Interpretation depends on backend:
@@ -7320,25 +7321,25 @@ antsr_pca_features <- function(voxmats, k) {
 #'   - For "default": length-k vector of sparsity parameters.
 #' @return A named list of sparse projection matrices (voxels by k).
 #' @export
-antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet", "PMA", "sparsepca"), para = NULL) {
+antsr_spca_features <- function(data_matrices, k, method = c( "default", "elasticnet", "PMA", "sparsepca"), para = NULL) {
   method <- match.arg(method)
-  stopifnot(is.list(voxmats))
-  stopifnot(all(sapply(voxmats, is.matrix)))
+  stopifnot(is.list(data_matrices))
+  stopifnot(all(sapply(data_matrices, is.matrix)))
 
   if ( method == "default" ) {
     if ( is.null(para) ) {
-      para <- rep(0.8, length(voxmats))  # Default sparsity
+      para <- rep(0.8, length(data_matrices))  # Default sparsity
     } else if ( length(para) == 1 ) {
-      para <- rep(para, length(voxmats))  # Replicate single value
+      para <- rep(para, length(data_matrices))  # Replicate single value
     }
-    loadings = antsr_pca_features( voxmats, k )
+    loadings = antsr_pca_features( data_matrices, k )
     for ( k in 1:length(loadings)) {
       loadings[[k]] = orthogonalizeAndQSparsify( loadings[[k]], para[k], positivity='positive' )
       }
     return(loadings)
     }
 
-  plist <- lapply(voxmats, function(m) {
+  plist <- lapply(data_matrices, function(m) {
     max_k <- min(nrow(m), ncol(m))
     if (k > max_k) {
       warning(sprintf("Requested k = %d exceeds matrix rank (%d); reducing to k = %d", k, max_k, max_k))
@@ -7389,7 +7390,7 @@ antsr_spca_features <- function(voxmats, k, method = c( "default", "elasticnet",
     loadings
   })
 
-  names(plist) <- names(voxmats)
+  names(plist) <- names(data_matrices)
   return(plist)
 }
 
@@ -7569,8 +7570,8 @@ simlr_sparseness <- function(v,
       v <- t(ensembled_sparsity(t(v), positivity))
     } else if (na2f.loc( sparseness_alg == 'nnorth') ) {
       v = project_to_orthonormal_nonnegative( v, constraint=positivity )
-    } 
-    if (sparseness_quantile != 0) {
+    }
+    if ( sparseness_quantile != 0 & constraint_weight == 0 & sparseness_alg =='soft' ) {
       v <- orthogonalizeAndQSparsify(
         v,
         sparsenessQuantile = sparseness_quantile,
@@ -8565,7 +8566,7 @@ project_to_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-4, co
 #'
 #' @export
 project_to_partially_orthonormal_nonnegative <- function(X, 
-  max_iter = 100, tol = 1e-4, constraint='positive', ortho_strength = 1.0 ) {
+  max_iter = 100, tol = 1e-6, constraint='positive', ortho_strength = 1.0 ) {
   # --- Input Validation ---
   stopifnot(is.matrix(X))
   
@@ -8667,7 +8668,7 @@ project_to_partially_orthonormal_nonnegative <- function(X,
 
     # Compute T = V * diag(1/s_i) * V^T
     # Need to handle s_i near zero. Add epsilon to s_i before inverting.
-    epsilon=1e-8
+    epsilon=1e-4
     s_i_safe <- pmax(s_i, epsilon) # Ensure s_i is not zero
     S_inv_sqrt <- diag(1 / s_i_safe)
     T <- V %*% S_inv_sqrt %*% t(V)

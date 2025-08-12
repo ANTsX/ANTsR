@@ -21,6 +21,7 @@ antspymm_simlr(
   exclusions = NULL,
   inclusions = NULL,
   sparseness = NULL,
+  mixAlg = NULL,
   iterations = NULL,
   path_modeling = NULL,
   sparsenessAlg = NA,
@@ -60,7 +61,9 @@ Other options include 'lrr', 'regression', 'nc', 'base.pca', 'base.spca', 'base.
 
 \item{inclusions}{vector of strings to include in predictors}
 
-\item{sparseness}{vector or scalar value to set sparseness}
+\item{sparseness}{vector or scalar value to set sparseness.}
+
+\item{mixAlg}{string 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
 
 \item{iterations}{int value to set max iterations}
 

@@ -4,10 +4,10 @@
 \alias{antsr_random_features}
 \title{Generate reproducible random feature projections for a list of voxel matrices}
 \usage{
-antsr_random_features(voxmats, k, seed = 42)
+antsr_random_features(data_matrices, k, seed = 42)
 }
 \arguments{
-\item{voxmats}{A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).}
+\item{data_matrices}{A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).}
 
 \item{k}{Integer. Number of projection dimensions (features) to generate.}
 

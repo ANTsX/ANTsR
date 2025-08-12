@@ -7,7 +7,7 @@
 project_to_partially_orthonormal_nonnegative(
   X,
   max_iter = 100,
-  tol = 1e-04,
+  tol = 1e-06,
   constraint = "positive",
   ortho_strength = 1
 )
