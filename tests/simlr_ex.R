@@ -22,8 +22,17 @@ set.seed(808)
      mat1 <- (outcome %*% t(outcome1) %*% (outcome1)) %*% view1tx
      mat2 <- (outcome %*% t(outcome2) %*% (outcome2)) %*% view2tx
      mat3 <- (outcome %*% t(outcome3) %*% (outcome3)) %*% view3tx
-     voxmats <- list(vox = mat1, vox2 = mat2, vox3 = mat3)
+     voxmats <- list(vox = mat1, vox1 = mat2, vox3 = mat3)
 #    result <- simlr(voxmats)
+
+ks <- 5 # True number of shared components
+ku <- 9 # Number of unique components per modality
+fbig=c(201, 499, 666)
+fsmall=round(fbig*0.1)
+voxmats <- generate_structured_multiview_data(
+    n_subjects = 400, n_features = fsmall,
+    k_shared = ks, k_specific = ku, noise_sd = 0.1
+  )$data_list
 
 # --- New Function to Extract Ortho Strength ---
 extract_ortho_strength <- function(constraint_str) {
@@ -51,14 +60,15 @@ extract_ortho_strength <- function(constraint_str) {
 }
 
 
-orthos=c("orthox1x2",  "orthox0.12x2", "orthox0.08x2", "orthox0.04x2", "orthox0.01x2","orthox0.005x2","orthox0.002x2","orthox0.001x2", "orthox0x0" )
-if( ! exists("mydf")) {
+orthos=c(  "orthox0.08x1", "orthox0.04x1","orthox0.02x1", "orthox0.01x1","orthox0.005x1", "orthox0.001x1", "orthox0.0005x1", "orthox0.0001x1" )
+if( ! exists("mydf") | TRUE ) {
 mydf=data.frame()
-for ( m in c("ica","pca","svd") )
 for ( e in c("regression","nc","acc","lrr"))
+for ( m in c("ica","pca","svd") )
 for ( o in orthos ) {
   result <- simlr(voxmats,verbose=0,energyType=e,mixAlg=m,iterations=500,
-    constraint=o, randomSeed=808, optimizationStyle='ls_adam')
+    scale=c("centerAndScale",'norm'),
+    constraint=o, randomSeed=212, optimizationStyle='nadam', expBeta=0.0 )
   n=nrow(mydf)+1
   mydf[n,'omega']=extract_ortho_strength(o)
   mydf[n,'defect']=invariant_orthogonality_defect(result$v[[1]])
@@ -71,14 +81,14 @@ df=mydf
 
 print( mydf )
 
-plot1 <- ggplot(df, aes(x = omega, y = energy)) +
+plot1 <- ggplot(df, aes(x = defect, y = energy)) +
   geom_point(aes(color = objective), alpha = 0.7) + # Points with color for each objective
   geom_line(aes(color = objective), alpha = 0.5) +   # Lines to connect points within each objective
   facet_wrap(~ objective, scales = "free") +       # Facet by objective, allowing scales to adjust
   labs(
-    title = "Energy vs. Omega across Different Objectives",
+    title = "Energy vs. O.D. across Different Objectives",
     subtitle = "Facetted by Objective Type",
-    x = "Omega Value",
+    x = "Orthogonality Defect",
     y = "Energy Value",
     color = "Objective"
   ) +
@@ -90,11 +100,10 @@ plot1 <- ggplot(df, aes(x = omega, y = energy)) +
     strip.text = element_text(face = "bold", size = 12) # Bold facet titles
   )
 
-print("Generating Plot 1: Energy vs. Omega (Faceted by Objective)")
 print(plot1)
 
 
-
+deek
 plot2 <- ggplot(df, aes(x = omega, y = defect)) +
   geom_point(aes(color = objective), alpha = 0.7) +
   geom_line(aes(color = objective), alpha = 0.5) +
@@ -141,14 +150,14 @@ print("Generating Plot 3: Energy vs. Defect (Faceted by Objective)")
 print(plot3)
 
 
-plot4_violin <- ggplot(df, aes(x = objective, y = omega, fill = objective)) +
+plot4_violin <- ggplot(df, aes(x = objective, y = defect, fill = objective)) +
   geom_violin(trim = FALSE, alpha = 0.7) +
   geom_jitter(width = 0.2, alpha = 0.5) + # Add jittered points for more detail
   labs(
-    title = "Distribution of Omega by Objective",
+    title = "Distribution of O.D. by Objective",
     subtitle = "Violin Plot Showing Density and Individual Data Points",
     x = "Objective",
-    y = "Omega Value"
+    y = "Orthogonality Defect Value"
   ) +
   theme_minimal() +
   theme(
@@ -159,5 +168,4 @@ plot4_violin <- ggplot(df, aes(x = objective, y = omega, fill = objective)) +
     axis.text.x = element_text(size = 10)
   )
 
-print("Generating Plot 4: Distribution of Omega by Objective (Violin Plot)")
-print(plot4_violin)
+# print(plot4_violin)

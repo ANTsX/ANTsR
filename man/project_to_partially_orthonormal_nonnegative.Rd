@@ -9,7 +9,8 @@ project_to_partially_orthonormal_nonnegative(
   max_iter = 100,
   tol = 1e-06,
   constraint = "positive",
-  ortho_strength = 1
+  ortho_strength = 1,
+  epsilon = 1e-10
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ project_to_partially_orthonormal_nonnegative(
 orthonormality enforced. 0 means no orthonormality
 enforcement (only non-negativity), 1 means full
 orthonormality.}
+
+\item{epsilon}{very small value for stability.}
 }
 \value{
 A matrix Y that is non-negative and has columns that are

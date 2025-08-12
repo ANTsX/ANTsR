@@ -8545,6 +8545,7 @@ project_to_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-4, co
 #'                       orthonormality enforced. 0 means no orthonormality
 #'                       enforcement (only non-negativity), 1 means full
 #'                       orthonormality.
+#' @param epsilon very small value for stability.
 #' @return A matrix Y that is non-negative and has columns that are
 #'         controlled in their orthonormality by ortho_strength.
 #' @examples
@@ -8566,7 +8567,10 @@ project_to_orthonormal_nonnegative <- function(X, max_iter = 100, tol = 1e-4, co
 #'
 #' @export
 project_to_partially_orthonormal_nonnegative <- function(X, 
-  max_iter = 100, tol = 1e-6, constraint='positive', ortho_strength = 1.0 ) {
+  max_iter = 100, tol = 1e-6, 
+  constraint='positive', 
+  ortho_strength = 1.0, 
+  epsilon = 1e-10 ) {
   # --- Input Validation ---
   stopifnot(is.matrix(X))
   
@@ -8668,7 +8672,6 @@ project_to_partially_orthonormal_nonnegative <- function(X,
 
     # Compute T = V * diag(1/s_i) * V^T
     # Need to handle s_i near zero. Add epsilon to s_i before inverting.
-    epsilon=1e-4
     s_i_safe <- pmax(s_i, epsilon) # Ensure s_i is not zero
     S_inv_sqrt <- diag(1 / s_i_safe)
     T <- V %*% S_inv_sqrt %*% t(V)
@@ -8698,3 +8701,5 @@ project_to_partially_orthonormal_nonnegative <- function(X,
 
   return(Y_prev)
 }
+
+

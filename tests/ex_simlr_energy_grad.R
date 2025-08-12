@@ -12,54 +12,6 @@ library(ANTsR)
 .install_and_load(c("dplyr", "tibble", "purrr", "ggplot2", "ggrepel", "viridis", "progress", "tidyr", "forcats", "pracma", "clue", "DT", "htmltools"))
 
 
-# --- CORRECTED/ADDED SECTION: Placeholder functions ---
-
-#' @title Generate Structured Multiview Data (Placeholder)
-#' @description Creates a list of matrices with shared and specific components.
-#' This is a functional placeholder for the missing function.
-generate_structured_multiview_data <- function(n_subjects, n_features, k_shared, k_specific, noise_sd) {
-  
-  # Ground truth shared latent space
-  U_shared <- matrix(rnorm(n_subjects * k_shared), nrow = n_subjects, ncol = k_shared)
-  
-  # Create three data views
-  data_list <- list()
-  V_shared_list <- list()
-  
-  for (i in 1:3) {
-    # Shared feature loadings
-    V_shared <- matrix(rnorm(n_features[i] * k_shared), nrow = n_features[i], ncol = k_shared)
-    V_shared_list[[i]] <- V_shared
-    
-    # Specific latent space and loadings
-    U_specific <- matrix(rnorm(n_subjects * k_specific), nrow = n_subjects, ncol = k_specific)
-    V_specific <- matrix(rnorm(n_features[i] * k_specific), nrow = n_features[i], ncol = k_specific)
-    
-    # Combine signals and add noise
-    signal <- U_shared %*% t(V_shared) + U_specific %*% t(V_specific)
-    noise <- matrix(rnorm(n_subjects * n_features[i], sd = noise_sd), nrow = n_subjects, ncol = n_features[i])
-    
-    data_list[[paste0("view_", i)]] <- signal + noise
-  }
-  
-  return(list(
-    data_list = data_list,
-    ground_truth = list(U_shared = U_shared, V_shared = V_shared_list)
-  ))
-}
-
-#' @title Estimate Rank by Permutation RV (Placeholder)
-#' @description A placeholder function to estimate the optimal rank k.
-estimate_rank_by_permutation_rv <- function(data_list, n_permutations, return_max) {
-  # In a real scenario, this would perform a complex permutation test.
-  # For this placeholder, we return a fixed, plausible estimate.
-  if (return_max) {
-    return(list(optimal_k = 8, plot = ggplot() + labs(title="Placeholder Rank Plot")))
-  } else {
-    return(list(optimal_k = 5, plot = ggplot() + labs(title="Placeholder Rank Plot")))
-  }
-}
-
 
 # --- Original Functions (Unchanged) ---
 extract_ortho_strength <- function(constraint_str) {
