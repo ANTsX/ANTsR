@@ -24,7 +24,7 @@ antspymm_simlr(
   mixAlg = NULL,
   iterations = NULL,
   path_modeling = NULL,
-  sparsenessAlg = NA,
+  sparsenessAlg = "soft",
   optimizationStyle = NULL,
   verbose = FALSE
 )
