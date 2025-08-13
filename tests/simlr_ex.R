@@ -67,8 +67,8 @@ for ( e in c("regression","nc","acc","lrr"))
 for ( m in c("ica","pca","svd") )
 for ( o in orthos ) {
   result <- simlr(voxmats,verbose=0,energyType=e,mixAlg=m,iterations=500,
-    scale=c("centerAndScale",'norm'),
-    constraint=o, randomSeed=212, optimizationStyle='nadam', expBeta=0.0 )
+    scale=c("centerAndScale",'eigenvalue'),
+    constraint=o, randomSeed=212, optimizationStyle='adam', expBeta=0.0 )
   n=nrow(mydf)+1
   mydf[n,'omega']=extract_ortho_strength(o)
   mydf[n,'defect']=invariant_orthogonality_defect(result$v[[1]])
