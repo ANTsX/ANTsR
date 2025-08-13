@@ -102,7 +102,7 @@ plot1 <- ggplot(df, aes(x = defect, y = energy)) +
 print(plot1)
 
 
-deek
+
 plot2 <- ggplot(df, aes(x = omega, y = defect)) +
   geom_point(aes(color = objective), alpha = 0.7) +
   geom_line(aes(color = objective), alpha = 0.5) +
