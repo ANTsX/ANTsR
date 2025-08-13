@@ -271,9 +271,9 @@ initu = initializeSimlr( matlist, 3, jointReduction = TRUE  )
 np=40
 myperm = simlr.perm(  matlist,
   energyType='regression',
-  constraint='none',scale=prepro, 
+  constraint=constr,scale=prepro, 
   initialUMatrix=initu,
-  iterations=100,
+  iterations=500,
   nperms=np, FUN=adjusted_rvcoef, verbose=TRUE )
 print( tail( myperm$significance, 2 )  )
 gglist = list()
@@ -370,12 +370,11 @@ The `simlr.search` function performs the grid search over the parameter space de
 
 
 ```{r grassmann2, eval=!exists("simlrXs")}
-deek
 simlrXs=simlr.search(
         matlist,
         regs=regs,
         simparms,
-        maxits=5,
+        maxits=500,
         nperms=10, # just fast for vignette
         verbose=1
         )
