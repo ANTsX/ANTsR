@@ -343,14 +343,14 @@ csearch = list( "orthox0x0", "orthox0.002x1")
 simparms = simlr.parameters( 
     nsimlr_options = list( 2 ),
     prescaling_options = list( 
-            c( "centerAndScale",  "np") ),
-    objectiver_options = list("regression",'acc','normalized_correlation','lrr'),
-    mixer_options=list("ica",'pca','svd'), 
+            c( "centerAndScale",  "np"), c( "center",  "np") ),
+    objectiver_options = list('acc','normalized_correlation','lrr',"regression"),
+    mixer_options=list(  'pca' , 'ica'), 
     sparval_options=list(  c(0.5,0.5,0.5) ), # less relevant if orthowt > 0
     expBeta_options = list( c(0.0) ),
     positivities_options = list(
             c("positive","positive","positive")),
-    optimus_options=list( "adam",  'adagrad' ),
+    optimus_options=list( "adam",  'adagrad', 'nadam' ),
     constraint_options=csearch,
     search_type="full",  # full or random
     num_samples=5
@@ -370,11 +370,13 @@ The `simlr.search` function performs the grid search over the parameter space de
 
 
 ```{r grassmann2, eval=!exists("simlrXs")}
+deek
 simlrXs=simlr.search(
         matlist,
         regs=regs,
         simparms,
-        nperms=20, # just fast for vignette
+        maxits=5,
+        nperms=10, # just fast for vignette
         verbose=1
         )
 # simlrXs$paramsearch
