@@ -447,7 +447,7 @@ plot_ranking <- ggplot(
   geom_segment(aes(x = 0, xend = Mean_RV, yend = fct_reorder(Configuration, Mean_RV)), linewidth = 0.8, alpha = 0.5) +
   geom_point(aes(shape = Mixer), size = 4) +
   scale_color_viridis_d(option = "cividis", name = "Objective") +
-  scale_shape_manual(name = "Mixer", values = c("ica" = 17, "pca" = 16)) +
+  scale_shape_manual(name = "Mixer", values = c("ica" = 17, "pca" = 16, "svd"=15)) +
   theme_minimal(base_size = 12) +
   labs(
     title = "Top 20 SIMLR Configurations by Mean RV",
