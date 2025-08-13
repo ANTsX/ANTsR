@@ -5037,30 +5037,47 @@ simlrU <- function(
 #' @param FUN function for summarizing variance explained 
 #' @return A data frame containing p-values for each permutation.
 #' @export
-simlr.perm <- function(data_matrices, smoothingMatrices, iterations = 10, sparsenessQuantiles, 
-                       positivities, initialUMatrix, mixAlg = c("svd", "ica", "avg", 
-                                                                "rrpca-l", "rrpca-s", "pca", "stochastic"), orthogonalize = FALSE, 
-                       repeatedMeasures = NA, lineSearchRange = c(-5e2, 5e2), 
-                       lineSearchTolerance = 1e-12, randomSeed, constraint = c("none", 
-                                                                               "Grassmannx0", "Stiefelx0"), 
-                      energyType = c("cca", "regression","normalized", "acc", "lowRank", "lowRankRegression",'normalized_correlation'), 
-                       vmats, connectors = NULL, optimizationStyle = 'adam', 
-                       scale = c("center", "eigenvalue"), expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
-                       verbose = FALSE, nperms = 50, FUN='mean') {
+simlr.perm <- function(data_matrices, 
+  smoothingMatrices, 
+  iterations = 10, sparsenessQuantiles, 
+  positivities, initialUMatrix, 
+  mixAlg = c("svd", "ica", "avg","rrpca-l", "rrpca-s", "pca", "stochastic"), 
+  orthogonalize = FALSE,
+  repeatedMeasures = NA, lineSearchRange = c(-5e2, 5e2), 
+  lineSearchTolerance = 1e-12, randomSeed, 
+  constraint = c("orthox0.001x1", "Grassmannx0", "Stiefelx0", "none" ), 
+  energyType = c("cca", "regression","normalized", "acc", "lowRank", "lowRankRegression",'normalized_correlation'), 
+  vmats, connectors = NULL, optimizationStyle = 'adam', 
+  scale = c("centerAndScale", "eigenvalue"), 
+  expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
+  verbose = FALSE, nperms = 50, FUN='mean') {
   
   # Set up permutations
   myseeds <- 1:1000000
-  
   # Initial SiMLR run
   simlr_result <- simlr( data_matrices, 
-                         smoothingMatrices, iterations, sparsenessQuantiles, 
-                         positivities, initialUMatrix, mixAlg, orthogonalize, 
-                         repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
-                         energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
-                         jointInitialization, sparsenessAlg, verbose=verbose > 0 )
+    smoothingMatrices=smoothingMatrices, 
+    iterations=iterations, 
+    sparsenessQuantiles=sparsenessQuantiles, 
+    positivities=positivities, 
+    initialUMatrix=initialUMatrix, 
+    mixAlg=mixAlg, 
+    orthogonalize=orthogonalize, 
+    repeatedMeasures=repeatedMeasures, 
+    lineSearchRange=lineSearchRange, 
+    lineSearchTolerance=lineSearchTolerance, 
+    randomSeed=randomSeed, 
+    constraint=constraint, 
+    energyType=energyType, 
+    vmats=vmats, 
+    connectors=connectors, 
+    optimizationStyle=optimizationStyle, 
+    scale=scale, expBeta=expBeta, 
+    jointInitialization=jointInitialization, 
+    sparsenessAlg=sparsenessAlg, verbose=verbose )
   for ( k in 1:length(data_matrices)) {
     simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
-    simlr_result$v[[k]]=divide_by_column_sum( simlr_result$v[[k]] )
+    simlr_result$v[[k]]=l1_normalize_features( simlr_result$v[[k]] )
     rownames(simlr_result$v[[k]])=colnames(data_matrices[[k]])
   }
   
@@ -5076,14 +5093,29 @@ simlr.perm <- function(data_matrices, smoothingMatrices, iterations = 10, sparse
       
       data_matrices_perm <- lapply(data_matrices, function(mat) mat[sample(1:nrow(mat)), ])
       
-      simlr_result_perm <- simlr(data_matrices_perm, smoothingMatrices, iterations, sparsenessQuantiles, 
-                                 positivities, initialUMatrix, mixAlg, orthogonalize, 
-                                 repeatedMeasures, lineSearchRange, lineSearchTolerance, randomSeed, constraint, 
-                                 energyType, vmats, connectors, optimizationStyle, scale, expBeta, 
-                                 jointInitialization, sparsenessAlg, verbose=verbose > 3)
+      simlr_result_perm <- simlr(data_matrices_perm,
+          smoothingMatrices=smoothingMatrices, 
+          iterations=iterations, 
+          sparsenessQuantiles=sparsenessQuantiles, 
+          positivities=positivities, 
+          initialUMatrix=initialUMatrix, 
+          mixAlg=mixAlg, 
+          orthogonalize=orthogonalize, 
+          repeatedMeasures=repeatedMeasures, 
+          lineSearchRange=lineSearchRange, 
+          lineSearchTolerance=lineSearchTolerance, 
+          randomSeed=randomSeed, 
+          constraint=constraint, 
+          energyType=energyType, 
+          vmats=vmats, 
+          connectors=connectors, 
+          optimizationStyle=optimizationStyle, 
+          scale=scale, expBeta=expBeta, 
+          jointInitialization=jointInitialization, 
+          sparsenessAlg=sparsenessAlg, verbose=verbose )
       for ( k in 1:length(data_matrices)) {
         simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
-        simlr_result_perm$v[[k]] = divide_by_column_sum( simlr_result_perm$v[[k]] )
+        simlr_result_perm$v[[k]] = l1_normalize_features( simlr_result_perm$v[[k]] )
       }
       refvarxmeans_perm = pairwise_matrix_similarity( data_matrices_perm, simlr_result_perm$v, FUN=FUN )
       simlrpermvarx[nperm + 1, refvarxmeansnms ] <- refvarxmeans_perm
@@ -5551,7 +5583,7 @@ simlr.parameters <- function(
     positivities_options,
     optimus_options,
     constraint_options = list("none"),
-    sparsenessAlg = list(NA),
+    sparsenessAlg = list('soft'),
     num_samples = 10,
     search_type = c("random", "deterministic", "full")
 ) {
@@ -7537,6 +7569,7 @@ simlr_sparseness <- function(v,
                              energy_type = 'acc') {
   v <- as.matrix(v)
   constraint_type <- match.arg(constraint_type)
+  if ( is.na(sparseness_alg) ) sparseness_alg='soft'
   if ( positivity == 'positive') v=take_abs_unsigned(v)
   na2f.loc <- function (x) {
     x[is.na(x)] = FALSE

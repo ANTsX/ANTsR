@@ -10,7 +10,7 @@ project_to_partially_orthonormal_nonnegative(
   tol = 1e-06,
   constraint = "positive",
   ortho_strength = 1,
-  epsilon = 1e-10
+  epsilon = 1e-04
 )
 }
 \arguments{

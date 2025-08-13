@@ -62,9 +62,16 @@ colnames(mat3)=paste0("m3.",1:ncol(mat3))
 
 # Combine the matrices into a list
 matlist <- list(m1 = mat1, m2 = mat2, m3 = mat3)
+
+# gsmd = generate_structured_multiview_data( nsub, npix,
+#  k_shared=nk, k_specific=1, seed=0 )
+# matlist = gsmd$data_list
+
 ```
 
 In this code, `mat1`, `mat2`, and `mat3` represent three views of the data. Each view is constructed to share a common underlying structure but with different transformations applied.
+
+A more complex data generation scheme is available in `generate_structured_multiview_data`.
 
 ### Step 2: Apply SiMLR
 
@@ -72,21 +79,16 @@ Now we apply the SiMLR algorithm to the simulated multi-view data to find a comm
 
 ```{r step2}
 # Applying SiMLR
-prepro=c( "centerAndScale","np")
-constr='Stiefelx100x1'
-constr='orthox100x0.1'
-constr='Grassmannx100x1'
+prepro=c( "centerAndScale","eigenvalue")
+constr='orthox0.02x1' # good default
 result <- simlr(matlist,constraint=constr,scale=prepro, 
-  mixAlg='pca', energyType='normalized_correlation', # recommended
-#  mixAlg='pca', energyType='cca', # recommended
-#  mixAlg='ica', energyType='regression', # recommended
-  sparsenessAlg = "spmp",
-  iterations=100, verbose=TRUE)
-
+  mixAlg='pca', energyType='acc', # recommended
+  verbose=TRUE)
 # Projecting data into the reduced space
 p1 <- mat1 %*% (result$v[[1]])
 p2 <- mat2 %*% (result$v[[2]])
 p3 <- mat3 %*% (result$v[[3]])
+# pheatmap::pheatmap( result$v[[1]], cluster_cols=F, cluster_rows=F )
 ```
 
 SiMLR identifies a sparse set of features that best reconstruct each view, resulting in projections `p1`, `p2`, and `p3` for each view.
@@ -260,7 +262,7 @@ diagcorr = function( X,Y ) mean(abs(diag(cor(X,Y))))
 initu = initializeSimlr( matlist, 3, jointReduction = TRUE  )
 np=40
 myperm = simlr.perm(  matlist,
-  energyType='normalized_correlation',
+  energyType='regression',
   constraint='none',scale=prepro, 
   initialUMatrix=initu,
   iterations=100,
@@ -328,19 +330,19 @@ In this step, the simlr.parameters function is called to create a parameter list
 paster <- function(vec1, vec2) {
   paste0(rep(vec1, each = length(vec2)), vec2)
 }
-csearch = list( "none", "Grassmannx0","Stiefelx0","orthox0.1x5")
+csearch = list( "orthox0x0", "orthox0.002x1")
 # the 10x10 are weights on the optimization term of the energy
 simparms = simlr.parameters( 
     nsimlr_options = list( 2 ),
     prescaling_options = list( 
-            c( "robust", "centerAndScale",  "np") ),
-    objectiver_options = list("regression",'acc','normalized_correlation','reconorm','lrr'),
-    mixer_options=list("ica",'pca'), 
-    sparval_options=list(  c(0.5,0.5,0.5) ),
+            c( "centerAndScale",  "eigenvalue") ),
+    objectiver_options = list("regression",'acc','normalized_correlation','lrr'),
+    mixer_options=list("ica",'pca','svd'), 
+    sparval_options=list(  c(0.5,0.5,0.5) ), # less relevant if orthowt > 0
     expBeta_options = list( c(0.0) ),
     positivities_options = list(
             c("positive","positive","positive")),
-    optimus_options=list( "adam","nadam","rmsprop", 'ls_adam', 'adagrad' ),
+    optimus_options=list( "adam",  'adagrad' ),
     constraint_options=csearch,
     search_type="full",  # full or random
     num_samples=5
@@ -364,8 +366,8 @@ simlrXs=simlr.search(
         matlist,
         regs=regs,
         simparms,
-        nperms=5, # just fast for vignette
-        verbose=4
+        nperms=20, # just fast for vignette
+        verbose=1
         )
 # simlrXs$paramsearch
 ```
