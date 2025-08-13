@@ -63,9 +63,14 @@ colnames(mat3)=paste0("m3.",1:ncol(mat3))
 # Combine the matrices into a list
 matlist <- list(m1 = mat1, m2 = mat2, m3 = mat3)
 
-# gsmd = generate_structured_multiview_data( nsub, npix,
-#  k_shared=nk, k_specific=1, seed=0 )
-# matlist = gsmd$data_list
+gsmd = generate_structured_multiview_data( nsub, npix,
+  k_shared=nk, k_specific=1, seed=0 )
+matlist = gsmd$data_list
+mat1 = gsmd$data_list[[1]]
+mat2 = gsmd$data_list[[2]]
+mat3 = gsmd$data_list[[3]]
+outcome = gsmd$ground_truth[[1]]
+outcome1 = gsmd$ground_truth[[2]]$View1
 
 ```
 
@@ -79,7 +84,7 @@ Now we apply the SiMLR algorithm to the simulated multi-view data to find a comm
 
 ```{r step2}
 # Applying SiMLR
-prepro=c( "centerAndScale","eigenvalue")
+prepro=c( "centerAndScale","np")
 constr='orthox0.02x1' # good default
 result <- simlr(matlist,constraint=constr,scale=prepro, 
   mixAlg='pca', energyType='acc', # recommended
@@ -152,8 +157,9 @@ A permutation test can assess whether the observed correlations are significant.
 s1 <- sample(1:nsub)
 s2 <- sample(1:nsub)
 permMats=list(vox = mat1, vox2 = mat2[s1, ], vox3 = mat3[s2, ])
-resultp <- simlr(permMats,
-  constraint=constr,scale=prepro,  sparsenessAlg = "spmp" )
+resultp <- simlr(permMats,constraint=constr,scale=prepro, 
+  mixAlg='pca', energyType='acc', # recommended
+  verbose=TRUE)
 p1p <- mat1 %*% (resultp$v[[1]])
 p2p <- mat2[s1, ] %*% (resultp$v[[2]])
 p3p <- mat3[s2, ] %*% (resultp$v[[3]])
@@ -191,7 +197,7 @@ simres2=read_simlr_data_frames( sim2nm, names(matlist) )
 popdf = data.frame( age = outcome, cog=outcome1, mat1, mat2, mat3 )
 temp2=apply_simlr_matrices( popdf, simres2, center=TRUE, scale=TRUE )
 simnames=temp2[[2]]
-zz=exploratory_visualization( temp2[[1]][, temp2[[2]]], dotsne=FALSE )
+zz=exploratory_visualization( temp2[[1]][,simnames[1:4]], dotsne=FALSE )
 print( zz$plot )
 ```
 
@@ -201,11 +207,11 @@ is one of the advantages of SiMLR: it provides systematic guidance for building 
 
 ```{r dataintegration2,fig.width=12,fig.height=6.5}
 # multi-view regression
-summary( lm( age.1 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
-summary( lm( age.2 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
-summary( lm( age.3 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
-summary( lm( age.4 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
-summary( lm( age.5 ~ m1PC1 + m2PC1 + m3PC1, data=temp2[[1]] ))
+summary( lm( age.1 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
+summary( lm( age.2 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
+summary( lm( age.3 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
+summary( lm( age.4 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
+summary( lm( age.5 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
 ```
 
 
@@ -231,7 +237,7 @@ In scenarios where you have multiple data modalities but missing information sca
 
 ```{r imp}
 popdfi=popdf
-proportion <- 0.1
+proportion <- 0.25
 num_NAs <- ceiling(proportion * nrow(popdfi) * ncol(popdfi))
 indices <- arrayInd(sample(1:(nrow(popdfi) * ncol(popdfi)), num_NAs), .dim = dim(popdfi))
 popdfi[indices] <- NA
@@ -250,6 +256,8 @@ for ( n in nms ) {
 }
 impresult=data.frame( og=popdf[,imputedcols[1]], imp=popdfi[,imputedcols[1]])
 ggscatter( impresult, 'og', 'imp' ) + ggtitle(paste("Imputed vs original data",imputedcols[1]))
+
+
 ```
 
 
@@ -335,7 +343,7 @@ csearch = list( "orthox0x0", "orthox0.002x1")
 simparms = simlr.parameters( 
     nsimlr_options = list( 2 ),
     prescaling_options = list( 
-            c( "centerAndScale",  "eigenvalue") ),
+            c( "centerAndScale",  "np") ),
     objectiver_options = list("regression",'acc','normalized_correlation','lrr'),
     mixer_options=list("ica",'pca','svd'), 
     sparval_options=list(  c(0.5,0.5,0.5) ), # less relevant if orthowt > 0
@@ -388,9 +396,9 @@ performance_data <- simlrXs_paramsearch %>%
     Mixer = mixer,
     Constraint = constraint,
     Optimizer = optimus,
-    RV_12 = rvcoef_m1_m2,
-    RV_13 = rvcoef_m1_m3,
-    RV_23 = rvcoef_m2_m3
+    RV_12 = rvcoef_View1_View2,
+    RV_13 = rvcoef_View1_View3,
+    RV_23 = rvcoef_View2_View3
   ) %>%
   # Calculate summary metrics
   mutate(

@@ -7812,6 +7812,7 @@ generate_structured_multiview_data <- function(n_subjects,
   data_list <- lapply(data_list, t)
   names(data_list) <- paste0("View", 1:n_modalities)
   names(V_shared_list) <- names(data_list)
+  for ( k in 1:length(data_list)) colnames(data_list[[k]])=paste0(names(data_list)[k],'.',1:ncol(data_list[[k]]))
 
   return(list(
     data_list = data_list,
