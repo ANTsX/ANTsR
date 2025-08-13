@@ -8570,7 +8570,7 @@ project_to_partially_orthonormal_nonnegative <- function(X,
   max_iter = 100, tol = 1e-6, 
   constraint='positive', 
   ortho_strength = 1.0, 
-  epsilon = 1e-10 ) {
+  epsilon = 1e-4 ) {
   # --- Input Validation ---
   stopifnot(is.matrix(X))
   
