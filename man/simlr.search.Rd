@@ -13,7 +13,7 @@ simlr.search(
   nperms = 1,
   verbose = 0,
   FUN = rvcoef,
-  cores = parallel::detectCores() - 1
+  cores = 1
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ simlr.search(
 
 \item{FUN}{Evaluation function.}
 
-\item{cores}{Number of CPU cores to use (default: detectCores() - 1).}
+\item{cores}{Number of CPU cores to use (default: detectCores() - 1). \code{parallel::detectCores() - 1}}
 }
 \value{
 List with best SIMLR result, significance, best parameters, and search table.

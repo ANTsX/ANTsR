@@ -4158,7 +4158,7 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
 #' overall similar to canonical correlation analysis but generalizes the basis
 #' construction and to arbitrary numbers of modalities.
 #'
-#' @param voxmats A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.
+#' @param data_matrices A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.
 #' @param smoothingMatrices list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.
 #' @param iterations number of gradient descent iterations
 #' @param sparsenessQuantiles vector of quantiles to control sparseness - higher is sparser
@@ -5019,7 +5019,7 @@ simlrU <- function(
 #' @param positivities A vector of positivity constraints.
 #' @param initialUMatrix Initial U matrix for the algorithm.
 #' @param mixAlg The mixing algorithm to use. Default is 'svd'.
-#' @param orthogonalize Logical indicating whether to orthogonalize. Default is FALSE.
+#' @param orthogonalizeU Logical indicating whether to orthogonalize U. Default is FALSE.
 #' @param repeatedMeasures Repeated measures data. Default is NA.
 #' @param lineSearchRange Range for line search. Default is c(-1e+10, 1e+10).
 #' @param lineSearchTolerance Tolerance for line search. Default is 1e-08.
@@ -5043,7 +5043,7 @@ simlr.perm <- function(data_matrices,
   iterations = 10, sparsenessQuantiles, 
   positivities, initialUMatrix, 
   mixAlg = c("svd", "ica", "avg","rrpca-l", "rrpca-s", "pca", "stochastic"), 
-  orthogonalize = FALSE,
+  orthogonalizeU = FALSE,
   repeatedMeasures = NA, lineSearchRange = c(-5e2, 5e2), 
   lineSearchTolerance = 1e-12, randomSeed, 
   constraint = c("orthox0.001x1", "Grassmannx0", "Stiefelx0", "none" ), 
@@ -5148,8 +5148,8 @@ simlr.perm <- function(data_matrices,
 
 #' Computes the RV-Coefficient (Internal) Trace Method for Wide data
 #'
-#' @param X A numeric matrix (n observations, p variables).
-#' @param Y A numeric matrix (n observations, q variables).
+#' @param X_centered A numeric matrix (n observations, p variables).
+#' @param Y_centered A numeric matrix (n observations, q variables).
 #' @return values.
 #' @export
 rvcoef_trace_impl <- function(X_centered, Y_centered) {
@@ -5173,8 +5173,8 @@ rvcoef_trace_impl <- function(X_centered, Y_centered) {
 
 #' Computes the RV-Coefficient (Internal) Gram Matrix Method for Tall data
 #'
-#' @param X A numeric matrix (n observations, p variables).
-#' @param Y A numeric matrix (n observations, q variables).
+#' @param X_centered A numeric matrix (n observations, p variables).
+#' @param Y_centered A numeric matrix (n observations, q variables).
 #' @return values.
 #' @export
 rvcoef_gram_impl <- function(X_centered, Y_centered) {
@@ -5646,7 +5646,7 @@ simlr.parameters <- function(
 #' @param nperms Number of permutations for significance test.
 #' @param verbose Verbosity level.
 #' @param FUN Evaluation function.
-#' @param cores Number of CPU cores to use (default: detectCores() - 1).
+#' @param cores Number of CPU cores to use (default: detectCores() - 1). \code{parallel::detectCores() - 1}
 #' @return List with best SIMLR result, significance, best parameters, and search table.
 #' @export
 simlr.search <- function(
@@ -5658,7 +5658,7 @@ simlr.search <- function(
     nperms = 1,
     verbose = 0,
     FUN = rvcoef,
-    cores = parallel::detectCores() - 1
+    cores = 1
 ) {
   # ---- Helper to run a single set ----
   run_one <- function(i) {
@@ -5695,7 +5695,7 @@ simlr.search <- function(
       randomSeed = 0,
       mixAlg = mixer,
       energyType = objectiver,
-      orthogonalize = FALSE,
+      orthogonalizeU = FALSE,
       scale = prescaling,
       sparsenessQuantiles = sparval,
       expBeta = ebber,

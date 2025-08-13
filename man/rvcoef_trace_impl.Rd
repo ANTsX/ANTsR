@@ -7,9 +7,9 @@
 rvcoef_trace_impl(X_centered, Y_centered)
 }
 \arguments{
-\item{X}{A numeric matrix (n observations, p variables).}
+\item{X_centered}{A numeric matrix (n observations, p variables).}
 
-\item{Y}{A numeric matrix (n observations, q variables).}
+\item{Y_centered}{A numeric matrix (n observations, q variables).}
 }
 \value{
 values.

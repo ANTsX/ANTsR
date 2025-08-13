@@ -12,7 +12,7 @@ simlr.perm(
   positivities,
   initialUMatrix,
   mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
-  orthogonalize = FALSE,
+  orthogonalizeU = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c(-500, 500),
   lineSearchTolerance = 1e-12,
@@ -47,7 +47,7 @@ simlr.perm(
 
 \item{mixAlg}{The mixing algorithm to use. Default is 'svd'.}
 
-\item{orthogonalize}{Logical indicating whether to orthogonalize. Default is FALSE.}
+\item{orthogonalizeU}{Logical indicating whether to orthogonalize U. Default is FALSE.}
 
 \item{repeatedMeasures}{Repeated measures data. Default is NA.}
 

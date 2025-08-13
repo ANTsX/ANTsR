@@ -6,7 +6,6 @@ library(scales)
 library(dplyr)
 library(tidyr)
 library(viridis)
-library(ggforce) # For geom_mark_ellipse
 
 set.seed(808)
      nsub <- 250

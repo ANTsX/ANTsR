@@ -31,6 +31,8 @@ simlr(
 )
 }
 \arguments{
+\item{data_matrices}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
+
 \item{smoothingMatrices}{list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.}
 
 \item{iterations}{number of gradient descent iterations}
@@ -82,8 +84,6 @@ can be a vector which will apply each strategy in order.}
 
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}
-
-\item{voxmats}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
 }
 \value{
 A list of u, x, y, z etc related matrices.

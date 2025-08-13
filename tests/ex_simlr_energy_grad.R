@@ -4,7 +4,7 @@ library(ANTsR)
   for (pkg in packages) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
       message(paste("Installing required package:", pkg))
-      install.packages(pkg)
+      install.packages(pkg, repos = "https://cloud.r-project.org")
     }
     library(pkg, character.only = TRUE)
   }
