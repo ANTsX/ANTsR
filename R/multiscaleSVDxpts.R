@@ -3966,6 +3966,142 @@ gradient_invariant_orthogonality_salad<- function(A) {
 }
 
 
+
+#' Calculate ICA Energy
+#'
+#' Computes the negentropy-based energy for the ICA objective using a specified
+#' non-linearity to measure non-Gaussianity.
+#'
+#' @param X A data matrix [n x p].
+#' @param V A loading matrix [p x k].
+#' @param nonlinearity Non-linearity function ("logcosh", "exp", "kurtosis", or "gauss").
+#' @param a Parameter for gaussian nonlinearity (default: 1).
+#' @return A single numeric value representing the ICA energy.
+#' @keywords internal
+.calculate_ica_energy <- function(X, V, nonlinearity = "logcosh", a = 1) {
+  # Input validation
+  stopifnot(
+    is.matrix(X) && is.matrix(V),
+    "Matrix dimensions are not compatible." = ncol(X) == nrow(V),
+    "Nonlinearity must be 'logcosh', 'exp', 'kurtosis' or 'gauss'." = nonlinearity %in% c("logcosh", "exp", "gauss", "kurtosis"),
+    "Parameter a must be positive for gaussian nonlinearity." = a > 0
+  )
+  
+  # Calculate sources
+  S <- X %*% V
+  
+  # Compute ICA energy based on nonlinearity
+  if (nonlinearity == "logcosh") {
+    energy <- -sum(log(cosh(S))) / nrow(X)
+  } else if (nonlinearity == "exp") {
+    energy <- -sum(-exp(-S^2 / 2)) / nrow(X)
+  } else if (nonlinearity == "gauss") {
+    energy <- -sum(-0.5 * exp(-a * S^2)) / nrow(X)
+  } else if (nonlinearity == "kurtosis") {
+    energy <- -sum((S^4.) / 4.) / nrow(X)
+  }
+  
+  return(energy)
+}
+
+#' Calculate ICA Gradient
+#'
+#' Computes the analytical gradient for the ICA objective using the derivative
+#' of the specified non-linearity.
+#'
+#' @param X A data matrix [n x p].
+#' @param V A loading matrix [p x k].
+#' @param nonlinearity Non-linearity function ("logcosh", "exp", "kurtosis" or "gauss").
+#' @param a Parameter for gaussian nonlinearity (default: 1).
+#' @return A matrix [p x k] representing a descent direction for the ICA energy.
+#' @keywords internal
+.calculate_ica_gradient <- function(X, V, nonlinearity = "logcosh", a = 1) {
+  # Defensive dimension checks
+  n <- nrow(X); p <- ncol(X); k <- ncol(V)
+  stopifnot(
+    is.matrix(X) && is.matrix(V),
+    "Matrix dimensions are not compatible." = p == nrow(V),
+    "Nonlinearity must be 'logcosh', 'exp', 'kurtosis', or 'gauss'." = nonlinearity %in% c("logcosh", "exp", "gauss", "kurtosis"),
+    "Parameter a must be positive for gaussian nonlinearity." = a > 0
+  )
+  
+  # Calculate sources
+  S <- X %*% V
+  
+  # Compute gradient based on nonlinearity
+  if (nonlinearity == "logcosh") {
+    gradient <- (1/n) * (t(X) %*% tanh(S))
+  } else if (nonlinearity == "exp") {
+    gradient <- (1/n) * (t(X) %*% (S * exp(-S^2 / 2)))
+  } else if (nonlinearity == "gauss") {
+    gradient <- (1/n) * (t(X) %*% (a * S * exp(-a * S^2)))
+  } else if (nonlinearity == "kurtosis") {
+    gradient <- (1/n) * (t(X) %*% (S^3))
+  }
+  
+  return(gradient)
+}
+
+
+#' Calculate Domain Alignment Energy
+#'
+#' Computes the quadratic domain alignment energy, given by -lambda * ||ZV||_F^2,
+#' which encourages alignment between the loading matrix V and the prior matrix Z.
+#'
+#' @param V A loading matrix [p x k].
+#' @param Z A prior matrix [z x p].
+#' @param lambda Domain alignment strength (non-negative scalar).
+#' @return A single numeric value representing the domain alignment energy.
+#' @keywords internal
+.calculate_domain_energy <- function(V, Z, lambda) {
+  # Input validation
+  stopifnot(
+    is.matrix(V) && is.matrix(Z),
+    "Matrix dimensions are not compatible." = ncol(Z) == nrow(V),
+    "Lambda must be non-negative." = lambda >= 0
+  )
+  
+  # Compute projection
+  Vmod=l1_normalize_features(V)
+  M <- Z %*% Vmod
+  
+  # Compute domain alignment energy: -lambda * ||M||_F^2
+  energy <- -lambda * sum(M^2)
+  
+  return(energy)
+}
+
+#' Calculate Domain Alignment Gradient
+#'
+#' Computes the analytical gradient for the quadratic domain alignment objective,
+#' given by -2 * lambda * Z^T (ZV).
+#'
+#' @param V A loading matrix [p x k].
+#' @param Z A prior matrix [z x p].
+#' @param lambda Domain alignment strength (non-negative scalar).
+#' @return A matrix [p x k] representing a descent direction for the domain alignment energy.
+#' @keywords internal
+.calculate_domain_gradient <- function(V, Z, lambda) {
+  # Defensive dimension checks
+  p <- nrow(V); k <- ncol(V); z <- nrow(Z)
+  stopifnot(
+    is.matrix(V) && is.matrix(Z),
+    "Matrix dimensions are not compatible." = ncol(Z) == p,
+    "Lambda must be non-negative." = lambda >= 0
+  )
+  
+  # Compute projection
+  Vmod=l1_normalize_features(V)
+  M <- Z %*% Vmod
+  
+  # Compute gradient: -2 * lambda * Z^T M
+  gradient <- -2 * lambda * t(Z) %*% M
+  
+  return(gradient)
+}
+
+
+
 #' Clip a Gradient Matrix by its Frobenius Norm
 #'
 #' This function prevents exploding gradients by rescaling any gradient whose
@@ -4079,10 +4215,15 @@ clip_gradient_by_quantile <- function(gradient, quantile = 0.80) {
 #' @param X The data matrix for the current modality [n x p].
 #' @param U The shared basis matrix [n x k].
 #' @param energy_type A string specifying the similarity objective.
+#' @param lambda prior weight term for dat
+#' @param prior_matrix matrix of prior weights, same number of columns as V
 #' @return A single numeric value for the similarity energy. The sign is adjusted
 #'   such that the value should always be minimized.
 #' @export
-calculate_simlr_energy <- function(V, X, U, energy_type) {
+calculate_simlr_energy <- function(V, X, U, energy_type, lambda=1.0, prior_matrix=NULL ) {
+  if ( ! is.null( prior_matrix ) ) {
+    Z=prior_matrix
+  }
 
   # For maximization objectives, we return the negative value because the
   # optimizer's goal is always to MINIMIZE the returned energy.
@@ -4094,6 +4235,11 @@ calculate_simlr_energy <- function(V, X, U, energy_type) {
     "lrr" = .calculate_angular_distance(X, U, V),
     "cca" = -.calculate_abs_canonical_covariance(X, U, V),
     "acc" = -.calculate_abs_canonical_covariance(X, U, V),
+    "logcosh" = .calculate_ica_energy( X, V, nonlinearity = energy_type ),
+    "kurtosis" = .calculate_ica_energy( X, V, nonlinearity = energy_type ),
+    "exp" = .calculate_ica_energy( X, V, nonlinearity = energy_type ),
+    "gauss" = .calculate_ica_energy( X, V, nonlinearity = energy_type ),
+    "dat" = .calculate_domain_energy( V, Z, lambda),
     "normalized_correlation" = -.calculate_procrustes_correlation(X, U, V),
     stop(paste("Unknown energy_type in calculate_simlr_energy:", energy_type))
   )
@@ -4112,9 +4258,14 @@ calculate_simlr_energy <- function(V, X, U, energy_type) {
 #' @param energy_type A string specifying the similarity objective.
 #' @param clipping_threshold Optional numeric value for gradient clipping.
 #'
+#' @param lambda prior weight term for dat
+#' @param prior_matrix matrix of prior weights, same shape as V
 #' @return A matrix [p x k] representing the descent direction.
 #' @export
-calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = NULL ) {
+calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = NULL, lambda=1.0, prior_matrix=NULL ) {
+  if ( ! is.null( prior_matrix ) ) {
+    Z=prior_matrix
+  }
 
   # Each helper function is now defined to return a descent direction
   # for its corresponding energy function.
@@ -4123,13 +4274,14 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
     "reconorm" = .calculate_normed_regression_error_gradient(X, U, V),
     "lowRankRegression" = .calculate_angular_distance_gradient(X, U, V),
     "lrr" = .calculate_angular_distance_gradient(X, U, V),
-    
-    # For MAXIMIZATION objectives J, the energy is E = -J.
-    # The descent direction for E is grad(J).
-    # The helpers for these return grad(J), so we use them directly.
     "cca" = .calculate_abs_canonical_covariance_gradient(X, U, V),
     "acc" = .calculate_abs_canonical_covariance_gradient(X, U, V),
     "normalized_correlation" = .calculate_procrustes_gradient(X, U, V),
+    "logcosh" = .calculate_ica_gradient( X, V, nonlinearity = energy_type ),
+    "kurtosis" = .calculate_ica_gradient( X, V, nonlinearity = energy_type ),
+    "exp" = .calculate_ica_gradient( X, V, nonlinearity = energy_type ),
+    "gauss" = .calculate_ica_gradient( X, V, nonlinearity = energy_type ),
+    "dat" = .calculate_domain_gradient( V, Z, lambda),
     "nc" = .calculate_procrustes_gradient(X, U, V),
     
     stop(paste("Unknown energy_type in calculate_simlr_gradient:", energy_type))
@@ -4265,7 +4417,7 @@ simlr <- function(
     lineSearchTolerance = 1e-12,
     randomSeed=0,
     constraint = c( "Grassmannx0", "Stiefelx0", "orthox0.01", "none"),
-    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc', 'lrr', 'reconorm'),
+    energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc','dat', 'lrr', 'reconorm', 'logcosh', 'exp', 'kurtosis', 'gauss'),
     vmats,
     connectors = NULL,
     optimizationStyle = "adam",
@@ -4274,6 +4426,8 @@ simlr <- function(
     jointInitialization = TRUE,
     sparsenessAlg = 'soft',
     orthogonalizeU = FALSE,
+    domainMatrices = NULL,
+    domainLambdas  = NULL,
     verbose = FALSE) {
 
   parse_constraint <- function(x) {
@@ -4561,7 +4715,16 @@ optimizer_object <- create_optimizer(
   beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8, sgd_momentum_beta = 0.9
 )
 
+# initialize energy trackers for each modality
+all_sim_energy   <- vector("list", nModalities)
+all_dom_energy   <- vector("list", nModalities)
+all_total_energy <- vector("list", nModalities)
 
+for (j in 1:nModalities) {
+  all_sim_energy[[j]]   <- numeric()
+  all_dom_energy[[j]]   <- numeric()
+  all_total_energy[[j]] <- numeric()
+}
 # --- 2. Main Optimization Loop ---
 for (myit in 1:iterations) {
 # --- Calculate dynamic learning rate for non-line-search methods ---
@@ -4572,49 +4735,90 @@ for (myit in 1:iterations) {
 
     # first define the local versions of the energy and gradient 
     smooth_cost <- function(V, return_raw = FALSE) {
-        if ( positivities[i] == 'positive' ) V=take_abs_unsigned(V)
-        V_sp = simlr_sparseness(
-                  V,
-                  constraint_type = constraint_type,
-                  smoothing_matrix = smoothingMatrices[[i]],
-                  positivity = positivities[i],
-                  sparseness_quantile = sparsenessQuantiles[i],
-                  constraint_iterations = constraint_iterations,
-                  constraint_weight = constraint_weight,
-                  sparseness_alg = sparsenessAlg
-                )
-        raw_e = calculate_simlr_energy(V_sp, data_matrices[[i]], initialUMatrix[[i]], energyType)
-        if ( return_raw ) return( raw_e )
-        sim_e <- raw_e * normalizing_weights[i]
-        orth_e <- 0
-        if (constraint_type == 'ortho' ) {
-          orth_e <- invariant_orthogonality_defect(V_sp) * constraint_weight * orth_weights[i]
-        }
-        return(sim_e + orth_e)
-      }
+      if (positivities[i] == 'positive') V <- take_abs_unsigned(V)
+      V_sp <- simlr_sparseness(
+        V,
+        constraint_type = constraint_type,
+        smoothing_matrix = smoothingMatrices[[i]],
+        positivity = positivities[i],
+        sparseness_quantile = sparsenessQuantiles[i],
+        constraint_iterations = constraint_iterations,
+        constraint_weight = constraint_weight,
+        sparseness_alg = sparsenessAlg
+      )
       
-    smooth_grad <- function(V) {
-        if ( positivities[i] == 'positive' ) V=take_abs_unsigned(V)
-        V_sp = simlr_sparseness(
-                  V,
-                  constraint_type = constraint_type,
-                  smoothing_matrix = smoothingMatrices[[i]],
-                  positivity = positivities[i],
-                  sparseness_quantile = sparsenessQuantiles[i],
-                  constraint_iterations = constraint_iterations,
-                  constraint_weight = constraint_weight,
-                  sparseness_alg = sparsenessAlg
-                )  
-        sim_grad <- calculate_simlr_gradient(V_sp, data_matrices[[i]], initialUMatrix[[i]], energyType ) * normalizing_weights[i]
-        orth_grad <- 0
-        if (constraint_type == 'ortho' & FALSE ) {
-          orth_grad <-  constraint_weight * orth_weights[i] *            
-              gradient_invariant_orthogonality_defect(V_sp)
+      # --- User-chosen energy ---
+      sim_e <- calculate_simlr_energy(
+        V_sp, data_matrices[[i]], initialUMatrix[[i]],
+        energyType
+      ) * normalizing_weights[i]
+
+      # --- Domain energy (only if lambda > 0) ---
+      dom_e <- 0
+      if (!is.null(domainMatrices) && !is.null(domainLambdas)) {
+        lam <- domainLambdas[i]
+        if (lam > 0) {
+          dom_e <- calculate_simlr_energy(
+            V_sp, data_matrices[[i]], initialUMatrix[[i]],
+            "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
+          )
         }
-        g=clip_gradient_by_quantile( 
-          constrainG( as.matrix(sim_grad - orth_grad), i, constraint_type), clipper )
-        return(g)
       }
+
+      orth_e <- 0
+      if (constraint_type == "ortho") {
+        orth_e <- invariant_orthogonality_defect(V_sp) * constraint_weight * orth_weights[i]
+      }
+
+      total_e <- sim_e + dom_e + orth_e
+      # --- Track values ---
+      all_sim_energy[[i]] <<- c(all_sim_energy[[i]], sim_e)
+      all_dom_energy[[i]] <<- c(all_dom_energy[[i]], dom_e)
+      all_total_energy[[i]] <<- c(all_total_energy[[i]], total_e)
+      if (return_raw) return(sim_e + dom_e) # raw similarity+domain only
+      return(total_e)
+    }
+    smooth_grad <- function(V) {
+      if (positivities[i] == 'positive') V <- take_abs_unsigned(V)
+      V_sp <- simlr_sparseness(
+        V,
+        constraint_type = constraint_type,
+        smoothing_matrix = smoothingMatrices[[i]],
+        positivity = positivities[i],
+        sparseness_quantile = sparsenessQuantiles[i],
+        constraint_iterations = constraint_iterations,
+        constraint_weight = constraint_weight,
+        sparseness_alg = sparsenessAlg
+      )
+
+      # --- User-chosen gradient ---
+      sim_grad <- calculate_simlr_gradient(
+        V_sp, data_matrices[[i]], initialUMatrix[[i]],
+        energyType
+      ) * normalizing_weights[i]
+
+      # --- Domain gradient (only if lambda > 0) ---
+      dom_grad <- 0
+      if (!is.null(domainMatrices) && !is.null(domainLambdas)) {
+        lam <- domainLambdas[i]
+        if (lam > 0) {
+          dom_grad <- calculate_simlr_gradient(
+            V_sp, data_matrices[[i]], initialUMatrix[[i]],
+            "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
+          )
+        }
+      }
+
+      orth_grad <- 0
+      if (constraint_type == "ortho" & FALSE) {
+        orth_grad <- constraint_weight * orth_weights[i] *
+          gradient_invariant_orthogonality_defect(V_sp)
+      }
+
+      g <- sim_grad + dom_grad - orth_grad
+      g <- clip_gradient_by_quantile(constrainG(as.matrix(g), i, constraint_type), clipper)
+      return(g)
+    }      
 
     riemannian_descent_grad = smooth_grad(vmats[[i]])
     step_result <- step(
@@ -4670,9 +4874,11 @@ for (myit in 1:iterations) {
       tot_e <- smooth_cost(V_current  )
       orth_e <- invariant_orthogonality_defect(V_current)
       iter_results_list[[i]] <- tibble::tibble(
+        iteration = i, 
         modality = names(data_matrices)[i],
-        total_energy = tot_e,
-        similarity_energy = sim_e,
+        total_energy = all_total_energy[[i]][length(all_total_energy[[i]])],
+        similarity_energy = all_sim_energy[[i]][length(all_sim_energy[[i]])],
+        domain_energy = all_dom_energy[[i]][length(all_dom_energy[[i]])], # NEW
         feature_orthogonality = orth_e,
         similarity_energy_w = sim_e * normalizing_weights[i],
         feature_orthogonality_w = orth_e * orth_weights[i] * constraint_weight
@@ -4782,9 +4988,93 @@ return(
       connectors = connectors,
       energyType = energyType,
       optimizationStyle = optimizationStyle,
-      converged_at = converged
+      converged_at = converged,
+      sim_energy = all_sim_energy,
+      domain_energy = all_dom_energy,
+      total_energy = all_total_energy
     )
   )
+}
+
+#' Plot Energy Decomposition During SIMLR Optimization
+#'
+#' Creates line plots showing the evolution of similarity, domain, and total 
+#' energy across optimization iterations, for each modality. Energies are 
+#' rescaled to [0,1] within each type for comparability.
+#'
+#' @param simlr_result A list returned by \code{simlr()}, containing
+#'   \code{energyPath}, \code{sim_energy}, \code{domain_energy}, 
+#'   and \code{total_energy}.
+#' @param modality Character string giving the name of the modality to plot
+#'   (must match names in \code{energyPath$modality}).
+#' @param show_weights Logical, if TRUE also show weighted energies.
+#' @return A \code{ggplot2} object.
+#' @examples
+#' \dontrun{
+#'   res <- simlr(...)
+#'   plot_energy_decomposition(res, modality = "RNA")
+#' }
+#' @export
+plot_energy_decomposition <- function(simlr_result, modality, show_weights = FALSE) {
+  stopifnot(requireNamespace("ggplot2", quietly = TRUE))
+  
+  df <- simlr_result$energyPath
+  df <- df[df$modality == modality, ]
+  df = df[-1,]
+  
+  # Base data
+  energies <- data.frame(
+    iteration = df$iteration,
+    similarity = df$similarity_energy,
+    domain = df$domain_energy,
+    total = df$total_energy
+  )
+  
+  energies_long <- tidyr::pivot_longer(
+    energies,
+    cols = -iteration,
+    names_to = "energy_type",
+    values_to = "value"
+  )
+  
+  # Rescale each energy type to [0,1] for visual comparability
+  energies_long <- energies_long %>%
+    dplyr::group_by(energy_type) %>%
+    dplyr::mutate(value_rescaled = (value - min(value, na.rm = TRUE)) /
+                                   (max(value, na.rm = TRUE) - min(value, na.rm = TRUE) + 1e-8)) %>%
+    dplyr::ungroup()
+  
+  p <- ggplot2::ggplot(energies_long, ggplot2::aes(x = iteration, y = value_rescaled, color = energy_type)) +
+    ggplot2::geom_line(size = 1) +
+    ggplot2::theme_minimal(base_size = 14) +
+    ggplot2::labs(
+      title = paste("Energy Decomposition for", modality),
+      subtitle = "All energies rescaled to [0,1] for comparability",
+      x = "Iteration",
+      y = "Rescaled Energy (0–1)",
+      color = "Energy type"
+    )
+  
+  if (show_weights) {
+    weighted <- data.frame(
+      iteration = df$iteration,
+      sim_w = df$similarity_energy_w,
+      orth_w = df$feature_orthogonality_w
+    )
+    weighted_long <- tidyr::pivot_longer(
+      weighted,
+      cols = -iteration,
+      names_to = "weighted_type",
+      values_to = "value"
+    )
+    p <- p + ggplot2::geom_line(
+      data = weighted_long,
+      ggplot2::aes(x = iteration, y = value, linetype = weighted_type),
+      color = "black"
+    )
+  }
+  
+  return(p)
 }
 
 
@@ -5047,7 +5337,7 @@ simlr.perm <- function(data_matrices,
   repeatedMeasures = NA, lineSearchRange = c(-5e2, 5e2), 
   lineSearchTolerance = 1e-12, randomSeed, 
   constraint = c("orthox0.001x1", "Grassmannx0", "Stiefelx0", "none" ), 
-  energyType = c("cca", "regression","normalized", "acc", "lowRank", "lowRankRegression",'normalized_correlation'), 
+  energyType = c("cca", "regression","normalized", "acc", "dat", "lowRank", "lowRankRegression",'normalized_correlation', 'logcosh', 'exp', 'kurtosis','gauss'), 
   vmats, connectors = NULL, optimizationStyle = 'adam', 
   scale = c("centerAndScale", "eigenvalue"), 
   expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
@@ -6669,9 +6959,9 @@ antspymm_simlr <- function(blaster,
   
   myenergies <- c('cca', 'acc', 'reg', 'lrr', 'lowRankRegression', 'regression',
                   "base.pca", "base.spca", "base.rand.1", "base.rand.0",
-                  "normalized_correlation", 'nc')
+                  "normalized_correlation", 'nc', 'dat', 'logcosh', 'exp', 'kurtosis','gauss')
   if (!energy %in% myenergies) {
-    stop(paste0("energy should be one of ", paste(myenergies, collapse = ", ")))
+    message(paste0("energy should be one of ", paste(myenergies, collapse = ", ")))
   }
 
   # --- 2. Feature Selection and Filtering (IDPs) ---
@@ -7620,7 +7910,7 @@ simlr_sparseness <- function(v,
   }
 
   # Optional L1 normalization
-  normalize_energy_types <- c("acc", "cca", "nc", "normalized_correlation", "lowRankRegression", "lrr")
+  normalize_energy_types <- c("acc", "cca", "nc", "normalized_correlation", "lowRankRegression", "lrr", "dat", 'logcosh', 'exp', 'kurtosis','gauss' )
   if (!is.null(energy_type) && energy_type %in% normalize_energy_types) {
     v <- l1_normalize_features(v)
   }

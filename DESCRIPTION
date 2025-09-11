@@ -91,5 +91,5 @@ Suggests:
 LazyData: TRUE
 Remotes: ANTsX/ANTsRCore
 VignetteBuilder: knitr
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Encoding: UTF-8

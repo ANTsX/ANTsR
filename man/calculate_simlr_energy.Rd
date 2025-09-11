@@ -4,7 +4,7 @@
 \alias{calculate_simlr_energy}
 \title{Calculate SIMLR Similarity Energy}
 \usage{
-calculate_simlr_energy(V, X, U, energy_type)
+calculate_simlr_energy(V, X, U, energy_type, lambda = 1, prior_matrix = NULL)
 }
 \arguments{
 \item{V}{A candidate loading matrix [p x k] to evaluate.}
@@ -14,6 +14,10 @@ calculate_simlr_energy(V, X, U, energy_type)
 \item{U}{The shared basis matrix [n x k].}
 
 \item{energy_type}{A string specifying the similarity objective.}
+
+\item{lambda}{prior weight term for dat}
+
+\item{prior_matrix}{matrix of prior weights, same number of columns as V}
 }
 \value{
 A single numeric value for the similarity energy. The sign is adjusted

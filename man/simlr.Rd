@@ -18,7 +18,8 @@ simlr(
   randomSeed = 0,
   constraint = c("Grassmannx0", "Stiefelx0", "orthox0.01", "none"),
   energyType = c("cca", "regression", "normalized", "ucca", "lowRank",
-    "lowRankRegression", "normalized_correlation", "acc", "nc", "lrr", "reconorm"),
+    "lowRankRegression", "normalized_correlation", "acc", "nc", "dat", "lrr", "reconorm",
+    "logcosh", "exp", "kurtosis", "gauss"),
   vmats,
   connectors = NULL,
   optimizationStyle = "adam",
@@ -27,6 +28,8 @@ simlr(
   jointInitialization = TRUE,
   sparsenessAlg = "soft",
   orthogonalizeU = FALSE,
+  domainMatrices = NULL,
+  domainLambdas = NULL,
   verbose = FALSE
 )
 }
