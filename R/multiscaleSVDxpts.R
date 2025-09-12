@@ -3988,7 +3988,8 @@ gradient_invariant_orthogonality_salad<- function(A) {
   )
   
   # Calculate sources
-  S <- X %*% V
+  Vmod = l1_normalize_features(V)
+  S <- X %*% Vmod
   
   # Compute ICA energy based on nonlinearity
   if (nonlinearity == "logcosh") {
@@ -4000,7 +4001,6 @@ gradient_invariant_orthogonality_salad<- function(A) {
   } else if (nonlinearity == "kurtosis") {
     energy <- -sum((S^4.) / 4.) / nrow(X)
   }
-  
   return(energy)
 }
 
@@ -4026,7 +4026,8 @@ gradient_invariant_orthogonality_salad<- function(A) {
   )
   
   # Calculate sources
-  S <- X %*% V
+  Vmod = l1_normalize_features(V)
+  S <- X %*% Vmod
   
   # Compute gradient based on nonlinearity
   if (nonlinearity == "logcosh") {
@@ -4777,7 +4778,7 @@ for (myit in 1:iterations) {
       all_sim_energy[[i]] <<- c(all_sim_energy[[i]], sim_e)
       all_dom_energy[[i]] <<- c(all_dom_energy[[i]], dom_e)
       all_total_energy[[i]] <<- c(all_total_energy[[i]], total_e)
-      if (return_raw) return(sim_e + dom_e) # raw similarity+domain only
+      if (return_raw) return(sim_e) # raw similarity+domain only
       return(total_e)
     }
     smooth_grad <- function(V) {
@@ -4862,8 +4863,6 @@ for (myit in 1:iterations) {
                    connectors = connectors)
     # Apply Gram-Schmidt orthogonalization (localGS)
     initialUMatrix <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalizeU))
-
-
     # --- C. Evaluate, Track, and Report Convergence ---
     
     # Calculate energies and orthogonality for each modality at the end of the iteration
@@ -7913,6 +7912,7 @@ simlr_sparseness <- function(v,
 
   # Optional L1 normalization
   normalize_energy_types <- c("acc", "cca", "nc", "normalized_correlation", "lowRankRegression", "lrr", "dat", 'logcosh', 'exp', 'kurtosis','gauss' )
+  normalize_energy_types <- c("acc", "cca", "nc", "normalized_correlation", "lowRankRegression", "lrr"  )
   if (!is.null(energy_type) && energy_type %in% normalize_energy_types) {
     v <- l1_normalize_features(v)
   }
