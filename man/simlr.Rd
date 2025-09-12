@@ -85,6 +85,10 @@ can be a vector which will apply each strategy in order.}
 
 \item{orthogonalizeU}{boolean controlling whether we orthogonalize the U matrices}
 
+\item{domainMatrices}{matrices containing domain knowledge length of \code{data_matrices} with number of columns also equal to each corresponding data matrix}
+
+\item{domainLambdas}{weights for domain knowledge term length of \code{data_matrices}}
+
 \item{verbose}{boolean to control verbosity of output - set to level \code{2}
 in order to see more output, specifically the gradient descent parameters.}
 }

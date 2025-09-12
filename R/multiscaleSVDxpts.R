@@ -4340,6 +4340,8 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
 #' @param jointInitialization boolean for initialization options, default TRUE
 #' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
 #' @param orthogonalizeU boolean controlling whether we orthogonalize the U matrices
+#' @param domainMatrices matrices containing domain knowledge length of \code{data_matrices} with number of columns also equal to each corresponding data matrix
+#' @param domainLambdas weights for domain knowledge term length of \code{data_matrices}
 #' @param verbose boolean to control verbosity of output - set to level \code{2}
 #' in order to see more output, specifically the gradient descent parameters.
 #' @return A list of u, x, y, z etc related matrices.
