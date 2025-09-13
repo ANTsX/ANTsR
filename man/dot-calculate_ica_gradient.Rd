@@ -4,14 +4,16 @@
 \alias{.calculate_ica_gradient}
 \title{Calculate ICA Gradient}
 \usage{
-.calculate_ica_gradient(X, V, nonlinearity = "logcosh", a = 1)
+.calculate_ica_gradient(X, U, V, nonlinearity = "logcosh", a = 1)
 }
 \arguments{
 \item{X}{A data matrix [n x p].}
 
+\item{U}{A weighting matrix [n x k].}
+
 \item{V}{A loading matrix [p x k].}
 
-\item{nonlinearity}{Non-linearity function ("logcosh", "exp", "kurtosis" or "gauss").}
+\item{nonlinearity}{Non-linearity function ("logcosh", "exp", "kurtosis", or "gauss").}
 
 \item{a}{Parameter for gaussian nonlinearity (default: 1).}
 }
@@ -20,6 +22,6 @@ A matrix [p x k] representing a descent direction for the ICA energy.
 }
 \description{
 Computes the analytical gradient for the ICA objective using the derivative
-of the specified non-linearity.
+of the specified non-linearity, with bilinear source S = U^T X V.
 }
 \keyword{internal}

@@ -3973,12 +3973,13 @@ gradient_invariant_orthogonality_salad<- function(A) {
 #' non-linearity to measure non-Gaussianity.
 #'
 #' @param X A data matrix [n x p].
+#' @param U A weighting matrix [n x k].
 #' @param V A loading matrix [p x k].
 #' @param nonlinearity Non-linearity function ("logcosh", "exp", "kurtosis", or "gauss").
 #' @param a Parameter for gaussian nonlinearity (default: 1).
 #' @return A single numeric value representing the ICA energy.
 #' @keywords internal
-.calculate_ica_energy <- function(X, V, nonlinearity = "logcosh", a = 1) {
+.calculate_ica_energy <- function(X, U, V, nonlinearity = "logcosh", a = 1) {
   # Input validation
   stopifnot(
     is.matrix(X) && is.matrix(V),
@@ -3989,7 +3990,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
   
   # Calculate sources
   Vmod = l1_normalize_features(V)
-  S <- X %*% Vmod
+  S <- (t(U) %*% X) %*% Vmod
   
   # Compute ICA energy based on nonlinearity
   if (nonlinearity == "logcosh") {
@@ -4007,42 +4008,42 @@ gradient_invariant_orthogonality_salad<- function(A) {
 #' Calculate ICA Gradient
 #'
 #' Computes the analytical gradient for the ICA objective using the derivative
-#' of the specified non-linearity.
+#' of the specified non-linearity, with bilinear source S = U^T X V.
 #'
 #' @param X A data matrix [n x p].
+#' @param U A weighting matrix [n x k].
 #' @param V A loading matrix [p x k].
-#' @param nonlinearity Non-linearity function ("logcosh", "exp", "kurtosis" or "gauss").
+#' @param nonlinearity Non-linearity function ("logcosh", "exp", "kurtosis", or "gauss").
 #' @param a Parameter for gaussian nonlinearity (default: 1).
 #' @return A matrix [p x k] representing a descent direction for the ICA energy.
 #' @keywords internal
-.calculate_ica_gradient <- function(X, V, nonlinearity = "logcosh", a = 1) {
+#' @export
+.calculate_ica_gradient <- function(X, U, V, nonlinearity = "logcosh", a = 1) {
   # Defensive dimension checks
-  n <- nrow(X); p <- ncol(X); k <- ncol(V)
   stopifnot(
-    is.matrix(X) && is.matrix(V),
-    "Matrix dimensions are not compatible." = p == nrow(V),
+    is.matrix(X) && is.matrix(U) && is.matrix(V),
+    "Matrix dimensions are not compatible." = (nrow(X) == nrow(U)) && (ncol(X) == nrow(V)) && (ncol(U) == ncol(V)),
     "Nonlinearity must be 'logcosh', 'exp', 'kurtosis', or 'gauss'." = nonlinearity %in% c("logcosh", "exp", "gauss", "kurtosis"),
     "Parameter a must be positive for gaussian nonlinearity." = a > 0
   )
   
-  # Calculate sources
-  Vmod = l1_normalize_features(V)
-  S <- X %*% Vmod
+  # Calculate sources: S = U^T X V
+  Vmod <- l1_normalize_features(V)
+  S <- t(U) %*% X %*% Vmod  # k x k matrix
   
   # Compute gradient based on nonlinearity
   if (nonlinearity == "logcosh") {
-    gradient <- (1/n) * (t(X) %*% tanh(S))
+    gradient <- (1/nrow(S)) * (t(X) %*% U %*% tanh(S))
   } else if (nonlinearity == "exp") {
-    gradient <- (1/n) * (t(X) %*% (S * exp(-S^2 / 2)))
+    gradient <- (1/nrow(S)) * (t(X) %*% U %*% (S * exp(-S^2 / 2)))
   } else if (nonlinearity == "gauss") {
-    gradient <- (1/n) * (t(X) %*% (a * S * exp(-a * S^2)))
+    gradient <- (1/nrow(S)) * (t(X) %*% U %*% (a * S * exp(-a * S^2)))
   } else if (nonlinearity == "kurtosis") {
-    gradient <- (1/n) * (t(X) %*% (S^3))
+    gradient <- (1/nrow(S)) * (t(X) %*% U %*% (S^3))
   }
   
   return(gradient)
 }
-
 
 #' Calculate Domain Alignment Energy
 #'
@@ -4063,11 +4064,13 @@ gradient_invariant_orthogonality_salad<- function(A) {
   )
   
   # Compute projection
-  Vmod=l1_normalize_features(V)
-  M <- Z %*% Vmod
+#  Vmod=l1_normalize_features(V)
+#  Vmod <- apply(V, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
+#  Z <- apply(Z, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
+  M <- Z %*% V
   
   # Compute domain alignment energy: -lambda * ||M||_F^2
-  energy <- -lambda * sum(M^2)
+  energy <- -lambda * sum(M^2) / prod( c(nrow(Z), ncol(V)))
   
   return(energy)
 }
@@ -4092,11 +4095,13 @@ gradient_invariant_orthogonality_salad<- function(A) {
   )
   
   # Compute projection
-  Vmod=l1_normalize_features(V)
-  M <- Z %*% Vmod
+#  Vmod=l1_normalize_features(V)
+#  Vmod <- apply(V, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
+#  Z <- apply(Z, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
+  M <- Z %*% V
   
   # Compute gradient: -2 * lambda * Z^T M
-  gradient <- -2 * lambda * t(Z) %*% M
+  gradient <- 2 / prod( c(nrow(Z), ncol(V))) * lambda * t(Z) %*% M
   
   return(gradient)
 }
@@ -4236,10 +4241,10 @@ calculate_simlr_energy <- function(V, X, U, energy_type, lambda=1.0, prior_matri
     "lrr" = .calculate_angular_distance(X, U, V),
     "cca" = -.calculate_abs_canonical_covariance(X, U, V),
     "acc" = -.calculate_abs_canonical_covariance(X, U, V),
-    "logcosh" = .calculate_ica_energy( X, V, nonlinearity = energy_type ),
-    "kurtosis" = .calculate_ica_energy( X, V, nonlinearity = energy_type ),
-    "exp" = .calculate_ica_energy( X, V, nonlinearity = energy_type ),
-    "gauss" = .calculate_ica_energy( X, V, nonlinearity = energy_type ),
+    "logcosh" = .calculate_ica_energy( X, U, V, nonlinearity = energy_type ),
+    "kurtosis" = .calculate_ica_energy( X, U, V, nonlinearity = energy_type ),
+    "exp" = .calculate_ica_energy( X, U, V, nonlinearity = energy_type ),
+    "gauss" = .calculate_ica_energy( X, U, V, nonlinearity = energy_type ),
     "dat" = .calculate_domain_energy( V, Z, lambda),
     "normalized_correlation" = -.calculate_procrustes_correlation(X, U, V),
     stop(paste("Unknown energy_type in calculate_simlr_energy:", energy_type))
@@ -4278,10 +4283,10 @@ calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = 
     "cca" = .calculate_abs_canonical_covariance_gradient(X, U, V),
     "acc" = .calculate_abs_canonical_covariance_gradient(X, U, V),
     "normalized_correlation" = .calculate_procrustes_gradient(X, U, V),
-    "logcosh" = .calculate_ica_gradient( X, V, nonlinearity = energy_type ),
-    "kurtosis" = .calculate_ica_gradient( X, V, nonlinearity = energy_type ),
-    "exp" = .calculate_ica_gradient( X, V, nonlinearity = energy_type ),
-    "gauss" = .calculate_ica_gradient( X, V, nonlinearity = energy_type ),
+    "logcosh" = .calculate_ica_gradient( X, U, V, nonlinearity = energy_type ),
+    "kurtosis" = .calculate_ica_gradient( X, U, V, nonlinearity = energy_type ),
+    "exp" = .calculate_ica_gradient( X, U, V, nonlinearity = energy_type ),
+    "gauss" = .calculate_ica_gradient( X, U, V, nonlinearity = energy_type ),
     "dat" = .calculate_domain_gradient( V, Z, lambda),
     "nc" = .calculate_procrustes_gradient(X, U, V),
     
@@ -4660,6 +4665,10 @@ simlr <- function(
   orthPath = matrix(Inf, nrow = iterations, ncol = nModalities)
   bestU <- initialUMatrix
   bestV <- vmats
+  domain_knowledge=0
+  if ( !is.null( domainLambdas ) & !is.null( domainMatrices )  ){
+    domain_knowledge=paste0("d.",nrow(domainMatrices[[1]]),'.l.',mean(domainLambdas) )
+  }
   if (verbose) {
     cat(sprintf("
       --- Method Summary ---
@@ -4671,8 +4680,9 @@ simlr <- function(
         • constraint-it    : %s
         • constraint-wt    : %s
         • optimizationStyle: %s
+        • domain-knowledge : %s
       ----------------------
-      ", mixAlg, energyType, sparsenessAlg, expBeta, constraint_type, constraint_iterations, constraint_weight, optimizationStyle))
+      ", mixAlg, energyType, sparsenessAlg, expBeta, constraint_type, constraint_iterations, constraint_weight, optimizationStyle, domain_knowledge ))
   }
   
   # 2.0 Define Logic for Optimization Style
@@ -4696,6 +4706,8 @@ simlr <- function(
 # Initialize adaptive orthogonality weights
 orth_weights <- rep(0.0, nModalities)
 normalizing_weights = rep( 1.0, nModalities )
+domain_weights <- rep(1.0, nModalities)  # Rename auto_norm_domain_weights
+names(domain_weights) <- names(data_matrices)
 names( orth_weights ) = names( normalizing_weights ) = names( data_matrices )
 clipper = 0.80
 bestTot <- Inf
@@ -4721,11 +4733,13 @@ optimizer_object <- create_optimizer(
 # initialize energy trackers for each modality
 all_sim_energy   <- vector("list", nModalities)
 all_dom_energy   <- vector("list", nModalities)
+all_dom_energy_raw<-vector("list", nModalities)
 all_total_energy <- vector("list", nModalities)
 
 for (j in 1:nModalities) {
   all_sim_energy[[j]]   <- numeric()
   all_dom_energy[[j]]   <- numeric()
+  all_dom_energy_raw[[j]] <- numeric()
   all_total_energy[[j]] <- numeric()
 }
 # --- 2. Main Optimization Loop ---
@@ -4735,8 +4749,9 @@ for (myit in 1:iterations) {
   current_learning_rate <- final_learning_rate + 0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
   # --- A. Update each V_i matrix ---
   for (i in 1:nModalities) {
-
-    # first define the local versions of the energy and gradient 
+    ##############################################################
+    # first define the local versions of the energy and gradient #
+    ##############################################################
     smooth_cost <- function(V, return_raw = FALSE) {
       if (positivities[i] == 'positive') V <- take_abs_unsigned(V)
       V_sp <- simlr_sparseness(
@@ -4757,14 +4772,15 @@ for (myit in 1:iterations) {
       ) * normalizing_weights[i]
 
       # --- Domain energy (only if lambda > 0) ---
-      dom_e <- 0
+      dom_e <- dom_e_raw <- 0
       if (!is.null(domainMatrices) && !is.null(domainLambdas)) {
         lam <- domainLambdas[i]
         if (lam > 0) {
-          dom_e <- calculate_simlr_energy(
+          dom_e_raw <- calculate_simlr_energy(
             V_sp, data_matrices[[i]], initialUMatrix[[i]],
             "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
           )
+          dom_e <- dom_e_raw * domain_weights[i]    # Scale
         }
       }
 
@@ -4777,10 +4793,12 @@ for (myit in 1:iterations) {
       # --- Track values ---
       all_sim_energy[[i]] <<- c(all_sim_energy[[i]], sim_e)
       all_dom_energy[[i]] <<- c(all_dom_energy[[i]], dom_e)
+      all_dom_energy_raw[[i]] <<- c(all_dom_energy_raw[[i]], dom_e_raw)
       all_total_energy[[i]] <<- c(all_total_energy[[i]], total_e)
       if (return_raw) return(sim_e) # raw similarity+domain only
       return(total_e)
     }
+    ############################
     smooth_grad <- function(V) {
       if (positivities[i] == 'positive') V <- take_abs_unsigned(V)
       V_sp <- simlr_sparseness(
@@ -4808,7 +4826,7 @@ for (myit in 1:iterations) {
           dom_grad <- calculate_simlr_gradient(
             V_sp, data_matrices[[i]], initialUMatrix[[i]],
             "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
-          )
+          ) * domain_weights[i]
         }
       }
 
@@ -4863,6 +4881,7 @@ for (myit in 1:iterations) {
                    connectors = connectors)
     # Apply Gram-Schmidt orthogonalization (localGS)
     initialUMatrix <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalizeU))
+    #   cat(paste("<o><o><o><o><o><o><o><o><o><o>\n"))
     # --- C. Evaluate, Track, and Report Convergence ---
     
     # Calculate energies and orthogonality for each modality at the end of the iteration
@@ -4879,7 +4898,8 @@ for (myit in 1:iterations) {
         modality = names(data_matrices)[i],
         total_energy = all_total_energy[[i]][length(all_total_energy[[i]])],
         similarity_energy = all_sim_energy[[i]][length(all_sim_energy[[i]])],
-        domain_energy = all_dom_energy[[i]][length(all_dom_energy[[i]])], # NEW
+        domain_energy_raw = all_dom_energy_raw[[i]][length(all_dom_energy_raw[[i]])],  
+        domain_energy = all_dom_energy[[i]][length(all_dom_energy[[i]])],
         feature_orthogonality = orth_e,
         similarity_energy_w = sim_e * normalizing_weights[i],
         feature_orthogonality_w = orth_e * orth_weights[i] * constraint_weight
@@ -4911,6 +4931,16 @@ for (myit in 1:iterations) {
           orth_weights[i] <- 1.0
         }
       }
+      # After setting normalizing_weights and orth_weights
+      if (mod_results$domain_energy_raw != 0 & !is.na(mod_results$domain_energy_raw)) {  # Use raw
+        if (abs(mod_results$domain_energy_raw) > 1e-10) {
+          domain_weights[i] <- abs(mod_results$similarity_energy * normalizing_weights[i]) / abs(mod_results$domain_energy_raw)
+        } else {
+          domain_weights[i] <- 1.0
+        }
+        if (is.na(domain_weights[i]) | is.infinite(domain_weights[i])) domain_weights[i] <- 1.0
+      }
+      if (verbose & i == nModalities ) message("Domain Weights: ", paste(round(domain_weights, 2), collapse=", "))      
     }
     if (verbose) {
       message("Norm Weights: ", paste(round(normalizing_weights, 3), collapse=", "))
@@ -4991,7 +5021,7 @@ return(
       optimizationStyle = optimizationStyle,
       converged_at = converged,
       sim_energy = all_sim_energy,
-      domain_energy = all_dom_energy,
+      domain_energy = all_dom_energy_raw,
       total_energy = all_total_energy
     )
   )

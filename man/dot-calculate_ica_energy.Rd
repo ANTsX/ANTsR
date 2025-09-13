@@ -4,10 +4,12 @@
 \alias{.calculate_ica_energy}
 \title{Calculate ICA Energy}
 \usage{
-.calculate_ica_energy(X, V, nonlinearity = "logcosh", a = 1)
+.calculate_ica_energy(X, U, V, nonlinearity = "logcosh", a = 1)
 }
 \arguments{
 \item{X}{A data matrix [n x p].}
+
+\item{U}{A weighting matrix [n x k].}
 
 \item{V}{A loading matrix [p x k].}
 
