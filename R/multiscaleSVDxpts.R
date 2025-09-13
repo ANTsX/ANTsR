@@ -5018,6 +5018,7 @@ return(
       finalError = bestTot,
       connectors = connectors,
       energyType = energyType,
+      mixAlg = mixAlg,
       optimizationStyle = optimizationStyle,
       converged_at = converged,
       sim_energy = all_sim_energy,
