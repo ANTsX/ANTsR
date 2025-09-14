@@ -48,6 +48,57 @@ The simulation embeds 6 cognitive domains as latent signals, with modality-speci
 
 - **Cross-Modal Reconstruction Error**: Mean normalized Frobenius error predicting each view’s test data from other views’ concatenated embeddings via linear regression (lower better).
 
+## Technical Background
+
+Similarity-driven Multi-view Linear Reconstruction (SiMLR), implemented in the ANTsR package, is a dimensionality reduction framework designed to integrate high-dimensional, multimodal data by exploiting inter-modality relationships and incorporating prior domain knowledge to enhance interpretability [Avants et al., 2021]. SiMLR extends canonical correlation analysis (CCA) and related multi-view methods by incorporating regularization terms that promote sparsity and alignment with prior knowledge, making it particularly suited for neuroimaging applications where modalities like structural MRI, diffusion tensor imaging (DTI), and functional MRI (fMRI) must be fused to uncover latent biological signals [Stone et al., 2020].
+
+### SiMLR Objective Function
+
+SiMLR operates on a set of \( K \) data matrices \( \{X_k \in \mathbb{R}^{n \times p_k}\}_{k=1}^K \), where \( n \) is the number of subjects and \( p_k \) is the number of features for modality \( k \). The goal is to find low-dimensional embeddings \( \{U_k \in \mathbb{R}^{n \times d}\}_{k=1}^K \) and corresponding feature weight matrices \( \{V_k \in \mathbb{R}^{p_k \times d}\}_{k=1}^K \), where \( d \) is the number of latent components (\( d \ll p_k \)). These are derived by optimizing an objective function that balances cross-modal similarity, reconstruction fidelity, and alignment with domain knowledge priors.
+
+The SiMLR objective function can be expressed as:
+
+\[
+J = \sum_{k=1}^K \sum_{j \neq k} \text{Energy}(U_k, U_j) + \sum_{k=1}^K \lambda_k \|\hat{X}_k - X_k\|_F^2 + \sum_{k=1}^K \gamma_k \text{Prior}(V_k, Z_k),
+\]
+
+where:
+- **Energy Term**: The first term, \( \text{Energy}(U_k, U_j) \), measures the similarity between embeddings of different modalities. For the "acc" energy type, this is typically the RV coefficient, a multivariate generalization of the squared correlation coefficient, defined as:
+
+\[
+\text{RV}(U_k, U_j) = \frac{\text{tr}(U_k^T U_j U_j^T U_k)}{\sqrt{\text{tr}(U_k^T U_k)^2 \text{tr}(U_j^T U_j)^2}}.
+\]
+
+For the "regression" energy type, it involves a linear regression loss between embeddings. The choice of energy type influences how SiMLR captures inter-modality relationships, with "acc" emphasizing correlation and "regression" focusing on predictive accuracy.
+
+- **Reconstruction Term**: The second term, \( \|\hat{X}_k - X_k\|_F^2 \), minimizes the Frobenius norm of the reconstruction error, where \( \hat{X}_k = U_k V_k^T \) is the reconstructed data matrix for modality \( k \), and \( \lambda_k \) is a weighting parameter. This ensures that the low-dimensional embeddings preserve the original data’s structure.
+
+- **Domain Alignment Term**: The third term, \( \text{Prior}(V_k, Z_k) \), incorporates domain knowledge through a quadratic alignment energy, defined as:
+
+\[
+\text{Prior}(V_k, Z_k) = -\gamma_k \|Z_k V_k\|_F^2,
+\]
+
+where \( Z_k \in \mathbb{R}^{m_k \times p_k} \) is a prior matrix encoding domain knowledge for modality \( k \), with \( m_k \) representing the number of prior domains (e.g., cognitive domains like processing speed or memory), and \( \gamma_k \) (controlled by `domainLambda`) is a non-negative scalar controlling the strength of the prior. The term \( \|Z_k V_k\|_F^2 \) is the squared Frobenius norm of the projection of the feature weight matrix \( V_k \) onto the prior matrix \( Z_k \), normalized by the product of the dimensions of \( Z_k \) and \( V_k \):
+
+\[
+\|Z_k V_k\|_F^2 = \sum_{i,j} (Z_k V_k)_{i,j}^2.
+\]
+
+This negative quadratic form encourages the feature weights \( V_k \) to align with the structure of \( Z_k \), maximizing the projection’s magnitude and thus promoting components that capture features relevant to the specified domains. Unlike L1-norm regularization, which promotes sparsity, the quadratic Frobenius norm encourages smooth alignment with the prior, balancing interpretability with flexibility to capture data-driven patterns.
+
+### Domain Knowledge Integration
+
+The domain alignment term is critical for enhancing the biological interpretability of SiMLR embeddings in neuroimaging. The prior matrix \( Z_k \) encodes domain knowledge, such as mappings of cortical regions to cognitive functions or white matter tracts to motor skills, derived from anatomical atlases, functional parcellations, or prior studies [Avants et al., 2021]. For example, in the cortical thickness modality, \( Z_k \) might assign higher weights to temporal lobe features for the memory domain based on neuroscientific evidence. The negative sign in \( -\gamma_k \|Z_k V_k\|_F^2 \) ensures that the objective function minimizes the negative of the alignment energy, effectively maximizing \( \|Z_k V_k\|_F^2 \), which aligns the learned feature weights with the prior domains.
+
+The `domainLambda` parameter (\( \gamma_k \)) controls the trade-off between data-driven discovery and prior-guided alignment. A low \( \gamma_k \) allows SiMLR to prioritize the energy and reconstruction terms, capturing novel signals not represented in \( Z_k \), while a high \( \gamma_k \) enforces stronger adherence to the prior, potentially at the cost of overfitting to the provided knowledge. The normalization by \( \text{nrow}(Z_k) \times \text{ncol}(V_k) \) in the energy calculation ensures scale invariance, making the term robust to differences in the dimensionality of \( Z_k \) and \( V_k \). This formulation is particularly valuable in neuroimaging, where high-dimensional data (e.g., thousands of voxels or connectivity measures) must be reduced to interpretable components that align with biological constructs [Stone et al., 2020].
+
+### Optimization and Mixing Algorithms
+
+SiMLR optimizes the objective function iteratively using algorithms like Adam (`optimizationStyle = "adam"`) with constraints such as orthogonality (`constraint = "orthox0.02x1"`) and sparsity (`sparsenessQuantiles`). The mixing algorithm (`mixAlg`), such as independent component analysis (ICA) or principal component analysis (PCA), determines how latent components are separated. ICA, which assumes non-Gaussian sources, is often more effective for capturing complex signals in neuroimaging data, while PCA assumes Gaussianity and maximizes variance [Avants et al., 2021]. The interplay between the energy type, mixing algorithm, and domain alignment term shapes the balance between data-driven and prior-informed embeddings, making SiMLR a flexible tool for multimodal integration.
+
+This formulation enables SiMLR to address the challenges of multimodal neuroimaging, where modalities have distinct dimensionalities, noise profiles, and biological underpinnings. By incorporating domain knowledge via the quadratic alignment energy, SiMLR enhances the biological plausibility of the resulting embeddings, making it a powerful tool for applications like biomarker discovery or clinical stratification [Stone et al., 2020].
+
 ## Data Simulation
 
 Simulate n=300 subjects (200 train, 100 test), d=6 domains.
@@ -256,7 +307,7 @@ perm_test <- function(result, matlist_train, dlist, n_perm = 10, domlam) {
 
 ## Parameter Grid and Runs
 
-```{r run-grid}
+```{r run-grid, eval=!exists("results")}
 smoothingMats <- lapply(matlist_train, function(m) diag(ncol(m)))
 myspar <- rep(0.8, length(matlist_train))
 mypos <- rep("positive", length(matlist_train))
@@ -293,6 +344,7 @@ for (row in 1:nrow(params_grid)) {
     domainLambdas = rep(par$domainLambda, length(matlist_train)),
     randomSeed = 123
   )
+  result$mixAlg <- as.character(par$mixAlg)
   results[[key]] <- result
   emb_train <- lapply(1:3, function(i) matlist_train[[i]] %*% result$v[[i]])
   emb_test <- lapply(1:3, function(i) matlist_test[[i]] %*% result$v[[i]])
@@ -410,7 +462,7 @@ top_guided <- metrics_norm %>% filter(domainLambda > 0) %>% slice(which.max(alig
 best_unguided <- metrics_norm %>% filter(domainLambda == 0) %>% slice(which.max(recovery_r2))
 guided_avg <- metrics_norm %>% filter(domainLambda > 0) %>% summarise(across(c(cross_rv, recovery_r2, alignment, recon_err, cross_modal), mean))
 unguided_avg <- metrics_norm %>% filter(domainLambda == 0) %>% summarise(across(c(cross_rv, recovery_r2, alignment, recon_err, cross_modal), mean))
-
+best_unguided$perm_t=0
 plot_ly(type = "scatterpolar") %>%
   add_trace(
     r = as.numeric(top_guided[1, c("cross_rv", "recovery_r2", "alignment", "recon_err", "cross_modal")]),
@@ -419,7 +471,7 @@ plot_ly(type = "scatterpolar") %>%
     fill = "toself"
   ) %>%
   add_trace(
-    r = as.numeric(best_unguided[1, c("cross_rv", "recovery_r2", "alignment, recon_err, cross_modal")]),
+    r = as.numeric(best_unguided[1, c("cross_rv", "recovery_r2", "alignment", "recon_err", "cross_modal")]),
     theta = c("Cross-View Cor", "Recovery R²", "Domain Alignment", "Recon Error (Inv)", "Cross-Modal (Inv)"),
     name = paste(best_unguided$energyType, best_unguided$mixAlg, "0", sep="_"),
     fill = "toself"
@@ -471,11 +523,11 @@ ggplot(metrics_long, aes(x = Group, y = Value, fill = Group)) +
 
 ### Multi-Metric Line Plot
 
-```{r line-plot, fig.width=10, fig.height=8}
+```{r line-plot, fig.width=12, fig.height=8}
 ggplot(metrics_long, aes(x = domainLambda, y = Value, color = paste(energyType, mixAlg, sep="+"))) +
   geom_line(size = 1) +
   geom_point(size = 2) +
-  facet_wrap(~Metric, scales = "free_y", ncol = 2) +
+  facet_wrap(~Metric, scales = "free_y", ncol = 3) +
   labs(title = "Metrics vs. Domain Lambda", x = "Domain Lambda", y = "Value") +
   theme_minimal() +
   scale_color_discrete(name = "Energy + MixAlg")
@@ -483,7 +535,7 @@ ggplot(metrics_long, aes(x = domainLambda, y = Value, color = paste(energyType, 
 
 ### Scaled Line Plot
 
-```{r scaled-line-plot, fig.width=10, fig.height=8}
+```{r scaled-line-plot, fig.width=12, fig.height=8, echo=FALSE}
 library(dplyr)
 library(ggplot2)
 
@@ -500,7 +552,7 @@ ggplot(metrics_long, aes(x = domainLambda, y = Value_normalized,
                         color = energy_mix)) +
   geom_line(size = 1) +
   geom_point(size = 2) +
-  facet_wrap(~Metric, scales = "free_y", ncol = 2) +
+  facet_wrap(~Metric, scales = "free_y", ncol = 3) +
   labs(title = "Normalized Metrics vs. Domain Lambda", 
        x = "Domain Lambda", 
        y = "Normalized Value (0 to 1)") +
