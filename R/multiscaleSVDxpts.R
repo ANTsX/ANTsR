@@ -6944,34 +6944,39 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param path_modeling the result of a call to \code{simlr_path_models(n)}
 #' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
 #' @param optimizationStyle see \code{list_simlr_optimizers}
+#' @param domainMatrices matrices containing domain knowledge length of \code{data_matrices} with number of columns also equal to each corresponding data matrix
+#' @param domainLambdas weights for domain knowledge term length of \code{data_matrices}
 #' @param verbose boolean
 #' @return A list containing the results of the similarity analysis and related data.
 #' @export
 #' @examples
 #' # Example usage:
 #' # result <- antspymm_simlr(dataframe)
-antspymm_simlr <- function(blaster,
-                           select_training_boolean,
-                           connect_cog,
-                           energy,
-                           nsimlr,
-                           constraint,
-                           covariates = '1',
-                           myseed = 3,
-                           doAsym = TRUE,
-                           returnidps = FALSE,
-                           restrictDFN = FALSE,
-                           resnetGradeThresh = 1.02,
-                           doperm = FALSE,
-                           exclusions = NULL,
-                           inclusions = NULL,
-                           sparseness = NULL,
-                           mixAlg = NULL,
-                           iterations = NULL,
-                           path_modeling = NULL,
-                           sparsenessAlg = 'soft',
-                           optimizationStyle = NULL,
-                           verbose = FALSE) {
+antspymm_simlr <- function(
+                          blaster,
+                          select_training_boolean,
+                          connect_cog,
+                          energy,
+                          nsimlr,
+                          constraint,
+                          covariates = '1',
+                          myseed = 3,
+                          doAsym = TRUE,
+                          returnidps = FALSE,
+                          restrictDFN = FALSE,
+                          resnetGradeThresh = 1.02,
+                          doperm = FALSE,
+                          exclusions = NULL,
+                          inclusions = NULL,
+                          sparseness = NULL,
+                          mixAlg = NULL,
+                          iterations = NULL,
+                          path_modeling = NULL,
+                          sparsenessAlg = 'soft',
+                          optimizationStyle = NULL,
+                          domainMatrices = NULL,
+                          domainLambdas  = NULL,
+                          verbose = FALSE) {
 
   # --- Internal Helper Functions ---
   safegrep <- function(pattern, x, ...) {
@@ -7216,7 +7221,7 @@ antspymm_simlr <- function(blaster,
                   constraint = constraint,
                   optimizationStyle = optimizationStyle,
                   sparsenessAlg = sparsenessAlg,
-                  initialUMatrix = initu)
+                  initialUMatrix = initu, domainMatrices=domainMatrices, domainLambdas=domainLambdas)
 
   if (verbose) message("SIMLR execution complete.")
 

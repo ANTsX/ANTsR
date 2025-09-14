@@ -26,6 +26,8 @@ antspymm_simlr(
   path_modeling = NULL,
   sparsenessAlg = "soft",
   optimizationStyle = NULL,
+  domainMatrices = NULL,
+  domainLambdas = NULL,
   verbose = FALSE
 )
 }
@@ -72,6 +74,10 @@ Other options include 'lrr', 'regression', 'nc', 'base.pca', 'base.spca', 'base.
 \item{sparsenessAlg}{NA is default otherwise basic, spmp or orthorank}
 
 \item{optimizationStyle}{see \code{list_simlr_optimizers}}
+
+\item{domainMatrices}{matrices containing domain knowledge length of \code{data_matrices} with number of columns also equal to each corresponding data matrix}
+
+\item{domainLambdas}{weights for domain knowledge term length of \code{data_matrices}}
 
 \item{verbose}{boolean}
 }

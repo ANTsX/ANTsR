@@ -1,8 +1,30 @@
 ---
-title: "SiMLR with Domain Knowledge Guidance"
+title: "Similarity-driven Multi-view Linear Reconstruction (SiMLR)"
 author: "B. Avants"
 date: "September 12, 2025"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    theme: flatly
+    code_folding: hide
+    df_print: paged
+    highlight: tango
+header-includes:
+  - \usepackage{amsmath}
+  - \usepackage{amsfonts}
+  - \usepackage{amssymb}
+  - \usepackage{geometry}
+  - \geometry{margin=1in}
+  - \usepackage{booktabs}
+  - \usepackage{graphicx}
+  - \usepackage{natbib}
+  - \usepackage{hyperref}
+  - \usepackage{xcolor}
+  - \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+  - \usepackage{times}
 ---
 
 ```{r setup, include=FALSE}
@@ -22,90 +44,223 @@ library(clue)
 set.seed(123)  # For reproducibility
 ```
 
-## Introduction
+# Methods: SiMLR
 
-We demonstrate a method for incorporating soft prior knowledge into SiMLR (`simlr` in `ANTsR`). SiMLR integrates high-dimensional multi-modal data into low-dimensional embeddings, leveraging inter-modality similarities and domain priors for sparsity and interpretability.
+Similarity-driven Multi-view Linear Reconstruction (SiMLR), implemented in the ANTsR package, is a framework for integrative dimensionality reduction across multiple views (modalities), designed to uncover shared latent structures in high-dimensional, multimodal data such as neuroimaging datasets \citep{avants2021,stone2020}. Let there be \( Z = `r length(matlist_train)` \) views, representing modalities such as cortical thickness, white matter diffusion metrics, and functional connectivity. Each view is represented as a data matrix
 
-We simulate three "modalities" of information:
+\[
+X^{(z)} \in \mathbb{R}^{p_z \times n}, \quad z = 1, \dots, Z,
+\]
 
-- **Cortex**: Structural features (e.g., cortical thickness, n=300 subjects, p=500 features).
+where \( p_z \) denotes the number of features in view \( z \) (e.g., \( p_1 = `r ncol(matlist_train[[1]])` \) for cortex, \( p_2 = `r ncol(matlist_train[[2]])` \) for white matter, \( p_3 = `r ncol(matlist_train[[3]])` \) for functional connectivity), and \( n = `r n` \) denotes the number of samples (subjects). SiMLR assumes that a **shared latent embedding** \( U \in \mathbb{R}^{k \times n} \), with \( k \ll \min_k p_k \), captures common variation across all views. Each view is linearly associated with this shared representation through a multivariate map
 
-- **White Matter**: Diffusion metrics (e.g., fractional anisotropy, p=400 features).
+\[
+V^{(z)} \in \mathbb{R}^{p_z \times k}.
+\]
 
-- **Functional Connectivity**: Connectivity strengths (p=300 features).
+The columns of \( U \) represent subject-level latent scores, while the columns of \( V^{(z)} \) represent multivariate loadings or spatial maps linking latent dimensions to features in each modality, such as brain regions or connectivity measures.
 
-The simulation embeds 6 cognitive domains as latent signals, with modality-specific corruptions and noise. Domain matrices map domains to features, serving as "ground truth" priors. We evaluate SiMLR with and without domain guidance, varying `energyType`, `mixAlg`, and `domainLambdas`, and evaluate with several relevant metrics.
+## SiMLR Framework and Objectives
+
+SiMLR seeks to learn modality-specific loadings \( V^{(z)} \in \mathbb{R}^{p_z \times k} \). The framework optimizes a joint objective that balances data fidelity and regularization, formulated as:
+
+\[
+\min_{\{V^{(z)}\}} \;
+\sum_{z=1}^Z \mathcal{L}\big(X^{(z)}, U^{(z)}, V^{(z)}\big)
++ \sum_{z=1}^Z R\!\left( V^{(z)} \right).
+\]
+
+### Components of the Objective
+
+- **Data Fidelity Term \(\mathcal{L}(X^{(z)}, U^{(z)}, V^{(z)})\)**: Quantifies how well the shared embedding and view maps explain the observed data. SiMLR supports multiple fidelity measures (detailed in the "Energy Functions" subsection), such as reconstruction error (\(\| X^{(z)} - V^{(z)} U^{(z)} \|_F^2\)) or absolute canonical covariance (\(-\| \mathrm{Cov}(U^{(z)}, X^{(z)}) \|_1\)), selected via `energyType` (e.g., `"regression"`, `"acc"`). These allow SiMLR to adapt to tasks like reconstruction, correlation maximization, or cross-modal prediction. The $U^{(z)}$ matrix is updated based on the current estimates of \( V^{(z)} \) and thus is not directly optimized over.
+
+- **Regularization Term \( R(V^{(z)}) \)**: Imposes constraints on the view maps to enhance interpretability and robustness. These include:
+  - **Sparsity**: Enforced via \(\ell_1\)-norm penalties, controlled by `sparsenessQuantiles`.
+  - **Smoothness**: Enforced via spatial regularizers, specified by `smoothingMatrices`.
+  - **Positivity or Orthogonality**: Enforced via constraints like `constraint = "orthox0.02x1"` or `positivities`.
+  - **Domain Alignment**: Encourages \( V^{(z)} \) to align with prior domain matrices \( M_z \in \mathbb{R}^{m \times p_z} \), defined as \( R(V^{(z)}) = -\gamma_z \| M_z V^{(z)} \|_F^2 \), where \( \gamma_z \) (controlled by `domainLambdas`) balances prior strength. In this study, \( M_z \) maps features to \( m = `r nrow(dlist[[1]])` \) cognitive domains (e.g., processing speed, memory).
+
+Formally, the smoothing and sparseness component of the regularization on \( V^{(z)} \) is applied to the feature vectors. Denote \( v_{zk} \) as the \( k \)-th column of \( V^{(z)} \), \( G_z^\sigma \) as a sparse regularization matrix with rows summing to one, and \( \gamma_z \) as a scalar weight. The regularization term takes the form:
+
+\[
+\sum_{z=1}^Z \sum_{k=1}^k \gamma_z \| G_z^\sigma v_{zk} \|^+_{\ell_p},
+\]
+
+where \( \| \cdot \|^+_{\ell_p} \) is a positivity-constrained \(\ell_p\)-norm (typically \( p=0 \) or \( p=1 \)) to enforce sparsity or smoothness, tailored to neuroimaging applications (e.g., spatial adjacency for cortical features).
+
+### Optimization Strategy
+
+The joint optimization problem is nonconvex in \( (U^{(z)}, \{V^{(z)}\}) \). SiMLR employs **alternating minimization**:
+
+1. **Update \( V^{(z)} \)** (fixed \( U^{(z)} \)): Solve a regularized regression or covariance maximization problem for each view, incorporating sparsity, positivity, or domain alignment constraints.
+2. **Update \( U^{(z)} \)** (fixed \( \{V^{(z)}\} \)): Solve a dimensionality reduction problem (e.g., PCA, ICA) to obtain a low-dimensional representation based on \( \{X^{(j)} (V^{(j)})^\top\}_{j=1,j\ne z}^Z \) where we "leave-out" the view being updated.
+3. Apply constraint projections (e.g., orthogonalization via `constraint = "orthox0.02x1"`, positivity via `positivities`).
+4. Repeat until convergence or a fixed number of iterations (`iterations = `r myits``), using gradient-based methods like Adam, NADAM, stochastic gradient descent, or RMSprop (`optimizationStyle = "adam"`). Robust initializations (random, SVD-based, or other low-rank bases) are recommended \citep{kellman2017}.
+
+### Interpretation
+
+- \( V^{(z)} \): Interpretable multivariate maps (e.g., brain spatial maps linking latent dimensions to cortical regions or connectivity measures) for biological insights.
+
+### Energy Functions
+
+The data fidelity term \( \mathcal{L}(X^{(z)}, U^{(z)}, V^{(z)}) \) supports multiple objectives, each emphasizing different properties of the latent space. Below, we detail each energy function, its interpretation, strengths, limitations, and, for domain alignment, its gradient.
+
+#### 1. Regression / Reconstruction Error
+
+**Definition:**
+
+\[
+\mathcal{L}_{\text{reg}} = \| X^{(z)} - U^{(z)} (V^{(z)})^\top \|_F^2 \quad \text{or its centered/normalized variants.}
+\]
+
+**Interpretation:** Encourages \( U^{(z)} (V^{(z)})^\top \) to approximate \( X^{(z)} \), capturing maximum variance within each modality. Suitable for reconstructing data like cortical thickness maps in neuroimaging.
+
+**Strengths:**
+- Convex in \( V^{(z)} \), simplifying optimization.
+- Prioritizes data fidelity, ensuring high variance capture.
+
+**Limitations:**
+- Focuses on within-modality variance, potentially neglecting cross-modal alignment.
+- Sensitive to noise and outliers, which may dominate the Frobenius norm.
+
+#### 2. Procrustes Correlation
+
+**Definition:**
+
+\[
+\mathcal{L}_{\text{proc}} = -\frac{\operatorname{tr}((U^{(z)})^\top X^{(z)} V^{(z)})}{\| (U^{(z)})^\top X^{(z)} V^{(z)} \|_F}.
+\]
+
+**Interpretation:** Maximizes correlation (up to rotation/scale) between the projected data \( X^{(z)} V^{(z)} \) and \( U^{(z)} \), akin to canonical correlation analysis but normalized by the Frobenius norm. Useful for aligning functional connectivity with structural features in neuroimaging.
+
+**Strengths:**
+- Scale-invariant, focusing on geometric alignment of subspaces.
+- Enhances cross-modal similarity, supporting multimodal integration.
+
+**Limitations:**
+- Non-convex, sensitive to initialization and optimization challenges.
+- May prioritize alignment over reconstruction accuracy.
+
+#### 3. Angular Distance Objective
+
+**Definition:**
+
+\[
+\mathcal{L}_{\text{ang}} = \left\| \frac{U^{(z)}}{\| U^{(z)} \|_F} - \frac{X^{(z)} V^{(z)}}{\| X^{(z)} V^{(z)} \|_F} \right\|_F^2.
+\]
+
+**Interpretation:** Penalizes differences in subspace orientation between \( U^{(z)} \) and \( X^{(z)} V^{(z)} \), emphasizing directionality over magnitude. Ideal for applications where relative orientation matters, such as brain network alignments.
+
+**Strengths:**
+- Scale-invariant, robust to magnitude differences across modalities.
+- Focuses on geometric properties of the latent space.
+
+**Limitations:**
+- May underweight explained variance, reducing reconstruction accuracy.
+- Computationally complex due to normalization.
+
+#### 4. Absolute Canonical Covariance
+
+**Definition:**
+
+\[
+\mathcal{L}_{\text{acc}} = -\frac{\sum_i | ((U^{(z)})^\top X^{(z)} V^{(z)})_{ii} |}{\| U^{(z)} \|_F \| X^{(z)} V^{(z)} \|_F}.
+\]
+
+**Interpretation:** Maximizes absolute diagonal correlations between \( U^{(z)} \) and \( X^{(z)} V^{(z)} \), capturing canonical structure despite sign ambiguities. Relevant for aligning latent factors across modalities with positive or negative connectivity strengths.
+
+**Strengths:**
+- Robust to sign flips, ensuring consistent alignment.
+- Enhances interpretability of canonical relationships.
+
+**Limitations:**
+- Focus on diagonal correlations may miss off-diagonal interactions.
+- Normalization can be sensitive to small singular values.
+
+#### 5. ICA (Independent Component Analysis)
+
+**Definition (logcosh example):**
+
+\[
+\mathcal{L}_{\text{ICA}} = -\frac{1}{n} \sum_{ij} \log(\cosh(S_{ij})), \quad S = (U^{(z)})^\top X^{(z)} V^{(z)}.
+\]
+
+**Interpretation:** Promotes non-Gaussianity to disentangle statistically independent components across modalities. The logcosh function approximates negentropy, encouraging sparse or independent latent factors, useful for separating distinct neural processes (e.g., motor vs. memory signals).
+
+**Strengths:**
+- Captures sparse or independent factors, aligning with biological assumptions.
+- Robust to Gaussian noise due to non-Gaussianity focus.
+
+**Limitations:**
+- Sensitive to non-linearity choice (e.g., logcosh) and data scaling.
+- May overfit to non-Gaussian artifacts without careful tuning.
+
+#### 6. Domain Alignment Energy
+
+**Definition:**
+
+\[
+\mathcal{L}_{\text{domain}}(V^{(z)}) = -\gamma_z \| M_z V^{(z)} \|_F^2,
+\]
+
+where \( M_z \in \mathbb{R}^{m \times p_z} \) encodes prior information (e.g., anatomical or cognitive domain mappings).
+
+**Interpretation:** Encourages \( V^{(z)} \) to align with prior knowledge by maximizing the energy of \( M_z V^{(z)} \). In neuroimaging, \( M_z \) may represent cognitive domains, ensuring learned factors respect biological priors.
+
+**Strengths:**
+- Integrates priors (e.g., anatomical atlases) for interpretable solutions.
+- Flexible: \( M_z \) can be sparse or derived from prior studies.
+- Supports hypothesis-driven research in neuroscience.
+
+**Limitations:**
+- Requires accurate priors; restrictive \( M_z \) may bias results.
+- Performance depends on \( \gamma_z \) (via `domainLambdas`).
+
+**Gradient:**
+
+\[
+\nabla_{V^{(z)}} \mathcal{L}_{\text{domain}} = -2 \gamma_z (M_z)^\top (M_z V^{(z)}).
+\]
+
+This quadratic regularizer penalizes deviation from the domain-consistent subspace, guiding optimization toward biologically meaningful solutions.
+
+### Summary of Energy Functions
+
+Each energy function targets a distinct property:
+- **Regression**: Prioritizes within-modality variance for data reconstruction.
+- **Procrustes Correlation**: Enhances cross-modal subspace alignment.
+- **Angular Distance**: Focuses on geometric orientation, robust to scaling.
+- **Absolute Canonical Covariance**: Ensures robust canonical relationships.
+- **ICA**: Disentangles independent neural signals.
+- **Domain Alignment**: Integrates priors for biological interpretability.
+
+SiMLR combines these via `energyType` (e.g., `"acc"`, `"regression"`), enabling flexible multimodal integration for tasks like biomarker discovery \citep{avants2021,stone2020}.
+
+## Simulation Design
+
+We simulate \( V = `r length(matlist_train)` \) modalities with \( n = `r n` \) subjects (\( `r n_train` \) training, \( n - `r n_train` \) test) and \( d = `r d` \) latent cognitive domains. The modalities include:
+
+- **Cortex**: Structural features (e.g., cortical thickness, \( p_1 = `r ncol(matlist_train[[1]])` \) features).
+- **White Matter**: Diffusion metrics (e.g., fractional anisotropy, \( p_2 = `r ncol(matlist_train[[2]])` \) features).
+- **Functional Connectivity**: Connectivity strengths (\( p_3 = `r ncol(matlist_train[[3]])` \) features).
+
+The simulation embeds \( d = `r d` \) cognitive domains as latent signals, with modality-specific corruptions and noise (signal-to-noise ratio = `r snr`). Domain matrices \( Z_v \in \mathbb{R}^{`r nrow(dlist[[1]])` \times p_z} \) map domains to features, serving as "ground truth" priors. We evaluate SiMLR with and without domain guidance, varying `energyType`, `mixAlg`, and `domainLambdas`, and assess performance using the following metrics:
 
 ### Metrics
 
 - **Cross-view Embedding Correlation**: Mean RV coefficient between test embeddings (higher better).
-
 - **Domain Latent Recovery R²**: Mean squared canonical correlations between concatenated test embeddings and true latents (higher better).
-
-- **Domain Alignment Score**: Mean cosine similarity between feature weights (\(V_i\)) and domain matrices (higher better).
-
+- **Domain Alignment Score**: Mean cosine similarity between feature weights (\( V^{(z)} \)) and domain matrices (\( Z_v \)) (higher better).
 - **Reconstruction Error**: Mean normalized Frobenius norm of SiMLR reconstruction on test data (lower better).
-
 - **Cross-Modal Reconstruction Error**: Mean normalized Frobenius error predicting each view’s test data from other views’ concatenated embeddings via linear regression (lower better).
-
-## Technical Background
-
-Similarity-driven Multi-view Linear Reconstruction (SiMLR), implemented in the ANTsR package, is a dimensionality reduction framework designed to integrate high-dimensional, multimodal data by exploiting inter-modality relationships and incorporating prior domain knowledge to enhance interpretability [Avants et al., 2021]. SiMLR extends canonical correlation analysis (CCA) and related multi-view methods by incorporating regularization terms that promote sparsity and alignment with prior knowledge, making it particularly suited for neuroimaging applications where modalities like structural MRI, diffusion tensor imaging (DTI), and functional MRI (fMRI) must be fused to uncover latent biological signals [Stone et al., 2020].
-
-### SiMLR Objective Function
-
-SiMLR operates on a set of \( K \) data matrices \( \{X_k \in \mathbb{R}^{n \times p_k}\}_{k=1}^K \), where \( n \) is the number of subjects and \( p_k \) is the number of features for modality \( k \). The goal is to find low-dimensional embeddings \( \{U_k \in \mathbb{R}^{n \times d}\}_{k=1}^K \) and corresponding feature weight matrices \( \{V_k \in \mathbb{R}^{p_k \times d}\}_{k=1}^K \), where \( d \) is the number of latent components (\( d \ll p_k \)). These are derived by optimizing an objective function that balances cross-modal similarity, reconstruction fidelity, and alignment with domain knowledge priors.
-
-The SiMLR objective function can be expressed as:
-
-\[
-J = \sum_{k=1}^K \sum_{j \neq k} \text{Energy}(U_k, U_j) + \sum_{k=1}^K \lambda_k \|\hat{X}_k - X_k\|_F^2 + \sum_{k=1}^K \gamma_k \text{Prior}(V_k, Z_k),
-\]
-
-where:
-- **Energy Term**: The first term, \( \text{Energy}(U_k, U_j) \), measures the similarity between embeddings of different modalities. For the "acc" energy type, this is typically the RV coefficient, a multivariate generalization of the squared correlation coefficient, defined as:
-
-\[
-\text{RV}(U_k, U_j) = \frac{\text{tr}(U_k^T U_j U_j^T U_k)}{\sqrt{\text{tr}(U_k^T U_k)^2 \text{tr}(U_j^T U_j)^2}}.
-\]
-
-For the "regression" energy type, it involves a linear regression loss between embeddings. The choice of energy type influences how SiMLR captures inter-modality relationships, with "acc" emphasizing correlation and "regression" focusing on predictive accuracy.
-
-- **Reconstruction Term**: The second term, \( \|\hat{X}_k - X_k\|_F^2 \), minimizes the Frobenius norm of the reconstruction error, where \( \hat{X}_k = U_k V_k^T \) is the reconstructed data matrix for modality \( k \), and \( \lambda_k \) is a weighting parameter. This ensures that the low-dimensional embeddings preserve the original data’s structure.
-
-- **Domain Alignment Term**: The third term, \( \text{Prior}(V_k, Z_k) \), incorporates domain knowledge through a quadratic alignment energy, defined as:
-
-\[
-\text{Prior}(V_k, Z_k) = -\gamma_k \|Z_k V_k\|_F^2,
-\]
-
-where \( Z_k \in \mathbb{R}^{m_k \times p_k} \) is a prior matrix encoding domain knowledge for modality \( k \), with \( m_k \) representing the number of prior domains (e.g., cognitive domains like processing speed or memory), and \( \gamma_k \) (controlled by `domainLambda`) is a non-negative scalar controlling the strength of the prior. The term \( \|Z_k V_k\|_F^2 \) is the squared Frobenius norm of the projection of the feature weight matrix \( V_k \) onto the prior matrix \( Z_k \), normalized by the product of the dimensions of \( Z_k \) and \( V_k \):
-
-\[
-\|Z_k V_k\|_F^2 = \sum_{i,j} (Z_k V_k)_{i,j}^2.
-\]
-
-This negative quadratic form encourages the feature weights \( V_k \) to align with the structure of \( Z_k \), maximizing the projection’s magnitude and thus promoting components that capture features relevant to the specified domains. Unlike L1-norm regularization, which promotes sparsity, the quadratic Frobenius norm encourages smooth alignment with the prior, balancing interpretability with flexibility to capture data-driven patterns.
-
-### Domain Knowledge Integration
-
-The domain alignment term is critical for enhancing the biological interpretability of SiMLR embeddings in neuroimaging. The prior matrix \( Z_k \) encodes domain knowledge, such as mappings of cortical regions to cognitive functions or white matter tracts to motor skills, derived from anatomical atlases, functional parcellations, or prior studies [Avants et al., 2021]. For example, in the cortical thickness modality, \( Z_k \) might assign higher weights to temporal lobe features for the memory domain based on neuroscientific evidence. The negative sign in \( -\gamma_k \|Z_k V_k\|_F^2 \) ensures that the objective function minimizes the negative of the alignment energy, effectively maximizing \( \|Z_k V_k\|_F^2 \), which aligns the learned feature weights with the prior domains.
-
-The `domainLambda` parameter (\( \gamma_k \)) controls the trade-off between data-driven discovery and prior-guided alignment. A low \( \gamma_k \) allows SiMLR to prioritize the energy and reconstruction terms, capturing novel signals not represented in \( Z_k \), while a high \( \gamma_k \) enforces stronger adherence to the prior, potentially at the cost of overfitting to the provided knowledge. The normalization by \( \text{nrow}(Z_k) \times \text{ncol}(V_k) \) in the energy calculation ensures scale invariance, making the term robust to differences in the dimensionality of \( Z_k \) and \( V_k \). This formulation is particularly valuable in neuroimaging, where high-dimensional data (e.g., thousands of voxels or connectivity measures) must be reduced to interpretable components that align with biological constructs [Stone et al., 2020].
-
-### Optimization and Mixing Algorithms
-
-SiMLR optimizes the objective function iteratively using algorithms like Adam (`optimizationStyle = "adam"`) with constraints such as orthogonality (`constraint = "orthox0.02x1"`) and sparsity (`sparsenessQuantiles`). The mixing algorithm (`mixAlg`), such as independent component analysis (ICA) or principal component analysis (PCA), determines how latent components are separated. ICA, which assumes non-Gaussian sources, is often more effective for capturing complex signals in neuroimaging data, while PCA assumes Gaussianity and maximizes variance [Avants et al., 2021]. The interplay between the energy type, mixing algorithm, and domain alignment term shapes the balance between data-driven and prior-informed embeddings, making SiMLR a flexible tool for multimodal integration.
-
-This formulation enables SiMLR to address the challenges of multimodal neuroimaging, where modalities have distinct dimensionalities, noise profiles, and biological underpinnings. By incorporating domain knowledge via the quadratic alignment energy, SiMLR enhances the biological plausibility of the resulting embeddings, making it a powerful tool for applications like biomarker discovery or clinical stratification [Stone et al., 2020].
 
 ## Data Simulation
 
-Simulate n=300 subjects (200 train, 100 test), d=6 domains.
+Simulate \( n = `r n` \) subjects (\( `r n_train` \) train, \( n - `r n_train` \) test), \( d = `r d` \) domains.
 
 ```{r simulate-data}
-n <- 300
-n_train <- 200
+n <- 60
+n_train <- 40
 domains <- c("processing_speed", "language", "memory", "executive_functioning", "motor", "visuospatial_skills")
 d <- length(domains)
 p <- c(500, 400, 300)
@@ -177,7 +332,6 @@ cross_view_rv <- function(emb_list) {
 
 # Domain recovery R²
 domain_recovery_r2 <- function(emb_list, true_latents) {
-  # Input validation
   if (!is.list(emb_list) || length(emb_list) == 0) {
     stop("emb_list must be a non-empty list of matrices or vectors.")
   }
@@ -185,60 +339,39 @@ domain_recovery_r2 <- function(emb_list, true_latents) {
     stop("true_latents must be a matrix.")
   }
   
-  # Ensure all elements in emb_list are matrices
   emb_list <- lapply(emb_list, as.matrix)
-  
-  # Check number of rows consistency
   n_rows <- unique(sapply(emb_list, nrow))
   if (length(n_rows) != 1 || n_rows != nrow(true_latents)) {
     stop("All elements in emb_list and true_latents must have the same number of rows.")
   }
   
-  # Check for valid dimensions
   if (ncol(true_latents) == 0) {
     stop("true_latents has zero columns.")
   }
   
-  # Initialize vector to store mean squared canonical correlations for each embedding
   mean_cc2 <- numeric(length(emb_list))
-  
-  # Compute canonical correlations for each embedding
   for (i in seq_along(emb_list)) {
     emb <- emb_list[[i]]
-    
-    # Check for non-zero columns
     if (ncol(emb) == 0) {
       warning(paste("Embedding", i, "has zero columns. Skipping."))
       mean_cc2[i] <- 0
       next
     }
     
-    # Scale data, handling zero-variance columns
     emb_scaled <- scale(emb, center = TRUE, scale = TRUE)
     true_latents_scaled <- scale(true_latents, center = TRUE, scale = TRUE)
-    
-    # Replace NA values (from zero-variance columns) with 0
     emb_scaled[is.na(emb_scaled)] <- 0
     true_latents_scaled[is.na(true_latents_scaled)] <- 0
-    
-    # Compute cross-correlation matrix
     R <- t(emb_scaled) %*% true_latents_scaled / (nrow(emb_scaled) - 1)
-    
-    # Compute canonical correlations via SVD
     cc <- svd(R, nu = 0, nv = 0)$d
-    
-    # Ensure canonical correlations are between 0 and 1 (due to numerical precision)
     cc <- pmin(pmax(cc, 0), 1)
-    
-    # Store mean squared canonical correlations for this embedding
     mean_cc2[i] <- mean(cc^2, na.rm = TRUE)
   }
   
-  # Return average of mean squared canonical correlations across embeddings
   mean(mean_cc2, na.rm = TRUE)
 }
 
-# Domain alignment (optimized)
+# Domain alignment
 domain_alignment <- function(basis1, basis2) {
   similarity_matrix <- abs(proxy::simil(basis1, basis2, method = "correlation"))
   match_result <- clue::solve_LSAP(similarity_matrix, maximum = TRUE)
@@ -252,7 +385,7 @@ recon_error <- function(simlr_result, mat_test) {
   mean(errs, na.rm = TRUE)
 }
 
-# New: Cross-modal reconstruction error
+# Cross-modal reconstruction error
 cross_modal_recon <- function(emb_train_list, emb_test_list, mat_train_list, mat_test_list) {
   errs <- numeric(length(mat_train_list))
   for (i in 1:length(mat_train_list)) {
@@ -261,11 +394,11 @@ cross_modal_recon <- function(emb_train_list, emb_test_list, mat_train_list, mat
     other_inds <- setdiff(1:length(mat_train_list), i)
     concat_train <- do.call(cbind, emb_train_list[other_inds])
     concat_test <- do.call(cbind, emb_test_list[other_inds])
-    trdf=data.frame(concat_train)
-    tedf=data.frame(concat_test)
-    mylm=lm(X_train ~ . , data=trdf )
-    pp=data.matrix(predict( mylm, newdata=tedf))
-    errs[i] <- norm(X_test - data.matrix(pp), "F") / norm(X_test, "F")
+    trdf <- data.frame(concat_train)
+    tedf <- data.frame(concat_test)
+    mylm <- lm(X_train ~ ., data = trdf)
+    pp <- data.matrix(predict(mylm, newdata = tedf))
+    errs[i] <- norm(X_test - pp, "F") / norm(X_test, "F")
   }
   mean(errs, na.rm = TRUE)
 }
@@ -307,20 +440,18 @@ perm_test <- function(result, matlist_train, dlist, n_perm = 10, domlam) {
 
 ## Parameter Grid and Runs
 
-```{r run-grid, eval=!exists("results")}
+```{r run-grid,eval=!exists("results")}
 smoothingMats <- lapply(matlist_train, function(m) diag(ncol(m)))
 myspar <- rep(0.8, length(matlist_train))
 mypos <- rep("positive", length(matlist_train))
 myorth <- "orthox0.02x1"
-initu <- initializeSimlr(matlist_train, round(d*1.2) )
+initu <- initializeSimlr(matlist_train, round(d*1.2))
 myits <- 200
-myopt <- "adam"
-#############################################
+myopt <- "nadam"
 params_grid <- expand.grid(
-  energyType = c("acc", "regression"),# , "kurtosis", "logcosh" ),
-#  mixAlg = c("pca", "ica", "svd"),
-  mixAlg = c("pca",'ica'),
-  domainLambda = c( 0,  0.2, 0.5, 1, 2, 5 )/10.0
+  energyType = c('normalized_correlation', "acc", "regression"),
+  mixAlg = c("pca", "ica", 'svd'),
+  domainLambda = c(0, 0.2, 0.5, 1, 2, 5) / 10.0
 )
 results <- list()
 metrics <- data.frame(params_grid, cross_rv = NA, recovery_r2 = NA, alignment = NA, recon_err = NA, cross_modal = NA, perm_t = NA)
@@ -344,7 +475,7 @@ for (row in 1:nrow(params_grid)) {
     domainLambdas = rep(par$domainLambda, length(matlist_train)),
     randomSeed = 123
   )
-  result$mixAlg <- as.character(par$mixAlg)
+  result$mixAlg <- par$mixAlg
   results[[key]] <- result
   emb_train <- lapply(1:3, function(i) matlist_train[[i]] %*% result$v[[i]])
   emb_test <- lapply(1:3, function(i) matlist_test[[i]] %*% result$v[[i]])
@@ -353,7 +484,7 @@ for (row in 1:nrow(params_grid)) {
   metrics$alignment[row] <- mean(sapply(1:length(dlist), function(i) domain_alignment(dlist[[i]], t(result$v[[i]]))))
   metrics$recon_err[row] <- recon_error(result, matlist_test)
   metrics$cross_modal[row] <- cross_modal_recon(emb_train, emb_test, matlist_train, matlist_test)
-  if (par$domainLambda > 0  ) {
+  if (par$domainLambda > 0) {
     perm_res <- perm_test(result, matlist_train, dlist, n_perm = 5, domlam = par$domainLambda)
     metrics$perm_t[row] <- perm_res$t_stat
   }
@@ -367,12 +498,6 @@ for (row in 1:nrow(params_grid)) {
 ```{r metrics-table}
 library(gt)
 library(gtExtras)
-# datatable(
-#  metrics %>% mutate(across(c(cross_rv, recovery_r2, alignment, recon_err, cross_modal, perm_t), ~round(., 4))),
-##  options = list(pageLength = 10, order = list(list(3, "desc"))),
-#  caption = "Metrics for All Runs (Sortable)"
-# )
-#
 gt_tbl <- metrics %>% 
   mutate(across(c(cross_rv, recovery_r2, alignment, recon_err, cross_modal, perm_t), round, 4)) %>%
   arrange(desc(recovery_r2)) 
@@ -380,15 +505,12 @@ library(reactable)
 
 reactable(
   gt_tbl,
-  # Table-level options
   bordered = TRUE,
   striped = TRUE,
   highlight = TRUE,
   resizable = TRUE,
   pagination = FALSE,
   defaultSorted = list(recovery_r2 = "desc"),
-  
-  # Global styling
   defaultColDef = colDef(
     align = "center",
     headerStyle = list(
@@ -403,16 +525,6 @@ reactable(
       fontSize = "13px"
     )
   ),
-  
-  # Column-specific tweaks
-  columns = list(
-    mpg = colDef(name = "Miles/Gallon", format = colFormat(digits = 1)),
-    cyl = colDef(name = "Cylinders"),
-    hp  = colDef(name = "Horsepower"),
-    wt  = colDef(name = "Weight (1000 lbs)", format = colFormat(digits = 2))
-  ),
-  
-  # Theme (with custom style overrides)
   theme = reactableTheme(
     borderColor = "#dee2e6",
     stripedColor = "#f8f9fa",
@@ -421,14 +533,13 @@ reactable(
     color = "#212529",
     backgroundColor = "white",
     style = list(
-      borderRadius = "8px",       # rounded corners
-      borderWidth = "1px",        # table border thickness
+      borderRadius = "8px",
+      borderWidth = "1px",
       borderStyle = "solid",
       borderColor = "#dee2e6"
     )
   )
 )
-#########
 ```
 
 ### Heatmap of Metrics
@@ -457,12 +568,11 @@ metrics_norm <- metrics %>%
     cross_modal = 1 - (cross_modal - min(cross_modal)) / (max(cross_modal) - min(cross_modal))
   )
 
-# Top guided, best unguided, and group averages
 top_guided <- metrics_norm %>% filter(domainLambda > 0) %>% slice(which.max(alignment))
 best_unguided <- metrics_norm %>% filter(domainLambda == 0) %>% slice(which.max(recovery_r2))
 guided_avg <- metrics_norm %>% filter(domainLambda > 0) %>% summarise(across(c(cross_rv, recovery_r2, alignment, recon_err, cross_modal), mean))
 unguided_avg <- metrics_norm %>% filter(domainLambda == 0) %>% summarise(across(c(cross_rv, recovery_r2, alignment, recon_err, cross_modal), mean))
-best_unguided$perm_t=0
+
 plot_ly(type = "scatterpolar") %>%
   add_trace(
     r = as.numeric(top_guided[1, c("cross_rv", "recovery_r2", "alignment", "recon_err", "cross_modal")]),
@@ -497,25 +607,23 @@ plot_ly(type = "scatterpolar") %>%
 
 ### Grouped Bar Plot with Significance
 
-```{r bar-plot, fig.width=10, fig.height=6}
+```{r bar-plot, fig.width=12, fig.height=6}
 metrics_long <- metrics %>%
   mutate(Group = ifelse(domainLambda > 0, "Guided", "Unguided")) %>%
   pivot_longer(cols = c(cross_rv, recovery_r2, alignment, recon_err, cross_modal), names_to = "Metric", values_to = "Value")
-if ( FALSE ) {
-# T-tests for significance
-t_tests <- metrics_long %>%
-  group_by(Metric, energyType) %>%
-  summarise(
-    p_value = t.test(Value[Group == "Guided"], Value[Group == "Unguided"], alternative = "two.sided")$p.value,
-    .groups = "drop"
-  ) %>%
-  mutate(Signif = case_when(p_value < 0.01 ~ "***", p_value < 0.05 ~ "**", p_value < 0.1 ~ "*", TRUE ~ ""))
+if (FALSE) {
+  t_tests <- metrics_long %>%
+    group_by(Metric, energyType) %>%
+    summarise(
+      p_zalue = t.test(Value[Group == "Guided"], Value[Group == "Unguided"], alternative = "two.sided")$p.value,
+      .groups = "drop"
+    ) %>%
+    mutate(Signif = case_when(p_zalue < 0.01 ~ "***", p_zalue < 0.05 ~ "**", p_zalue < 0.1 ~ "*", TRUE ~ ""))
 }
 ggplot(metrics_long, aes(x = Group, y = Value, fill = Group)) +
   geom_bar(stat = "summary", fun = "mean", position = position_dodge()) +
   geom_errorbar(stat = "summary", fun.data = "mean_se", width = 0.4, position = position_dodge(0.45)) +
   facet_grid(Metric ~ energyType, scales = "free_y") +
-#  geom_text(data = t_tests, aes(x = 1.5, y = Inf, label = Signif), vjust = 1.5, size = 5) +
   labs(title = "Guided vs. Unguided Metrics by Energy Type", y = "Value") +
   theme_minimal() +
   scale_fill_manual(values = c("Guided" = "#1b9e77", "Unguided" = "#d95f02"))
@@ -535,11 +643,10 @@ ggplot(metrics_long, aes(x = domainLambda, y = Value, color = paste(energyType, 
 
 ### Scaled Line Plot
 
-```{r scaled-line-plot, fig.width=12, fig.height=8, echo=FALSE}
+```{r scaled-line-plot, fig.width=12, fig.height=8}
 library(dplyr)
 library(ggplot2)
 
-# Create a combined factor for energyType and mixAlg
 metrics_long <- metrics_long %>%
   mutate(energy_mix = paste(energyType, mixAlg, sep = "+")) %>%
   group_by(Metric, energy_mix) %>%
@@ -547,7 +654,6 @@ metrics_long <- metrics_long %>%
          (max(Value, na.rm = TRUE) - min(Value, na.rm = TRUE))) %>%
   ungroup()
 
-# Create the ggplot with normalized values
 ggplot(metrics_long, aes(x = domainLambda, y = Value_normalized, 
                         color = energy_mix)) +
   geom_line(size = 1) +
@@ -558,7 +664,6 @@ ggplot(metrics_long, aes(x = domainLambda, y = Value_normalized,
        y = "Normalized Value (0 to 1)") +
   theme_minimal() +
   scale_color_discrete(name = "Energy + MixAlg")
-  
 ```
 
 ### Energy Decomposition for Top Configurations
@@ -570,7 +675,7 @@ plots <- lapply(1:nrow(top_configs), function(i) {
   p <- plot_energy_decomposition(results[[key]], "cortex")
   p + ggtitle(paste("Energy Decomp:", key))
 })
-grid.arrange(grobs = plots, ncol = 2)
+grid.arrange(grobs = plots, ncol = 1)
 ```
 
 ## Example Runs
@@ -597,7 +702,7 @@ cat("Cross-Modal Recon:", cross_modal_recon(emb_domain, lapply(1:3, function(i) 
 
 ### Feature Weights Inspection
 
-To gain deeper insight into how domain priors influence the learned representations, we examine the feature weights for the cortical modality in the top guided configuration. We compute the domain contributions by projecting the absolute values of the loading matrix V onto the prior domain matrix. This reveals the extent to which each learned component captures specific cognitive domains, promoting interpretability in neuroimaging contexts where linking features to biological constructs is essential.
+To gain deeper insight into how domain priors influence the learned representations, we examine the feature weights for the cortical modality in the top guided configuration. We compute the domain contributions by projecting the absolute values of the loading matrix \( V^{(1)} \) onto the prior domain matrix. This reveals the extent to which each learned component captures specific cognitive domains, promoting interpretability in neuroimaging contexts where linking features to biological constructs is essential.
 
 ```{r inspect-weights}
 v_cortex <- result_domain$v[[1]]
@@ -605,15 +710,12 @@ domain_contrib <- dlist[[1]] %*% abs(v_cortex)
 colnames(domain_contrib) <- paste0("Comp", 1:ncol(domain_contrib))
 rownames(domain_contrib) <- domains
 
-# Print the matrix
 print(domain_contrib)
 
-# Visualize as heatmap for better interpretation
 heatmaply(domain_contrib, 
           colors = viridis::viridis(100), 
           main = "Domain Contributions to Learned Components (Cortex)",
           xlab = "Learned Components", ylab = "Cognitive Domains")
-          
 ```
 
 ## Summary Tables
@@ -627,7 +729,7 @@ top3 <- metrics %>%
   slice(1:3) %>%
   mutate(across(c(cross_rv, recovery_r2, alignment, recon_err, cross_modal, perm_t), round, 3)) 
 
-top3 %>%  gt() %>%
+top3 %>% gt() %>%
   tab_header(title = "Top 3 Guided Configurations")
 ```
 
@@ -639,9 +741,8 @@ best_unguided <- metrics %>%
   arrange(desc(recovery_r2)) %>%
   slice(1) %>%
   mutate(across(c(cross_rv, recovery_r2, alignment, recon_err, cross_modal), round, 3)) 
-  
-best_unguided%>%
-  gt() %>%
+
+best_unguided %>% gt() %>%
   tab_header(title = "Best Unguided Configuration")
 ```
 
@@ -672,20 +773,23 @@ summary_tbl
 
 ## Discussion
 
-This study leverages the similarity-driven multi-view linear reconstruction (SiMLR) framework within ANTsR to integrate high-dimensional, multimodal neuroimaging data, incorporating domain knowledge priors to enhance interpretability and statistical power, as inspired by prior work in neuroimaging and multi-omics [Avants et al., 2021; Stone et al., 2020]. Using simulated data mimicking cortical thickness, white matter diffusion metrics, and functional connectivity, we demonstrate that guided SiMLR configurations—particularly those employing the "acc" energy type with independent component analysis (ICA) mixing and moderate domain lambdas—substantially outperform unguided baselines across key metrics, aligning with the need for biologically grounded, reproducible analyses in quantitative neuroscience.
+This study leverages the similarity-driven multi-view linear reconstruction (SiMLR) framework within ANTsR to integrate high-dimensional, multimodal neuroimaging data, incorporating domain knowledge priors to enhance interpretability and statistical power, as inspired by prior work in neuroimaging and multi-omics \citep{avants2021,stone2020}. Using simulated data mimicking cortical thickness, white matter diffusion metrics, and functional connectivity, we demonstrate that guided SiMLR configurations—particularly those employing the "`r top3$energyType[1]`" energy type with `r top3$mixAlg[1]` mixing and moderate domain lambdas—substantially outperform unguided baselines across key metrics, aligning with the need for biologically grounded, reproducible analyses in quantitative neuroscience.
 
-The top-performing guided configuration (acc, ICA, domainLambda = 0.20) achieves a cross-view RV coefficient of 0.766, a domain latent recovery R² of 0.836, and a domain alignment score of 0.915, with a permutation test t-statistic of 37.99, indicating robust improvements over random prior permutations. These results highlight SiMLR’s ability to capture inter-modality similarities and align learned embeddings with predefined cognitive domains (e.g., processing speed, memory), as evidenced by the high alignment score. Compared to the best unguided baseline (regression, ICA, domainLambda = 0, recovery R² = 0.712, alignment = 0.582), the guided configuration yields a 0.124 increase in recovery R² and a 0.333 increase in alignment, underscoring the value of domain priors in enhancing the recovery of latent signals and their biological interpretability. The reconstruction error (385.963) and cross-modal reconstruction error (0.983) in this configuration are also notably lower than the unguided baseline (reconstruction error = 389.756, cross-modal error = 0.982), suggesting improved generalizability across modalities.
+The top-performing guided configuration (`r top3$energyType[1]`, `r top3$mixAlg[1]`, domainLambda = `r top3$domainLambda[1]`) achieves a cross-view RV coefficient of `r round(top3$cross_rv[1], 3)`, a domain latent recovery R² of `r round(top3$recovery_r2[1], 3)`, and a domain alignment score of `r round(top3$alignment[1], 3)`, with a permutation test t-statistic of `r round(top3$perm_t[1], 2)`, indicating robust improvements over random prior permutations. These results highlight SiMLR’s ability to capture inter-modality similarities and align learned embeddings with predefined cognitive domains (e.g., processing speed, memory), as evidenced by the high alignment score. Compared to the best unguided baseline (`r best_unguided$energyType`, `r best_unguided$mixAlg`, domainLambda = 0, recovery R² = `r round(best_unguided$recovery_r2, 3)`, alignment = `r round(best_unguided$alignment, 3)`), the guided configuration yields a `r round(top3$recovery_r2[1] - best_unguided$recovery_r2, 3)` increase in recovery R² and a `r round(top3$alignment[1] - best_unguided$alignment, 3)` increase in alignment, underscoring the value of domain priors in enhancing the recovery of latent signals and their biological interpretability. The reconstruction error (`r round(top3$recon_err[1], 3)`) and cross-modal reconstruction error (`r round(top3$cross_modal[1], 3)`) in this configuration are also lower than the unguided baseline (reconstruction error = `r round(best_unguided$recon_err, 3)`, cross-modal error = `r round(best_unguided$cross_modal, 3)`), suggesting improved generalizability across modalities.
 
-From a neuroimaging perspective, these findings are particularly relevant for integrating multimodal data, such as structural MRI, diffusion tensor imaging (DTI), and resting-state fMRI, where each modality captures complementary aspects of brain structure and function [Stone et al., 2020]. The high alignment scores in guided configurations (e.g., 0.915 for acc, ICA, domainLambda = 0.20) indicate that SiMLR effectively maps learned components to biologically meaningful domains, facilitating hypothesis-driven research, such as linking cortical thinning to cognitive deficits or white matter alterations to executive dysfunction. This mirrors applications in studies of traumatic brain injury or Alzheimer’s disease, where priors from anatomical atlases or functional parcellations enhance interpretability [Avants et al., 2021]. The low cross-modal reconstruction errors (e.g., 0.981 for acc, ICA, domainLambda = 0.05) suggest that guided embeddings can predict one modality from others, a critical capability for clinical settings where missing data or modality-specific artifacts are common, such as in longitudinal studies of neurodegenerative disorders.
+From a neuroimaging perspective, these findings are particularly relevant for integrating multimodal data, such as structural MRI, diffusion tensor imaging (DTI), and resting-state fMRI, where each modality captures complementary aspects of brain structure and function \citep{stone2020}. The high alignment scores in guided configurations (e.g., `r round(top3$alignment[1], 3)` for `r top3$energyType[1]`, `r top3$mixAlg[1]`, domainLambda = `r top3$domainLambda[1]`) indicate that SiMLR effectively maps learned components to biologically meaningful domains, facilitating hypothesis-driven research, such as linking cortical thinning to cognitive deficits or white matter alterations to executive dysfunction. This mirrors applications in studies of traumatic brain injury or Alzheimer’s disease, where priors from anatomical atlases or functional parcellations enhance interpretability \citep{avants2021}. The low cross-modal reconstruction errors (e.g., `r round(metrics$cross_modal[which(metrics$energyType == top3$energyType[1] & metrics$mixAlg == top3$mixAlg[1] & metrics$domainLambda == 0.05)], 3)` for `r top3$energyType[1]`, `r top3$mixAlg[1]`, domainLambda = 0.05) suggest that guided embeddings can predict one modality from others, a critical capability for clinical settings where missing data or modality-specific artifacts are common, such as in longitudinal studies of neurodegenerative disorders.
 
-The permutation tests provide strong statistical evidence of the non-random contribution of domain priors, with t-statistics ranging from 7.958 to 83.734 across guided configurations, peaking at 83.734 for regression, ICA, domainLambda = 0.02. This indicates that the priors significantly enhance performance in a manner robust to random perturbations, reinforcing confidence in SiMLR’s reliability for neuroimaging applications. However, the performance trade-offs are notable: configurations with higher domain lambdas (e.g., 0.50, acc, ICA) show a decline in recovery R² (0.781) and alignment (0.829) compared to moderate lambdas (e.g., 0.20), suggesting that excessive prior weighting may constrain the model’s flexibility to capture latent signals not fully represented in the domain matrices. This trade-off is evident in the acc, ICA configurations, where cross-view RV (0.766 at domainLambda = 0.20) and recovery R² (0.836) peak at moderate lambdas before declining at higher values.
+The permutation tests provide strong statistical evidence of the non-random contribution of domain priors, with t-statistics ranging from `r round(min(metrics$perm_t[metrics$domainLambda > 0], na.rm = TRUE), 3)` to `r round(max(metrics$perm_t[metrics$domainLambda > 0], na.rm = TRUE), 3)` across guided configurations, peaking at `r round(metrics$perm_t[which(metrics$energyType == "regression" & metrics$mixAlg == "ica" & metrics$domainLambda == 0.02)], 3)` for regression, ICA, domainLambda = 0.02. This indicates that the priors significantly enhance performance in a manner robust to random perturbations, reinforcing confidence in SiMLR’s reliability for neuroimaging applications. However, performance trade-offs are notable: configurations with higher domain lambdas (e.g., `r max(metrics$domainLambda[metrics$domainLambda > 0])`, `r top3$energyType[1]`, `r top3$mixAlg[1]`) show a decline in recovery R² (`r round(metrics$recovery_r2[which(metrics$energyType == top3$energyType[1] & metrics$mixAlg == top3$mixAlg[1] & metrics$domainLambda == max(metrics$domainLambda[metrics$domainLambda > 0]))], 3)`) and alignment (`r round(metrics$alignment[which(metrics$energyType == top3$energyType[1] & metrics$mixAlg == top3$mixAlg[1] & metrics$domainLambda == max(metrics$domainLambda[metrics$domainLambda > 0]))], 3)`) compared to moderate lambdas (e.g., `r top3$domainLambda[1]`), suggesting that excessive prior weighting may constrain the model’s flexibility to capture latent signals not fully represented in the domain matrices. This trade-off is evident in the `r top3$energyType[1]`, `r top3$mixAlg[1]` configurations, where cross-view RV (`r round(top3$cross_rv[1], 3)` at domainLambda = `r top3$domainLambda[1]`) and recovery R² (`r round(top3$recovery_r2[1], 3)`) peak at moderate lambdas before declining at higher values.
 
-Interestingly, the regression energy type with ICA mixing shows consistent performance across domain lambdas (e.g., recovery R² ≈ 0.694, alignment ≈ 0.591), with high permutation t-statistics (e.g., 83.689 for domainLambda = 0.10), suggesting robustness but limited sensitivity to prior strength. In contrast, the acc energy type with ICA mixing is highly sensitive to domainLambda, with cross-view RV increasing from 0.465 (unguided) to 0.766 (domainLambda = 0.20) and alignment from 0.574 to 0.915, indicating that the acc energy type benefits more from prior guidance. The PCA mixing algorithm, however, underperforms with the acc energy type (e.g., recovery R² = 0.645 at domainLambda = 0.02), likely due to its assumption of Gaussian signal components, whereas ICA’s ability to capture non-Gaussian structures aligns better with the simulated data’s complexity.
+Interestingly, the regression energy type with ICA mixing shows consistent performance across domain lambdas (e.g., recovery R² ≈ `r round(mean(metrics$recovery_r2[metrics$energyType == "regression" & metrics$mixAlg == "ica"]), 3)`, alignment ≈ `r round(mean(metrics$alignment[metrics$energyType == "regression" & metrics$mixAlg == "ica"]), 3)`), with high permutation t-statistics (e.g., `r round(metrics$perm_t[which(metrics$energyType == "regression" & metrics$mixAlg == "ica" & metrics$domainLambda == 0.1)], 3)` for domainLambda = 0.10), suggesting robustness but limited sensitivity to prior strength. In contrast, the `r top3$energyType[1]` energy type with `r top3$mixAlg[1]` mixing is highly sensitive to domainLambda, with cross-view RV increasing from `r round(metrics$cross_rv[which(metrics$energyType == top3$energyType[1] & metrics$mixAlg == top3$mixAlg[1] & metrics$domainLambda == 0)], 3)` (unguided) to `r round(top3$cross_rv[1], 3)` (domainLambda = `r top3$domainLambda[1]`) and alignment from `r round(metrics$alignment[which(metrics$energyType == top3$energyType[1] & metrics$mixAlg == top3$mixAlg[1] & metrics$domainLambda == 0)], 3)` to `r round(top3$alignment[1], 3)`, indicating that the `r top3$energyType[1]` energy type benefits more from prior guidance. The PCA mixing algorithm, however, underperforms with the `r top3$energyType[1]` energy type (e.g., recovery R² = `r round(metrics$recovery_r2[which(metrics$energyType == top3$energyType[1] & metrics$mixAlg == "pca" & metrics$domainLambda == 0.02)], 3)` at domainLambda = 0.02), likely due to its assumption of Gaussian signal components, whereas ICA’s ability to capture non-Gaussian structures aligns better with the simulated data’s complexity.
 
-The simulation’s design, while controlled, assumes linear mappings and Gaussian noise, which may not fully capture the nonlinearities, scanner artifacts, or subject-specific variability in real neuroimaging data [Avants et al., 2021]. The high reconstruction errors (e.g., 393.123 for acc, PCA, domainLambda = 0) in some configurations suggest sensitivity to parameter choices, particularly for PCA-based methods, which may struggle with the sparse, noisy nature of multimodal data. Future validation on large-scale datasets, such as the UK Biobank or the Adolescent Brain Cognitive Development (ABCD) study, is critical to confirm these findings in the presence of real-world heterogeneity. Additionally, the recovery R² metric, while effective for evaluating latent signal recovery, may require normalization or calibration to avoid numerical amplification, as values like 0.836 (acc, ICA, domainLambda = 0.20) suggest potential scaling issues in the canonical correlation computation.
+The simulation’s design, while controlled, assumes linear mappings and Gaussian noise, which may not fully capture the nonlinearities, scanner artifacts, or subject-specific variability in real neuroimaging data \citep{avants2021}. The high reconstruction errors (e.g., `r round(metrics$recon_err[which(metrics$energyType == "acc" & metrics$mixAlg == "pca" & metrics$domainLambda == 0)], 3)` for acc, PCA, domainLambda = 0) in some configurations suggest sensitivity to parameter choices, particularly for PCA-based methods, which may struggle with the sparse, noisy nature of multimodal data. Future validation on large-scale datasets, such as the UK Biobank or the Adolescent Brain Cognitive Development (ABCD) study, is critical to confirm these findings in the presence of real-world heterogeneity. Additionally, the recovery R² metric, while effective for evaluating latent signal recovery, may require normalization or calibration to avoid numerical amplification, as values like `r round(top3$recovery_r2[1], 3)` (`r top3$energyType[1]`, `r top3$mixAlg[1]`, domainLambda = `r top3$domainLambda[1]`) suggest potential scaling issues in the canonical correlation computation.
 
-Practically, SiMLR’s ability to integrate domain priors aligns with the ethos of reproducible, open-science neuroimaging championed by the ANTs ecosystem [Avants et al., 2011]. The feature weights inspection (Section "Feature Weights Inspection") reveals how learned components correspond to cognitive domains, enhancing biological interpretability and supporting applications like biomarker discovery in psychiatric disorders or monitoring longitudinal brain changes post-injury [Stone et al., 2020]. The method’s robustness to cross-modal prediction makes it suitable for clinical scenarios with incomplete datasets, such as predicting functional connectivity from structural MRI in patients with missing fMRI scans.
+Practically, SiMLR’s ability to integrate domain priors aligns with the ethos of reproducible, open-science neuroimaging championed by the ANTs ecosystem \citep{avants2011}. The feature weights inspection (Section "Feature Weights Inspection") reveals how learned components correspond to cognitive domains, enhancing biological interpretability and supporting applications like biomarker discovery in psychiatric disorders or monitoring longitudinal brain changes post-injury \citep{stone2020}. The method’s robustness to cross-modal prediction makes it suitable for clinical scenarios with incomplete datasets, such as predicting functional connectivity from structural MRI in patients with missing fMRI scans.
 
-Limitations include the simulation’s reliance on synthetic data, which simplifies biological variability. Nonlinear relationships between modalities and latents, common in real-world neuroimaging, may require extensions like kernel-based SiMLR or integration with deep learning within the ANTsX framework. The choice of domainLambda remains a critical tuning parameter, as overly strong priors (e.g., domainLambda = 0.50) may overfit to the provided knowledge, potentially missing novel signals. Future work should explore adaptive lambda selection, validate against clinical datasets with ground-truth outcomes (e.g., Alzheimer’s or traumatic brain injury cohorts), and integrate SiMLR with tools like Neuroconductor for scalable analysis [Muschelli et al., 2019]. Incorporating priors from advanced parcellations or connectomics could further enhance performance, particularly for disorders with distributed neural signatures.
+Limitations include the simulation’s reliance on synthetic data, which simplifies biological variability. Nonlinear relationships between modalities and latents, common in real-world neuroimaging, may require extensions like kernel-based SiMLR or integration with deep learning within the ANTsX framework. The choice of domainLambda remains a critical tuning parameter, as overly strong priors (e.g., domainLambda = `r max(metrics$domainLambda[metrics$domainLambda > 0])`) may overfit to the provided knowledge, potentially missing novel signals. Future work should explore adaptive lambda selection, validate against clinical datasets with ground-truth outcomes (e.g., Alzheimer’s or traumatic brain injury cohorts), and integrate SiMLR with tools like Neuroconductor for scalable analysis \citep{muschelli2019}. Incorporating priors from advanced parcellations or connectomics could further enhance performance, particularly for disorders with distributed neural signatures.
 
 In summary, this study demonstrates that SiMLR, augmented with domain knowledge priors, provides a robust, interpretable framework for multimodal neuroimaging analysis. By achieving superior alignment, latent recovery, and cross-modal prediction, it offers a promising tool for uncovering biologically meaningful patterns, advancing precision neuroscience and clinical biomarker discovery.
+
+\bibliographystyle{apalike}
+\bibliography{references}
