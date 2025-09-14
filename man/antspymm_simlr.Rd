@@ -14,7 +14,7 @@ antspymm_simlr(
   covariates = "1",
   myseed = 3,
   doAsym = TRUE,
-  returnidps = FALSE,
+  returnidps = 0,
   restrictDFN = FALSE,
   resnetGradeThresh = 1.02,
   doperm = FALSE,
@@ -51,7 +51,7 @@ Other options include 'lrr', 'regression', 'nc', 'base.pca', 'base.spca', 'base.
 
 \item{doAsym}{integer 0 for FALSE, 1 for TRUE and 2 for separate matrices for asymm variables.}
 
-\item{returnidps}{Logical indicating whether to return the intermediate processing steps' results. Defaults to FALSE.}
+\item{returnidps}{Integer indicating whether to return the idp names (1) or matrices (2) or neither (0). Defaults to 0.}
 
 \item{restrictDFN}{Logical indicating whether to restrict analysis to default network features. Defaults to FALSE.}
 

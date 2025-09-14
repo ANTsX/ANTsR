@@ -259,8 +259,8 @@ The simulation embeds \( d = `r d` \) cognitive domains as latent signals, with 
 Simulate \( n = `r n` \) subjects (\( `r n_train` \) train, \( n - `r n_train` \) test), \( d = `r d` \) domains.
 
 ```{r simulate-data}
-n <- 60
-n_train <- 40
+n <- 600
+n_train <- 400
 domains <- c("processing_speed", "language", "memory", "executive_functioning", "motor", "visuospatial_skills")
 d <- length(domains)
 p <- c(500, 400, 300)

@@ -131,12 +131,13 @@ step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
   beta1 <- params$beta1 %||% 0.9; beta2 <- params$beta2 %||% 0.999
   epsilon <- params$epsilon %||% 1e-8; learning_rate <- params$learning_rate %||% 0.001
   myit <- params$myit %||% 1 # Need current iteration for bias correction
-  
+  print("ASS")
   # Update state with the descent gradient
   state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
   state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)
   state$v_max <- pmax(state$v_max, state$v)
-  
+    print("BUTT")
+
   # Bias correction for momentum and adaptive learning rate
   m_hat <- state$m / (1 - beta1^myit)
   v_hat <- state$v_max / (1 - beta2^myit)

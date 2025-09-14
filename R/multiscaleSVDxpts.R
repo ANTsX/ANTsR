@@ -4058,12 +4058,13 @@ gradient_invariant_orthogonality_salad<- function(A) {
 .calculate_domain_energy <- function(V, Z, lambda) {
   # Input validation
   stopifnot(
-    is.matrix(V) && is.matrix(Z),
+#    is.matrix(V) && is.matrix(Z),
     "Matrix dimensions are not compatible." = ncol(Z) == nrow(V),
     "Lambda must be non-negative." = lambda >= 0
   )
   
   # Compute projection
+  Z=data.matrix(Z)
 #  Vmod=l1_normalize_features(V)
 #  Vmod <- apply(V, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
 #  Z <- apply(Z, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
@@ -4089,12 +4090,13 @@ gradient_invariant_orthogonality_salad<- function(A) {
   # Defensive dimension checks
   p <- nrow(V); k <- ncol(V); z <- nrow(Z)
   stopifnot(
-    is.matrix(V) && is.matrix(Z),
+#    is.matrix(V) && is.matrix(Z),
     "Matrix dimensions are not compatible." = ncol(Z) == p,
     "Lambda must be non-negative." = lambda >= 0
   )
   
   # Compute projection
+  Z=data.matrix(Z)
 #  Vmod=l1_normalize_features(V)
 #  Vmod <- apply(V, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
 #  Z <- apply(Z, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
@@ -4684,21 +4686,7 @@ simlr <- function(
       ----------------------
       ", mixAlg, energyType, sparsenessAlg, expBeta, constraint_type, constraint_iterations, constraint_weight, optimizationStyle, domain_knowledge ))
   }
-  
-  # 2.0 Define Logic for Optimization Style
-  lineSearchLogic <- function(x) { # energy path is input
-    nna <- sum(!is.na(x))
-    if (nna <= 1) {
-      return(TRUE)
-    }
-    xx <- na.omit(x)
-    if ((xx[length(xx) - 1] > xx[length(xx)])) {
-      return(FALSE)
-    }
-    return(TRUE)
-    # mdl = loess( xx ~ as.numeric(1:length(xx)) ) # for slope estimate
-  }
-  
+    
 # ==============================================================================
 #      High-Performance SIMLR Loop (Hybrid: Adam/SGD + Line Search)
 # ==============================================================================
@@ -4783,7 +4771,6 @@ for (myit in 1:iterations) {
           dom_e <- dom_e_raw * domain_weights[i]    # Scale
         }
       }
-
       orth_e <- 0
       if (constraint_type == "ortho") {
         orth_e <- invariant_orthogonality_defect(V_sp) * constraint_weight * orth_weights[i]
@@ -4840,7 +4827,6 @@ for (myit in 1:iterations) {
       g <- clip_gradient_by_quantile(constrainG(as.matrix(g), i, constraint_type), clipper)
       return(g)
     }      
-
     riemannian_descent_grad = smooth_grad(vmats[[i]])
     step_result <- step(
           optimizer_object,
@@ -4852,7 +4838,7 @@ for (myit in 1:iterations) {
           learning_rate = current_learning_rate,       # For non-hybrid methods
           myit = myit                                  # For Adam bias correction
         )
-    
+
  # Update the parameter and the optimizer object with their new states
     V_updated <- step_result$updated_V
     optimizer_object <- step_result$optimizer
@@ -6932,7 +6918,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
 #' @param covariates any covariates to adjust training matrices. if covariates is set to 'mean' then the rowwise mean will be factored out of each matrix.  this can be a vector e.g. \code{c('center','scale','rank')}. pass the name opt to antspymm_simlr_update_residuals to have the function print the options.
 #' @param myseed Seed for random number generation to ensure reproducibility. Defaults to 3.
 #' @param doAsym integer 0 for FALSE, 1 for TRUE and 2 for separate matrices for asymm variables.
-#' @param returnidps Logical indicating whether to return the intermediate processing steps' results. Defaults to FALSE.
+#' @param returnidps Integer indicating whether to return the idp names (1) or matrices (2) or neither (0). Defaults to 0.
 #' @param restrictDFN Logical indicating whether to restrict analysis to default network features. Defaults to FALSE.
 #' @param resnetGradeThresh image quality threshold (higher better).
 #' @param doperm Logical indicating whether to perform permutation tests. Defaults to FALSE.  Will randomize image features in the training data and thus leads to "randomized" but still regularized projections.
@@ -6962,7 +6948,7 @@ antspymm_simlr <- function(
                           covariates = '1',
                           myseed = 3,
                           doAsym = TRUE,
-                          returnidps = FALSE,
+                          returnidps = 0,
                           restrictDFN = FALSE,
                           resnetGradeThresh = 1.02,
                           doperm = FALSE,
@@ -7074,7 +7060,9 @@ antspymm_simlr <- function(
     print(sample(unique(unlist(idplist)), min(10, total_idps)))
   }
   
-  if (returnidps) return(unique(unlist(idplist)))
+  if (returnidps==1) {
+    return(idplist)
+  }
 
   # --- 4. Data Preparation and Subsetting ---
   if (verbose) message("Step 2: Preparing and subsetting data based on quality checks...")
@@ -7094,7 +7082,6 @@ antspymm_simlr <- function(
     matsFull[[names(idplist)[kk]]] <- blaster[, idplist[[kk]]]
     mats[[names(idplist)[kk]]] <- antsrimpute(blaster2[allnna, idplist[[kk]]])
   }
-  
   if (doperm) {
     if (verbose) message("Applying permutations to matrices for null model testing.")
     set.seed(myseed)
@@ -7134,6 +7121,11 @@ antspymm_simlr <- function(
   if (!missing(connect_cog)) {
     if (verbose) message("  Setting up sparse regularization for 'cg' modality.")
     regs[["cg"]] <- Matrix::Matrix(regs0[["cg"]], sparse = TRUE)
+  }
+
+
+  if (returnidps==2) {
+    return( list( matrices=mats, regs=regs ) )
   }
 
   # --- Handle baseline energy types ---
