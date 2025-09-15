@@ -5010,7 +5010,9 @@ return(
       converged_at = converged,
       sim_energy = all_sim_energy,
       domain_energy = all_dom_energy_raw,
-      total_energy = all_total_energy
+      total_energy = all_total_energy,
+      domainLambdas = domainLambdas,
+      constraint = constraint
     )
   )
 }
@@ -5040,6 +5042,10 @@ plot_energy_decomposition <- function(simlr_result, modality, show_weights = FAL
   df <- simlr_result$energyPath
   df <- df[df$modality == modality, ]
   df = df[-1,]
+  
+  if (!"iteration" %in% colnames(df)) {
+    df$iteration <- seq_len(nrow(df))
+  }
   
   # Base data
   energies <- data.frame(
