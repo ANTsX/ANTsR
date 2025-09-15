@@ -4929,6 +4929,7 @@ for (myit in 1:iterations) {
       if (verbose & i == nModalities ) message("Domain Weights: ", paste(round(domain_weights, 2), collapse=", "))      
     }
     if (verbose) {
+      print(normalizing_weights)
       message("Norm Weights: ", paste(round(normalizing_weights, 3), collapse=", "))
       message("Orth Weights: ", paste(round(orth_weights, 2), collapse=", "))
     }
