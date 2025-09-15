@@ -4430,7 +4430,7 @@ simlr <- function(
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc','dat', 'lrr', 'reconorm', 'logcosh', 'exp', 'kurtosis', 'gauss'),
     vmats,
     connectors = NULL,
-    optimizationStyle = "adam",
+    optimizationStyle = "lookahead",
     scale = c("center",  "eigenvalue" ),
     expBeta = 0.0,
     jointInitialization = TRUE,
