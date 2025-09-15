@@ -150,6 +150,33 @@ step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
   return(list(updated_V = updated_V, optimizer = optimizer))
 }
 
+
+#' @export
+step.gd <- function(optimizer, i, V_current, descent_gradient, ...) {
+  # Naive gradient descent with exponential learning rate decay
+  # update: V_{t+1} = V_t - η_t * ∇f(V_t)
+  
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  
+  learning_rate <- params$learning_rate %||% 0.01
+  decay_rate    <- params$decay_rate %||% 1e-3
+  
+  # Track iteration count in state
+  state$iter <- (state$iter %||% 0) + 1
+  
+  # Exponential decay schedule
+  effective_lr <- learning_rate * exp(-decay_rate * state$iter)
+  
+  # Compute update
+  updated_V <- V_current - effective_lr * descent_gradient
+  
+  # Update state
+  optimizer$state[[i]] <- state
+  
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
 #' @export
 step.nadam <- function(optimizer, i, V_current, descent_gradient, ...) {
   # This method uses Nesterov-accelerated Adam. It is very fast and powerful.
@@ -461,6 +488,139 @@ step.ls_nadam <- function(optimizer, i, V_current, descent_gradient, full_energy
   return(list(updated_V = updated_V, optimizer = optimizer))
 }
 
+
+#' @export
+step.lbfgs <- function(optimizer, i, V_current, descent_gradient, ...) {
+  # Naive memory-1 L-BFGS optimizer
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  lr <- params$learning_rate %||% 0.1
+  
+  # Initialize state if missing
+  state$prev_V <- state$prev_V %||% V_current
+  state$prev_g <- state$prev_g %||% descent_gradient
+  state$H <- state$H %||% diag(length(V_current))  # Hessian approx
+  
+  # Ensure vectors
+  s <- as.vector(V_current - state$prev_V)
+  y <- as.vector(descent_gradient - state$prev_g)
+  
+  # Skip update if y^T s is too small to avoid numerical instability
+  if (sum(y * s) > 1e-12) {
+    rho <- 1 / sum(y * s)
+    I <- diag(length(s))
+    
+    # Rank-1 BFGS update
+    H <- state$H
+    H_new <- (I - rho * tcrossprod(s, y)) %*% H %*% (I - rho * tcrossprod(y, s)) + rho * tcrossprod(s)
+    state$H <- H_new
+    
+    # Compute step
+    step_dir <- - H_new %*% descent_gradient
+  } else {
+    step_dir <- - lr * descent_gradient  # fallback to scaled GD
+  }
+  
+  # Apply step
+  updated_V <- V_current + lr * step_dir
+  
+  # Save state
+  state$prev_V <- V_current
+  state$prev_g <- descent_gradient
+  optimizer$state[[i]] <- state
+  
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
+#' @export
+step.amsgrad <- function(optimizer, i, V_current, descent_gradient, ...) {
+  # AMSGrad optimizer
+  
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  beta1 <- params$beta1 %||% 0.9
+  beta2 <- params$beta2 %||% 0.999
+  epsilon <- params$epsilon %||% 1e-8
+  lr <- params$learning_rate %||% 0.001
+  t <- params$myit %||% 1
+  
+  # Init state
+  state$m <- state$m %||% 0
+  state$v <- state$v %||% 0
+  state$vhat <- state$vhat %||% 0
+  
+  # Update biased moments
+  state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
+  state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)
+  
+  # Maintain max of past v's
+  state$vhat <- pmax(state$vhat, state$v)
+  
+  # Bias correction
+  m_hat <- state$m / (1 - beta1^t)
+  
+  # Update step
+  updated_V <- V_current - lr * m_hat / (sqrt(state$vhat) + epsilon)
+  
+  state$iter <- t + 1
+  optimizer$state[[i]] <- state
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
+#' @export
+step.adadelta <- function(optimizer, i, V_current, descent_gradient, ...) {
+  # AdaDelta update rule
+  
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  rho     <- params$rho %||% 0.95
+  epsilon <- params$epsilon %||% 1e-6
+  
+  # Init state if missing
+  state$Eg2 <- state$Eg2 %||% 0
+  state$Edx2 <- state$Edx2 %||% 0
+  
+  # Accumulate gradient squared
+  state$Eg2 <- rho * state$Eg2 + (1 - rho) * (descent_gradient^2)
+  
+  # Compute update
+  RMS_dx <- sqrt(state$Edx2 + epsilon)
+  RMS_g  <- sqrt(state$Eg2 + epsilon)
+  delta_x <- -(RMS_dx / RMS_g) * descent_gradient
+  
+  # Update parameters
+  updated_V <- V_current + delta_x
+  
+  # Accumulate updates squared
+  state$Edx2 <- rho * state$Edx2 + (1 - rho) * (delta_x^2)
+  
+  optimizer$state[[i]] <- state
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
+
+#' @export
+step.lookahead <- function(optimizer, i, V_current, descent_gradient, ...) {
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  k <- params$k %||% 5       # synchronization period
+  alpha <- params$alpha %||% 0.5  # slow-fast interpolation
+  
+  # Update fast weights with base optimizer
+  base_result <- optimizer$base_step(optimizer, i, V_current, descent_gradient, ...)
+  V_fast <- base_result$updated_V
+  optimizer <- base_result$optimizer
+  
+  state$step <- state$step + 1
+  if (state$step %% k == 0) {
+    # Sync slow and fast
+    state$V_slow <- state$V_slow + alpha * (V_fast - state$V_slow)
+    V_fast <- state$V_slow
+  }
+  
+  optimizer$state[[i]] <- state
+  return(list(updated_V = V_fast, optimizer = optimizer))
+}
 
 # Helper for default values
 `%||%` <- function(a, b) if (is.null(a)) b else a

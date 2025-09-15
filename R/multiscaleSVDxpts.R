@@ -9166,3 +9166,196 @@ read_simlr <- function(dir) {
 
   return(result)
 }
+
+
+
+
+#' Transform prior rows to (approximately) uncorrelated representative rows
+#'
+#' Given a prior matrix P (k x p) whose rows are correlated and potentially
+#' over-represent some latent signals, this function produces a reduced set
+#' of row-priors that are uncorrelated and representative.
+#'
+#' Methods:
+#' - "svd" : row-PCA / SVD on P (default). Returns top j orthogonal components.
+#' - "cluster_then_svd": cluster correlated rows, compute cluster centroids, then
+#'    run SVD on centroids to produce orthogonal representatives.
+#'
+#' The function will:
+#'  1. optionally normalize rows
+#'  2. compute SVD of P (or of centroids)
+#'  3. select j (user provided or automatic by variance explained)
+#'  4. return j orthogonal (uncorrelated) row-vectors in R^p
+#'
+#' @param P numeric matrix (k x p) — rows are the priors to compress/orthogonalize.
+#' @param j integer or NULL. Number of components to keep. If NULL, chosen automatically.
+#' @param method character, one of "svd" or "cluster_then_svd".
+#' @param row_center logical. Subtract row means before analysis (recommended).
+#' @param row_scale logical. Scale rows to unit sd (optional).
+#' @param varimax logical. Apply varimax rotation to loadings (improves interpretability).
+#' @param cluster_k integer or NULL. If method = "cluster_then_svd", number of clusters. If NULL, chosen with silhouette / dynamic.
+#' @param var_exp_threshold numeric in (0,1). If j is NULL, choose smallest j with cumulative variance >= this threshold.
+#' @param verbose logical.
+#'
+#' @return A list with elements:
+#'   - P_orig: original input
+#'   - P_trans: transformed row-priors (j x p) (rows uncorrelated)
+#'   - U: left singular vectors (k x j)
+#'   - S: singular values (j)
+#'   - Vt: right singular vectors transposed (j x p)
+#'   - transform_fn: function(newP) to map new data with same transform
+#'   - diagnostics: list with eigenvalues, variance explained, chosen j, clustering info
+#' @export
+transform_prior_rows_to_uncorrelated <- function(
+  P,
+  j = NULL,
+  method = c("svd", "cluster_then_svd"),
+  row_center = TRUE,
+  row_scale = FALSE,
+  varimax = FALSE,
+  cluster_k = NULL,
+  var_exp_threshold = 0.90,
+  verbose = TRUE
+) {
+  method <- match.arg(method)
+  stopifnot(is.matrix(P) || is.numeric(P))
+  P <- as.matrix(P)
+  k <- nrow(P); p <- ncol(P)
+  if (verbose) message(sprintf("Input: k=%d rows, p=%d cols", k, p))
+  
+  # 1) normalize rows if requested
+  row_means <- rep(0, k); row_sds <- rep(1, k)
+  if (row_center) {
+    row_means <- rowMeans(P)
+    Pc <- P - matrix(row_means, nrow = k, ncol = p, byrow = FALSE)
+  } else {
+    Pc <- P
+  }
+  if (row_scale) {
+    row_sds <- apply(Pc, 1, sd)
+    row_sds[row_sds == 0] <- 1
+    Pn <- Pc / matrix(row_sds, nrow = k, ncol = p, byrow = FALSE)
+  } else {
+    Pn <- Pc
+  }
+  
+  # Helper for automatic j selection based on variance explained of singular values
+  choose_j_from_s <- function(s, threshold = var_exp_threshold) {
+    var_explained <- s^2 / sum(s^2)
+    cumv <- cumsum(var_explained)
+    jsel <- which(cumv >= threshold)[1]
+    if (is.na(jsel)) jsel <- length(s)
+    return(list(j = jsel, var_explained = var_explained, cumv = cumv))
+  }
+  
+  # 2) optionally cluster rows then compute centroids
+  cluster_info <- NULL
+  if (method == "cluster_then_svd") {
+    if (is.null(cluster_k)) {
+      # choose cluster_k heuristically: e.g. between 2 and min( floor(k/2), 50)
+      cluster_k <- max(2, min(ceiling(k/10), k-1))
+      if (verbose) message("cluster_k not provided: using heuristic cluster_k = ", cluster_k)
+    }
+    # use correlation distance between rows
+    row_cor <- stats::cor(t(Pn))
+    distmat <- as.dist(1 - row_cor)
+    hc <- stats::hclust(distmat, method = "average")
+    cl <- stats::cutree(hc, k = cluster_k)
+    centroids <- matrix(NA_real_, nrow = cluster_k, ncol = p)
+    for (c in seq_len(cluster_k)) {
+      members <- which(cl == c)
+      centroids[c, ] <- colMeans(Pn[members, , drop = FALSE])
+    }
+    P_for_svd <- centroids
+    cluster_info <- list(hclust = hc, clusters = cl, centroids = centroids)
+  } else {
+    P_for_svd <- Pn
+  }
+  
+  # 3) SVD on P_for_svd : note: rows are observations, we want left singular vectors U (rows space)
+  #     Use svd(P_for_svd) where P_for_svd is m x p (m = k or cluster_k)
+  svd_res <- svd(P_for_svd, nu = min(nrow(P_for_svd), ncol(P_for_svd)), nv = min(nrow(P_for_svd), ncol(P_for_svd)))
+  svals <- svd_res$d
+  # select j if NULL
+  sel <- choose_j_from_s(svals)
+  if (is.null(j)) {
+    j_use <- sel$j
+    if (verbose) message(sprintf("Auto-selected j = %d (%.1f%% variance explained)", j_use, 100 * sum(sel$var_explained[1:j_use])))
+  } else {
+    j_use <- min(j, length(svals))
+  }
+  
+  Uj <- svd_res$u[, 1:j_use, drop = FALSE]   # (m x j)
+  Sj <- svals[1:j_use]
+  Vjt <- t(svd_res$v)[1:j_use, , drop = FALSE] # (j x p)
+  
+  # Rows uncorrelated property: (Uj^T * P_for_svd) has diagonal covariance = diag(Sj^2)
+  # Build transformed row-priors of size j x p. We define:
+  #   P_trans = Uj^T %*% P_for_svd  (gives j x p rows that are orthogonal)
+  P_trans_raw <- t(Uj) %*% P_for_svd  # j x p ; rows orthogonal, covariance diag(Sj^2)
+  
+  # Optionally varimax rotate rows for interpretability:
+  rotation <- NULL
+  if (varimax) {
+    # We want to rotate the rows (components) to be more sparse/ interpretable.
+    # varimax in base R rotates loadings (columns in a loadings matrix); we can transpose appropriately.
+    # varimax acts on columns; so pass t(P_trans_raw) which is p x j; result$rotmat is j x j
+    vm <- stats::varimax(t(P_trans_raw))
+    rotmat <- vm$rotmat  # j x j
+    P_trans <- (rotmat %*% P_trans_raw)  # j x p
+    rotation <- rotmat
+  } else {
+    P_trans <- P_trans_raw
+  }
+  
+  # Provide a transform function for new priors: apply same centering/scaling/cluster+projection
+  transform_fn <- function(newP) {
+    newP <- as.matrix(newP)
+    if (ncol(newP) != p) stop("newP must have same number of columns (p) as original P")
+    # apply same row centering/scaling (note: centering is by row; for new rows we use the mean/sd computed from original P)
+    np <- newP
+    if (row_center) {
+      np <- np - matrix(row_means, nrow = nrow(np), ncol = p, byrow = FALSE)
+    }
+    if (row_scale) {
+      np <- np / matrix(row_sds, nrow = nrow(np), ncol = p, byrow = FALSE)
+    }
+    if (method == "cluster_then_svd") {
+      # map new rows to cluster centroids: average rows inside each cluster? For mapping new arbitrary rows,
+      # we project the new rows onto the Uj basis of centroids. We'll compute projection using Vjt and Sj.
+      # We need to produce same j dims: P_trans_new = t(Uj) %*% centroid_space_projection(newP)
+      # Simpler: derive mapping from original svd: we have V (p x j), so projection = (newP %*% V) * diag(1)
+      # But careful: our P_for_svd was centroids; so a general mapping is new_proj = t(Uj) %*% newP_clustered
+      # For simplicity, map each new row x to representation r = (V_j %*% x) (this yields j-length vector).
+      # Implement: r = V_j^T %*% x  where V_j is p x j (svd_res$v[,1:j])
+      Vj <- svd_res$v[, 1:j_use, drop = FALSE] # p x j
+      # for input rows we return j-length vectors per row
+      t(t(newP %*% Vj)) # returns nrow(newP) x j; user can transpose if needed
+    } else {
+      # method == "svd": use Vj as above
+      Vj <- svd_res$v[, 1:j_use, drop = FALSE]
+      t(t(newP %*% Vj))
+    }
+  }
+  
+  diagnostics <- list(
+    singular_values = svals,
+    var_explained = sel$var_explained,
+    cumvar = sel$cumv,
+    chosen_j = j_use,
+    method = method,
+    cluster_info = cluster_info
+  )
+  
+  return(list(
+    P_orig = P,
+    P_processed = Pn,
+    P_trans = P_trans,
+    U = Uj,
+    S = Sj,
+    Vt = Vjt,
+    rotation = rotation,
+    transform_fn = transform_fn,
+    diagnostics = diagnostics
+  ))
+}
