@@ -44,6 +44,84 @@ library(clue)
 set.seed(123)  # For reproducibility
 ```
 
+
+
+## Data Simulation
+
+
+```{r simulate-data}
+n <- 600
+n_train <- 400
+domains <- c("processing_speed", "language", "memory", "executive_functioning", "motor", "visuospatial_skills")
+d <- length(domains)
+p <- c(500, 400, 300)
+snr <- 0.5
+
+# Domain latents
+domain_latents <- matrix(rnorm(n * d), nrow = n)
+domain_latents <- scale(domain_latents, center = TRUE, scale = TRUE)
+domain_latents_train <- domain_latents[1:n_train, ]
+domain_latents_test <- domain_latents[(n_train+1):n, ]
+
+# Domain knowledge matrices
+dlist <- lapply(1:3, function(i) {
+  dm <- matrix(0, d, p[i])
+  features_per_domain <- p[i] / d
+  for (j in 1:d) {
+    start <- round((j-1) * features_per_domain + 1)
+    end <- round(j * features_per_domain)
+    dm[j, start:end] <- runif(end - start + 1, 0.5, 1)
+    other_domain <- sample((1:d)[-j], 1)
+    overlap_idx <- sample(start:end, size = round(0.1 * (end - start)))
+    dm[other_domain, overlap_idx] <- runif(length(overlap_idx), 0.1, 0.3)
+  }
+  dm <- dm / rowSums(dm, na.rm = TRUE)
+  rownames(dm) <- domains
+  dm/max(dm)
+})
+names(dlist) <- c("cortex", "white_matter", "functional_connectivity")
+
+# Modality-specific corruptions
+corrupt_cortex <- svd(matrix(rnorm(d * d), d, d))$u
+corrupt_wm <- svd(matrix(rnorm(d * d), d, d))$u
+corrupt_fc <- svd(matrix(rnorm(d * d), d, d))$u
+
+# Generate data
+signal_sd <- 1
+noise_sd <- signal_sd / snr
+cortex <- domain_latents %*% corrupt_cortex %*% dlist[[1]] + 
+          matrix(rnorm(n * p[1], sd = noise_sd), n, p[1]) + 
+          matrix(rnorm(n * p[1], sd = noise_sd * 0.2), n, p[1])
+white_matter <- domain_latents %*% corrupt_wm %*% dlist[[2]] + 
+                matrix(rnorm(n * p[2], sd = noise_sd), n, p[2]) + 
+                matrix(rnorm(n * p[2], sd = noise_sd * 0.2), n, p[2])
+func_conn <- domain_latents %*% corrupt_fc %*% dlist[[3]] + 
+             matrix(rnorm(n * p[3], sd = noise_sd), n, p[3]) + 
+             matrix(rnorm(n * p[3], sd = noise_sd * 0.2), n, p[3])
+
+# Split train/test
+matlist_train <- list(cortex = cortex[1:n_train, ], white_matter = white_matter[1:n_train, ], functional_connectivity = func_conn[1:n_train, ])
+matlist_test <- list(cortex = cortex[(n_train+1):n, ], white_matter = white_matter[(n_train+1):n, ], functional_connectivity = func_conn[(n_train+1):n, ])
+
+
+
+smoothingMats <- lapply(matlist_train, function(m) diag(ncol(m)))
+myspar <- rep(0.8, length(matlist_train))
+mypos <- rep("positive", length(matlist_train))
+myorth <- "orthox0.02x1"
+initu <- initializeSimlr(matlist_train, round(d*1.2))
+myits <- 200
+myopt <- "lookahead"
+params_grid <- expand.grid(
+  energyType = c('normalized_correlation', "acc", "regression"),
+  mixAlg = c("pca", "ica", 'svd'),
+  domainLambda = c(0, 0.2, 0.5, 1, 2, 5) / 10.0
+)
+
+```
+
+Simulate \( n = `r n` \) subjects (\( `r n_train` \) train, \( n - `r n_train` \) test), \( d = `r d` \) domains.
+
 # Methods: SiMLR
 
 Similarity-driven Multi-view Linear Reconstruction (SiMLR), implemented in the ANTsR package, is a framework for integrative dimensionality reduction across multiple views (modalities), designed to uncover shared latent structures in high-dimensional, multimodal data such as neuroimaging datasets \citep{avants2021,stone2020}. Let there be \( Z = `r length(matlist_train)` \) views, representing modalities such as cortical thickness, white matter diffusion metrics, and functional connectivity. Each view is represented as a data matrix
@@ -254,65 +332,6 @@ The simulation embeds \( d = `r d` \) cognitive domains as latent signals, with 
 - **Reconstruction Error**: Mean normalized Frobenius norm of SiMLR reconstruction on test data (lower better).
 - **Cross-Modal Reconstruction Error**: Mean normalized Frobenius error predicting each view’s test data from other views’ concatenated embeddings via linear regression (lower better).
 
-## Data Simulation
-
-Simulate \( n = `r n` \) subjects (\( `r n_train` \) train, \( n - `r n_train` \) test), \( d = `r d` \) domains.
-
-```{r simulate-data}
-n <- 600
-n_train <- 400
-domains <- c("processing_speed", "language", "memory", "executive_functioning", "motor", "visuospatial_skills")
-d <- length(domains)
-p <- c(500, 400, 300)
-snr <- 0.5
-
-# Domain latents
-domain_latents <- matrix(rnorm(n * d), nrow = n)
-domain_latents <- scale(domain_latents, center = TRUE, scale = TRUE)
-domain_latents_train <- domain_latents[1:n_train, ]
-domain_latents_test <- domain_latents[(n_train+1):n, ]
-
-# Domain knowledge matrices
-dlist <- lapply(1:3, function(i) {
-  dm <- matrix(0, d, p[i])
-  features_per_domain <- p[i] / d
-  for (j in 1:d) {
-    start <- round((j-1) * features_per_domain + 1)
-    end <- round(j * features_per_domain)
-    dm[j, start:end] <- runif(end - start + 1, 0.5, 1)
-    other_domain <- sample((1:d)[-j], 1)
-    overlap_idx <- sample(start:end, size = round(0.1 * (end - start)))
-    dm[other_domain, overlap_idx] <- runif(length(overlap_idx), 0.1, 0.3)
-  }
-  dm <- dm / rowSums(dm, na.rm = TRUE)
-  rownames(dm) <- domains
-  dm/max(dm)
-})
-names(dlist) <- c("cortex", "white_matter", "functional_connectivity")
-
-# Modality-specific corruptions
-corrupt_cortex <- svd(matrix(rnorm(d * d), d, d))$u
-corrupt_wm <- svd(matrix(rnorm(d * d), d, d))$u
-corrupt_fc <- svd(matrix(rnorm(d * d), d, d))$u
-
-# Generate data
-signal_sd <- 1
-noise_sd <- signal_sd / snr
-cortex <- domain_latents %*% corrupt_cortex %*% dlist[[1]] + 
-          matrix(rnorm(n * p[1], sd = noise_sd), n, p[1]) + 
-          matrix(rnorm(n * p[1], sd = noise_sd * 0.2), n, p[1])
-white_matter <- domain_latents %*% corrupt_wm %*% dlist[[2]] + 
-                matrix(rnorm(n * p[2], sd = noise_sd), n, p[2]) + 
-                matrix(rnorm(n * p[2], sd = noise_sd * 0.2), n, p[2])
-func_conn <- domain_latents %*% corrupt_fc %*% dlist[[3]] + 
-             matrix(rnorm(n * p[3], sd = noise_sd), n, p[3]) + 
-             matrix(rnorm(n * p[3], sd = noise_sd * 0.2), n, p[3])
-
-# Split train/test
-matlist_train <- list(cortex = cortex[1:n_train, ], white_matter = white_matter[1:n_train, ], functional_connectivity = func_conn[1:n_train, ])
-matlist_test <- list(cortex = cortex[(n_train+1):n, ], white_matter = white_matter[(n_train+1):n, ], functional_connectivity = func_conn[(n_train+1):n, ])
-```
-
 ## Helper Functions for Metrics
 
 ```{r metrics-funcs}
@@ -441,18 +460,6 @@ perm_test <- function(result, matlist_train, dlist, n_perm = 10, domlam) {
 ## Parameter Grid and Runs
 
 ```{r run-grid,eval=!exists("results")}
-smoothingMats <- lapply(matlist_train, function(m) diag(ncol(m)))
-myspar <- rep(0.8, length(matlist_train))
-mypos <- rep("positive", length(matlist_train))
-myorth <- "orthox0.02x1"
-initu <- initializeSimlr(matlist_train, round(d*1.2))
-myits <- 200
-myopt <- "nadam"
-params_grid <- expand.grid(
-  energyType = c('normalized_correlation', "acc", "regression"),
-  mixAlg = c("pca", "ica", 'svd'),
-  domainLambda = c(0, 0.2, 0.5, 1, 2, 5) / 10.0
-)
 results <- list()
 metrics <- data.frame(params_grid, cross_rv = NA, recovery_r2 = NA, alignment = NA, recon_err = NA, cross_modal = NA, perm_t = NA)
 
