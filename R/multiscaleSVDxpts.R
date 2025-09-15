@@ -9059,3 +9059,110 @@ project_to_partially_orthonormal_nonnegative <- function(X,
 }
 
 
+#' Write all SiMLR outputs to disk
+#'
+#' This function saves the complete set of SiMLR outputs (e.g., `u`, `v`, energy paths,
+#' error metrics, and other metadata) to a structured directory on disk.
+#' Matrices and data frames are written as CSV files, while other R objects are serialized
+#' as `.rds`. A manifest is written to track the saved components.
+#'
+#' @param simlr_object A named list containing the full SiMLR outputs (e.g., `mysim$simlrX`).
+#' @param file_prefix A character string used as the prefix for the output directory name.
+#'
+#' @return No return value, called for side effects.
+#' @examples
+#' \dontrun{
+#' write_simlr(mysim$simlrX, "output")
+#' reloaded <- read_simlr("output_simlr")
+#' }
+#' @export
+write_simlr <- function(simlr_object, file_prefix) {
+  # create an output folder
+  outdir <- paste0(file_prefix, "_simlr")
+  if (!dir.exists(outdir)) dir.create(outdir, recursive = TRUE)
+
+  manifest <- list()
+
+  for (n in names(simlr_object)) {
+    obj <- simlr_object[[n]]
+    fname <- file.path(outdir, paste0(n, ".rds"))  # default
+    
+    # handle cases
+    if (is.data.frame(obj)) {
+      fname <- file.path(outdir, paste0(n, ".csv"))
+      write.csv(obj, fname, row.names = TRUE)
+    } else if (is.matrix(obj)) {
+      fname <- file.path(outdir, paste0(n, ".csv"))
+      write.csv(obj, fname, row.names = TRUE)
+    } else if (is.list(obj)) {
+      # nested list → save recursively
+      subdir <- file.path(outdir, n)
+      dir.create(subdir, showWarnings = FALSE)
+      for (i in seq_along(obj)) {
+        subobj <- obj[[i]]
+        subname <- names(obj)[i]
+        if (is.null(subname) || subname == "") subname <- paste0("element", i)
+        subfile <- file.path(subdir, paste0(subname, ".csv"))
+        if (is.data.frame(subobj) || is.matrix(subobj)) {
+          write.csv(subobj, subfile, row.names = TRUE)
+        } else {
+          subfile <- file.path(subdir, paste0(subname, ".rds"))
+          saveRDS(subobj, subfile)
+        }
+      }
+      fname <- subdir
+    } else {
+      # fallback: save as rds
+      saveRDS(obj, fname)
+    }
+
+    manifest[[n]] <- fname
+  }
+
+  saveRDS(manifest, file.path(outdir, "manifest.rds"))
+}
+
+
+#' Read all SiMLR outputs from disk
+#'
+#' This function reconstructs the complete SiMLR outputs previously written by
+#' \code{\link{write_simlr}}. It uses the manifest to reload each component in its
+#' original format.
+#'
+#' @param dir A character string specifying the directory where the SiMLR outputs were written.
+#'
+#' @return A named list reconstructing the original SiMLR object.
+#' @examples
+#' \dontrun{
+#' write_simlr(mysim$simlrX, "output")
+#' reloaded <- read_simlr("output_simlr")
+#' }
+#' @export
+read_simlr <- function(dir) {
+  manifest <- readRDS(file.path(dir, "manifest.rds"))
+  result <- list()
+
+  for (n in names(manifest)) {
+    fname <- manifest[[n]]
+    if (dir.exists(fname)) {
+      # nested folder
+      files <- list.files(fname, full.names = TRUE)
+      sublist <- list()
+      for (f in files) {
+        nm <- tools::file_path_sans_ext(basename(f))
+        if (grepl("\\.csv$", f)) {
+          sublist[[nm]] <- read.csv(f, row.names = 1, check.names = FALSE)
+        } else if (grepl("\\.rds$", f)) {
+          sublist[[nm]] <- readRDS(f)
+        }
+      }
+      result[[n]] <- sublist
+    } else if (grepl("\\.csv$", fname)) {
+      result[[n]] <- read.csv(fname, row.names = 1, check.names = FALSE)
+    } else if (grepl("\\.rds$", fname)) {
+      result[[n]] <- readRDS(fname)
+    }
+  }
+
+  return(result)
+}
