@@ -22,7 +22,7 @@ simlr(
     "logcosh", "exp", "kurtosis", "gauss"),
   vmats,
   connectors = NULL,
-  optimizationStyle = "adam",
+  optimizationStyle = "lookahead",
   scale = c("center", "eigenvalue"),
   expBeta = 0,
   jointInitialization = TRUE,
