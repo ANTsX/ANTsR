@@ -9077,12 +9077,13 @@ project_to_partially_orthonormal_nonnegative <- function(X,
 }
 
 
-#' Write all SiMLR outputs to disk
+#' Write all SiMLR outputs to disk (portable version)
 #'
 #' This function saves the complete set of SiMLR outputs (e.g., `u`, `v`, energy paths,
 #' error metrics, and other metadata) to a structured directory on disk.
-#' Matrices and data frames are written as CSV files, while other R objects are serialized
-#' as `.rds`. A manifest is written to track the saved components.
+#' Matrices and data frames are written as UTF-8 CSV files, while other R objects
+#' are serialized as `.rds`. A manifest is written with **relative paths** to track
+#' the saved components, ensuring portability across systems.
 #'
 #' @param simlr_object A named list containing the full SiMLR outputs (e.g., `mysim$simlrX`).
 #' @param file_prefix A character string used as the prefix for the output directory name.
@@ -9103,49 +9104,52 @@ write_simlr <- function(simlr_object, file_prefix) {
 
   for (n in names(simlr_object)) {
     obj <- simlr_object[[n]]
+    relname <- paste0(n) # base for manifest entries
     fname <- file.path(outdir, paste0(n, ".rds"))  # default
-    
+
     # handle cases
-    if (is.data.frame(obj)) {
+    if (is.data.frame(obj) || is.matrix(obj)) {
       fname <- file.path(outdir, paste0(n, ".csv"))
-      write.csv(obj, fname, row.names = TRUE)
-    } else if (is.matrix(obj)) {
-      fname <- file.path(outdir, paste0(n, ".csv"))
-      write.csv(obj, fname, row.names = TRUE)
+      write.csv(obj, fname, row.names = FALSE, fileEncoding = "UTF-8")
     } else if (is.list(obj)) {
       # nested list → save recursively
       subdir <- file.path(outdir, n)
       dir.create(subdir, showWarnings = FALSE)
+      submanifest <- list()
       for (i in seq_along(obj)) {
         subobj <- obj[[i]]
         subname <- names(obj)[i]
         if (is.null(subname) || subname == "") subname <- paste0("element", i)
-        subfile <- file.path(subdir, paste0(subname, ".csv"))
         if (is.data.frame(subobj) || is.matrix(subobj)) {
-          write.csv(subobj, subfile, row.names = TRUE)
+          subfile <- file.path(subdir, paste0(subname, ".csv"))
+          write.csv(subobj, subfile, row.names = FALSE, fileEncoding = "UTF-8")
         } else {
           subfile <- file.path(subdir, paste0(subname, ".rds"))
-          saveRDS(subobj, subfile)
+          saveRDS(subobj, subfile, version = 2)
         }
+        submanifest[[subname]] <- file.path(n, basename(subfile)) # relative path
       }
-      fname <- subdir
+      manifest[[n]] <- submanifest
+      next
     } else {
-      # fallback: save as rds
-      saveRDS(obj, fname)
+      # fallback: save as rds with version=2 for portability
+      saveRDS(obj, fname, version = 2)
     }
 
-    manifest[[n]] <- fname
+    # store relative path, not absolute
+    manifest[[n]] <- basename(fname)
   }
 
-  saveRDS(manifest, file.path(outdir, "manifest.rds"))
+  # save manifest with relative references
+  saveRDS(manifest, file.path(outdir, "manifest.rds"), version = 2)
 }
 
 
-#' Read all SiMLR outputs from disk
+#' Read all SiMLR outputs from disk (portable version)
 #'
 #' This function reconstructs the complete SiMLR outputs previously written by
 #' \code{\link{write_simlr}}. It uses the manifest to reload each component in its
-#' original format.
+#' original format, ensuring portability across systems.
 #'
 #' @param dir A character string specifying the directory where the SiMLR outputs were written.
 #'
@@ -9161,31 +9165,34 @@ read_simlr <- function(dir) {
   result <- list()
 
   for (n in names(manifest)) {
-    fname <- manifest[[n]]
-    if (dir.exists(fname)) {
-      # nested folder
-      files <- list.files(fname, full.names = TRUE)
+    entry <- manifest[[n]]
+
+    if (is.list(entry)) {
+      # nested list
       sublist <- list()
-      for (f in files) {
-        nm <- tools::file_path_sans_ext(basename(f))
-        if (grepl("\\.csv$", f)) {
-          sublist[[nm]] <- read.csv(f, row.names = 1, check.names = FALSE)
-        } else if (grepl("\\.rds$", f)) {
-          sublist[[nm]] <- readRDS(f)
+      for (subname in names(entry)) {
+        subfile <- file.path(dir, entry[[subname]])
+        if (grepl("\\.csv$", subfile)) {
+          sublist[[subname]] <- read.csv(subfile, check.names = FALSE)
+        } else if (grepl("\\.rds$", subfile)) {
+          sublist[[subname]] <- readRDS(subfile)
         }
       }
       result[[n]] <- sublist
-    } else if (grepl("\\.csv$", fname)) {
-      result[[n]] <- read.csv(fname, row.names = 1, check.names = FALSE)
-    } else if (grepl("\\.rds$", fname)) {
-      result[[n]] <- readRDS(fname)
+
+    } else {
+      # single file
+      fpath <- file.path(dir, entry)
+      if (grepl("\\.csv$", fpath)) {
+        result[[n]] <- read.csv(fpath, check.names = FALSE)
+      } else if (grepl("\\.rds$", fpath)) {
+        result[[n]] <- readRDS(fpath)
+      }
     }
   }
 
   return(result)
 }
-
-
 
 
 #' Transform prior rows to (approximately) uncorrelated representative rows

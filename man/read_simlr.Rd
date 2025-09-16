@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{read_simlr}
 \alias{read_simlr}
-\title{Read all SiMLR outputs from disk}
+\title{Read all SiMLR outputs from disk (portable version)}
 \usage{
 read_simlr(dir)
 }
@@ -15,7 +15,7 @@ A named list reconstructing the original SiMLR object.
 \description{
 This function reconstructs the complete SiMLR outputs previously written by
 \code{\link{write_simlr}}. It uses the manifest to reload each component in its
-original format.
+original format, ensuring portability across systems.
 }
 \examples{
 \dontrun{

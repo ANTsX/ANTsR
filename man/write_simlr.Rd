@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{write_simlr}
 \alias{write_simlr}
-\title{Write all SiMLR outputs to disk}
+\title{Write all SiMLR outputs to disk (portable version)}
 \usage{
 write_simlr(simlr_object, file_prefix)
 }
@@ -17,8 +17,9 @@ No return value, called for side effects.
 \description{
 This function saves the complete set of SiMLR outputs (e.g., `u`, `v`, energy paths,
 error metrics, and other metadata) to a structured directory on disk.
-Matrices and data frames are written as CSV files, while other R objects are serialized
-as `.rds`. A manifest is written to track the saved components.
+Matrices and data frames are written as UTF-8 CSV files, while other R objects
+are serialized as `.rds`. A manifest is written with **relative paths** to track
+the saved components, ensuring portability across systems.
 }
 \examples{
 \dontrun{
