@@ -11,7 +11,7 @@ simlr_sparseness(
   positivity = "positive",
   sparseness_quantile = 0.8,
   constraint_weight = NA,
-  constraint_iterations = 10,
+  constraint_iterations = 1,
   sparseness_alg = "soft",
   energy_type = "acc"
 )

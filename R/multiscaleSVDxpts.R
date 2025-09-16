@@ -4426,7 +4426,7 @@ simlr <- function(
     lineSearchRange = c(-5e2, 5e2),
     lineSearchTolerance = 1e-12,
     randomSeed=0,
-    constraint = c( "Grassmannx0", "Stiefelx0", "orthox0.01", "none"),
+    constraint = c( "orthox0x1", "Grassmannx0", "Stiefelx0",  "none"),
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc','dat', 'lrr', 'reconorm', 'logcosh', 'exp', 'kurtosis', 'gauss'),
     vmats,
     connectors = NULL,
@@ -4731,7 +4731,7 @@ for (j in 1:nModalities) {
   all_total_energy[[j]] <- numeric()
 }
 # --- 2. Main Optimization Loop ---
-for (myit in 1:iterations) {
+for (myit in 1:iterations) { # Begin main optimization loop
 # --- Calculate dynamic learning rate for non-line-search methods ---
   decay_progress <- (myit - 1) / max(1, iterations - 1)
   current_learning_rate <- final_learning_rate + 0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
@@ -7892,7 +7892,7 @@ simlr_sparseness <- function(v,
                              positivity = 'positive',
                              sparseness_quantile = 0.8,
                              constraint_weight = NA,
-                             constraint_iterations = 10,
+                             constraint_iterations = 1,
                              sparseness_alg = 'soft',
                              energy_type = 'acc') {
   v <- as.matrix(v)
@@ -7913,11 +7913,22 @@ simlr_sparseness <- function(v,
   if ( constraint_weight > 1 ) constraint_weight=1
   if ( constraint_weight < 0 ) constraint_weight=0
   # Apply sparsity
-  if (constraint_type %in% c("Stiefel", "Grassmann") ) {
+  if (constraint_type %in% c("Stiefel", "Grassmann","none") ) {
     if ( is.na( sparseness_alg )) sparseness_alg = 'nnorth'
     if (sparseness_alg == 'ensemble') v <- t(ensembled_sparsity(t(v), positivity))
     if (sparseness_alg == 'nnorth') v = project_to_orthonormal_nonnegative( v, 
       constraint=positivity )
+    if ( sparseness_quantile != 0 & sparseness_alg =='soft' ) {
+      v <- orthogonalizeAndQSparsify(
+        v,
+        sparsenessQuantile = sparseness_quantile,
+        positivity = positivity,
+        orthogonalize = FALSE,
+        unitNorm = FALSE,
+        softThresholding = TRUE,
+        sparsenessAlg = NA
+      )
+    }
   } else {
     if ( constraint_type == "ortho" & constraint_weight > 0 ){
       if ( constraint_weight == 1 ) {
@@ -7932,7 +7943,7 @@ simlr_sparseness <- function(v,
     } else if (na2f.loc( sparseness_alg == 'nnorth') ) {
       v = project_to_orthonormal_nonnegative( v, constraint=positivity )
     }
-    if ( sparseness_quantile != 0 & constraint_weight == 0 & sparseness_alg =='soft' ) {
+    if ( sparseness_quantile != 0 & sparseness_alg =='soft' ) {
       v <- orthogonalizeAndQSparsify(
         v,
         sparsenessQuantile = sparseness_quantile,
