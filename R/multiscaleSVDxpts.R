@@ -7930,7 +7930,7 @@ simlr_sparseness <- function(v,
       )
     }
   } else {
-    if ( constraint_type == "ortho" & constraint_weight > 0 ){
+    if ( constraint_type == "ortho" & constraint_weight >= 0 ){
       if ( constraint_weight == 1 ) {
       v = project_to_orthonormal_nonnegative( v, 
         max_iter=constraint_iterations, constraint=positivity)
