@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{calculate_simlr_gradient}
 \alias{calculate_simlr_gradient}
-\title{Calculate SIMLR Similarity Gradient}
+\title{Calculate SiMLR Similarity Gradient}
 \usage{
 calculate_simlr_gradient(
   V,
@@ -11,7 +11,8 @@ calculate_simlr_gradient(
   energy_type,
   clipping_threshold = NULL,
   lambda = 1,
-  prior_matrix = NULL
+  prior_matrix = NULL,
+  verbose = 0
 )
 }
 \arguments{
@@ -21,18 +22,24 @@ calculate_simlr_gradient(
 
 \item{U}{The shared basis matrix [n x k].}
 
-\item{energy_type}{A string specifying the similarity objective.}
+\item{energy_type}{Character string specifying the similarity objective.
+Supports partial matching (e.g., "reg" for "regression", "cca" for "cca" or "acc").
+Valid options: regression, reconorm, lowRankRegression, lrr, cca, acc,
+normalized_correlation, nc, logcosh, kurtosis, exp, gauss, dat.}
 
 \item{clipping_threshold}{Optional numeric value for gradient clipping.}
 
-\item{lambda}{prior weight term for dat}
+\item{lambda}{Numeric, weight for domain energy (default = 1.0).}
 
-\item{prior_matrix}{matrix of prior weights, same shape as V}
+\item{prior_matrix}{Optional matrix of prior weights, same shape as V (used with "dat").}
+
+\item{verbose}{Integer, verbosity level: 0 (none), 1 (log matched energy_type) (default = 0).}
 }
 \value{
 A matrix [p x k] representing the descent direction.
 }
 \description{
-This dispatcher computes the gradient for the similarity part of the objective,
-ensuring it is always a descent direction for the energy function.
+This dispatcher computes the gradient for the similarity part of the SiMLR
+objective, ensuring it is a descent direction for the energy function. Supports
+partial matching for energy_type.
 }

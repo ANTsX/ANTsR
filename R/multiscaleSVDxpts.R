@@ -4214,97 +4214,307 @@ clip_gradient_by_quantile <- function(gradient, quantile = 0.80) {
   return(clipped_gradient)
 }
 
-#' Calculate SIMLR Similarity Energy
+#' Calculate SiMLR energy for optimization
 #'
-#' This dispatcher calculates the similarity/reconstruction part of the
-#' objective function for use in an optimization routine.
+#' Computes the energy for SiMLR based on the specified energy type, with partial
+#' matching for energy_type. Returns negative values for maximization objectives
+#' to align with minimization goals.
 #'
-#' @param V A candidate loading matrix [p x k] to evaluate.
-#' @param X The data matrix for the current modality [n x p].
-#' @param U The shared basis matrix [n x k].
-#' @param energy_type A string specifying the similarity objective.
-#' @param lambda prior weight term for dat
-#' @param prior_matrix matrix of prior weights, same number of columns as V
-#' @return A single numeric value for the similarity energy. The sign is adjusted
-#'   such that the value should always be minimized.
+#' @param V Matrix V in the SiMLR decomposition.
+#' @param X Data matrix for the modality.
+#' @param U Matrix U in the SiMLR decomposition.
+#' @param energy_type Character string specifying the energy type. Supports partial
+#'   matching (e.g., "reg" for "regression", "cca" for "cca" or "acc").
+#'   Valid options: regression, reconorm, lowRankRegression, lrr, cca, acc,
+#'   logcosh, kurtosis, exp, gauss, normalized_correlation, dat.
+#' @param lambda Numeric, weight for domain energy (default = 1.0).
+#' @param prior_matrix Optional prior matrix for domain energy (used with "dat").
+#' @param verbose Integer, verbosity level: 0 (none), 1 (log matched energy_type) (default = 0).
+#'
+#' @return Numeric energy value (negative for maximization objectives).
 #' @export
-calculate_simlr_energy <- function(V, X, U, energy_type, lambda=1.0, prior_matrix=NULL ) {
-  if ( ! is.null( prior_matrix ) ) {
-    Z=prior_matrix
+calculate_simlr_energy <- function(V, X, U, energy_type, lambda = 1.0, prior_matrix = NULL, verbose = 0) {
+  if (!is.numeric(verbose) || verbose < 0 || verbose > 1 || verbose != as.integer(verbose)) {
+    stop("verbose must be 0 or 1")
   }
-
-  # For maximization objectives, we return the negative value because the
-  # optimizer's goal is always to MINIMIZE the returned energy.
-  energy <- switch(energy_type,
-    "regression" = .calculate_regression_error(X, U, V),
-    "reconorm" = .calculate_normed_regression_error(X, U, V),
-    # "lowRank" = .calculate_lowrank_norm_error(X, U, V), # Assuming this helper exists
-    "lowRankRegression" = .calculate_angular_distance(X, U, V),
-    "lrr" = .calculate_angular_distance(X, U, V),
-    "cca" = -.calculate_abs_canonical_covariance(X, U, V),
-    "acc" = -.calculate_abs_canonical_covariance(X, U, V),
-    "logcosh" = .calculate_ica_energy( X, U, V, nonlinearity = energy_type ),
-    "kurtosis" = .calculate_ica_energy( X, U, V, nonlinearity = energy_type ),
-    "exp" = .calculate_ica_energy( X, U, V, nonlinearity = energy_type ),
-    "gauss" = .calculate_ica_energy( X, U, V, nonlinearity = energy_type ),
-    "dat" = .calculate_domain_energy( V, Z, lambda),
-    "normalized_correlation" = -.calculate_procrustes_correlation(X, U, V),
-    stop(paste("Unknown energy_type in calculate_simlr_energy:", energy_type))
+  
+  # Validate inputs
+  if (!is.matrix(V) || !is.matrix(X) || !is.matrix(U)) {
+    stop("V, X, and U must be matrices")
+  }
+  if (!is.numeric(lambda) || lambda < 0) {
+    stop("lambda must be a non-negative numeric value")
+  }
+  if (!is.null(prior_matrix) && !is.matrix(prior_matrix)) {
+    stop("prior_matrix must be a matrix or NULL")
+  }
+  
+  # Define valid energy types
+  valid_energy_types <- c(
+    "regression",
+    "reconorm",
+    "lowRankRegression",
+    "lrr",
+    "cca",
+    "acc",
+    "logcosh",
+    "kurtosis",
+    "exp",
+    "gauss",
+    "normalized_correlation",
+    "dat"
   )
+  
+  # Partial matching for energy_type (case-insensitive)
+  energy_type <- tolower(energy_type)
+  matched_type <- pmatch(energy_type, tolower(valid_energy_types), nomatch = NA_integer_)
+  if (is.na(matched_type)) {
+    stop(sprintf("Unknown energy_type: '%s'. Valid options are: %s",
+                 energy_type, paste(valid_energy_types, collapse = ", ")))
+  }
+  if (sum(pmatch(energy_type, tolower(valid_energy_types), nomatch = 0) > 0) > 1) {
+    stop(sprintf("Ambiguous energy_type: '%s' matches multiple options: %s",
+                 energy_type, paste(valid_energy_types[pmatch(energy_type, tolower(valid_energy_types), nomatch = 0) > 0], collapse = ", ")))
+  }
+  energy_type <- valid_energy_types[matched_type]
+  
+  if (verbose >= 1) {
+    message(sprintf("Matched energy_type: %s", energy_type))
+  }
+  
+  # Assign prior_matrix to Z for "dat" energy type
+  Z <- prior_matrix
+  
+  # Compute energy based on matched energy_type
+  energy <- switch(energy_type,
+    regression = .calculate_regression_error(X, U, V),
+    reconorm = .calculate_normed_regression_error(X, U, V),
+    lowRankRegression = .calculate_angular_distance(X, U, V),
+    lrr = .calculate_angular_distance(X, U, V),
+    cca = -.calculate_abs_canonical_covariance(X, U, V),
+    acc = -.calculate_abs_canonical_covariance(X, U, V),
+    logcosh = .calculate_ica_energy(X, U, V, nonlinearity = energy_type),
+    kurtosis = .calculate_ica_energy(X, U, V, nonlinearity = energy_type),
+    exp = .calculate_ica_energy(X, U, V, nonlinearity = energy_type),
+    gauss = .calculate_ica_energy(X, U, V, nonlinearity = energy_type),
+    normalized_correlation = -.calculate_procrustes_correlation(X, U, V),
+    dat = .calculate_domain_energy(V, Z, lambda),
+    stop(sprintf("Internal error: matched energy_type '%s' not handled in switch", energy_type))
+  )
+  
   return(energy)
 }
 
-
-#' Calculate SIMLR Similarity Gradient
+#' Calculate SiMLR Similarity Gradient
 #'
-#' This dispatcher computes the gradient for the similarity part of the objective,
-#' ensuring it is always a descent direction for the energy function.
+#' This dispatcher computes the gradient for the similarity part of the SiMLR
+#' objective, ensuring it is a descent direction for the energy function. Supports
+#' partial matching for energy_type.
 #'
 #' @param V The current loading matrix [p x k].
 #' @param X The data matrix for the modality [n x p].
 #' @param U The shared basis matrix [n x k].
-#' @param energy_type A string specifying the similarity objective.
+#' @param energy_type Character string specifying the similarity objective.
+#'   Supports partial matching (e.g., "reg" for "regression", "cca" for "cca" or "acc").
+#'   Valid options: regression, reconorm, lowRankRegression, lrr, cca, acc,
+#'   normalized_correlation, nc, logcosh, kurtosis, exp, gauss, dat.
 #' @param clipping_threshold Optional numeric value for gradient clipping.
+#' @param lambda Numeric, weight for domain energy (default = 1.0).
+#' @param prior_matrix Optional matrix of prior weights, same shape as V (used with "dat").
+#' @param verbose Integer, verbosity level: 0 (none), 1 (log matched energy_type) (default = 0).
 #'
-#' @param lambda prior weight term for dat
-#' @param prior_matrix matrix of prior weights, same shape as V
 #' @return A matrix [p x k] representing the descent direction.
 #' @export
-calculate_simlr_gradient <- function(V, X, U, energy_type, clipping_threshold = NULL, lambda=1.0, prior_matrix=NULL ) {
-  if ( ! is.null( prior_matrix ) ) {
-    Z=prior_matrix
+calculate_simlr_gradient <- function(V, X, U, 
+  energy_type, clipping_threshold = NULL, 
+  lambda = 1.0, prior_matrix = NULL, verbose = 0) {
+  if (!is.numeric(verbose) || verbose < 0 || verbose > 1 || verbose != as.integer(verbose)) {
+    stop("verbose must be 0 or 1")
   }
-
-  # Each helper function is now defined to return a descent direction
-  # for its corresponding energy function.
-  gradient <- switch(energy_type,
-    "regression" = .calculate_regression_gradient(X, U, V),
-    "reconorm" = .calculate_normed_regression_error_gradient(X, U, V),
-    "lowRankRegression" = .calculate_angular_distance_gradient(X, U, V),
-    "lrr" = .calculate_angular_distance_gradient(X, U, V),
-    "cca" = .calculate_abs_canonical_covariance_gradient(X, U, V),
-    "acc" = .calculate_abs_canonical_covariance_gradient(X, U, V),
-    "normalized_correlation" = .calculate_procrustes_gradient(X, U, V),
-    "logcosh" = .calculate_ica_gradient( X, U, V, nonlinearity = energy_type ),
-    "kurtosis" = .calculate_ica_gradient( X, U, V, nonlinearity = energy_type ),
-    "exp" = .calculate_ica_gradient( X, U, V, nonlinearity = energy_type ),
-    "gauss" = .calculate_ica_gradient( X, U, V, nonlinearity = energy_type ),
-    "dat" = .calculate_domain_gradient( V, Z, lambda),
-    "nc" = .calculate_procrustes_gradient(X, U, V),
-    
-    stop(paste("Unknown energy_type in calculate_simlr_gradient:", energy_type))
+  
+  # Validate inputs
+  if (!is.matrix(V) || !is.matrix(X) || !is.matrix(U)) {
+    stop("V, X, and U must be matrices")
+  }
+  if (!is.numeric(lambda) || lambda < 0) {
+    stop("lambda must be a non-negative numeric value")
+  }
+  if (!is.null(prior_matrix) && !is.matrix(prior_matrix)) {
+    stop("prior_matrix must be a matrix or NULL")
+  }
+  if (!is.null(clipping_threshold) && (!is.numeric(clipping_threshold) || clipping_threshold <= 0)) {
+    stop("clipping_threshold must be a positive numeric value or NULL")
+  }
+  
+  # Define valid energy types
+  valid_energy_types <- c(
+    "regression",
+    "reconorm",
+    "lowRankRegression",
+    "lrr",
+    "cca",
+    "acc",
+    "normalized_correlation",
+    "nc",
+    "logcosh",
+    "kurtosis",
+    "exp",
+    "gauss",
+    "dat"
   )
-
+  
+  # Partial matching for energy_type (case-insensitive)
+  energy_type <- tolower(energy_type)
+  matched_type <- pmatch(energy_type, tolower(valid_energy_types), nomatch = NA_integer_)
+  if (is.na(matched_type)) {
+    stop(sprintf("Unknown energy_type: '%s'. Valid options are: %s",
+                 energy_type, paste(valid_energy_types, collapse = ", ")))
+  }
+  if (sum(pmatch(energy_type, tolower(valid_energy_types), nomatch = 0) > 0) > 1) {
+    stop(sprintf("Ambiguous energy_type: '%s' matches multiple options: %s",
+                 energy_type, paste(valid_energy_types[pmatch(energy_type, tolower(valid_energy_types), nomatch = 0) > 0], collapse = ", ")))
+  }
+  energy_type <- valid_energy_types[matched_type]
+  
+  if (verbose >= 1) {
+    message(sprintf("Matched energy_type: %s", energy_type))
+  }
+  
+  # Assign prior_matrix to Z for "dat" energy type
+  Z <- prior_matrix
+  
+  # Compute gradient based on matched energy_type
+  gradient <- switch(energy_type,
+    regression = .calculate_regression_gradient(X, U, V),
+    reconorm = .calculate_normed_regression_error_gradient(X, U, V),
+    lowRankRegression = .calculate_angular_distance_gradient(X, U, V),
+    lrr = .calculate_angular_distance_gradient(X, U, V),
+    cca = .calculate_abs_canonical_covariance_gradient(X, U, V),
+    acc = .calculate_abs_canonical_covariance_gradient(X, U, V),
+    normalized_correlation = .calculate_procrustes_gradient(X, U, V),
+    nc = .calculate_procrustes_gradient(X, U, V),
+    logcosh = .calculate_ica_gradient(X, U, V, nonlinearity = energy_type),
+    kurtosis = .calculate_ica_gradient(X, U, V, nonlinearity = energy_type),
+    exp = .calculate_ica_gradient(X, U, V, nonlinearity = energy_type),
+    gauss = .calculate_ica_gradient(X, U, V, nonlinearity = energy_type),
+    dat = .calculate_domain_gradient(V, Z, lambda),
+    stop(sprintf("Internal error: matched energy_type '%s' not handled in switch", energy_type))
+  )
+  
   # Apply gradient clipping if a threshold is provided
   if (!is.null(clipping_threshold) && clipping_threshold > 0) {
-    gradient <- clip_gradient_by_quantile( gradient )
+    gradient <- clip_gradient_by_quantile(gradient)
   }
   
-  
-  return( as.matrix( gradient) )
+  return(as.matrix(gradient))
 }
 
 
+#' Optimal initializer for SiMLR
+#'
+#' This function generates multiple random candidate U matrices, evaluates their
+#' associated energy (without gradient descent), and returns the best-scoring
+#' initialization. A seed parameter ensures reproducibility across runs.
+#'
+#' @param data_matrices A list of modality-specific data matrices.
+#' @param n_init Number of random initializations to try (default = 10).
+#' @param basisK Number of basis components (columns in U).
+#' @param energyType Energy function to evaluate.
+#' @param domainMatrices Optional list of domain priors (same length as data_matrices).
+#' @param domainLambdas Optional vector of domain weights.
+#' @param verbose Logical, whether to print progress.
+#' @param seed Optional numeric seed for reproducibility (default = NULL, no seed set).
+#'
+#' @return A list with elements:
+#'   \describe{
+#'     \item{bestU}{List of U matrices (one per modality) for the best initialization.}
+#'     \item{bestV}{List of corresponding V matrices.}
+#'     \item{bestEnergy}{Mean energy for the selected initialization.}
+#'   }
+#' @export
+optimal_simlr_initializer <- function(data_matrices,
+                                     n_init = 10,
+                                     basisK,
+                                     energyType = "acc",
+                                     domainMatrices = NULL,
+                                     domainLambdas = NULL,
+                                     verbose = TRUE,
+                                     seed = NULL) {
+  nModalities <- length(data_matrices)
+
+  # Set random seed if provided
+  if (!is.null(seed)) {
+    if (!is.numeric(seed) || seed < 0 || seed != as.integer(seed)) {
+      stop("seed must be a non-negative integer or NULL")
+    }
+    set.seed(seed)
+    if (verbose) {
+      message(sprintf("Using seed: %d", seed))
+    }
+  }
+
+  bestEnergy <- Inf
+  bestU <- NULL
+  bestV <- NULL
+
+  for (trial in seq_len(n_init)) {
+    # --- 1. Generate random U matrices ---
+    if ( trial == 1 ) {
+      U = initializeSimlr(data_matrices, basisK, uAlgorithm = "pca", jointReduction = TRUE)
+    } else {
+      U = matrix(rnorm(nrow(data_matrices[[1]]) * basisK), nrow(data_matrices[[1]]), basisK)
+    }
+    U = U / norm(U, "F")
+    # --- 2. Build corresponding V matrices ---
+    V_list <- vector("list", nModalities)
+    for (i in seq_len(nModalities)) {
+      V_list[[i]] <- t(data_matrices[[i]]) %*% U
+      V_list[[i]] <- V_list[[i]] / norm(V_list[[i]], "F")
+    }
+
+    # --- 3. Compute energy for this initialization ---
+    total_energy <- 0
+    for (i in seq_len(nModalities)) {
+      sim_e <- calculate_simlr_energy(
+        V_list[[i]], data_matrices[[i]], U,
+        energyType
+      )
+
+      dom_e <- 0
+      if (!is.null(domainMatrices) && !is.null(domainLambdas)) {
+        lam <- domainLambdas[i]
+        if (lam > 0) {
+          dom_e <- calculate_simlr_energy(
+            V_list[[i]], data_matrices[[i]], U,
+            "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
+          )
+        }
+      }
+
+      total_energy <- total_energy + sim_e + dom_e
+    }
+
+    mean_energy <- total_energy / nModalities
+
+    if (verbose) {
+      message(sprintf("Trial %d/%d | Mean energy = %.4f",
+                      trial, n_init, mean_energy))
+    }
+
+    # --- 4. Keep the best initialization ---
+    if (mean_energy < bestEnergy) {
+      bestEnergy <- mean_energy
+      bestU <- U
+      bestV <- V_list
+    }
+  }
+
+  if (verbose) {
+    message(sprintf("✅ Best initialization found with mean energy = %.4f", bestEnergy))
+  }
+
+  return(list(bestU = bestU, bestV = bestV, bestEnergy = bestEnergy))
+}
 
 #' Similarity-driven multiview linear reconstruction model (simlr) for N modalities
 #'
@@ -4652,10 +4862,6 @@ simlr <- function(
     vmats <- list()
     for (i in 1:nModalities) {
       vmats[[i]] <- t(data_matrices[[i]]) %*% initialUMatrix[[i]]
-      # 0 # svd( temp, nu=basisK, nv=0 )$u
-      # for ( kk in 1:nModalities ) vmats[[ i ]] = vmats[[ i ]] + t(data_matrices[[i]]) %*% initialUMatrix[[kk]]
-      #      vmats[[ i ]] = # svd( vmats[[ i ]], nu=basisK, nv=0 )$u
-      #        ( stats::prcomp( vmats[[ i ]], retx=TRUE, rank.=basisK, scale.=TRUE )$x )
       vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
     }
   }
@@ -4697,7 +4903,7 @@ normalizing_weights = rep( 1.0, nModalities )
 domain_weights <- rep(1.0, nModalities)  # Rename auto_norm_domain_weights
 names(domain_weights) <- names(data_matrices)
 names( orth_weights ) = names( normalizing_weights ) = names( data_matrices )
-clipper = 0.80
+clipper = 0.95 # no clipping
 bestTot <- Inf
 bestRow <- 1
 bestU <- initialUMatrix
@@ -4707,16 +4913,21 @@ converged=0
 
 # --- Add these parameters to your main simlr() function signature ---
 optimizer = optimizationStyle
-initial_learning_rate = 0.01
-final_learning_rate = 1e-5
+initial_learning_rate = 1.0
+final_learning_rate = 1e-6
 
 # Create the optimizer object based on user's choice
-optimizer_object <- create_optimizer(
-  optimizer_type = optimizer,
-  vmats = vmats,
-  # Pass hyperparameters that the step functions will need
-  beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8, sgd_momentum_beta = 0.9
-)
+optimizer_object_l = list()
+for ( k in 1:nModalities) {
+  optimizer_object <- create_optimizer(
+    optimizer_type = optimizer,
+    vmats = vmats,
+    # Pass hyperparameters that the step functions will need
+    beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8, sgd_momentum_beta = 0.9
+  )
+  optimizer_object_l[[k]] <- optimizer_object
+}
+
 
 # initialize energy trackers for each modality
 all_sim_energy   <- vector("list", nModalities)
@@ -4730,9 +4941,15 @@ for (j in 1:nModalities) {
   all_dom_energy_raw[[j]] <- numeric()
   all_total_energy[[j]] <- numeric()
 }
+v_initial = vmats
+u_initial = initialUMatrix
 # --- 2. Main Optimization Loop ---
 for (myit in 1:iterations) { # Begin main optimization loop
 # --- Calculate dynamic learning rate for non-line-search methods ---
+  if ( myit <= 2 ) {
+    vmats = v_initial
+    initialUMatrix = u_initial
+  }
   decay_progress <- (myit - 1) / max(1, iterations - 1)
   current_learning_rate <- final_learning_rate + 0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
   # --- A. Update each V_i matrix ---
@@ -4814,6 +5031,16 @@ for (myit in 1:iterations) { # Begin main optimization loop
             V_sp, data_matrices[[i]], initialUMatrix[[i]],
             "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
           ) * domain_weights[i]
+          dom_grad <- simlr_sparseness(
+                  dom_grad,
+                  constraint_type = constraint_type,
+                  smoothing_matrix = smoothingMatrices[[i]],
+                  positivity = positivities[i],
+                  sparseness_quantile = sparsenessQuantiles[i],
+                  constraint_iterations = constraint_iterations,
+                  constraint_weight = constraint_weight,
+                  sparseness_alg = sparsenessAlg
+                )
         }
       }
 
@@ -4829,7 +5056,7 @@ for (myit in 1:iterations) { # Begin main optimization loop
     }      
     riemannian_descent_grad = smooth_grad(vmats[[i]])
     step_result <- step(
-          optimizer_object,
+          optimizer = optimizer_object_l[[i]],
           i = i,
           V_current = vmats[[i]],
           descent_gradient = riemannian_descent_grad,
@@ -4841,7 +5068,7 @@ for (myit in 1:iterations) { # Begin main optimization loop
 
  # Update the parameter and the optimizer object with their new states
     V_updated <- step_result$updated_V
-    optimizer_object <- step_result$optimizer
+    optimizer_object_l[[i]] <- step_result$optimizer
     # print(step_result)
     # 5. Apply the final non-smooth projection (sparsity and retraction)
     vmats[[i]] <- simlr_sparseness(
@@ -4964,6 +5191,21 @@ for (myit in 1:iterations) { # Begin main optimization loop
         myit=iterations
       }
     }
+  } else {
+    initial_learning_rate = initial_learning_rate * 0.5
+    final_learning_rate = final_learning_rate * 0.9
+    perturb_matrices <- function(U, V, scale_U = 1e-3, scale_V = 1e-3) {
+      U_perturbed <- U + matrix(rnorm(length(U), mean = 0, sd = scale_U),
+                                nrow = nrow(U), ncol = ncol(U))
+      V_perturbed <- V + matrix(rnorm(length(V), mean = 0, sd = scale_V),
+                                nrow = nrow(V), ncol = ncol(V))
+      list(U = U_perturbed, V = V_perturbed)
+    }
+    for ( k in 1:length(vmats)) {
+      mypert = perturb_matrices( initialUMatrix[[k]], vmats[[k]], scale_U = 1e-3, scale_V = 1e-3)
+      initialUMatrix[[k]] = mypert$U
+      vmats[[k]] = mypert$V
+    }
   }
   
   if (verbose & printit | verbose > 1 ) {
@@ -4971,7 +5213,7 @@ for (myit in 1:iterations) { # Begin main optimization loop
     mean_orthogonality <- mean(iter_results$feature_orthogonality, na.rm = TRUE)
 #    message(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f",
 #                  myit, mean_current_energy, bestTot, bestRow, mean_orthogonality))
-    cat(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f \n",
+    cat(sprintf("It: %d | Energy: %.4f | Best.Energy: %.4f (at iter %d) | Ortho: %.4f \n",
                   myit, mean_current_energy, bestTot, bestRow, mean_orthogonality))
     if ( myit == 1) cat("\n----iteration 1 is an auto-tuning iteration----\n")
   }
@@ -7194,8 +7436,11 @@ antspymm_simlr <- function(
   }
 
   # Initialize U matrix
-  initu <- initializeSimlr(mats, nsimlr, uAlgorithm = "pca", jointReduction = FALSE)
-  
+  initu = optimal_simlr_initializer( mats, 
+    n_init = 10, basisK = nsimlr,
+    energyType=energy,
+    seed = 123, verbose=TRUE )$bestU
+
   # Configure path modeling
   if (!is.null(path_modeling)) {
     clist <- path_modeling
@@ -7217,11 +7462,11 @@ antspymm_simlr <- function(
   
   simlrX <- simlr(mats, regs,
                   iterations = maxits,
-                  verbose = !doperm,
+                  verbose = verbose,
                   randomSeed = myseed,
                   mixAlg = mixer,
                   energyType = energy,
-                  scale = c('center', 'eigenvalue'),
+                  scale = c('center','eigenvalue'),
                   sparsenessQuantiles = sparval,
                   expBeta = 0.0,
                   positivities = rep("positive", length(mats)),

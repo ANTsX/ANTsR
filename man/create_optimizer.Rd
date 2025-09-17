@@ -11,7 +11,8 @@ create_optimizer(optimizer_type = "hybrid_adam", vmats, ...)
 "hybrid_adam" (Adam direction with Armijo line search - robust),
 "adam" (Adam with a learning rate schedule - fast),
 "nadam" (Nesterov-accelerated Adam - fast and robust),
-"sgd_momentum" (SGD with momentum and learning rate schedule - classic).}
+"sgd_momentum" (SGD with momentum and learning rate schedule - classic),
+"armijo_gradient" (steepest descent with robust Armijo backtracking line search - maximally robust).}
 
 \item{vmats}{The list of initial V matrices, used to set up the dimensions
 of the optimizer's internal state variables.}

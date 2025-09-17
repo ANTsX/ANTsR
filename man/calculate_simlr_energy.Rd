@@ -2,28 +2,41 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{calculate_simlr_energy}
 \alias{calculate_simlr_energy}
-\title{Calculate SIMLR Similarity Energy}
+\title{Calculate SiMLR energy for optimization}
 \usage{
-calculate_simlr_energy(V, X, U, energy_type, lambda = 1, prior_matrix = NULL)
+calculate_simlr_energy(
+  V,
+  X,
+  U,
+  energy_type,
+  lambda = 1,
+  prior_matrix = NULL,
+  verbose = 0
+)
 }
 \arguments{
-\item{V}{A candidate loading matrix [p x k] to evaluate.}
+\item{V}{Matrix V in the SiMLR decomposition.}
 
-\item{X}{The data matrix for the current modality [n x p].}
+\item{X}{Data matrix for the modality.}
 
-\item{U}{The shared basis matrix [n x k].}
+\item{U}{Matrix U in the SiMLR decomposition.}
 
-\item{energy_type}{A string specifying the similarity objective.}
+\item{energy_type}{Character string specifying the energy type. Supports partial
+matching (e.g., "reg" for "regression", "cca" for "cca" or "acc").
+Valid options: regression, reconorm, lowRankRegression, lrr, cca, acc,
+logcosh, kurtosis, exp, gauss, normalized_correlation, dat.}
 
-\item{lambda}{prior weight term for dat}
+\item{lambda}{Numeric, weight for domain energy (default = 1.0).}
 
-\item{prior_matrix}{matrix of prior weights, same number of columns as V}
+\item{prior_matrix}{Optional prior matrix for domain energy (used with "dat").}
+
+\item{verbose}{Integer, verbosity level: 0 (none), 1 (log matched energy_type) (default = 0).}
 }
 \value{
-A single numeric value for the similarity energy. The sign is adjusted
-  such that the value should always be minimized.
+Numeric energy value (negative for maximization objectives).
 }
 \description{
-This dispatcher calculates the similarity/reconstruction part of the
-objective function for use in an optimization routine.
+Computes the energy for SiMLR based on the specified energy type, with partial
+matching for energy_type. Returns negative values for maximization objectives
+to align with minimization goals.
 }

@@ -19,7 +19,8 @@
 #'   "hybrid_adam" (Adam direction with Armijo line search - robust),
 #'   "adam" (Adam with a learning rate schedule - fast),
 #'   "nadam" (Nesterov-accelerated Adam - fast and robust),
-#'   "sgd_momentum" (SGD with momentum and learning rate schedule - classic).
+#'   "sgd_momentum" (SGD with momentum and learning rate schedule - classic),
+#'   "armijo_gradient" (steepest descent with robust Armijo backtracking line search - maximally robust).
 #' @param vmats The list of initial V matrices, used to set up the dimensions
 #'   of the optimizer's internal state variables.
 #' @param ... Additional hyperparameters for the optimizer (e.g., `beta1`, `beta2`).
@@ -121,6 +122,91 @@ step.hybrid_adam <- function(optimizer, i, V_current, descent_gradient, full_ene
   return(list(updated_V = updated_V, optimizer = optimizer))
 }
 
+#' @export
+step.random_search <- function(optimizer, i, V_current, descent_gradient,
+                               full_energy_function, ...) {
+  # This optimizer performs random search around V_current.
+  # It proposes n_trials random perturbations and picks the candidate
+  # that yields the lowest energy (greedy). If no energy function is given,
+  # it returns a single perturbation.
+  
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  n_trials <- params$n_trials %||% 16L
+  noise_scale <- params$noise_scale %||% 0.1
+  lr <- params$learning_rate %||% 0.01
+  
+  best_V <- V_current
+  best_energy <- Inf
+  
+  if (!is.null(full_energy_function)) {
+    # Evaluate current energy
+    current_energy <- full_energy_function(V_current, return_raw = FALSE)
+    best_energy <- current_energy
+  }
+  
+  for (t in seq_len(n_trials)) {
+    noise <- matrix(rnorm(length(V_current)), nrow = nrow(V_current))
+    perturb <- lr * noise_scale * noise
+    candidate <- V_current + perturb
+    
+    if (!is.null(full_energy_function)) {
+      cand_energy <- tryCatch(
+        full_energy_function(candidate, return_raw = FALSE),
+        error = function(e) Inf
+      )
+      if (cand_energy < best_energy) {
+        best_energy <- cand_energy
+        best_V <- candidate
+      }
+    } else {
+      # No energy function → just take the first perturbation
+      best_V <- candidate
+      break
+    }
+  }
+  
+  optimizer$state[[i]] <- state
+  return(list(updated_V = best_V, optimizer = optimizer))
+}
+
+#' @export
+step.random_gradient <- function(optimizer, i, V_current, descent_gradient,
+                                 full_energy_function, ...) {
+  # This optimizer ignores the actual gradient and generates a random one.
+  # It then uses backtracking line search to find an acceptable step size.
+  
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  epsilon <- params$epsilon %||% 1e-8
+  
+  # Generate a random gradient of the same shape as V_current
+  rand_grad <- matrix(rnorm(length(V_current)), nrow = nrow(V_current))
+  
+  # Normalize gradient to unit RMS, then scale
+  rms <- sqrt(mean(rand_grad^2))
+  if (rms > 0) rand_grad <- rand_grad / (rms + epsilon)
+  
+  # Proposed descent direction is the random gradient
+  search_direction <- rand_grad
+  
+  # Perform line search along this direction
+  optimal_step_size <- .backtracking_linesearch(
+    V_current = V_current,
+    descent_direction = search_direction,
+    ascent_gradient = -rand_grad, # slope term consistency
+    energy_function = full_energy_function,
+    initial_step_size = state$last_step_size %||% 1.0
+  )
+  
+  # Store updated step size for next call
+  state$last_step_size <- if (optimal_step_size > 1e-9) optimal_step_size * 1.5 else 1.0
+  optimizer$state[[i]] <- state
+  
+  updated_V <- V_current + optimal_step_size * search_direction
+  
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
 
 #' @export
 step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
@@ -159,7 +245,7 @@ step.gd <- function(optimizer, i, V_current, descent_gradient, ...) {
   state <- optimizer$state[[i]]
   params <- optimizer$params
   
-  learning_rate <- params$learning_rate %||% 0.01
+  learning_rate <- params$learning_rate %||% 1e-6
   decay_rate    <- params$decay_rate %||% 1e-3
   
   # Track iteration count in state
@@ -636,6 +722,248 @@ step.lookahead <- function(optimizer, i, V_current, descent_gradient, ...) {
   optimizer$state[[i]] <- state
   return(list(updated_V = V_fast, optimizer = optimizer))
 }
+
+
+# ==============================================================================
+#           NEW OPTIMIZER: Bidirectional Armijo Gradient
+# ==============================================================================
+#' @export
+step.bidirectional_armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+  # This method tries both the provided descent_gradient and its negation, using a robust
+  # Armijo backtracking line search to find an energy-reducing step. It is maximally robust
+  # to incorrect gradient directions and guarantees an energy-reducing step if possible.
+  
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  epsilon <- params$epsilon %||% 1e-12
+  
+  # Normalize the descent_gradient to unit Frobenius norm
+  dir_norm <- sqrt(sum(descent_gradient^2))
+  if (dir_norm < epsilon) {
+    # Stationary point: no update
+    return(list(updated_V = V_current, optimizer = optimizer))
+  }
+  norm_direction <- descent_gradient / dir_norm
+  
+  # Perform bidirectional line search
+  result <- .bidirectional_linesearch(
+    V_current = V_current,
+    descent_direction = norm_direction,
+    ascent_gradient = -descent_gradient,  # grad(E)
+    energy_function = full_energy_function,
+    initial_step_size = state$last_step_size %||% 1.0
+  )
+  
+  optimal_step_size <- result$step_size
+  selected_direction <- result$direction
+  
+  # Update last_step_size: expand if successful, reset if failed/tiny
+  state$last_step_size <- if (optimal_step_size > 1e-9) optimal_step_size * 1.5 else 1.0
+  optimizer$state[[i]] <- state
+  
+  # Apply the step
+  updated_V <- V_current + optimal_step_size * selected_direction
+  
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
+# --- Internal Helper for Bidirectional Line Search ---
+
+#' @keywords internal
+.bidirectional_linesearch <- function(V_current, descent_direction, ascent_gradient,
+                                     energy_function, initial_step_size = 1.0,
+                                     alpha = 1e-4, beta = 0.5, min_step = 1e-12) {
+  # Tries both descent_direction and its negation, returning the direction and step size
+  # that satisfies the Armijo condition with the largest step size. Returns zero step
+  # and original direction if neither works.
+  
+  # Try positive direction
+  pos_result <- .robust_backtracking_linesearch(
+    V_current = V_current,
+    descent_direction = descent_direction,
+    ascent_gradient = ascent_gradient,
+    energy_function = energy_function,
+    initial_step_size = initial_step_size,
+    alpha = alpha,
+    beta = beta,
+    min_step = min_step
+  )
+  
+  # Try negative direction
+  neg_result <- .robust_backtracking_linesearch(
+    V_current = V_current,
+    descent_direction = -descent_direction,
+    ascent_gradient = -ascent_gradient,  # Flip for consistency
+    energy_function = energy_function,
+    initial_step_size = initial_step_size,
+    alpha = alpha,
+    beta = beta,
+    min_step = min_step
+  )
+  
+  # Select the direction with the larger step size
+  if (pos_result >= neg_result && pos_result > 0) {
+    return(list(step_size = pos_result, direction = descent_direction))
+  } else if (neg_result > 0) {
+    return(list(step_size = neg_result, direction = -descent_direction))
+  } else {
+    warning("Bidirectional line search failed to find a suitable step size in either direction.")
+    return(list(step_size = 0, direction = descent_direction))
+  }
+}
+
+# ==============================================================================
+#           NEW OPTIMIZER: Steepest Descent with Robust Armijo Line Search
+# ==============================================================================
+#' @export
+step.armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+  # This method uses the steepest descent direction (normalized descent_gradient) and a robust
+  # backtracking line search with Armijo condition. It is maximally robust and guaranteed to
+  # find an energy-reducing step if the point is not stationary, by backtracking until a very
+  # small step size threshold.
+  
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  epsilon <- params$epsilon %||% 1e-12
+  
+  # Use the descent_gradient as the base direction
+  search_direction <- descent_gradient
+  
+  # Compute Frobenius norm for normalization (unit direction for consistent scaling)
+  dir_norm <- sqrt(sum(search_direction^2))
+  if (dir_norm < epsilon) {
+    # Stationary point: no update
+    return(list(updated_V = V_current, optimizer = optimizer))
+  }
+  search_direction <- search_direction / dir_norm
+  
+  # Perform robust line search along this direction
+  optimal_step_size <- .robust_backtracking_linesearch(
+    V_current = V_current,
+    descent_direction = search_direction,
+    ascent_gradient = -descent_gradient,  # grad(E)
+    energy_function = full_energy_function,
+    initial_step_size = state$last_step_size  # Warm start from history
+  )
+  
+  # Update last_step_size: expand if successful, reset if failed/tiny
+  state$last_step_size <- if (optimal_step_size > 1e-9) optimal_step_size * 1.5 else 1.0
+  optimizer$state[[i]] <- state
+  
+  # Apply the step
+  updated_V <- V_current + optimal_step_size * search_direction
+  
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
+# --- Internal Helper for Robust Line Search ---
+
+#' @keywords internal
+.robust_backtracking_linesearch <- function(V_current, descent_direction, ascent_gradient,
+                                            energy_function, initial_step_size = 1.0,
+                                            alpha = 1e-4, beta = 0.5, min_step = 1e-12) {
+  step_size <- initial_step_size
+  initial_energy <- energy_function(V_current)
+  
+  # Slope term: <grad(E), d> (should be negative)
+  slope_term <- sum(ascent_gradient * descent_direction)
+  if (slope_term >= 0) {
+    warning("Line search given a non-descent direction. Stopping search.")
+    return(0)
+  }
+  
+  # Backtrack until Armijo satisfied or step too small (guaranteed for small steps)
+  while (step_size > min_step) {
+    V_candidate <- V_current + step_size * descent_direction
+    new_energy <- tryCatch(energy_function(V_candidate), error = function(e) Inf)
+    
+    # Armijo condition
+    if (new_energy <= initial_energy + alpha * step_size * slope_term) {
+      return(step_size)
+    }
+    step_size <- beta * step_size
+  }
+  
+  warning("Robust line search failed to find a suitable step size; possibly at local minimum or numerical issue.")
+  return(0)
+}
+
+
+# ==============================================================================
+#           NEW OPTIMIZER: Bidirectional Lookahead
+# ==============================================================================
+#' @export
+step.bidirectional_lookahead <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+  # This method combines lookahead with a bidirectional line search on the Adam-proposed direction.
+  # It computes the Adam descent direction, then performs a bidirectional Armijo backtracking line
+  # search (trying both the direction and its negation) to find a robust energy-reducing step.
+  # Finally, it applies lookahead synchronization for improved generalization and stability.
+  # It is robust to incorrect gradient directions and aims to guarantee energy reduction when possible.
+  
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  
+  # Lookahead parameters
+  k <- params$k %||% 5       # Sync period
+  alpha <- params$alpha %||% 0.5
+  
+  # Adam parameters (base optimizer)
+  beta1 <- params$beta1 %||% 0.9
+  beta2 <- params$beta2 %||% 0.999
+  epsilon <- params$epsilon %||% 1e-8
+  myit <- params$myit %||% 1
+  
+  # Initialize lookahead state
+  state$V_slow <- state$V_slow %||% V_current
+  state$step <- state$step %||% 0
+  
+  # --- 1. Compute Adam Descent Direction ---
+  
+  # Update Adam state with the descent gradient
+  state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
+  state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)
+  state$v_max <- pmax(state$v_max, state$v)
+  
+  # Bias correction for momentum and adaptive learning rate
+  m_hat <- state$m / (1 - beta1^myit)
+  v_hat <- state$v_max / (1 - beta2^myit)
+  
+  # The Adam-proposed descent direction (adaptive momentum)
+  search_direction <- m_hat / (sqrt(v_hat) + epsilon)
+  
+  # --- 2. Perform Bidirectional Line Search ---
+  
+  bidirectional_result <- .bidirectional_linesearch(
+    V_current = V_current,
+    descent_direction = search_direction,
+    ascent_gradient = -descent_gradient,  # grad(E)
+    energy_function = full_energy_function,
+    initial_step_size = state$last_step_size %||% 1.0
+  )
+  
+  optimal_step_size <- bidirectional_result$step_size
+  selected_direction <- bidirectional_result$direction
+  
+  # Compute the fast updated V using the selected step and direction
+  V_fast <- V_current + optimal_step_size * selected_direction
+  
+  # --- 3. Apply Lookahead Synchronization ---
+  
+  state$step <- state$step + 1
+  if (state$step %% k == 0) {
+    state$V_slow <- state$V_slow + alpha * (V_fast - state$V_slow)
+    V_fast <- state$V_slow
+  }
+  
+  # Update last_step_size for line search warm-starting
+  state$last_step_size <- if (optimal_step_size > 1e-9) optimal_step_size * 1.5 else 1.0
+  
+  # Save updated state
+  optimizer$state[[i]] <- state
+  
+  return(list(updated_V = V_fast, optimizer = optimizer))
+}
+
 
 # Helper for default values
 `%||%` <- function(a, b) if (is.null(a)) b else a
