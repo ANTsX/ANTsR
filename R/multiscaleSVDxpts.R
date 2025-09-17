@@ -5201,11 +5201,11 @@ for (myit in 1:iterations) { # Begin main optimization loop
                                 nrow = nrow(V), ncol = ncol(V))
       list(U = U_perturbed, V = V_perturbed)
     }
-    for ( k in 1:length(vmats)) {
-      mypert = perturb_matrices( initialUMatrix[[k]], vmats[[k]], scale_U = 1e-3, scale_V = 1e-3)
-      initialUMatrix[[k]] = mypert$U
-      vmats[[k]] = mypert$V
-    }
+#    for ( k in 1:length(vmats)) {
+#      mypert = perturb_matrices( initialUMatrix[[k]], vmats[[k]], scale_U = 1e-3, scale_V = 1e-3)
+#      initialUMatrix[[k]] = mypert$U
+#      vmats[[k]] = mypert$V
+#    }
   }
   
   if (verbose & printit | verbose > 1 ) {
