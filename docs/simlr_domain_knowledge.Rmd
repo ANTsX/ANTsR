@@ -108,10 +108,10 @@ matlist_test <- list(cortex = cortex[(n_train+1):n, ], white_matter = white_matt
 smoothingMats <- lapply(matlist_train, function(m) diag(ncol(m)))
 myspar <- rep(0.8, length(matlist_train))
 mypos <- rep("positive", length(matlist_train))
-myorth <- "orthox0.02x1"
+myorth <- "orthox0.5x1"
 initu <- initializeSimlr(matlist_train, round(d*1.2))
 myits <- 200
-myopt <- "lookahead"
+myopt <- "bidirectional_lookahead"
 params_grid <- expand.grid(
   energyType = c('normalized_correlation', "acc", "regression"),
   mixAlg = c("pca", "ica", 'svd'),
