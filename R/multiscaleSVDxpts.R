@@ -5005,20 +5005,10 @@ for (myit in 1:iterations) { # Begin main optimization loop
     ############################
     smooth_grad <- function(V) {
       if (positivities[i] == 'positive') V <- take_abs_unsigned(V)
-      V_sp <- simlr_sparseness(
-        V,
-        constraint_type = constraint_type,
-        smoothing_matrix = smoothingMatrices[[i]],
-        positivity = positivities[i],
-        sparseness_quantile = sparsenessQuantiles[i],
-        constraint_iterations = constraint_iterations,
-        constraint_weight = constraint_weight,
-        sparseness_alg = sparsenessAlg
-      )
 
       # --- User-chosen gradient ---
       sim_grad <- calculate_simlr_gradient(
-        V_sp, data_matrices[[i]], initialUMatrix[[i]],
+        V, data_matrices[[i]], initialUMatrix[[i]],
         energyType
       ) * normalizing_weights[i]
 
@@ -5028,19 +5018,9 @@ for (myit in 1:iterations) { # Begin main optimization loop
         lam <- domainLambdas[i]
         if (lam > 0) {
           dom_grad <- calculate_simlr_gradient(
-            V_sp, data_matrices[[i]], initialUMatrix[[i]],
+            V, data_matrices[[i]], initialUMatrix[[i]],
             "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
           ) * domain_weights[i]
-          dom_grad <- simlr_sparseness(
-                  dom_grad,
-                  constraint_type = constraint_type,
-                  smoothing_matrix = smoothingMatrices[[i]],
-                  positivity = positivities[i],
-                  sparseness_quantile = sparsenessQuantiles[i],
-                  constraint_iterations = constraint_iterations,
-                  constraint_weight = constraint_weight,
-                  sparseness_alg = sparsenessAlg
-                )
         }
       }
 
@@ -5050,10 +5030,25 @@ for (myit in 1:iterations) { # Begin main optimization loop
           gradient_invariant_orthogonality_defect(V_sp)
       }
 
+
       g <- sim_grad + dom_grad - orth_grad
-      g <- clip_gradient_by_quantile(constrainG(as.matrix(g), i, constraint_type), clipper)
+      g <- clip_gradient_by_quantile( 
+        constrainG(as.matrix(g), i, constraint_type), clipper)
+
+      g <- simlr_sparseness(
+        g,
+        constraint_type = constraint_type,
+        smoothing_matrix = smoothingMatrices[[i]],
+        positivity = positivities[i],
+        sparseness_quantile = sparsenessQuantiles[i],
+        constraint_iterations = constraint_iterations,
+        constraint_weight = constraint_weight,
+        sparseness_alg = sparsenessAlg
+      )
+
       return(g)
     }      
+    
     riemannian_descent_grad = smooth_grad(vmats[[i]])
     step_result <- step(
           optimizer = optimizer_object_l[[i]],
