@@ -4995,13 +4995,18 @@ for ( k in 1:length(data_matrices)) {
     colnames(bestV[[k]])=paste0("PC",1:ncol(bestV[[k]]))
   }
   
+for ( v in 1:length(bestV)) {
+  if ( is.null( rownames(bestV[[v]])) ) {
+    rownames(bestV[[v]])=paste0("x",1:nrow(bestV[[v]]))
+  }
+}
+
 energyPath <- na.omit(energyPath)
-return(
-    list(
+rlist=    list(
       u = bestU,
       v = bestV,
       initialRandomMatrix = randmat,
-      energyPath = convergence_df,
+      energyPath = data.frame(convergence_df),
       finalError = bestTot,
       connectors = connectors,
       energyType = energyType,
@@ -5011,9 +5016,13 @@ return(
       sim_energy = all_sim_energy,
       domain_energy = all_dom_energy_raw,
       total_energy = all_total_energy,
-      domainLambdas = domainLambdas,
       constraint = constraint
     )
+if ( ! is.null( domainLambdas ) ) {
+  rlist$domainLambdas = domainLambdas
+}
+return(
+  rlist
   )
 }
 
@@ -9077,118 +9086,242 @@ project_to_partially_orthonormal_nonnegative <- function(X,
 }
 
 
-#' Write all SiMLR outputs to disk (portable version)
+#' Write all SiMLR outputs to disk
 #'
-#' This function saves the complete set of SiMLR outputs (e.g., `u`, `v`, energy paths,
-#' error metrics, and other metadata) to a structured directory on disk.
-#' Matrices and data frames are written as UTF-8 CSV files, while other R objects
-#' are serialized as `.rds`. A manifest is written with **relative paths** to track
-#' the saved components, ensuring portability across systems.
+#' Saves SiMLR outputs to a structured directory with relative paths for portability.
+#' Matrices and data frames are written as CSV files with row names included and
+#' stored in the manifest. Other R objects are saved as `.rds`. NULL components are
+#' recorded without files.
 #'
-#' @param simlr_object A named list containing the full SiMLR outputs (e.g., `mysim$simlrX`).
-#' @param file_prefix A character string used as the prefix for the output directory name.
+#' @param simlr_object A named list containing SiMLR outputs (e.g., `mysim$simlrX`).
+#' @param file_prefix A character string used as the prefix for the output directory.
+#' @param clear_dir Logical: if TRUE, clear the output directory before writing (default: FALSE).
 #'
 #' @return No return value, called for side effects.
-#' @examples
-#' \dontrun{
-#' write_simlr(mysim$simlrX, "output")
-#' reloaded <- read_simlr("output_simlr")
-#' }
 #' @export
-write_simlr <- function(simlr_object, file_prefix) {
-  # create an output folder
+write_simlr <- function(simlr_object, file_prefix, clear_dir = FALSE) {
+  if (!is.list(simlr_object) || is.null(names(simlr_object))) {
+    stop("simlr_object must be a named list")
+  }
   outdir <- paste0(file_prefix, "_simlr")
-  if (!dir.exists(outdir)) dir.create(outdir, recursive = TRUE)
+  if (clear_dir && dir.exists(outdir)) {
+    unlink(outdir, recursive = TRUE)
+    # cat"Cleared directory:", outdir, "\n")
+  }
+  if (!dir.exists(outdir)) {
+    dir.create(outdir, recursive = TRUE)
+  } else if (length(list.files(outdir)) > 0) {
+    warning("Directory not empty; existing files may be overwritten")
+  }
 
   manifest <- list()
+  # cat"Writing components to:", outdir, "\n")
+  # cat"Components:", paste(names(simlr_object), collapse=", "), "\n")
 
   for (n in names(simlr_object)) {
     obj <- simlr_object[[n]]
-    relname <- paste0(n) # base for manifest entries
-    fname <- file.path(outdir, paste0(n, ".rds"))  # default
+    fname <- paste0(n, ".rds")  # Relative path
+    abs_fname <- file.path(outdir, fname)  # Absolute path for writing
+    # catsprintf("Processing %s (type: %s)\n", n, paste(class(obj), collapse=", ")))
 
-    # handle cases
-    if (is.data.frame(obj) || is.matrix(obj)) {
-      fname <- file.path(outdir, paste0(n, ".csv"))
-      write.csv(obj, fname, row.names = FALSE, fileEncoding = "UTF-8")
+    if (is.null(obj)) {
+      manifest[[n]] <- list(type = "null", file = NULL)
+      # catsprintf("  Recorded %s as NULL (no file)\n", n))
+      next
+    }
+
+    # Handle energyPath explicitly
+    if (n == "energyPath" && !is.data.frame(obj)) {
+      obj <- as.data.frame(obj)
+    }
+
+    if (is.data.frame(obj)) {
+      fname <- paste0(n, ".csv")
+      abs_fname <- file.path(outdir, fname)
+      write.csv(obj, abs_fname, row.names = TRUE)  # Always write row names
+      manifest[[n]] <- list(
+        type = "data.frame",
+        file = fname,
+        has_rownames = !is.null(rownames(obj)),
+        rownames = if (!is.null(rownames(obj))) rownames(obj) else NULL
+      )
+
+    } else if (is.matrix(obj)) {
+      fname <- paste0(n, ".csv")
+      abs_fname <- file.path(outdir, fname)
+      write.csv(as.data.frame(obj), abs_fname, row.names = TRUE)  # Always write row names
+      manifest[[n]] <- list(
+        type = "matrix",
+        file = fname,
+        has_rownames = !is.null(rownames(obj)),
+        rownames = if (!is.null(rownames(obj))) rownames(obj) else NULL,
+        storage.mode = storage.mode(obj)
+      )
+
     } else if (is.list(obj)) {
-      # nested list → save recursively
       subdir <- file.path(outdir, n)
-      dir.create(subdir, showWarnings = FALSE)
+      dir.create(subdir, showWarnings = FALSE, recursive = TRUE)
       submanifest <- list()
+
       for (i in seq_along(obj)) {
         subobj <- obj[[i]]
         subname <- names(obj)[i]
-        if (is.null(subname) || subname == "") subname <- paste0("element", i)
-        if (is.data.frame(subobj) || is.matrix(subobj)) {
-          subfile <- file.path(subdir, paste0(subname, ".csv"))
-          write.csv(subobj, subfile, row.names = FALSE, fileEncoding = "UTF-8")
-        } else {
-          subfile <- file.path(subdir, paste0(subname, ".rds"))
-          saveRDS(subobj, subfile, version = 2)
-        }
-        submanifest[[subname]] <- file.path(n, basename(subfile)) # relative path
-      }
-      manifest[[n]] <- submanifest
-      next
-    } else {
-      # fallback: save as rds with version=2 for portability
-      saveRDS(obj, fname, version = 2)
-    }
+        use_name <- !is.null(subname) && subname != ""
+        if (!use_name) subname <- as.character(i)
+        # cat(sprintf("  Subcomponent %s$%s (type: %s)\n", n, subname,
+        #            paste(class(subobj), collapse=", ")))
 
-    # store relative path, not absolute
-    manifest[[n]] <- basename(fname)
+        if (is.null(subobj)) {
+          submanifest[[subname]] <- list(file = NULL, type = "null", use_name = use_name)
+          # catsprintf("    Recorded %s$%s as NULL (no file)\n", n, subname))
+          next
+        }
+
+        subfile <- if (is.data.frame(subobj) || is.matrix(subobj)) {
+          paste0(n, "/", subname, ".csv")
+        } else {
+          paste0(n, "/", subname, ".rds")
+        }
+        abs_subfile <- file.path(outdir, subfile)
+
+        if (is.data.frame(subobj)) {
+          write.csv(subobj, abs_subfile, row.names = TRUE)  # Always write row names
+          submanifest[[subname]] <- list(
+            file = subfile,
+            type = "data.frame",
+            use_name = use_name,
+            has_rownames = !is.null(rownames(subobj)),
+            rownames = if (!is.null(rownames(subobj))) rownames(subobj) else NULL
+          )
+          # cat(sprintf("    Wrote %s$%s to %s (rownames: %s)\n", n, subname, subfile,
+          #            if (!is.null(rownames(subobj))) "present" else "none"))
+        } else if (is.matrix(subobj)) {
+          write.csv(as.data.frame(subobj), abs_subfile, row.names = TRUE)  # Always write row names
+          submanifest[[subname]] <- list(
+            file = subfile,
+            type = "matrix",
+            use_name = use_name,
+            has_rownames = !is.null(rownames(subobj)),
+            rownames = if (!is.null(rownames(subobj))) rownames(subobj) else NULL,
+            storage.mode = storage.mode(subobj)
+          )
+          # cat(sprintf("    Wrote %s$%s to %s (rownames: %s)\n", n, subname, subfile,
+          #            if (!is.null(rownames(subobj))) "present" else "none"))
+        } else {
+          saveRDS(subobj, abs_subfile)
+          submanifest[[subname]] <- list(
+            file = subfile,
+            type = "rds",
+            use_name = use_name,
+            class = class(subobj)
+          )
+          # catsprintf("    Wrote %s$%s to %s\n", n, subname, subfile))
+        }
+      }
+      manifest[[n]] <- list(type = "list", contents = submanifest)
+      # catsprintf("  Created submanifest for %s\n", n))
+
+    } else {
+      saveRDS(obj, abs_fname)
+      manifest[[n]] <- list(type = "rds", file = fname, class = class(obj))
+      # catsprintf("  Wrote %s to %s\n", n, fname))
+    }
   }
 
-  # save manifest with relative references
-  saveRDS(manifest, file.path(outdir, "manifest.rds"), version = 2)
+  manifest_file <- file.path(outdir, "manifest.rds")
+  saveRDS(manifest, manifest_file)
+  # cat"Manifest written to:", file.path(basename(outdir), "manifest.rds"), "\n")
 }
 
-
-#' Read all SiMLR outputs from disk (portable version)
+#' Read all SiMLR outputs from disk
 #'
-#' This function reconstructs the complete SiMLR outputs previously written by
-#' \code{\link{write_simlr}}. It uses the manifest to reload each component in its
-#' original format, ensuring portability across systems.
+#' Reconstructs SiMLR outputs written by \code{\link{write_simlr}} using the manifest
+#' with relative paths for portability. Restores row names for matrices and data frames
+#' from the CSV files.
 #'
-#' @param dir A character string specifying the directory where the SiMLR outputs were written.
+#' @param dir A character string specifying the directory with SiMLR outputs.
 #'
 #' @return A named list reconstructing the original SiMLR object.
-#' @examples
-#' \dontrun{
-#' write_simlr(mysim$simlrX, "output")
-#' reloaded <- read_simlr("output_simlr")
-#' }
 #' @export
 read_simlr <- function(dir) {
-  manifest <- readRDS(file.path(dir, "manifest.rds"))
+  manifest_file <- file.path(dir, "manifest.rds")
+  if (!file.exists(manifest_file)) {
+    stop("Manifest file not found in directory: ", dir)
+  }
+  manifest <- readRDS(manifest_file)
   result <- list()
+  # cat"Reading components from:", dir, "\n")
+  # cat"Components:", paste(names(manifest), collapse=", "), "\n")
 
   for (n in names(manifest)) {
     entry <- manifest[[n]]
+    # catsprintf("Processing %s (type: %s)\n", n, entry$type))
 
-    if (is.list(entry)) {
-      # nested list
+    if (entry$type == "null") {
+      result[[n]] <- NULL
+      # catsprintf("  Assigned %s as NULL\n", n))
+      next
+    }
+
+    abs_file <- file.path(dir, entry$file)  # Resolve relative path
+    if (entry$type == "data.frame") {
+      if (!file.exists(abs_file)) stop("File not found: ", abs_file)
+      obj <- read.csv(abs_file, row.names = if (isTRUE(entry$has_rownames)) 1 else NULL, check.names = FALSE)
+      # cat(sprintf("  Read %s from %s (dimensions: %sx%s, rownames: %s)\n", n, entry$file, nrow(obj), ncol(obj), if (isTRUE(entry$has_rownames)) "restored" else "none"))
+      if (!isTRUE(entry$has_rownames)) rownames(obj) <- NULL
+
+    } else if (entry$type == "matrix") {
+      if (!file.exists(abs_file)) stop("File not found: ", abs_file)
+      obj <- read.csv(abs_file, row.names = if (isTRUE(entry$has_rownames)) 1 else NULL, check.names = FALSE)
+      obj <- as.matrix(obj)
+      if (!isTRUE(entry$has_rownames)) rownames(obj) <- NULL
+      if (!is.null(entry$storage.mode)) storage.mode(obj) <- entry$storage.mode
+      # cat(sprintf("  Read %s from %s (dimensions: %sx%s, rownames: %s)\n", n, entry$file, nrow(obj), ncol(obj), if (isTRUE(entry$has_rownames)) "restored" else "none"))
+
+    } else if (entry$type == "rds") {
+      if (!file.exists(abs_file)) stop("File not found: ", abs_file)
+      obj <- readRDS(abs_file)
+      if (!is.null(entry$class)) class(obj) <- entry$class
+      # catsprintf("  Read %s from %s\n", n, entry$file))
+
+    } else if (entry$type == "list") {
       sublist <- list()
-      for (subname in names(entry)) {
-        subfile <- file.path(dir, entry[[subname]])
-        if (grepl("\\.csv$", subfile)) {
-          sublist[[subname]] <- read.csv(subfile, check.names = FALSE)
-        } else if (grepl("\\.rds$", subfile)) {
-          sublist[[subname]] <- readRDS(subfile)
+      for (subn in names(entry$contents)) {
+        subentry <- entry$contents[[subn]]
+        # catsprintf("  Subcomponent %s$%s (type: %s)\n", n, subn, subentry$type))
+        if (subentry$type == "null") {
+          sublist[[subn]] <- NULL
+          # catsprintf("    Assigned %s$%s as NULL\n", n, subn))
+          next
+        }
+
+        abs_subfile <- file.path(dir, subentry$file)
+        if (!file.exists(abs_subfile)) stop("File not found: ", abs_subfile)
+        if (subentry$type == "data.frame") {
+          sobj <- read.csv(abs_subfile, row.names = if (isTRUE(subentry$has_rownames)) 1 else NULL, check.names = FALSE)
+          if (!isTRUE(subentry$has_rownames)) rownames(sobj) <- NULL
+        } else if (subentry$type == "matrix") {
+          sobj <- read.csv(abs_subfile, row.names = if (isTRUE(subentry$has_rownames)) 1 else NULL, check.names = FALSE)
+          sobj <- as.matrix(sobj)
+          if (!isTRUE(subentry$has_rownames)) rownames(sobj) <- NULL
+          if (!is.null(subentry$storage.mode)) storage.mode(sobj) <- subentry$storage.mode
+        } else {
+          sobj <- readRDS(abs_subfile)
+          if (!is.null(subentry$class)) class(sobj) <- subentry$class
+        }
+
+        if (isTRUE(subentry$use_name)) {
+          sublist[[subn]] <- sobj
+        } else {
+          sublist[[length(sublist) + 1]] <- sobj
         }
       }
-      result[[n]] <- sublist
-
+      obj <- sublist
     } else {
-      # single file
-      fpath <- file.path(dir, entry)
-      if (grepl("\\.csv$", fpath)) {
-        result[[n]] <- read.csv(fpath, check.names = FALSE)
-      } else if (grepl("\\.rds$", fpath)) {
-        result[[n]] <- readRDS(fpath)
-      }
+      stop("Unknown type in manifest for ", n, ": ", entry$type)
     }
+
+    result[[n]] <- obj
   }
 
   return(result)

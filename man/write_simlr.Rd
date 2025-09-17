@@ -2,28 +2,23 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{write_simlr}
 \alias{write_simlr}
-\title{Write all SiMLR outputs to disk (portable version)}
+\title{Write all SiMLR outputs to disk}
 \usage{
-write_simlr(simlr_object, file_prefix)
+write_simlr(simlr_object, file_prefix, clear_dir = FALSE)
 }
 \arguments{
-\item{simlr_object}{A named list containing the full SiMLR outputs (e.g., `mysim$simlrX`).}
+\item{simlr_object}{A named list containing SiMLR outputs (e.g., `mysim$simlrX`).}
 
-\item{file_prefix}{A character string used as the prefix for the output directory name.}
+\item{file_prefix}{A character string used as the prefix for the output directory.}
+
+\item{clear_dir}{Logical: if TRUE, clear the output directory before writing (default: FALSE).}
 }
 \value{
 No return value, called for side effects.
 }
 \description{
-This function saves the complete set of SiMLR outputs (e.g., `u`, `v`, energy paths,
-error metrics, and other metadata) to a structured directory on disk.
-Matrices and data frames are written as UTF-8 CSV files, while other R objects
-are serialized as `.rds`. A manifest is written with **relative paths** to track
-the saved components, ensuring portability across systems.
-}
-\examples{
-\dontrun{
-write_simlr(mysim$simlrX, "output")
-reloaded <- read_simlr("output_simlr")
-}
+Saves SiMLR outputs to a structured directory with relative paths for portability.
+Matrices and data frames are written as CSV files with row names included and
+stored in the manifest. Other R objects are saved as `.rds`. NULL components are
+recorded without files.
 }

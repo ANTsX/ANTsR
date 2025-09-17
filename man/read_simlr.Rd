@@ -2,24 +2,18 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{read_simlr}
 \alias{read_simlr}
-\title{Read all SiMLR outputs from disk (portable version)}
+\title{Read all SiMLR outputs from disk}
 \usage{
 read_simlr(dir)
 }
 \arguments{
-\item{dir}{A character string specifying the directory where the SiMLR outputs were written.}
+\item{dir}{A character string specifying the directory with SiMLR outputs.}
 }
 \value{
 A named list reconstructing the original SiMLR object.
 }
 \description{
-This function reconstructs the complete SiMLR outputs previously written by
-\code{\link{write_simlr}}. It uses the manifest to reload each component in its
-original format, ensuring portability across systems.
-}
-\examples{
-\dontrun{
-write_simlr(mysim$simlrX, "output")
-reloaded <- read_simlr("output_simlr")
-}
+Reconstructs SiMLR outputs written by \code{\link{write_simlr}} using the manifest
+with relative paths for portability. Restores row names for matrices and data frames
+from the CSV files.
 }
