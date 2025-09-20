@@ -4640,7 +4640,7 @@ simlr <- function(
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc','dat', 'lrr', 'reconorm', 'logcosh', 'exp', 'kurtosis', 'gauss'),
     vmats,
     connectors = NULL,
-    optimizationStyle = "lookahead",
+    optimizationStyle = c("armijo_gradient","lookahead","bidirectional_lookahead", "bidirectional_armijo_gradient" ),
     scale = c("center",  "eigenvalue" ),
     expBeta = 0.0,
     jointInitialization = TRUE,
@@ -4931,12 +4931,14 @@ for ( k in 1:nModalities) {
 
 # initialize energy trackers for each modality
 all_sim_energy   <- vector("list", nModalities)
+all_ort_energy   <- vector("list", nModalities)
 all_dom_energy   <- vector("list", nModalities)
 all_dom_energy_raw<-vector("list", nModalities)
 all_total_energy <- vector("list", nModalities)
 
 for (j in 1:nModalities) {
   all_sim_energy[[j]]   <- numeric()
+  all_ort_energy[[j]]   <- numeric()
   all_dom_energy[[j]]   <- numeric()
   all_dom_energy_raw[[j]] <- numeric()
   all_total_energy[[j]] <- numeric()
@@ -4997,6 +4999,7 @@ for (myit in 1:iterations) { # Begin main optimization loop
       # --- Track values ---
       all_sim_energy[[i]] <<- c(all_sim_energy[[i]], sim_e)
       all_dom_energy[[i]] <<- c(all_dom_energy[[i]], dom_e)
+      all_ort_energy[[i]] <<- c( all_ort_energy[[i]], orth_e )
       all_dom_energy_raw[[i]] <<- c(all_dom_energy_raw[[i]], dom_e_raw)
       all_total_energy[[i]] <<- c(all_total_energy[[i]], total_e)
       if (return_raw) return(sim_e) # raw similarity+domain only
@@ -5108,7 +5111,7 @@ for (myit in 1:iterations) { # Begin main optimization loop
         similarity_energy = all_sim_energy[[i]][length(all_sim_energy[[i]])],
         domain_energy_raw = all_dom_energy_raw[[i]][length(all_dom_energy_raw[[i]])],  
         domain_energy = all_dom_energy[[i]][length(all_dom_energy[[i]])],
-        feature_orthogonality = orth_e,
+        feature_orthogonality = all_ort_energy[[i]][length(all_ort_energy[[i]])],
         similarity_energy_w = sim_e * normalizing_weights[i],
         feature_orthogonality_w = orth_e * orth_weights[i] * constraint_weight
       )
@@ -5252,6 +5255,7 @@ rlist=    list(
       converged_at = converged,
       sim_energy = all_sim_energy,
       domain_energy = all_dom_energy_raw,
+      orth_energy = all_ort_energy,
       total_energy = all_total_energy,
       constraint = constraint
     )
@@ -5284,11 +5288,9 @@ return(
 #' @export
 plot_energy_decomposition <- function(simlr_result, modality, show_weights = FALSE) {
   stopifnot(requireNamespace("ggplot2", quietly = TRUE))
-  
   df <- simlr_result$energyPath
   df <- df[df$modality == modality, ]
   df = df[-1,]
-  
   if (!"iteration" %in% colnames(df)) {
     df$iteration <- seq_len(nrow(df))
   }
@@ -5298,16 +5300,17 @@ plot_energy_decomposition <- function(simlr_result, modality, show_weights = FAL
     iteration = df$iteration,
     similarity = df$similarity_energy,
     domain = df$domain_energy,
+    orth = df$feature_orthogonality,
     total = df$total_energy
   )
-  
+
   energies_long <- tidyr::pivot_longer(
     energies,
     cols = -iteration,
     names_to = "energy_type",
     values_to = "value"
   )
-  
+
   # Rescale each energy type to [0,1] for visual comparability
   energies_long <- energies_long %>%
     dplyr::group_by(energy_type) %>%

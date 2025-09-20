@@ -113,9 +113,13 @@ initu <- initializeSimlr(matlist_train, round(d*1.2))
 myits <- 200
 myopt <- "bidirectional_lookahead"
 params_grid <- expand.grid(
-  energyType = c('normalized_correlation', "acc", "regression"),
+  opt=c( "bidirectional_lookahead","bidirectional_armijo_gradient",
+    "lookahead", 'armijo_gradient'),
+#  energyType = c('normalized_correlation', "acc", "regression"),
+  energyType = c( "reg", 'logcosh', "acc", "kurtosis" ),
   mixAlg = c("pca", "ica", 'svd'),
-  domainLambda = c(0, 0.2, 0.5, 1, 2, 5) / 10.0
+  constraint = c("orthox1x2", 'none'),
+  domainLambda = c( 0.5, 0.0 ) 
 )
 
 ```
@@ -305,11 +309,17 @@ This quadratic regularizer penalizes deviation from the domain-consistent subspa
 ### Summary of Energy Functions
 
 Each energy function targets a distinct property:
+
 - **Regression**: Prioritizes within-modality variance for data reconstruction.
+
 - **Procrustes Correlation**: Enhances cross-modal subspace alignment.
+
 - **Angular Distance**: Focuses on geometric orientation, robust to scaling.
+
 - **Absolute Canonical Covariance**: Ensures robust canonical relationships.
+
 - **ICA**: Disentangles independent neural signals.
+
 - **Domain Alignment**: Integrates priors for biological interpretability.
 
 SiMLR combines these via `energyType` (e.g., `"acc"`, `"regression"`), enabling flexible multimodal integration for tasks like biomarker discovery \citep{avants2021,stone2020}.
@@ -423,7 +433,7 @@ cross_modal_recon <- function(emb_train_list, emb_test_list, mat_train_list, mat
 }
 
 # Permutation test
-perm_test <- function(result, matlist_train, dlist, n_perm = 10, domlam) {
+perm_test <- function(result, matlist_train, dlist, n_perm = 10, domlam, constraint, optimizer ) {
   orig_r2 <- domain_recovery_r2(lapply(1:3, function(i) matlist_train[[i]] %*% result$v[[i]]), domain_latents_train)
   perm_r2 <- numeric(n_perm)
   for (p in 1:n_perm) {
@@ -442,10 +452,10 @@ perm_test <- function(result, matlist_train, dlist, n_perm = 10, domlam) {
       initialUMatrix = initu,
       mixAlg = as.character(result$mixAlg),
       energyType = as.character(result$energyType),
-      constraint = myorth,
+      constraint = constraint,
       domainLambdas = rep(domlam, length(matlist_train)),
       domainMatrices = perm_dlist,
-      optimizationStyle = myopt,
+      optimizationStyle = optimizer,
       randomSeed = p,
       verbose = FALSE
     )
@@ -464,8 +474,10 @@ results <- list()
 metrics <- data.frame(params_grid, cross_rv = NA, recovery_r2 = NA, alignment = NA, recon_err = NA, cross_modal = NA, perm_t = NA)
 
 for (row in 1:nrow(params_grid)) {
+  v = FALSE
   par <- params_grid[row, ]
-  key <- paste(par$energyType, par$mixAlg, par$domainLambda, sep="_")
+  key <- paste(par$energyType, par$mixAlg, par$domainLambda, 
+    par$opt, par$constraint, sep="_")
   result <- simlr(
     data_matrices = matlist_train,
     smoothingMatrices = smoothingMats,
@@ -475,13 +487,15 @@ for (row in 1:nrow(params_grid)) {
     initialUMatrix = initu,
     energyType = as.character(par$energyType),
     mixAlg = as.character(par$mixAlg),
-    constraint = myorth,
-    optimizationStyle = myopt,
-    verbose = FALSE,
+    constraint = as.character(par$constraint),
+    optimizationStyle = as.character(par$opt),
+    verbose = v,
     domainMatrices = dlist,
     domainLambdas = rep(par$domainLambda, length(matlist_train)),
     randomSeed = 123
   )
+  plot_energy_decomposition( result, "cortex"  )
+
   result$mixAlg <- par$mixAlg
   results[[key]] <- result
   emb_train <- lapply(1:3, function(i) matlist_train[[i]] %*% result$v[[i]])
@@ -492,7 +506,10 @@ for (row in 1:nrow(params_grid)) {
   metrics$recon_err[row] <- recon_error(result, matlist_test)
   metrics$cross_modal[row] <- cross_modal_recon(emb_train, emb_test, matlist_train, matlist_test)
   if (par$domainLambda > 0) {
-    perm_res <- perm_test(result, matlist_train, dlist, n_perm = 5, domlam = par$domainLambda)
+    perm_res <- perm_test(result, matlist_train, dlist, n_perm = 5, 
+      domlam = par$domainLambda, 
+      constraint = as.character(par$constraint)
+      optimizer  = as.character(par$opt) )
     metrics$perm_t[row] <- perm_res$t_stat
   }
 }
