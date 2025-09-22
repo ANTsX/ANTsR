@@ -4649,7 +4649,7 @@ simlr <- function(
     domainMatrices = NULL,
     domainLambdas  = NULL,
     verbose = FALSE) {
-
+  if ( length( optimizationStyle ) > 1 ) optimizationStyle=optimizationStyle[1]
   parse_constraint <- function(x) {
     num1=num2=NA
     temp=unlist(strsplit( x, "x"))
