@@ -116,10 +116,10 @@ params_grid <- expand.grid(
   opt=c( "bidirectional_lookahead","bidirectional_armijo_gradient",
     "lookahead", 'armijo_gradient'),
 #  energyType = c('normalized_correlation', "acc", "regression"),
-  energyType = c( "reg", 'logcosh', "acc", "kurtosis" ),
+  energyType = c( "reg", 'nc', 'acc' ),
   mixAlg = c("pca", "ica", 'svd'),
   constraint = c("orthox1x2", 'none'),
-  domainLambda = c( 0.5, 0.0 ) 
+  domainLambda = c( 1.0, 0.0 ) 
 )
 
 ```
@@ -478,6 +478,7 @@ for (row in 1:nrow(params_grid)) {
   par <- params_grid[row, ]
   key <- paste(par$energyType, par$mixAlg, par$domainLambda, 
     par$opt, par$constraint, sep="_")
+  
   result <- simlr(
     data_matrices = matlist_train,
     smoothingMatrices = smoothingMats,
@@ -505,10 +506,10 @@ for (row in 1:nrow(params_grid)) {
   metrics$alignment[row] <- mean(sapply(1:length(dlist), function(i) domain_alignment(dlist[[i]], t(result$v[[i]]))))
   metrics$recon_err[row] <- recon_error(result, matlist_test)
   metrics$cross_modal[row] <- cross_modal_recon(emb_train, emb_test, matlist_train, matlist_test)
-  if (par$domainLambda > 0) {
+  if (par$domainLambda > 0 & FALSE ) {
     perm_res <- perm_test(result, matlist_train, dlist, n_perm = 5, 
       domlam = par$domainLambda, 
-      constraint = as.character(par$constraint)
+      constraint = as.character(par$constraint),
       optimizer  = as.character(par$opt) )
     metrics$perm_t[row] <- perm_res$t_stat
   }
@@ -572,6 +573,7 @@ reactable(
 metrics_long <- metrics %>%
   pivot_longer(cols = c(cross_rv, recovery_r2, alignment, recon_err, cross_modal), names_to = "Metric", values_to = "Value") %>%
   mutate(Param = paste(energyType, mixAlg, sep="+"))
+
 heatmaply(
   metrics_long %>% dplyr::select(Param, domainLambda, Metric, Value) %>%
     pivot_wider(names_from = Metric, values_from = Value),

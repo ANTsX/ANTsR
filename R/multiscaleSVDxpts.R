@@ -979,8 +979,7 @@ smoothMatrixPrediction <- function(
   if (!is.na(LRR)) {
     u <- lowrankRowMatrix(u, LRR)
     v <- t(lowrankRowMatrix(t(v), LRR))
-    x <- icawhiten(x, LRR)
-    #  x = lowrankRowMatrix( x, LRR )
+    x <- fast_whiten(x)
   }
   if (hasweights & is.na(LRR)) {
     u <- diag(sqrt(rowWeights)) %*% u
@@ -2147,8 +2146,6 @@ smoothAppGradCCA <- function(x, y,
                              initialization = "randxy",
                              verbose = FALSE) {
   if (nrow(x) != nrow(y)) stop("nrow x should equal nrow y")
-  #  x = scale( icawhiten(x,nrow(x)), scale=T )
-  #  y = scale( icawhiten(y,nrow(y)), scale=T )
   x <- scale(x, scale = T)
   y <- scale(y, scale = T)
   errs <- rep(NA, iterations)
@@ -6905,7 +6902,75 @@ antspymm_vartype <- function(x) {
   return(NA)
 }
 
-
+#' Fast Matrix Whitening
+#'
+#' Perform whitening (sphering) of a data matrix \eqn{X} such that the
+#' covariance matrix of the output is approximately the identity.  
+#' The implementation automatically chooses the most efficient algorithm
+#' depending on whether the number of features \eqn{p} is much larger than
+#' the number of samples \eqn{n} (\eqn{p >> n}) or vice versa (\eqn{n >> p}).
+#'
+#' Whitening is performed via an SVD-based approach with Tikhonov-style
+#' regularization to handle small singular values.
+#'
+#' @param X A numeric matrix of size \eqn{n \times p}, where \eqn{n} is the
+#'   number of samples (rows) and \eqn{p} is the number of features (columns).
+#' @param epsilon A small non-negative numeric value used to stabilize the
+#'   inversion of singular values (default = 1e-8).
+#'
+#' @return A numeric matrix of the same dimensions as \code{X}, with whitened
+#'   columns. The covariance of the whitened data is approximately the identity
+#'   in the relevant space.
+#'
+#' @details
+#' - If \eqn{p > n}, whitening is computed in the sample space
+#'   (avoids forming a \eqn{p \times p} covariance).
+#' - If \eqn{n >= p}, whitening is computed in the feature space
+#'   (avoids forming an \eqn{n \times n} covariance).
+#'
+#' Computational complexity:
+#' \itemize{
+#'   \item \eqn{O(n^2 p)} when \eqn{p >> n}
+#'   \item \eqn{O(n p^2)} when \eqn{n >> p}
+#' }
+#'
+#' @examples
+#' set.seed(42)
+#'
+#' # Case 1: p >> n
+#' X1 <- matrix(rnorm(50 * 2000), 50, 2000)
+#' Xw1 <- fast_whiten(X1)
+#' round(cov(t(Xw1))[1:5, 1:5], 3)
+#'
+#' # Case 2: n >> p
+#' X2 <- matrix(rnorm(2000 * 50), 2000, 50)
+#' Xw2 <- fast_whiten(X2)
+#' round(cov(Xw2)[1:5, 1:5], 3)
+#'
+#' @export
+fast_whiten <- function(X, epsilon = 1e-8) {
+  n <- nrow(X)
+  p <- ncol(X)
+  
+  # Center data
+  X_centered <- scale(X, center = TRUE, scale = FALSE)
+  
+  if (p > n) {
+    # Case 1: p >> n
+    svd_res <- svd(X_centered, nu = n, nv = 0)
+    s <- svd_res$d
+    W <- diag(1 / sqrt(s^2 + epsilon))
+    X_whitened <- svd_res$u %*% W %*% t(svd_res$u) %*% X_centered
+  } else {
+    # Case 2: n >> p
+    svd_res <- svd(X_centered, nu = 0, nv = p)
+    s <- svd_res$d
+    W <- diag(1 / sqrt(s^2 + epsilon))
+    X_whitened <- X_centered %*% svd_res$v %*% W %*% t(svd_res$v)
+  }
+  
+  return(X_whitened)
+}
 
 #' return nuisance variable strings
 #' 
@@ -7117,7 +7182,7 @@ antspymm_simlr_update_residuals <- function(mats, x, covariate, blaster2, allnna
     return( data.matrix(mats[[x]])/norm(data.matrix(mats[[x]]), type = "F") )
   }
   if (covariate == "whiten") {
-    return(icawhiten(data.matrix(mats[[x]]), n.comp = nc))
+    return(fast_whiten(data.matrix(mats[[x]])))
   }
   if (covariate == "lowrank") {
     return(lowrankRowMatrix(data.matrix(mats[[x]]), nc))
@@ -7464,7 +7529,7 @@ antspymm_simlr <- function(
                   randomSeed = myseed,
                   mixAlg = mixer,
                   energyType = energy,
-                  scale = c('center','eigenvalue'),
+                  scale = c('none'),
                   sparsenessQuantiles = sparval,
                   expBeta = 0.0,
                   positivities = rep("positive", length(mats)),
