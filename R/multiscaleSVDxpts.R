@@ -7978,6 +7978,12 @@ antsr_pca_features <- function(data_matrices, k) {
   })
 
   names(plist) <- names(data_matrices)
+  for ( k in 1:length(data_matrices)) {
+    rownames(plist[[k]])=colnames(data_matrices[[k]])
+    prefix=paste0(names(data_matrices)[k],"PC")
+    prefix="PC"
+    colnames(plist[[k]])=paste0(prefix,1:ncol(plist[[k]]))
+  }
   return(plist)
 }
 
