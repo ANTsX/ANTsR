@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
       </span>
     </div>
 
@@ -127,13 +127,13 @@ random displacements are chosen (random normal:  mean = 0, sd = <code>sdDisplace
 <span class="r-in"><span><span class="va">image</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="getANTsRData.html">getANTsRData</a></span><span class="op">(</span> <span class="st">"r16"</span> <span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">transformedImage</span> <span class="op">&lt;-</span> <span class="fu">histogramWarpImageIntensities</span><span class="op">(</span> <span class="va">image</span>, transformDomainSize <span class="op">=</span> <span class="fl">10</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">image</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells  3479516 185.9    5814731 310.6         NA  5814731 310.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 11378691  86.9   22785357 173.9     102400 22784809 173.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 3544541 189.3    6681702 356.9         NA  5085271 271.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 6231230  47.6   16551593 126.3     102400 16549231 126.3</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">transformedImage</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells  3479421 185.9    5814731 310.6         NA  5814731 310.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 11378569  86.9   22785357 173.9     102400 22784809 173.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 3544227 189.3    6681702 356.9         NA  5085271 271.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 6230743  47.6   16551593 126.3     102400 16549231 126.3</span>
 </code></pre></div>
     </div>
   </div>

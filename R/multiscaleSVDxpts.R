@@ -4637,7 +4637,7 @@ simlr <- function(
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc','dat', 'lrr', 'reconorm', 'logcosh', 'exp', 'kurtosis', 'gauss'),
     vmats,
     connectors = NULL,
-    optimizationStyle = c("armijo_gradient","lookahead","bidirectional_lookahead", "bidirectional_armijo_gradient" ),
+    optimizationStyle = c("bidirectional_lookahead", "armijo_gradient","lookahead","bidirectional_armijo_gradient" ),
     scale = c("center",  "eigenvalue" ),
     expBeta = 0.0,
     jointInitialization = TRUE,

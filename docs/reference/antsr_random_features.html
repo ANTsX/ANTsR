@@ -18,7 +18,7 @@ It uses a fixed seed to ensure reproducibility across runs."><!-- mathjax --><sc
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
       </span>
     </div>
 
@@ -71,15 +71,15 @@ It uses a fixed seed to ensure reproducibility across runs.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">antsr_random_features</span><span class="op">(</span><span class="va">voxmats</span>, <span class="va">k</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">antsr_random_features</span><span class="op">(</span><span class="va">data_matrices</span>, <span class="va">k</span>, seed <span class="op">=</span> <span class="fl">42</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
 
 
-<dl><dt id="arg-voxmats">voxmats<a class="anchor" aria-label="anchor" href="#arg-voxmats"></a></dt>
-<dd><p>A list of numeric matrices. Each matrix should have dimensions (subjects × voxels).</p></dd>
+<dl><dt id="arg-data-matrices">data_matrices<a class="anchor" aria-label="anchor" href="#arg-data-matrices"></a></dt>
+<dd><p>A list of numeric matrices. Each matrix should have dimensions (subjects by voxels).</p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
@@ -92,7 +92,7 @@ It uses a fixed seed to ensure reproducibility across runs.</p>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of projection matrices, each with dimensions (voxels × k).</p>
+    <p>A list of projection matrices, each with dimensions (voxels by k).</p>
     </div>
 
   </div>

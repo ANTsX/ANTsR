@@ -25,7 +25,7 @@ construction and to arbitrary numbers of modalities."><!-- mathjax --><script sr
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
       </span>
     </div>
 
@@ -86,29 +86,32 @@ construction and to arbitrary numbers of modalities.</p>
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simlr</span><span class="op">(</span></span>
-<span>  <span class="va">voxmats</span>,</span>
+<span>  <span class="va">data_matrices</span>,</span>
 <span>  <span class="va">smoothingMatrices</span>,</span>
-<span>  iterations <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  iterations <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  <span class="va">sparsenessQuantiles</span>,</span>
 <span>  <span class="va">positivities</span>,</span>
 <span>  <span class="va">initialUMatrix</span>,</span>
 <span>  mixAlg <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"svd"</span>, <span class="st">"ica"</span>, <span class="st">"avg"</span>, <span class="st">"rrpca-l"</span>, <span class="st">"rrpca-s"</span>, <span class="st">"pca"</span>, <span class="st">"stochastic"</span><span class="op">)</span>,</span>
-<span>  orthogonalize <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  repeatedMeasures <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  lineSearchRange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1e+10</span>, <span class="fl">1e+10</span><span class="op">)</span>,</span>
-<span>  lineSearchTolerance <span class="op">=</span> <span class="fl">1e-08</span>,</span>
-<span>  <span class="va">randomSeed</span>,</span>
-<span>  constraint <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Grassmannx1000x1000"</span>, <span class="st">"Stiefelx1000x1000"</span>, <span class="st">"orthox1000x1000"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
+<span>  lineSearchRange <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">500</span>, <span class="fl">500</span><span class="op">)</span>,</span>
+<span>  lineSearchTolerance <span class="op">=</span> <span class="fl">1e-12</span>,</span>
+<span>  randomSeed <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  constraint <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"orthox0x1"</span>, <span class="st">"Grassmannx0"</span>, <span class="st">"Stiefelx0"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  energyType <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cca"</span>, <span class="st">"regression"</span>, <span class="st">"normalized"</span>, <span class="st">"ucca"</span>, <span class="st">"lowRank"</span>,</span>
-<span>    <span class="st">"lowRankRegression"</span><span class="op">)</span>,</span>
+<span>    <span class="st">"lowRankRegression"</span>, <span class="st">"normalized_correlation"</span>, <span class="st">"acc"</span>, <span class="st">"nc"</span>, <span class="st">"dat"</span>, <span class="st">"lrr"</span>, <span class="st">"reconorm"</span>,</span>
+<span>    <span class="st">"logcosh"</span>, <span class="st">"exp"</span>, <span class="st">"kurtosis"</span>, <span class="st">"gauss"</span><span class="op">)</span>,</span>
 <span>  <span class="va">vmats</span>,</span>
 <span>  connectors <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  optimizationStyle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lineSearch"</span>, <span class="st">"mixed"</span>, <span class="st">"greedy"</span><span class="op">)</span>,</span>
-<span>  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"centerAndScale"</span>, <span class="st">"sqrtnp"</span>, <span class="st">"np"</span>, <span class="st">"center"</span>, <span class="st">"norm"</span>, <span class="st">"none"</span>, <span class="st">"impute"</span>,</span>
-<span>    <span class="st">"eigenvalue"</span>, <span class="st">"robust"</span>, <span class="st">"whiten"</span>, <span class="st">"lowrank"</span>, <span class="st">"rank"</span><span class="op">)</span>,</span>
+<span>  optimizationStyle <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"armijo_gradient"</span>, <span class="st">"lookahead"</span>, <span class="st">"bidirectional_lookahead"</span>,</span>
+<span>    <span class="st">"bidirectional_armijo_gradient"</span><span class="op">)</span>,</span>
+<span>  scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"center"</span>, <span class="st">"eigenvalue"</span><span class="op">)</span>,</span>
 <span>  expBeta <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  jointInitialization <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  sparsenessAlg <span class="op">=</span> <span class="cn">NA</span>,</span>
+<span>  sparsenessAlg <span class="op">=</span> <span class="st">"soft"</span>,</span>
+<span>  orthogonalizeU <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  domainMatrices <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  domainLambdas <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -117,7 +120,7 @@ construction and to arbitrary numbers of modalities.</p>
     <h2>Arguments</h2>
 
 
-<dl><dt id="arg-voxmats">voxmats<a class="anchor" aria-label="anchor" href="#arg-voxmats"></a></dt>
+<dl><dt id="arg-data-matrices">data_matrices<a class="anchor" aria-label="anchor" href="#arg-data-matrices"></a></dt>
 <dd><p>A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the <code>scale</code> function.</p></dd>
 
 
@@ -147,10 +150,6 @@ If this is set to a scalar, or is missing, a random matrix will be used.</p></dd
 
 <dt id="arg-mixalg">mixAlg<a class="anchor" aria-label="anchor" href="#arg-mixalg"></a></dt>
 <dd><p>'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases</p></dd>
-
-
-<dt id="arg-orthogonalize">orthogonalize<a class="anchor" aria-label="anchor" href="#arg-orthogonalize"></a></dt>
-<dd><p>boolean to control whether we orthogonalize the solutions explicitly</p></dd>
 
 
 <dt id="arg-repeatedmeasures">repeatedMeasures<a class="anchor" aria-label="anchor" href="#arg-repeatedmeasures"></a></dt>
@@ -188,7 +187,7 @@ that indicates which modalities should be paired with current modality</p></dd>
 
 
 <dt id="arg-optimizationstyle">optimizationStyle<a class="anchor" aria-label="anchor" href="#arg-optimizationstyle"></a></dt>
-<dd><p>one of <code>c("mixed","greedy","linesearch")</code></p></dd>
+<dd><p>the simlr optimizer</p></dd>
 
 
 <dt id="arg-scale">scale<a class="anchor" aria-label="anchor" href="#arg-scale"></a></dt>
@@ -208,6 +207,18 @@ can be a vector which will apply each strategy in order.</p></dd>
 
 <dt id="arg-sparsenessalg">sparsenessAlg<a class="anchor" aria-label="anchor" href="#arg-sparsenessalg"></a></dt>
 <dd><p>NA is default otherwise basic, spmp or orthorank</p></dd>
+
+
+<dt id="arg-orthogonalizeu">orthogonalizeU<a class="anchor" aria-label="anchor" href="#arg-orthogonalizeu"></a></dt>
+<dd><p>boolean controlling whether we orthogonalize the U matrices</p></dd>
+
+
+<dt id="arg-domainmatrices">domainMatrices<a class="anchor" aria-label="anchor" href="#arg-domainmatrices"></a></dt>
+<dd><p>matrices containing domain knowledge length of <code>data_matrices</code> with number of columns also equal to each corresponding data matrix</p></dd>
+
+
+<dt id="arg-domainlambdas">domainLambdas<a class="anchor" aria-label="anchor" href="#arg-domainlambdas"></a></dt>
+<dd><p>weights for domain knowledge term length of <code>data_matrices</code></p></dd>
 
 
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>

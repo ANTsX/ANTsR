@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
       </span>
     </div>
 
@@ -122,17 +122,17 @@ mask used to limit the region of reconstruction from the patches.</p></dd>
 <span class="r-in"><span>  <span class="fu">reconstructImageFromPatches</span><span class="op">(</span> <span class="va">patchSet</span>, <span class="va">image</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="fl">8</span>, <span class="fl">8</span> <span class="op">)</span> <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/equality-expectations.html" class="external-link">expect_equal</a></span><span class="op">(</span><span class="fu"><a href="as.array.html">as.array</a></span><span class="op">(</span><span class="va">image</span><span class="op">)</span>, <span class="fu"><a href="as.array.html">as.array</a></span><span class="op">(</span><span class="va">imageReconstructed</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">image</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells  4255375 227.3    7574517 404.6         NA  7574517 404.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 15010091 114.6   27422428 209.3     102400 22785327 173.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 4320340 230.8    6681702 356.9         NA  6681702 356.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 9862331  75.3   16551593 126.3     102400 16551592 126.3</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">patchSet</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells  4253351 227.2    7574517 404.6         NA  7574517 404.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 12448611  95.0   27422428 209.3     102400 22785327 173.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 4318301 230.7    6681702 356.9         NA  6681702 356.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 7300826  55.8   16551593 126.3     102400 16551592 126.3</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/rm.html" class="external-link">rm</a></span><span class="op">(</span><span class="va">imageReconstructed</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc</a></span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells  4253343 227.2    7574517 404.6         NA  7574517 404.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 12448634  95.0   27422428 209.3     102400 22785327 173.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           used  (Mb) gc trigger  (Mb) limit (Mb) max used  (Mb)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ncells 4318293 230.7    6681702 356.9         NA  6681702 356.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vcells 7300849  55.8   16551593 126.3     102400 16551592 126.3</span>
 </code></pre></div>
     </div>
   </div>

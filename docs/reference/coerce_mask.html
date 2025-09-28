@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
       </span>
     </div>
 
@@ -95,41 +95,41 @@
 <span class="r-in"><span><span class="va">mask</span> <span class="op">&lt;-</span> <span class="va">img</span> <span class="op">&gt;</span> <span class="fl">0</span></span></span>
 <span class="r-in"><span><span class="fu">coerce_mask</span><span class="op">(</span><span class="va">mask</span>, error <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  TRUE  TRUE FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  TRUE  TRUE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE  TRUE  TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] FALSE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] FALSE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] FALSE FALSE FALSE  TRUE FALSE  TRUE FALSE FALSE FALSE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] FALSE  TRUE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] FALSE FALSE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] FALSE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE</span>
 <span class="r-in"><span><span class="fu">coerce_mask</span><span class="op">(</span><span class="va">mask</span> <span class="op">+</span> <span class="fl">1</span>, error <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]    2    2    2    1    1    2    2    1    2     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]    2    2    1    2    1    2    2    2    2     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]    2    2    1    1    2    1    1    1    2     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]    2    2    2    1    2    1    2    1    2     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]    1    1    2    2    1    1    1    2    2     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    1    1    1    2    2    2    1    2    2     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    1    1    2    1    1    1    2    1    1     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]    1    1    2    1    1    1    1    1    2     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    1    2    2    1    2    2    1    2    1     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]    2    2    2    1    2    2    2    2    2     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]    1    1    1    2    1    2    1    1    1     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]    1    1    1    1    1    1    2    2    1     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]    1    2    2    1    1    1    1    1    1     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]    1    2    1    2    1    1    2    1    1     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,]    1    2    2    1    1    2    2    2    2     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,]    1    1    2    2    2    1    1    2    2     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,]    1    1    1    2    2    2    2    2    2     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]    2    1    1    1    1    1    2    1    1     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,]    1    2    2    2    2    2    1    1    2     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]    2    1    2    1    2    1    2    2    1     2</span>
 <span class="r-in"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_error</a></span><span class="op">(</span><span class="fu">coerce_mask</span><span class="op">(</span><span class="va">mask</span> <span class="op">+</span> <span class="fl">1</span>, error <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">coerce_mask</span><span class="op">(</span><span class="fu"><a href="as.array.html">as.array</a></span><span class="op">(</span><span class="va">mask</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span>, error <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]  [,9] [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,]  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,]  TRUE  TRUE FALSE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,]  TRUE  TRUE FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,]  TRUE  TRUE  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE  TRUE  TRUE  TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] FALSE FALSE FALSE  TRUE  TRUE  TRUE FALSE  TRUE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] FALSE FALSE  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] FALSE  TRUE  TRUE FALSE  TRUE  TRUE FALSE  TRUE FALSE  TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  TRUE  TRUE  TRUE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] FALSE FALSE FALSE  TRUE FALSE  TRUE FALSE FALSE FALSE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] FALSE FALSE FALSE FALSE FALSE FALSE  TRUE  TRUE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] FALSE  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] FALSE  TRUE FALSE  TRUE FALSE FALSE  TRUE FALSE FALSE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] FALSE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] FALSE FALSE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] FALSE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,]  TRUE FALSE FALSE FALSE FALSE FALSE  TRUE FALSE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] FALSE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,]  TRUE FALSE  TRUE FALSE  TRUE FALSE  TRUE  TRUE FALSE  TRUE</span>
 </code></pre></div>
     </div>
   </div>

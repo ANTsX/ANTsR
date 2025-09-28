@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
       </span>
     </div>
 
@@ -399,6 +399,10 @@
         </td>
         <td><p>Generate reproducible random feature projections for a list of voxel matrices</p></td>
       </tr><tr><td>
+          <p><code><a href="antsr_spca_features.html">antsr_spca_features()</a></code> </p>
+        </td>
+        <td><p>Generate sparse PCA-based feature projections for a list of voxel matrices</p></td>
+      </tr><tr><td>
           <p><code><a href="antsrimpute.html">antsrimpute()</a></code> </p>
         </td>
         <td><p>antsrimpute</p></td>
@@ -507,9 +511,29 @@
         </td>
         <td><p>ANTs template building.</p></td>
       </tr><tr><td>
+          <p><code><a href="calculate_simlr_energy.html">calculate_simlr_energy()</a></code> </p>
+        </td>
+        <td><p>Calculate SiMLR energy for optimization</p></td>
+      </tr><tr><td>
+          <p><code><a href="calculate_simlr_gradient.html">calculate_simlr_gradient()</a></code> </p>
+        </td>
+        <td><p>Calculate SiMLR Similarity Gradient</p></td>
+      </tr><tr><td>
           <p><code><a href="check_ants-methods.html">check_ants()</a></code> </p>
         </td>
         <td><p>Check if antsImage or read in</p></td>
+      </tr><tr><td>
+          <p><code><a href="check_zero_variance.html">check_zero_variance()</a></code> </p>
+        </td>
+        <td><p>Check a matrix for zero-variance rows and columns</p></td>
+      </tr><tr><td>
+          <p><code><a href="clip_gradient_by_quantile.html">clip_gradient_by_quantile()</a></code> </p>
+        </td>
+        <td><p>Clip a Gradient Matrix by a Quantile of its Values</p></td>
+      </tr><tr><td>
+          <p><code><a href="clip_gradient_norm.html">clip_gradient_norm()</a></code> </p>
+        </td>
+        <td><p>Clip a Gradient Matrix by its Frobenius Norm</p></td>
       </tr><tr><td>
           <p><code><a href="clusterTimeSeries.html">clusterTimeSeries()</a></code> </p>
         </td>
@@ -571,6 +595,10 @@
         </td>
         <td><p>Create a warped grid for visualization.</p></td>
       </tr><tr><td>
+          <p><code><a href="create_optimizer.html">create_optimizer()</a></code> </p>
+        </td>
+        <td><p>Create and Initialize a SIMLR Optimizer</p></td>
+      </tr><tr><td>
           <p><code><a href="cropImage.html">cropImage()</a></code> </p>
         </td>
         <td><p>crop a sub-image via a mask</p></td>
@@ -615,6 +643,14 @@
         </td>
         <td><p>Density of Values in an Image</p></td>
       </tr><tr><td>
+          <p><code><a href="dice_overlap_soft_matrix.html">dice_overlap_soft_matrix()</a></code> </p>
+        </td>
+        <td><p>Compute pairwise Dice overlaps for matrix rows or columns</p></td>
+      </tr><tr><td>
+          <p><code><a href="dice_overlap_soft_vector.html">dice_overlap_soft_vector()</a></code> </p>
+        </td>
+        <td><p>Compute Dice overlap for sparse vectors with optional quantile thresholding</p></td>
+      </tr><tr><td>
           <p><code><a href="displacementFieldFromAntsrTransform.html">displacementFieldFromAntsrTransform()</a></code> </p>
         </td>
         <td><p>displacementFieldFromAntsrTransform</p></td>
@@ -635,6 +671,10 @@
         </td>
         <td><p>Segmentation for eigenanatomy.</p></td>
       </tr><tr><td>
+          <p><code><a href="ensembled_sparsity.html">ensembled_sparsity()</a></code> </p>
+        </td>
+        <td><p>Create a Smoothed Sparse Matrix via Permutation Ensemble Averaging</p></td>
+      </tr><tr><td>
           <p><code><a href="error_not_antsImage.html">error_not_antsImage()</a></code> </p>
         </td>
         <td><p>Stop if not an antsImage object</p></td>
@@ -642,6 +682,14 @@
           <p><code><a href="estSmooth.html">estSmooth()</a></code> </p>
         </td>
         <td><p>Estimate image smoothness</p></td>
+      </tr><tr><td>
+          <p><code><a href="estimate_joint_rank.html">estimate_joint_rank()</a></code> </p>
+        </td>
+        <td><p>Estimate the Joint Rank of a Multi-View Dataset via Parallel Analysis</p></td>
+      </tr><tr><td>
+          <p><code><a href="estimate_rank_by_permutation_rv.html">estimate_rank_by_permutation_rv()</a></code> </p>
+        </td>
+        <td><p>Estimate Joint Rank via Cross-View RV Analysis</p></td>
       </tr><tr><td>
           <p><code><a href="euler.html">euler()</a></code> </p>
         </td>
@@ -674,6 +722,10 @@
           <p><code><a href="fastMarchingExtension.html">fastMarchingExtension()</a></code> </p>
         </td>
         <td><p>Fast Marching Extension filter will extend an intensity or label image from a known region into the unknown region along a geodesic path</p></td>
+      </tr><tr><td>
+          <p><code><a href="fast_whiten.html">fast_whiten()</a></code> </p>
+        </td>
+        <td><p>Fast Matrix Whitening</p></td>
       </tr><tr><td>
           <p><code><a href="filterfMRIforNetworkAnalysis.html">filterfMRIforNetworkAnalysis()</a></code> </p>
         </td>
@@ -719,6 +771,10 @@
         </td>
         <td><p>Automatically generate an arterial input function mask.</p></td>
       </tr><tr><td>
+          <p><code><a href="generate_structured_multiview_data.html">generate_structured_multiview_data()</a></code> </p>
+        </td>
+        <td><p>Generate a Sophisticated Simulated Multi-View Dataset</p></td>
+      </tr><tr><td>
           <p><code><a href="geoSeg.html">geoSeg()</a></code> </p>
         </td>
         <td><p>brain segmentation based on geometric priors</p></td>
@@ -762,6 +818,10 @@
           <p><code><a href="getMultivariateTemplateCoordinates.html">getMultivariateTemplateCoordinates()</a></code> </p>
         </td>
         <td><p>Label multivariate components by an anatomical coordinate system.</p></td>
+      </tr><tr><td>
+          <p><code><a href="getNamesFromDataframe.html">getNamesFromDataframe()</a></code> </p>
+        </td>
+        <td><p>Extract column names with concatenated search parameters</p></td>
       </tr><tr><td>
           <p><code><a href="getNeighborhoodAtVoxel.html">getNeighborhoodAtVoxel()</a></code> </p>
         </td>
@@ -999,6 +1059,10 @@
         </td>
         <td><p>Simple list append tool</p></td>
       </tr><tr><td>
+          <p><code><a href="list_simlr_optimizers.html">list_simlr_optimizers()</a></code> </p>
+        </td>
+        <td><p>List Available SIMLR Optimizers</p></td>
+      </tr><tr><td>
           <p><code><a href="load.ANTsR.html">load.ANTsR()</a></code> </p>
         </td>
         <td><p>Load R sessions with ANTsR objects</p></td>
@@ -1034,6 +1098,14 @@
           <p><code><a href="makePowersPointsImage.html">makePowersPointsImage()</a></code> </p>
         </td>
         <td><p>Label image from Powers points</p></td>
+      </tr><tr><td>
+          <p><code><a href="mapAsymVar.html">mapAsymVar()</a></code> </p>
+        </td>
+        <td><p>Convert left/right variables to a measure of asymmetry</p></td>
+      </tr><tr><td>
+          <p><code><a href="mapLRAverageVar.html">mapLRAverageVar()</a></code> </p>
+        </td>
+        <td><p>Convert left/right variables to an average measurement</p></td>
       </tr><tr><td>
           <p><code><a href="maskImage.html">maskImage()</a></code> </p>
         </td>
@@ -1115,6 +1187,10 @@
         </td>
         <td><p>Convert multichannel <code>antsImage</code> to a vector.</p></td>
       </tr><tr><td>
+          <p><code><a href="multigrep.html">multigrep()</a></code> </p>
+        </td>
+        <td><p>Grep entries with a vector search parameters</p></td>
+      </tr><tr><td>
           <p><code><a href="multiscaleSVD.html">multiscaleSVD()</a></code> </p>
         </td>
         <td><p>Multi-scale svd</p></td>
@@ -1143,6 +1219,10 @@
         </td>
         <td><p>Inverse one-hot transformation</p></td>
       </tr><tr><td>
+          <p><code><a href="optimal_simlr_initializer.html">optimal_simlr_initializer()</a></code> </p>
+        </td>
+        <td><p>Optimal initializer for SiMLR</p></td>
+      </tr><tr><td>
           <p><code><a href="optimize_indicator_matrix.html">optimize_indicator_matrix()</a></code> </p>
         </td>
         <td><p>Optimize Binary Indicator Matrix with Row Uniformity</p></td>
@@ -1154,6 +1234,10 @@
           <p><code><a href="orthogonalizeAndQSparsifyOld.html">orthogonalizeAndQSparsifyOld()</a></code> </p>
         </td>
         <td><p>sparsify a matrix</p></td>
+      </tr><tr><td>
+          <p><code><a href="orthogonalize_feature_space.html">orthogonalize_feature_space()</a></code> </p>
+        </td>
+        <td><p>Orthogonalize a List of Matrices via Gradient Descent with Convergence Check</p></td>
       </tr><tr><td>
           <p><code><a href="padImageByFactor.html">padImageByFactor()</a></code> </p>
         </td>
@@ -1195,6 +1279,10 @@
         </td>
         <td><p>Simple plotPrettyGraph function saves to png.</p></td>
       </tr><tr><td>
+          <p><code><a href="plot_energy_decomposition.html">plot_energy_decomposition()</a></code> </p>
+        </td>
+        <td><p>Plot Energy Decomposition During SIMLR Optimization</p></td>
+      </tr><tr><td>
           <p><code><a href="plot_features.html">plot_features()</a></code> </p>
         </td>
         <td><p>Plot Features</p></td>
@@ -1218,6 +1306,14 @@
           <p><code><a href="priorBasedSegmentation.html">priorBasedSegmentation()</a></code> </p>
         </td>
         <td><p>spatial prior-based image segmentation.</p></td>
+      </tr><tr><td>
+          <p><code><a href="project_to_orthonormal_nonnegative.html">project_to_orthonormal_nonnegative()</a></code> </p>
+        </td>
+        <td><p>Project Non-Negative Matrix to Orthonormal Columns Matrix</p></td>
+      </tr><tr><td>
+          <p><code><a href="project_to_partially_orthonormal_nonnegative.html">project_to_partially_orthonormal_nonnegative()</a></code> </p>
+        </td>
+        <td><p>Project Non-Negative Matrix with Controllable Orthonormality</p></td>
       </tr><tr><td>
           <p><code><a href="quantifyCBF.html">quantifyCBF()</a></code> </p>
         </td>
@@ -1270,6 +1366,10 @@
           <p><code><a href="readNormalizedPopulationData.html">readNormalizedPopulationData()</a></code> </p>
         </td>
         <td><p>Read normalized population from h5 file or directory</p></td>
+      </tr><tr><td>
+          <p><code><a href="read_simlr.html">read_simlr()</a></code> </p>
+        </td>
+        <td><p>Read all SiMLR outputs from disk</p></td>
       </tr><tr><td>
           <p><code><a href="read_simlr_data_frames.html">read_simlr_data_frames()</a></code> </p>
         </td>
@@ -1355,6 +1455,22 @@
         </td>
         <td><p>Computes the RV-Coefficient (Optimized Public API)</p></td>
       </tr><tr><td>
+          <p><code><a href="rvcoef_components.html">rvcoef_components()</a></code> </p>
+        </td>
+        <td><p>Computes the RV-Coefficient (Internal)</p></td>
+      </tr><tr><td>
+          <p><code><a href="rvcoef_gram_impl.html">rvcoef_gram_impl()</a></code> </p>
+        </td>
+        <td><p>Computes the RV-Coefficient (Internal) Gram Matrix Method for Tall data</p></td>
+      </tr><tr><td>
+          <p><code><a href="rvcoef_trace_impl.html">rvcoef_trace_impl()</a></code> </p>
+        </td>
+        <td><p>Computes the RV-Coefficient (Internal) Trace Method for Wide data</p></td>
+      </tr><tr><td>
+          <p><code><a href="safe_pca.html">safe_pca()</a></code> </p>
+        </td>
+        <td><p>Safe PCA with Deterministic Bad-Column Repair</p></td>
+      </tr><tr><td>
           <p><code><a href="save.ANTsR.html">save.ANTsR()</a></code> </p>
         </td>
         <td><p>Save R sessions including ANTsR objects</p></td>
@@ -1379,6 +1495,10 @@
         </td>
         <td><p>One-hot encoding function</p></td>
       </tr><tr><td>
+          <p><code><a href="select_joint_k.html">select_joint_k()</a></code> </p>
+        </td>
+        <td><p>Select an Optimal Joint Number of Components for Multi-View Data</p></td>
+      </tr><tr><td>
           <p><code><a href="setANTsDeterministic.html">setANTsDeterministic()</a></code> </p>
         </td>
         <td><p>Set ANTs deterministic behavior</p></td>
@@ -1390,6 +1510,10 @@
           <p><code><a href="setAntsrTransformParameters.html">setAntsrTransformParameters()</a></code> </p>
         </td>
         <td><p>setAntsrTransformParameters</p></td>
+      </tr><tr><td>
+          <p><code><a href="setSeedBasedOnTime.html">setSeedBasedOnTime()</a></code> </p>
+        </td>
+        <td><p>Set Seed Based on Current Time</p></td>
       </tr><tr><td>
           <p><code><a href="shorten_pymm_names.html">shorten_pymm_names()</a></code> </p>
         </td>
@@ -1409,7 +1533,7 @@
       </tr><tr><td>
           <p><code><a href="simlr.search.html">simlr.search()</a></code> </p>
         </td>
-        <td><p>Perform SIMLR Grid Search</p></td>
+        <td><p>Perform Parallel SIMLR Grid Search (with Progress Bar)</p></td>
       </tr><tr><td>
           <p><code><a href="simlrU.html">simlrU()</a></code> </p>
         </td>
@@ -1426,6 +1550,10 @@
           <p><code><a href="simlr_path_models.html">simlr_path_models()</a></code> </p>
         </td>
         <td><p>SiMLR Path Models helper</p></td>
+      </tr><tr><td>
+          <p><code><a href="simlr_sparseness.html">simlr_sparseness()</a></code> </p>
+        </td>
+        <td><p>Apply SIMLR Sparseness and Normalize Features</p></td>
       </tr><tr><td>
           <p><code><a href="simulateBiasField.html">simulateBiasField()</a></code> </p>
         </td>
@@ -1487,6 +1615,10 @@
         </td>
         <td><p>Sparse regression on input images.</p></td>
       </tr><tr><td>
+          <p><code><a href="sparsify_by_column_winner.html">sparsify_by_column_winner()</a></code> </p>
+        </td>
+        <td><p>Sparsify a Matrix via Column-wise Winner-Take-All</p></td>
+      </tr><tr><td>
           <p><code><a href="spatialbayesianlm.html">spatialbayesianlm()</a></code> </p>
         </td>
         <td><p>spatially constrained bayesian regression function.</p></td>
@@ -1510,6 +1642,10 @@
           <p><code><a href="statFieldThresh.html">statFieldThresh()</a></code> </p>
         </td>
         <td><p>Produces a threshold value based on cluster or voxel level statistics</p></td>
+      </tr><tr><td>
+          <p><code><a href="step.html">step()</a></code> </p>
+        </td>
+        <td><p>Take One Optimization Step</p></td>
       </tr><tr><td>
           <p><code><a href="subgradientL1Regression.html">subgradientL1Regression()</a></code> </p>
         </td>
@@ -1562,6 +1698,10 @@
           <p><code><a href="tracts.html">tracts</a></code> </p>
         </td>
         <td><p>tracts</p></td>
+      </tr><tr><td>
+          <p><code><a href="transform_prior_rows_to_uncorrelated.html">transform_prior_rows_to_uncorrelated()</a></code> </p>
+        </td>
+        <td><p>Transform prior rows to (approximately) uncorrelated representative rows</p></td>
       </tr><tr><td>
           <p><code><a href="trapz.html">trapz()</a></code> </p>
         </td>
@@ -1622,6 +1762,10 @@
           <p><code><a href="writeNormalizedPopulationData.html">writeNormalizedPopulationData()</a></code> </p>
         </td>
         <td><p>Save normalized population data to a directory or h5 file</p></td>
+      </tr><tr><td>
+          <p><code><a href="write_simlr.html">write_simlr()</a></code> </p>
+        </td>
+        <td><p>Write all SiMLR outputs to disk</p></td>
       </tr><tr><td>
           <p><code><a href="write_simlr_data_frames.html">write_simlr_data_frames()</a></code> </p>
         </td>
