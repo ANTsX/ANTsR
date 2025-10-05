@@ -22,7 +22,7 @@ simlr(
     "logcosh", "exp", "kurtosis", "gauss"),
   vmats,
   connectors = NULL,
-  optimizationStyle = c("armijo_gradient", "lookahead", "bidirectional_lookahead",
+  optimizationStyle = c("bidirectional_lookahead", "armijo_gradient", "lookahead",
     "bidirectional_armijo_gradient"),
   scale = c("center", "eigenvalue"),
   expBeta = 0,
