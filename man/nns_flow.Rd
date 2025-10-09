@@ -15,7 +15,7 @@ nns_flow(
   verbose = FALSE,
   seed = NULL,
   apply_nonneg = TRUE,
-  opt_type = "lookahead",
+  opt_type = "adam",
   record_every = 1,
   window_size = 5
 )

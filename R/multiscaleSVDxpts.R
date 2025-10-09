@@ -10236,7 +10236,7 @@ inv_sqrt_sym <- function(M) {
 #' @export
 nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("soft", "polar", "qr"),
                      max_iter = 1000, tol = 1e-4, verbose = FALSE, seed = NULL,
-                     apply_nonneg = TRUE, opt_type = "lookahead", record_every = 1,
+                     apply_nonneg = TRUE, opt_type = "adam", record_every = 1,
                      window_size = 5) {
   if (!is.null(seed)) set.seed(seed)
   retraction <- match.arg(retraction)
