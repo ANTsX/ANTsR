@@ -17,7 +17,7 @@ Computes the inverse square root of a symmetric positive semi-definite matrix us
 }
 \details{
 For a symmetric matrix M, computes \eqn{M^{-1/2}} via eigen-decomposition, clipping eigenvalues
-below 1e-12 to ensure numerical stability. Used in polar and soft retractions for NNS-Flow.
+below 1e-12 to ensure numerical stability. Used in polar and soft retractions for NSA-Flow.
 }
 \examples{
 M <- matrix(c(4, 1, 1, 2), 2, 2)

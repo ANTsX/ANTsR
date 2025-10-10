@@ -977,5 +977,6 @@ step.bidirectional_lookahead <- function(optimizer, i, V_current, descent_gradie
 list_simlr_optimizers <- function() {
   methods_vec <- as.character(methods("step"))
   optimizers <- gsub("^step\\.|\\*$", "", methods_vec)
+  optimizers=optimizers[ !(optimizers %in% c("lbfgs", "random_search"))]
   return(optimizers)
 }

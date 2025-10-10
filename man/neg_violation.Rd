@@ -17,7 +17,7 @@ Measures the extent to which a matrix violates nonnegativity constraints.
 }
 \details{
 Computes \eqn{||\min(Y, 0)||_F}, the Frobenius norm of the negative part of Y, which quantifies
-the magnitude of negative entries. Used to monitor nonnegativity enforcement in NNS-Flow.
+the magnitude of negative entries. Used to monitor nonnegativity enforcement in NSA-Flow.
 }
 \examples{
 Y <- matrix(c(-1, 2, -3, 4), 2, 2)

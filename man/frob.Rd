@@ -17,7 +17,7 @@ Computes the Frobenius norm of a matrix, defined as the square root of the sum o
 }
 \details{
 The Frobenius norm is \eqn{\sqrt{\sum_{i,j} A_{ij}^2}}, equivalent to the Euclidean norm of the vectorized matrix.
-Used for scaling and computing residuals in NNS-Flow.
+Used for scaling and computing residuals in NSA-Flow.
 }
 \examples{
 A <- matrix(1:4, 2, 2)

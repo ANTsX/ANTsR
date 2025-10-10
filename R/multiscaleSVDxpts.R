@@ -10129,7 +10129,7 @@ symm <- function(A) {
 #' @return Numeric scalar, the Frobenius norm ||A||_F.
 #' @details
 #' The Frobenius norm is \eqn{\sqrt{\sum_{i,j} A_{ij}^2}}, equivalent to the Euclidean norm of the vectorized matrix.
-#' Used for scaling and computing residuals in NNS-Flow.
+#' Used for scaling and computing residuals in NSA-Flow.
 #' @examples
 #' A <- matrix(1:4, 2, 2)
 #' frob(A)
@@ -10163,7 +10163,7 @@ orth_residual <- function(Y) {
 #' @return Numeric scalar, the Frobenius norm of negative entries.
 #' @details
 #' Computes \eqn{||\min(Y, 0)||_F}, the Frobenius norm of the negative part of Y, which quantifies
-#' the magnitude of negative entries. Used to monitor nonnegativity enforcement in NNS-Flow.
+#' the magnitude of negative entries. Used to monitor nonnegativity enforcement in NSA-Flow.
 #' @examples
 #' Y <- matrix(c(-1, 2, -3, 4), 2, 2)
 #' neg_violation(Y)
@@ -10180,7 +10180,7 @@ neg_violation <- function(Y) {
 #' @return Numeric matrix, the inverse square root of M.
 #' @details
 #' For a symmetric matrix M, computes \eqn{M^{-1/2}} via eigen-decomposition, clipping eigenvalues
-#' below 1e-12 to ensure numerical stability. Used in polar and soft retractions for NNS-Flow.
+#' below 1e-12 to ensure numerical stability. Used in polar and soft retractions for NSA-Flow.
 #' @examples
 #' M <- matrix(c(4, 1, 1, 2), 2, 2)
 #' inv_sqrt_sym(M)
@@ -10193,57 +10193,100 @@ inv_sqrt_sym <- function(M) {
 }
 
 
-#' Riemannian-Proximal Flow for Nonnegative Orthogonal Matrices
+#' NSA-Flow Optimization for Nonnegative Orthogonal Factor Learning
 #'
-#' Optimizes a matrix under simultaneous orthogonality and nonnegativity constraints
-#' using a combination of Riemannian optimization on the Stiefel manifold and proximal projections.
+#' @description
+#' The `nsa_flow()` function optimizes a matrix \eqn{Y} to balance two competing
+#' objectives:
+#' (1) **Fidelity** to a target matrix \eqn{X_0}, and  
+#' (2) **Orthogonality** of the columns of \eqn{Y}.
+#' 
+#' This algorithm is inspired by nonnegative subspace flow dynamics, combining
+#' manifold retractions, adaptive learning rate scheduling, and optional nonnegativity
+#' enforcement. It supports multiple retraction methods (`polar`, `qr`, `soft`)
+#' and gradient-based optimizers. Non-negative Stiefel approximation flow (NSAFlow).
 #'
-#' @param Y0 Numeric matrix (p x k). Initial iterate.
-#' @param X0 Optional numeric matrix (p x k). Target matrix for fidelity term.
-#' @param w Numeric in [0,1]. Weight for fidelity term; 1-w weights orthogonality term.
-#' @param lambda Numeric in [0,1]. Lambda for soft retraction mixing (used only if retraction = "soft"). Defaults to 1-w.
-#' @param retraction Retraction method: one of "soft", "polar", "qr".
-#' @param max_iter Integer. Maximum number of iterations.
-#' @param tol Numeric. Convergence tolerance for relative energy reduction over the window.
-#' @param verbose Logical. Whether to print iteration diagnostics.
-#' @param seed Optional integer. Random seed for reproducibility.
-#' @param apply_nonneg Logical. If TRUE, apply nonnegativity projection at each iteration.
-#' @param opt_type Type of optimizer to use: 'lookahead' (default) or 'adam'.
-#' @param initial_learning_rate Numeric. Initial learning rate for the optimizer.
-#' @param record_every Integer. How often to record diagnostics into the trace log.
-#' @param window_size Integer. Size of the moving window for checking energy reduction convergence.
-#'
-#' @return A list containing:
-#'   \item{Y}{Final matrix iterate.}
-#'   \item{traces}{Data frame of iteration diagnostics (iteration, time, energy, orthogonality residual, nonnegativity violation, lambda).}
-#'   \item{final_iter}{Number of iterations completed.}
+#' @param Y0 Numeric matrix (`p x k`). Initial estimate of the factor matrix.
+#' @param X0 Optional numeric matrix (`p x k`). Target or reference matrix
+#'        for fidelity regularization. If `NULL`, only orthogonality is enforced.
+#' @param w Numeric scalar in `[0, 1]`. Balances fidelity and orthogonality:
+#'        small `w` emphasizes orthogonality; large `w` emphasizes fidelity.
+#' @param lambda Numeric scalar in `[0, 1]`. Complementary weight to `w`
+#'        (`lambda = 1 - w`); used internally for retraction interpolation.
+#' @param retraction Character string. Retraction method used to project
+#'        the updated matrix back to a valid manifold:
+#'        \itemize{
+#'          \item `"polar"` – polar decomposition-based retraction.
+#'          \item `"qr"` – QR decomposition-based retraction.
+#'          \item `"soft"` – soft interpolation between identity and polar retraction.
+#'        }
+#' @param max_iter Integer. Maximum number of optimization iterations.
+#' @param tol Numeric. Relative tolerance for convergence; stops early if energy
+#'        reduction across the last `window_size` iterations is smaller than `tol`.
+#' @param verbose Logical. If `TRUE`, prints progress information at each iteration.
+#' @param seed Optional integer. If provided, fixes the random seed for reproducibility.
+#' @param apply_nonneg Logical. If `TRUE`, enforces nonnegativity on `Y` after
+#'        each retraction via `pmax(Y, 0)`.
+#' @param optimizer Character string. Name of optimizer used for gradient updates.
+#'        Default: `"bidirectional_lookahead"`. Passed to `create_optimizer()`.
+#' @param initial_learning_rate Numeric. Initial learning rate used in cosine annealing.
+#' @param record_every Integer. Frequency (in iterations) to record trace information.
+#' @param window_size Integer. Number of most recent energy values used for convergence check.
 #'
 #' @details
-#' Optimizes the objective \eqn{F(Y) = w \cdot (1/2) ||Y - X_0||_F^2 + (1-w) \cdot (1/4) ||(Y^T Y / ||Y||_F^2) - \mathrm{diag}(...)||_F^2},
-#' where the first term encourages fidelity to \eqn{X_0} and the second enforces orthogonality up to scale.
-#' Convergence is determined by relative energy reduction over a moving window of size \code{window_size}:
-#' if \eqn{(E_{t-window_size} - E_t) / |E_{t-window_size}| < tol}, the algorithm stops.
-#' The algorithm uses Riemannian optimization on the Stiefel manifold with polar, QR, or soft retractions,
-#' followed by a proximal nonnegativity projection \eqn{P_+(Y) = \max(Y, 0)}.
-#' The learning rate follows a cosine annealing schedule from 1.0 to 1e-6.
+#' The optimization minimizes an energy function:
+#'
+#' \deqn{E(Y) = c_{orth} \cdot \frac{1}{4} \|A^T A - D\|_F^2 + \frac{1}{2} \cdot fid_{\eta} \|Y - X_0\|_F^2}
+#'
+#' where:
+#' * \eqn{A = Y / \|Y\|_F}  
+#' * \eqn{D} is the diagonal of \eqn{A^T A}
+#'
+#' The first term encourages orthogonality among columns of \eqn{Y}, while the
+#' second encourages fidelity to \eqn{X_0}.  
+#' The coefficients `c_orth` and `fid_eta` are automatically scaled based on
+#' initialization and problem size.
+#'
+#' The learning rate is decayed according to a **cosine annealing** schedule:
+#' \deqn{\eta_t = \eta_{final} + 0.5 (\eta_0 - \eta_{final})(1 + \cos(\pi t / T))}
+#'
+#' The retraction step ensures that updates remain on (or near) the orthogonal manifold.
+#'
+#' @return
+#' A list with elements:
+#' \describe{
+#'   \item{`Y`}{Final optimized matrix (`p x k`).}
+#'   \item{`traces`}{Data frame containing iteration logs:
+#'        iteration, time, energy, orthogonality residual, nonnegativity violation, and lambda.}
+#'   \item{`final_iter`}{Integer; number of iterations completed before convergence.}
+#' }
 #'
 #' @examples
-#' set.seed(1)
-#' Y0 <- matrix(runif(9), 3, 3)
-#' X0 <- Y0
-#' out <- nns_flow(Y0, X0, w = 0.99, max_iter = 20)
-#' all.equal(out$Y, X0, tolerance = 1e-3)
+#' \dontrun{
+#' set.seed(123)
+#' Y0 <- matrix(runif(50), 10, 5)
+#' X0 <- Y0 + matrix(rnorm(50, sd = 0.1), 10, 5)
+#' res <- nsa_flow(Y0, X0, w = 0.3, verbose = TRUE)
+#' plot(res$traces$iter, res$traces$energy, type = "l",
+#'      xlab = "Iteration", ylab = "Energy", main = "Convergence of NNS Flow")
+#' }
+#'
+#' @seealso [create_optimizer()], [orth_residual()], [inv_sqrt_sym()], [symm()]
 #'
 #' @export
-nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("soft", "polar", "qr"),
-                    max_iter = 1000, tol = 1e-4, verbose = FALSE, seed = NULL,
-                    apply_nonneg = TRUE, opt_type = "adam", 
+nsa_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("soft", "polar", "qr"),
+                    max_iter = 100, tol = 1e-4, verbose = FALSE, seed = 42,
+                    apply_nonneg = TRUE, optimizer = "bidirectional_lookahead", 
                     initial_learning_rate = 1.e-2,
                     record_every = 1,
                     window_size = 5) {
+  # --- Initialization ---
   if (!is.null(seed)) set.seed(seed)
   retraction <- match.arg(retraction)
   if (w < 0 || w > 1) stop("w must be in [0,1]")
+  if (w < 1e-5) w <- 1e-5
+  if (w > 1 - 1e-5) w <- 1 - 1e-5
+  
   Y <- Y0
   p <- nrow(Y); k <- ncol(Y)
   
@@ -10261,10 +10304,13 @@ nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("sof
     fid_eta <- fid_eta / max(1e-12, g0)
   }
   
-  optimizer <- create_optimizer(opt_type, vmats = list(Y0), beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8, k = 5, alpha = 0.5)
+  optimizer <- create_optimizer(optimizer, vmats = list(Y0), beta1 = 0.9, beta2 = 0.999,
+                                epsilon = 1e-8, k = 5, alpha = 0.5)
+  
   trace <- list()
   t0 <- Sys.time()
   
+  # --- Energy function ---
   energy_F <- function(Y, X0, fid_eta, c_orth) {
     norm2 <- sum(Y^2)
     e <- 0
@@ -10277,15 +10323,17 @@ nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("sof
     if (!is.null(X0) && fid_eta > 0) e <- e + 0.5 * fid_eta * sum((Y - X0)^2)
     e
   }
-  final_learning_rate <- initial_learning_rate* 1e-6
   
+  final_learning_rate <- initial_learning_rate * 1e-6
   recent_energies <- numeric(0)
   
+  # --- Main optimization loop ---
   for (it in seq_len(max_iter)) {
-    
     decay_progress <- (it - 1) / max(1, max_iter - 1)
-    current_learning_rate <- final_learning_rate + 0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
+    current_learning_rate <- final_learning_rate +
+      0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
     
+    # Gradient computation
     U <- crossprod(Y)
     norm2 <- sum(Y^2)
     grad_f <- matrix(0, p, k)
@@ -10300,7 +10348,6 @@ nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("sof
       grad_f <- c_orth * (term1 - term2)
     }
     grad <- grad_f
-    
     if (!is.null(X0) && fid_eta > 0) grad <- grad + fid_eta * (Y - X0)
     
     sym_term <- symm(t(Y) %*% grad)
@@ -10310,7 +10357,7 @@ nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("sof
     full_energy_function <- function(V_proposed) {
       Z <- V_proposed
       if (!all(is.finite(Z))) return(Inf)
-      if (retraction == "polar" || retraction == "soft") {
+      if (retraction %in% c("polar", "soft")) {
         M <- crossprod(Z)
         if (!all(is.finite(M))) return(Inf)
       }
@@ -10334,16 +10381,15 @@ nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("sof
       energy_F(Ynext, X0, fid_eta, c_orth)
     }
     
-    step_result <- step(optimizer, i = 1, V_current = Y, 
+    step_result <- step(optimizer, i = 1, V_current = Y,
                        descent_gradient = descent_gradient,
                        learning_rate = current_learning_rate,
                        full_energy_function = full_energy_function, myit = it)
     Z <- step_result$updated_V
     optimizer <- step_result$optimizer
     
-    if (retraction == "polar" || retraction == "soft") {
-      M <- crossprod(Z)
-    }
+    # Retraction
+    if (retraction %in% c("polar", "soft")) M <- crossprod(Z)
     if (retraction == "polar") {
       Tmat <- inv_sqrt_sym(M)
       Ytilde <- Z %*% Tmat
@@ -10362,6 +10408,7 @@ nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("sof
     
     dt <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
     Enext <- energy_F(Ynext, X0, fid_eta, c_orth)
+    
     if (it %% record_every == 0) {
       trace[[length(trace) + 1]] <- list(
         iter = it, time = dt, energy = Enext,
@@ -10369,12 +10416,15 @@ nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("sof
         lambda = lambda
       )
     }
-    if (verbose) cat("Iteration", it, "Energy", sprintf("%.6f", Enext), "Orth", sprintf("%.6f", orth_residual(Ynext)), "Neg", sprintf("%.6f", neg_violation(Ynext)), "\n")
+    if (verbose)
+      cat("Iteration", it, "Energy", sprintf("%.6f", Enext),
+          "Orth", sprintf("%.6f", orth_residual(Ynext)),
+          "Neg", sprintf("%.6f", neg_violation(Ynext)), "\n")
     
+    # Convergence check
     recent_energies <- c(recent_energies, Enext)
-    if (length(recent_energies) > window_size) {
+    if (length(recent_energies) > window_size)
       recent_energies <- recent_energies[-1]
-    }
     if (length(recent_energies) == window_size) {
       reduction <- recent_energies[1] - recent_energies[window_size]
       rel_reduction <- reduction / max(1e-10, abs(recent_energies[1]))
