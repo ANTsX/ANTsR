@@ -16,6 +16,7 @@ nns_flow(
   seed = NULL,
   apply_nonneg = TRUE,
   opt_type = "adam",
+  initial_learning_rate = 0.01,
   record_every = 1,
   window_size = 5
 )
@@ -42,6 +43,8 @@ nns_flow(
 \item{apply_nonneg}{Logical. If TRUE, apply nonnegativity projection at each iteration.}
 
 \item{opt_type}{Type of optimizer to use: 'lookahead' (default) or 'adam'.}
+
+\item{initial_learning_rate}{Numeric. Initial learning rate for the optimizer.}
 
 \item{record_every}{Integer. How often to record diagnostics into the trace log.}
 

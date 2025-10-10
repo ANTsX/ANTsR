@@ -10209,6 +10209,7 @@ inv_sqrt_sym <- function(M) {
 #' @param seed Optional integer. Random seed for reproducibility.
 #' @param apply_nonneg Logical. If TRUE, apply nonnegativity projection at each iteration.
 #' @param opt_type Type of optimizer to use: 'lookahead' (default) or 'adam'.
+#' @param initial_learning_rate Numeric. Initial learning rate for the optimizer.
 #' @param record_every Integer. How often to record diagnostics into the trace log.
 #' @param window_size Integer. Size of the moving window for checking energy reduction convergence.
 #'
@@ -10235,9 +10236,11 @@ inv_sqrt_sym <- function(M) {
 #'
 #' @export
 nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("soft", "polar", "qr"),
-                     max_iter = 1000, tol = 1e-4, verbose = FALSE, seed = NULL,
-                     apply_nonneg = TRUE, opt_type = "adam", record_every = 1,
-                     window_size = 5) {
+                    max_iter = 1000, tol = 1e-4, verbose = FALSE, seed = NULL,
+                    apply_nonneg = TRUE, opt_type = "adam", 
+                    initial_learning_rate = 1.e-2,
+                    record_every = 1,
+                    window_size = 5) {
   if (!is.null(seed)) set.seed(seed)
   retraction <- match.arg(retraction)
   if (w < 0 || w > 1) stop("w must be in [0,1]")
@@ -10274,8 +10277,7 @@ nns_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("sof
     if (!is.null(X0) && fid_eta > 0) e <- e + 0.5 * fid_eta * sum((Y - X0)^2)
     e
   }
-  initial_learning_rate <- 1.0
-  final_learning_rate <- 1e-6
+  final_learning_rate <- initial_learning_rate* 1e-6
   
   recent_energies <- numeric(0)
   
