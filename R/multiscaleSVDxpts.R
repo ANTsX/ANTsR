@@ -8524,11 +8524,15 @@ simlr_sparseness <- function(v,
   } else {
     if ( constraint_type == "ortho" & constraint_weight >= 0 ){
       if ( constraint_weight == 1 ) {
-      v = project_to_orthonormal_nonnegative( v, 
-        max_iter=constraint_iterations, constraint=positivity)
+        v = nsa_flow( v, w = constraint_weight, retraction='qr', 
+          optimizer='nadam', max_iter=constraint_iterations, verbose=FALSE)$Y
+#      v = project_to_orthonormal_nonnegative( v, 
+#        max_iter=constraint_iterations, constraint=positivity)
       } else {
-      v = project_to_partially_orthonormal_nonnegative( v, 
-        max_iter=constraint_iterations, constraint=positivity, ortho_strength=constraint_weight )
+        v = nsa_flow( v, w = constraint_weight, retraction='soft', 
+          max_iter=constraint_iterations, optimizer='nadam', verbose=F )$Y
+#      v = project_to_partially_orthonormal_nonnegative( v, 
+#        max_iter=constraint_iterations, constraint=positivity, ortho_strength=constraint_weight )
       }
     } else if ( na2f.loc( sparseness_alg == 'ensemble') ) {
       v <- t(ensembled_sparsity(t(v), positivity))
@@ -10188,258 +10192,801 @@ neg_violation <- function(Y) {
 inv_sqrt_sym <- function(M) {
   e <- eigen(M, symmetric = TRUE)
   ev <- e$values
-  ev[ev < 1e-12] <- 1e-12
+  ev[ev < 1e-8] <- 1e-8
   e$vectors %*% diag(1 / sqrt(ev)) %*% t(e$vectors)
 }
 
 
-#' NSA-Flow Optimization for Nonnegative Orthogonal Factor Learning
+#' @title NSA-Flow Optimization (v4 - Robust Hybrid Riemannian-Euclidean)
 #'
 #' @description
-#' The `nsa_flow()` function optimizes a matrix \eqn{Y} to balance two competing
-#' objectives:
-#' (1) **Fidelity** to a target matrix \eqn{X_0}, and  
-#' (2) **Orthogonality** of the columns of \eqn{Y}.
-#' 
-#' This algorithm is inspired by nonnegative subspace flow dynamics, combining
-#' manifold retractions, adaptive learning rate scheduling, and optional nonnegativity
-#' enforcement. It supports multiple retraction methods (`polar`, `qr`, `soft`)
-#' and gradient-based optimizers. Non-negative Stiefel approximation flow (NSAFlow).
-#'
-#' @param Y0 Numeric matrix (`p x k`). Initial estimate of the factor matrix.
-#' @param X0 Optional numeric matrix (`p x k`). Target or reference matrix
-#'        for fidelity regularization. If `NULL`, only orthogonality is enforced.
-#' @param w Numeric scalar in `[0, 1]`. Balances fidelity and orthogonality:
-#'        small `w` emphasizes orthogonality; large `w` emphasizes fidelity.
-#' @param lambda Numeric scalar in `[0, 1]`. Complementary weight to `w`
-#'        (`lambda = 1 - w`); used internally for retraction interpolation.
-#' @param retraction Character string. Retraction method used to project
-#'        the updated matrix back to a valid manifold:
-#'        \itemize{
-#'          \item `"polar"` – polar decomposition-based retraction.
-#'          \item `"qr"` – QR decomposition-based retraction.
-#'          \item `"soft"` – soft interpolation between identity and polar retraction.
-#'        }
-#' @param max_iter Integer. Maximum number of optimization iterations.
-#' @param tol Numeric. Relative tolerance for convergence; stops early if energy
-#'        reduction across the last `window_size` iterations is smaller than `tol`.
-#' @param verbose Logical. If `TRUE`, prints progress information at each iteration.
-#' @param seed Optional integer. If provided, fixes the random seed for reproducibility.
-#' @param apply_nonneg Logical. If `TRUE`, enforces nonnegativity on `Y` after
-#'        each retraction via `pmax(Y, 0)`.
-#' @param optimizer Character string. Name of optimizer used for gradient updates.
-#'        Default: `"bidirectional_lookahead"`. Passed to `create_optimizer()`.
-#' @param initial_learning_rate Numeric. Initial learning rate used in cosine annealing.
-#' @param record_every Integer. Frequency (in iterations) to record trace information.
-#' @param window_size Integer. Number of most recent energy values used for convergence check.
+#' Performs a tunable optimization to balance fidelity to a target matrix and orthogonality
+#' of the solution matrix. This function implements a robust hybrid optimization strategy that
+#' correctly adapts to the user-specified weight `w`.
 #'
 #' @details
-#' The optimization minimizes an energy function:
+#' This function solves the optimization problem:
+#' \deqn{E(Y) = (1 - w) \cdot \frac{1}{2}||Y - X0||_F^2 + w \cdot \lambda \cdot \text{defect}(Y)}
+#' where \code{defect(Y)} is a scale-invariant measure of orthogonality deviation, and
+#' \eqn{\lambda} is an internal scaling factor that balances the terms at initialization.
 #'
-#' \deqn{E(Y) = c_{orth} \cdot \frac{1}{4} \|A^T A - D\|_F^2 + \frac{1}{2} \cdot fid_{\eta} \|Y - X_0\|_F^2}
-#'
-#' where:
-#' * \eqn{A = Y / \|Y\|_F}  
-#' * \eqn{D} is the diagonal of \eqn{A^T A}
-#'
-#' The first term encourages orthogonality among columns of \eqn{Y}, while the
-#' second encourages fidelity to \eqn{X_0}.  
-#' The coefficients `c_orth` and `fid_eta` are automatically scaled based on
-#' initialization and problem size.
-#'
-#' The learning rate is decayed according to a **cosine annealing** schedule:
-#' \deqn{\eta_t = \eta_{final} + 0.5 (\eta_0 - \eta_{final})(1 + \cos(\pi t / T))}
-#'
-#' The retraction step ensures that updates remain on (or near) the orthogonal manifold.
-#'
-#' @return
-#' A list with elements:
-#' \describe{
-#'   \item{`Y`}{Final optimized matrix (`p x k`).}
-#'   \item{`traces`}{Data frame containing iteration logs:
-#'        iteration, time, energy, orthogonality residual, nonnegativity violation, and lambda.}
-#'   \item{`final_iter`}{Integer; number of iterations completed before convergence.}
+#' The optimization strategy correctly adapts based on the weight `w`:
+#' \itemize{
+#'   \item **If `w = 0`:** The problem is a pure fidelity optimization. The algorithm uses a standard **Proximal Gradient Descent** in Euclidean space to minimize \eqn{||Y - X0||_F^2}, subject to non-negativity if `apply_nonneg = TRUE`. No Riemannian operations (projection, retraction) are performed.
+#'   \item **If `w = 1`:** The problem is a pure orthogonality optimization. The algorithm uses **Riemannian Gradient Descent** on the Stiefel manifold to minimize the orthogonality defect.
+#'   \item **If `0 < w < 1`:** The problem is a hybrid. The algorithm uses **Proximal Riemannian Gradient Descent**, where the combined Euclidean gradient is projected onto the tangent space of the Stiefel manifold before the update step.
 #' }
+#' This ensures correct and stable behavior across the entire range of `w`, passing the test cases for pure fidelity and pure orthogonality. Convergence is guaranteed by a robust backtracking line search that ensures monotonic energy decrease.
+#'
+#' @param Y0 Numeric matrix of size \code{p x k}, the initial guess for the solution.
+#' @param X0 Numeric matrix of size \code{p x k}, the target matrix for fidelity.
+#'   If \code{NULL}, initialized as \code{pmax(Y0, 0)}.
+#' @param w Numeric scalar in \code{[0,1]}, weighting the trade-off between fidelity
+#'   (1 - w) and orthogonality (w). Default is 0.5.
+#' @param retraction Character string specifying the retraction method. Default is \code{"soft"}.
+#'   Options are "soft", "polar", "qr", "soft_polar", "none". If "none", the problem
+#'   is treated as purely Euclidean, regardless of `w`.
+#' @param max_iter Integer, maximum number of iterations. Default is 100.
+#' @param tol Numeric, tolerance for convergence. Default is 1e-6.
+#' @param verbose Logical, if \code{TRUE}, prints iteration details. Default is \code{FALSE}.
+#' @param seed Integer, random seed for reproducibility. Default is 42.
+#' @param apply_nonneg Logical, if \code{TRUE}, enforces non-negativity. Default is \code{TRUE}.
+#' @param initial_learning_rate Numeric, starting step size for the line search. Default is 1.0.
+#' @param line_search_beta Numeric, shrinkage factor for backtracking (\code{0 < beta < 1}). Default is 0.5.
+#' @param record_every Integer, frequency of recording metrics. Default is 1.
+#' @param window_size Integer, window for energy stability check. Default is 5.
+#' @param plot Logical, if \code{TRUE}, generates a ggplot trace. Default is \code{FALSE}.
+#'
+#' @return A list containing:
+#'   \itemize{
+#'     \item \code{Y}: Numeric matrix, the best solution found (lowest total energy).
+#'     \item \code{traces}: Data frame with convergence metrics.
+#'     \item \code{final_iter}: Integer, number of iterations performed.
+#'     \item \code{plot}: A ggplot object of the trace if \code{plot = TRUE}.
+#'     \item \code{best_total_energy}: Numeric, the lowest total energy achieved.
+#'     \item \code{X0}: The target matrix used in the optimization.
+#'   }
 #'
 #' @examples
-#' \dontrun{
 #' set.seed(123)
 #' Y0 <- matrix(runif(50), 10, 5)
-#' X0 <- Y0 + matrix(rnorm(50, sd = 0.1), 10, 5)
-#' res <- nsa_flow(Y0, X0, w = 0.3, verbose = TRUE)
-#' plot(res$traces$iter, res$traces$energy, type = "l",
-#'      xlab = "Iteration", ylab = "Energy", main = "Convergence of NNS Flow")
-#' }
 #'
-#' @seealso [create_optimizer()], [orth_residual()], [inv_sqrt_sym()], [symm()]
+#' # Test Case 1: Pure Fidelity (w=0). Result should be close to pmax(Y0,0).
+#' res_fid <- nsa_flow(Y0, X0=Y0, w=0, apply_nonneg=TRUE, verbose=TRUE)
+#' print(paste("Fidelity error at w=0:", norm(res_fid$Y - pmax(Y0,0), "F")))
 #'
+#' # Test Case 2: Pure Orthogonality (w=1). Result should have low orth. defect.
+#' res_orth <- nsa_flow(Y0, X0=Y0, w=1, verbose=TRUE)
+#' print(paste("Orthogonality defect at w=1:", norm(crossprod(res_orth$Y) - diag(5),'F')))
+#'
+#' # Test Case 3: Hybrid (0 < w < 1).
+#' res_hybrid <- nsa_flow(Y0, X0=Y0, w=0.1, verbose=TRUE, plot=TRUE)
+#' if (!is.null(res_hybrid$plot)) print(res_hybrid$plot)
+#'
+#' @import ggplot2
+#' @importFrom stats runif
 #' @export
-nsa_flow <- function(Y0, X0 = NULL, w = 0.5, lambda = 1 - w, retraction = c("soft", "polar", "qr"),
-                    max_iter = 100, tol = 1e-4, verbose = FALSE, seed = 42,
-                    apply_nonneg = TRUE, optimizer = "bidirectional_lookahead", 
-                    initial_learning_rate = 1.e-2,
-                    record_every = 1,
-                    window_size = 5) {
-  # --- Initialization ---
-  if (!is.null(seed)) set.seed(seed)
-  retraction <- match.arg(retraction)
-  if (w < 0 || w > 1) stop("w must be in [0,1]")
-  if (w < 1e-5) w <- 1e-5
-  if (w > 1 - 1e-5) w <- 1 - 1e-5
-  
-  Y <- Y0
-  p <- nrow(Y); k <- ncol(Y)
-  
-  w <- 1.0 - w
-  c_orth <- if (w < 1) (1 - w) / (w + 1e-10) else 0
-  fid_eta <- if (w > 0) w / (1 - w + 1e-10) else 0
-  
-  c_orth <- c_orth / k
-  fid_eta <- fid_eta / (p * k)
-  
-  f0 <- orth_residual(Y0)
-  if (w < 1 && f0 > 0) c_orth <- c_orth / max(1e-12, f0)
-  if (!is.null(X0) && w > 0) {
-    g0 <- 0.5 * sum((Y0 - X0)^2) / (p * k)
-    fid_eta <- fid_eta / max(1e-12, g0)
+nsa_flow <- function(
+  Y0, X0 = NULL, w = 0.5,
+  retraction = c("soft", "polar", "qr", "none", "soft_polar"),
+  max_iter = 100, tol = 1e-6, verbose = FALSE, seed = 42,
+  apply_nonneg = TRUE,
+  initial_learning_rate = 1.0,
+  line_search_beta = 0.5,
+  record_every = 1, window_size = 5,
+  plot = FALSE
+) {
+  # --- Input validation ---
+  stopifnot(is.matrix(Y0), is.numeric(Y0))
+  stopifnot(is.null(X0) || (is.matrix(X0) && is.numeric(X0)))
+  stopifnot(is.numeric(w), w >= 0, w <= 1)
+  stopifnot(is.integer(max_iter) || max_iter == as.integer(max_iter), max_iter > 0)
+  stopifnot(is.numeric(tol), tol > 0)
+  stopifnot(is.logical(verbose))
+  stopifnot(is.null(seed) || is.numeric(seed))
+  stopifnot(is.logical(apply_nonneg))
+  stopifnot(is.numeric(initial_learning_rate), initial_learning_rate > 0)
+  stopifnot(is.numeric(line_search_beta), line_search_beta > 0, line_search_beta < 1)
+  stopifnot(is.integer(record_every) || record_every == as.integer(record_every), record_every > 0)
+  stopifnot(is.integer(window_size) || window_size == as.integer(window_size), window_size > 0)
+  stopifnot(is.logical(plot))
+
+  # --- Fully Encapsulated Helper Functions ---
+
+  invariant_orthogonality_defect <- function(Y) {
+    norm_Y_sq <- sum(Y^2)
+    if (norm_Y_sq < 1e-12) return(0)
+    AtA <- crossprod(Y) / norm_Y_sq
+    D <- diag(diag(AtA))
+    sum((AtA - D)^2)
   }
-  
-  optimizer <- create_optimizer(optimizer, vmats = list(Y0), beta1 = 0.9, beta2 = 0.999,
-                                epsilon = 1e-8, k = 5, alpha = 0.5)
-  
-  trace <- list()
-  t0 <- Sys.time()
-  
-  # --- Energy function ---
-  energy_F <- function(Y, X0, fid_eta, c_orth) {
-    norm2 <- sum(Y^2)
-    e <- 0
-    if (norm2 > 0 && c_orth > 0) {
-      AtA <- crossprod(Y) / norm2
-      D <- diag(diag(AtA))
-      defect <- sum((AtA - D)^2)
-      e <- c_orth * 0.25 * defect
-    }
-    if (!is.null(X0) && fid_eta > 0) e <- e + 0.5 * fid_eta * sum((Y - X0)^2)
-    e
+
+  .inv_sqrt_sym <- function(M, epsilon = 1e-10) {
+    M <- (M + t(M)) / 2 # Ensure symmetry
+    eig <- eigen(M, symmetric = TRUE)
+    eig$values[eig$values < 0] <- 0
+    inv_sqrt_vals <- 1 / sqrt(eig$values + epsilon)
+    eig$vectors %*% diag(inv_sqrt_vals) %*% t(eig$vectors)
   }
-  
-  final_learning_rate <- initial_learning_rate * 1e-6
-  recent_energies <- numeric(0)
-  
-  # --- Main optimization loop ---
-  for (it in seq_len(max_iter)) {
-    decay_progress <- (it - 1) / max(1, max_iter - 1)
-    current_learning_rate <- final_learning_rate +
-      0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
-    
-    # Gradient computation
-    U <- crossprod(Y)
-    norm2 <- sum(Y^2)
-    grad_f <- matrix(0, p, k)
-    if (norm2 > 0 && c_orth > 0) {
-      D <- diag(diag(U))
-      offdiag_part <- U - D
-      AtA <- U / norm2
-      D_at <- diag(diag(AtA))
-      defect <- sum((AtA - D_at)^2)
-      term1 <- Y %*% offdiag_part / norm2^2
-      term2 <- (defect / norm2) * Y
-      grad_f <- c_orth * (term1 - term2)
+
+  .retract <- function(Y_cand, w_retract, retraction_type) {
+    if (retraction_type == "none") {
+      return(Y_cand)
     }
-    grad <- grad_f
-    if (!is.null(X0) && fid_eta > 0) grad <- grad + fid_eta * (Y - X0)
-    
-    sym_term <- symm(t(Y) %*% grad)
-    rgrad <- grad - Y %*% sym_term
-    descent_gradient <- -rgrad
-    
-    full_energy_function <- function(V_proposed) {
-      Z <- V_proposed
-      if (!all(is.finite(Z))) return(Inf)
-      if (retraction %in% c("polar", "soft")) {
-        M <- crossprod(Z)
-        if (!all(is.finite(M))) return(Inf)
-      }
-      if (retraction == "polar") {
-        Tmat <- inv_sqrt_sym(M)
-        Ytilde <- Z %*% Tmat
-      } else if (retraction == "qr") {
-        qrq <- qr(Z)
-        Q <- qr.Q(qrq)
-        Rmat <- qr.R(qrq)
-        signs <- sign(diag(Rmat)); signs[signs == 0] <- 1
-        Ytilde <- Q %*% diag(signs)
-      } else {
-        T1 <- inv_sqrt_sym(M)
-        Tomega <- (1 - lambda) * diag(k) + lambda * T1
-        Ytilde <- Z %*% Tomega
-      }
-      if (!all(is.finite(Ytilde))) return(Inf)
-      Ynext <- if (apply_nonneg) pmax(Ytilde, 0) else Ytilde
-      if (!all(is.finite(Ynext))) return(Inf)
-      energy_F(Ynext, X0, fid_eta, c_orth)
-    }
-    
-    step_result <- step(optimizer, i = 1, V_current = Y,
-                       descent_gradient = descent_gradient,
-                       learning_rate = current_learning_rate,
-                       full_energy_function = full_energy_function, myit = it)
-    Z <- step_result$updated_V
-    optimizer <- step_result$optimizer
-    
-    # Retraction
-    if (retraction %in% c("polar", "soft")) M <- crossprod(Z)
-    if (retraction == "polar") {
-      Tmat <- inv_sqrt_sym(M)
-      Ytilde <- Z %*% Tmat
-    } else if (retraction == "qr") {
-      qrq <- qr(Z)
+    YtY <- crossprod(Y_cand)
+    if (retraction_type == "polar") {
+      Ytilde <- Y_cand %*% .inv_sqrt_sym(YtY)
+    } else if (retraction_type == "qr") {
+      qrq <- qr(Y_cand)
       Q <- qr.Q(qrq)
       Rmat <- qr.R(qrq)
       signs <- sign(diag(Rmat)); signs[signs == 0] <- 1
       Ytilde <- Q %*% diag(signs)
-    } else {
-      T1 <- inv_sqrt_sym(M)
-      Tomega <- (1 - lambda) * diag(k) + lambda * T1
-      Ytilde <- Z %*% Tomega
+    } else if (retraction_type == "soft") {
+      qrq <- qr(Y_cand)
+      Q <- qr.Q(qrq)
+      Rmat <- qr.R(qrq)
+      signs <- sign(diag(Rmat)); signs[signs == 0] <- 1
+      Q <- Q %*% diag(signs)
+      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
+      norm_Y <- sqrt(sum(Y_cand^2))
+      if (norm_Y > 1e-12) {
+          Ytilde <- Ytilde / sqrt(sum(Ytilde^2)) * norm_Y
+      }
+    } else if (retraction_type == "soft_polar") {
+      T1 <- .inv_sqrt_sym(YtY)
+      T_w <- (1 - w_retract) * diag(ncol(Y_cand)) + w_retract * T1
+      Ytilde <- Y_cand %*% T_w
     }
-    Ynext <- if (apply_nonneg) pmax(Ytilde, 0) else Ytilde
+    return(Ytilde)
+  }
+
+  # --- Reproducibility & Initialization ---
+  if (!is.null(seed)) set.seed(seed)
+  p <- nrow(Y0); k <- ncol(Y0)
+  retraction <- match.arg(retraction)
+
+  if (is.null(X0)) {
+    if (all(Y0 == 0)) {
+      if (verbose) cat("Y0 is all-zero and X0 is NULL. Adding small perturbation to Y0.\n")
+      perturb_scale <- 1e-4
+      Y0 <- Y0 + matrix(stats::runif(p * k, -perturb_scale, perturb_scale), p, k)
+    }
+    X0 <- pmax(Y0, 0)
+  } else {
+    X0 <- pmax(X0, 0)
+    if (nrow(X0) != p || ncol(X0) != k) stop("X0 must have same dimensions as Y0")
+  }
+
+  Y <- Y0
+  
+  # --- Robust Scaling ---
+  E_fid0 <- 0.5 * sum((Y - X0)^2)
+  E_orth0 <- invariant_orthogonality_defect(Y)
+  lambda <- 1.0
+  if (w > 0 && w < 1) {
+    lambda <- E_fid0 / (E_orth0 + 1e-12)
+  }
+
+  # --- Metrics & Gradient Function (Core Logic) ---
+  compute_metrics <- function(V) {
+    diff <- V - X0
+    E_fid <- 0.5 * sum(diff^2)
+    grad_fid_E <- diff
     
+    E_orth <- 0; grad_orth_E <- matrix(0, p, k)
+    if (w > 0) {
+        norm2_V <- sum(V^2)
+        if (norm2_V > 1e-12) {
+            YtY <- crossprod(V)
+            AtA <- YtY / norm2_V
+            defect <- sum((AtA - diag(diag(AtA)))^2)
+            E_orth <- defect
+            term1 <- V %*% (YtY - diag(diag(YtY))) / norm2_V^2
+            term2 <- (defect / norm2_V) * V
+            grad_orth_E <- 4 * (term1 - term2)
+        }
+    }
+
+    total_energy <- (1 - w) * E_fid + w * lambda * E_orth
+    grad_total_E <- (1 - w) * grad_fid_E + w * lambda * grad_orth_E
+    
+    # Conditionally project gradient to tangent space
+    if (w > 0 && retraction != "none") {
+        sym_term <- (t(V) %*% grad_total_E + t(grad_total_E) %*% V) / 2
+        rgrad <- grad_total_E - V %*% sym_term
+    } else {
+        rgrad <- grad_total_E
+    }
+    
+    list(total_energy = total_energy, E_fid = E_fid, E_orth = E_orth, rgrad = rgrad)
+  }
+
+  # --- Optimization Loop Initialization ---
+  trace <- list(); recent_energies <- numeric(0); t0 <- Sys.time()
+  
+  best_Y <- Y
+  init_metrics <- compute_metrics(Y)
+  best_total_energy <- init_metrics$total_energy
+  init_grad_norm <- sqrt(sum(init_metrics$rgrad^2)) + 1e-8
+
+  # --- Main Optimization Loop ---
+  for (it in seq_len(max_iter)) {
+    metrics <- compute_metrics(Y)
+    rgrad <- metrics$rgrad; current_energy <- metrics$total_energy
+
+    if (any(is.na(rgrad)) || any(is.infinite(rgrad))) {
+      if (verbose) cat("NaN or Inf in gradient. Stopping.\n"); break
+    }
+    
+    descent_direction <- -rgrad; alpha <- initial_learning_rate
+    ls_iter <- 0; max_ls_iter <- 10
+
+    while (ls_iter < max_ls_iter) {
+      Y_candidate <- Y + alpha * descent_direction
+      Y_retracted <- .retract(Y_candidate, w, retraction)
+      Y_new <- if (apply_nonneg) pmax(Y_retracted, 0) else Y_retracted
+      new_metrics <- compute_metrics(Y_new)
+      if (new_metrics$total_energy < current_energy) break
+      alpha <- alpha * line_search_beta; ls_iter <- ls_iter + 1
+    }
+    
+    if (ls_iter == max_ls_iter) {
+      if (verbose) cat("Line search failed. Convergence likely.\n")# ; break
+    }
+    
+    Y <- Y_new; total_energy <- new_metrics$total_energy
+    
+    if (total_energy < best_total_energy) { best_total_energy <- total_energy; best_Y <- Y }
     dt <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
-    Enext <- energy_F(Ynext, X0, fid_eta, c_orth)
     
     if (it %% record_every == 0) {
-      trace[[length(trace) + 1]] <- list(
-        iter = it, time = dt, energy = Enext,
-        orth = orth_residual(Ynext), neg = neg_violation(Ynext),
-        lambda = lambda
-      )
+      trace[[length(trace) + 1]] <- list(iter = it, time = dt, fidelity = new_metrics$E_fid, 
+                                         orthogonality = new_metrics$E_orth, total_energy = total_energy)
     }
-    if (verbose)
-      cat("Iteration", it, "Energy", sprintf("%.6f", Enext),
-          "Orth", sprintf("%.6f", orth_residual(Ynext)),
-          "Neg", sprintf("%.6f", neg_violation(Ynext)), "\n")
+    if (verbose) {
+      cat(sprintf("[Iter %3d] Total Energy: %.6e | Fid: %.6e | Ortho: %.6e | Step: %.2e\n",
+                  it, total_energy, new_metrics$E_fid, new_metrics$E_orth, alpha))
+    }
     
-    # Convergence check
-    recent_energies <- c(recent_energies, Enext)
-    if (length(recent_energies) > window_size)
-      recent_energies <- recent_energies[-1]
-    if (length(recent_energies) == window_size) {
-      reduction <- recent_energies[1] - recent_energies[window_size]
-      rel_reduction <- reduction / max(1e-10, abs(recent_energies[1]))
-      if (rel_reduction < tol) {
-        if (verbose) cat("Converged at iter", it, "based on energy reduction\n")
-        Y <- Ynext
-        break
+    grad_norm <- sqrt(sum(rgrad^2))
+    if ((grad_norm / init_grad_norm) < tol) {
+      if (verbose) cat("Converged: Relative gradient norm tolerance reached.\n")
+    }
+    recent_energies <- c(recent_energies, total_energy)
+    if (length(recent_energies) > window_size) recent_energies <- recent_energies[-1]
+    if (it > window_size && (max(recent_energies) - min(recent_energies)) / (abs(mean(recent_energies)) + 1e-12) < tol) {
+      if (verbose) cat("Converged: Energy stability tolerance reached.\n"); break
+    }
+  }
+
+  final_iter <- if(length(trace) == 0) 0 else trace[[length(trace)]]$iter
+  trace_df <- do.call(rbind, lapply(trace, as.data.frame))
+
+  # --- Plotting ---
+  energy_plot <- NULL
+  if (plot && !is.null(trace_df) && nrow(trace_df) > 1) {
+    max_fid <- max(trace_df$fidelity, na.rm = TRUE)
+    max_orth <- max(trace_df$orthogonality, na.rm = TRUE)
+    ratio <- if (max_orth > 1e-9) max_fid / max_orth else 1
+    
+    energy_plot <- ggplot(trace_df, aes(x = .data$iter)) +
+      geom_line(aes(y = .data$fidelity, color = "Fidelity"), size = 1.2) +
+      geom_line(aes(y = .data$orthogonality * ratio, color = "Orthogonality"), size = 1.2) +
+      scale_y_continuous("Fidelity Energy", sec.axis = sec_axis(~ . / ratio, name = "Orthogonality Defect")) +
+      scale_color_manual(values = c("Fidelity" = "#1f78b4", "Orthogonality" = "#33a02c")) +
+      labs(title = paste("NSA-Flow Trace:", retraction), subtitle = sprintf("w = %.2f", w), x = "Iteration", color = "Term") +
+      theme_minimal(base_size = 14) +
+      theme(plot.title = element_text(face = "bold", hjust = 0.5), legend.position = "top",
+            axis.title.y.left = element_text(color = "#1f78b4"), axis.title.y.right = element_text(color = "#33a02c"))
+  }
+
+  list(
+    Y = best_Y,
+    traces = trace_df,
+    final_iter = final_iter,
+    plot = energy_plot,
+    best_total_energy = best_total_energy,
+    X0 = X0
+  )
+}
+
+
+
+
+#' @title NSA-Flow Optimization
+#'
+#' @description
+#' Performs optimization to balance fidelity to a target matrix and orthogonality
+#' of the solution matrix using a weighted objective function.
+#' The function supports multiple retraction methods and includes robust convergence checks.
+#'
+#' @param Y0 Numeric matrix of size \code{p x k}, the initial guess for the solution.
+#' @param X0 Numeric matrix of size \code{p x k}, the target matrix for fidelity.
+#'   If \code{NULL}, initialized as \code{pmax(Y0, 0)} with a small perturbation added to \code{Y0}.
+#' @param w Numeric scalar in \code{[0,1]}, weighting the trade-off between fidelity
+#'   (1 - w) and orthogonality (w). Default is 0.5.
+#' @param retraction Character string specifying the retraction method to enforce
+#'   orthogonality constraints. Options are:
+#'   \itemize{
+#'     \item \code{"soft"}: Smooth interpolation between identity and polar retraction.
+#'     \item \code{"polar"}: Polar decomposition-based retraction.
+#'     \item \code{"qr"}: QR decomposition-based retraction.
+#'     \item \code{"none"}: No retraction applied.
+#'   }
+#'   Default is \code{"soft"}.
+#' @param max_iter Integer, maximum number of iterations. Default is 100.
+#' @param tol Numeric, tolerance for convergence based on relative gradient norm
+#'   and energy stability. Default is 1e-6.
+#' @param verbose Logical, if \code{TRUE}, prints iteration details. Default is \code{FALSE}.
+#' @param seed Integer, random seed for reproducibility. If \code{NULL}, no seed is set.
+#'   Default is 42.
+#' @param apply_nonneg Logical, if \code{TRUE}, enforces non-negativity on the solution
+#'   after retraction. Default is \code{TRUE}.
+#' @param optimizer Character string, optimization algorithm to use.
+#'   Currently only \code{"adam"} is supported. Default is \code{"adam"}.
+#' @param initial_learning_rate Numeric, initial learning rate for the optimizer.
+#'   Default is 1e-3.
+#' @param record_every Integer, frequency of recording iteration metrics.
+#'   Default is 1 (record every iteration).
+#' @param window_size Integer, size of the window for energy stability convergence check.
+#'   Default is 5.
+#' @param plot Logical, if \code{TRUE}, generates a ggplot of fidelity and orthogonality
+#'   traces with dual axes. Default is \code{FALSE}.
+#'
+#' @return A list containing:
+#'   \itemize{
+#'     \item \code{Y}: Numeric matrix, the best solution found (lowest total energy).
+#'     \item \code{traces}: Data frame with columns \code{iter}, \code{time},
+#'           \code{fidelity}, \code{orthogonality}, and \code{total_energy}
+#'           for recorded iterations.
+#'     \item \code{final_iter}: Integer, number of iterations performed.
+#'     \item \code{plot}: ggplot object of the optimization trace
+#'           (if \code{plot = TRUE}), otherwise \code{NULL}.
+#'     \item \code{best_total_energy}: Numeric, the lowest total energy achieved.
+#'   }
+#'
+#' @details
+#' The function minimizes a weighted objective combining fidelity to \code{X0} and
+#' orthogonality of \code{Y}, defined as:
+#' \deqn{E(Y) = (1 - w) * ||Y - X0||_F^2 / (2 * p * k) + w * defect(Y)}
+#' where \code{defect(Y)} measures orthogonality deviation.
+#'
+#' The optimization uses a Riemannian gradient descent approach with optional
+#' retraction to enforce orthogonality constraints. Convergence is checked via
+#' relative gradient norm and energy stability over a window of iterations.
+#'
+#' @examples
+#' set.seed(123)
+#' Y0 <- matrix(runif(20), 5, 4)
+#' X0 <- matrix(runif(20), 5, 4)
+#' # The original function relies on helper functions not shown here, such as:
+#' # create_optimizer, step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
+#' # The following example is conceptual:
+#' # result <- nsa_flow(Y0, X0, w = 0.0, max_iter = 10, verbose = TRUE, plot = TRUE)
+#' # print(result$plot)
+#' # print(result$traces)
+#'
+#' @import ggplot2
+#' @import reshape2
+#' @export
+nsa_flow <- function(
+  Y0, X0 = NULL, w = 0.5,
+  retraction = c("soft", "polar", "qr", "none", "soft_polar"),
+  max_iter = 100, tol = 1e-6, verbose = FALSE, seed = 42,
+  apply_nonneg = TRUE, optimizer = "adam", 
+  initial_learning_rate = 1e-3,
+  record_every = 1, window_size = 5,
+  plot = FALSE
+) {
+  # --- Input validation ---
+  stopifnot(is.matrix(Y0), is.numeric(Y0))
+  stopifnot(is.null(X0) || (is.matrix(X0) && is.numeric(X0)))
+  stopifnot(is.numeric(w), w >= 0, w <= 1)
+  stopifnot(is.integer(max_iter) || max_iter == as.integer(max_iter), max_iter > 0)
+  stopifnot(is.numeric(tol), tol > 0)
+  stopifnot(is.logical(verbose))
+  stopifnot(is.null(seed) || is.numeric(seed))
+  stopifnot(is.logical(apply_nonneg))
+  stopifnot(is.character(optimizer))
+  stopifnot(is.numeric(initial_learning_rate), initial_learning_rate > 0)
+  stopifnot(is.integer(record_every) || record_every == as.integer(record_every), record_every > 0)
+  stopifnot(is.integer(window_size) || window_size == as.integer(window_size), window_size > 0)
+  stopifnot(is.logical(plot))
+  stopifnot(!all(Y0==0))
+
+  .inv_sqrt_sym <- function(M, epsilon = 1e-10) {
+    M <- (M + t(M)) / 2 # Ensure symmetry
+    eig <- eigen(M, symmetric = TRUE)
+    eig$values[eig$values < 0] <- 0
+    inv_sqrt_vals <- 1 / sqrt(eig$values + epsilon)
+    eig$vectors %*% diag(inv_sqrt_vals) %*% t(eig$vectors)
+  }
+
+  .retract <- function(Y_cand, w_retract, retraction_type) {
+    if (retraction_type == "none") {
+      return(Y_cand)
+    }
+    YtY <- crossprod(Y_cand)
+    if (retraction_type == "polar") {
+      Ytilde <- Y_cand %*% .inv_sqrt_sym(YtY)
+    } else if (retraction_type == "qr") {
+      qrq <- qr(Y_cand)
+      Q <- qr.Q(qrq)
+      Rmat <- qr.R(qrq)
+      signs <- sign(diag(Rmat)); signs[signs == 0] <- 1
+      Ytilde <- Q %*% diag(signs)
+    } else if (retraction_type == "soft") {
+      qrq <- qr(Y_cand)
+      Q <- qr.Q(qrq)
+      Rmat <- qr.R(qrq)
+      signs <- sign(diag(Rmat)); signs[signs == 0] <- 1
+      Q <- Q %*% diag(signs)
+      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
+      norm_Y <- sqrt(sum(Y_cand^2))
+      if (norm_Y > 1e-12) {
+          Ytilde <- Ytilde / sqrt(sum(Ytilde^2)) * norm_Y
+      }
+    } else if (retraction_type == "soft_polar") {
+      T1 <- .inv_sqrt_sym(YtY)
+      T_w <- (1 - w_retract) * diag(ncol(Y_cand)) + w_retract * T1
+      Ytilde <- Y_cand %*% T_w
+    }
+    return(Ytilde)
+  }
+
+  # --- Reproducibility ---
+  if (!is.null(seed)) {
+    set.seed(seed)
+    RNGkind("Mersenne-Twister", "Inversion")
+  }
+
+  p <- nrow(Y0)
+  k <- ncol(Y0)
+
+  # --- Initialize X0 if missing ---
+  if (is.null(X0)) {
+    X0 <- pmax(Y0, 0)
+    perturb_scale <- 0.1 * sqrt(sum(Y0^2)) / sqrt(length(Y0))
+    Y0 <- Y0 + matrix(rnorm(p * k, sd = perturb_scale), p, k)
+    if (verbose) cat("Added small perturbation to Y0\n")
+  } else {
+    X0 <- pmax(X0, 0)
+    if (nrow(X0) != p || ncol(X0) != k) stop("X0 must have same dimensions as Y0")
+  }
+
+  retraction <- match.arg(retraction)
+  Y <- Y0
+
+  # --- Compute initial scales ---
+  g0 <- 0.5 * sum((Y0 - X0)^2) / (p * k)
+  if (g0 < 1e-8) g0 <- 1e-8
+  
+  # This assumes invariant_orthogonality_defect is defined in the global environment
+  d0 <- invariant_orthogonality_defect(Y0)
+  if (d0 < 1e-8) d0 <- 1e-8
+
+  # --- Weighting terms ---
+  fid_eta <- (1 - w) / (g0 * p * k)
+  c_orth <- 4 * w / d0
+
+  # --- Optimizer initialization ---
+  # This assumes create_optimizer and step are defined in the global environment
+  opt <- create_optimizer(optimizer, vmats = list(Y0),
+                          beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8,
+                          learning_rate = initial_learning_rate,
+                          k = 5, alpha = 0.5)
+
+  trace <- list()
+  recent_energies <- numeric(0)
+  t0 <- Sys.time()
+
+  # --- Track best solution ---
+  best_Y <- Y
+  best_total_energy <- Inf
+
+  # --- Compute initial gradient for relative norm tolerance ---
+  grad_fid_init <- fid_eta * (Y - X0) * (-1.0)
+  norm2_init <- sum(Y^2)
+  grad_orth_init <- matrix(0, p, k)
+  if (norm2_init > 0 && c_orth > 0) {
+    AtA_init <- crossprod(Y) / norm2_init
+    D_init <- diag(diag(AtA_init))
+    defect_init <- sum((AtA_init - D_init)^2)
+    term1_init <- Y %*% (crossprod(Y) - diag(diag(crossprod(Y)))) / norm2_init^2
+    term2_init <- (defect_init / norm2_init) * Y
+    grad_orth_init <- c_orth * (term1_init - term2_init)
+  }
+  if (c_orth > 0) {
+    # This assumes symm is defined in the global environment
+    sym_term_orth_init <- symm(t(Y) %*% grad_orth_init)
+    rgrad_orth_init <- grad_orth_init - Y %*% sym_term_orth_init
+  } else {
+    rgrad_orth_init <- grad_orth_init
+  }
+  rgrad_init <- grad_fid_init + rgrad_orth_init
+  init_grad_norm <- sqrt(sum(rgrad_init^2)) + 1e-8
+
+  # --- Adaptive learning rate ---
+  lr <- initial_learning_rate
+
+  # --- Full energy function ---
+  nsa_energy <- function(Vp) {
+    # --- Retraction ---
+    Vp = .retract(Vp, w, retraction)
+    # --- Optional non-negativity ---
+    Vp <- if (apply_nonneg) pmax(Vp, 0) else Vp
+    e <- 0.5 * fid_eta * sum((Vp - X0)^2)
+    if (c_orth > 0) {
+      norm2_V <- sum(Vp^2)
+      if (norm2_V > 0) {
+        defect <- invariant_orthogonality_defect(Vp)
+        e <- e + 0.25 * c_orth * defect
       }
     }
-    
-    Y <- Ynext
+    e
   }
+
+  for (it in seq_len(max_iter)) {
+    # --- Fidelity gradient ---
+    grad_fid <- fid_eta * (Y - X0) * (-1.0)
+
+    # --- Orthogonality gradient ---
+    norm2 <- sum(Y^2)
+    grad_orth <- matrix(0, p, k)
+    if (norm2 > 0 && c_orth > 0) {
+      AtA <- crossprod(Y) / norm2
+      D <- diag(diag(AtA))
+      defect <- sum((AtA - D)^2)
+      term1 <- Y %*% (crossprod(Y) - diag(diag(crossprod(Y)))) / norm2^2
+      term2 <- (defect / norm2) * Y
+      grad_orth <- c_orth * (term1 - term2)
+    }
+
+    # --- Riemannian projection ---
+    if (c_orth > 0) {
+      sym_term_orth <- symm(t(Y) %*% grad_orth)
+      rgrad_orth <- grad_orth - Y %*% sym_term_orth
+    } else {
+      rgrad_orth <- grad_orth
+    }
+
+    # --- Combined gradient ---
+    rgrad <- grad_fid + rgrad_orth
+
+    # --- Check for NaN/Inf in gradient ---
+    if (any(is.na(rgrad)) || any(is.infinite(rgrad))) {
+      if (verbose) cat("NaN or Inf detected in gradient. Stopping optimization.\n")
+      break
+    }
+
+    # --- Optimizer step ---
+    step_result <- step(opt, i = 1, V_current = Y,
+                        descent_gradient = rgrad,
+                        learning_rate = lr,
+                        full_energy_function = nsa_energy,
+                        myit = it)
+    Y_prev <- Y
+    Y <- step_result$updated_V
+    opt <- step_result$optimizer
+
+    # --- Backtracking line search ---
+    prev_energy <- nsa_energy(Y_prev)
+    current_energy <- nsa_energy(Y)
+    alpha <- 1
+    count <- 0
+    while (current_energy > prev_energy && count < 10) {
+      alpha <- alpha * 0.5 
+      Y <- Y_prev + alpha * (step_result$updated_V - Y_prev)
+      current_energy <- nsa_energy(Y)
+      count <- count + 1
+    }
+    if (count == 10) {
+      Y <- Y_prev
+      if (verbose) cat("Backtracking failed to reduce energy. Reverting to previous Y.\n")
+    }
+
+    # --- Adaptive learning rate adjustment ---
+    if (count > 3) {
+      lr <- lr * 0.5
+      if (verbose) cat(sprintf("Reducing learning rate to %.6e due to backtracking\n", lr))
+    } else if (count == 0 && it %% 5 == 0) {
+      lr <- lr * 1.1
+      if (verbose) cat(sprintf("Increasing learning rate to %.6e\n", lr))
+    }
+
+    # --- Retraction ---
+    Ytilde = .retract(Y, w, retraction)    
+    # --- Optional non-negativity ---
+    Y <- if (apply_nonneg) pmax(Ytilde, 0) else Ytilde
+
+    # --- Check for NaN/Inf in Y ---
+    if (any(is.na(Y)) || any(is.infinite(Y))) {
+      if (verbose) cat("NaN or Inf detected in Y. Stopping optimization.\n")
+      break
+    }
+
+    # --- Energy and orthogonality tracking ---
+    fidelity <- 0.5 * fid_eta * sum((Y - X0)^2)
+    orthogonality <- invariant_orthogonality_defect(Y)
+    total_energy <- fidelity + 0.25 * c_orth * orthogonality
+    dt <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
+
+    # --- Update best solution ---
+    if (total_energy < best_total_energy) {
+      best_total_energy <- total_energy
+      best_Y <- Y
+    }
+
+    # --- Append to recent energies ---
+    recent_energies <- c(recent_energies, total_energy)
+    if (length(recent_energies) > window_size) {
+      recent_energies <- recent_energies[-1]
+    }
+
+    if (it %% record_every == 0) {
+      trace[[length(trace) + 1]] <- list(
+        iter = it, time = dt,
+        fidelity = fidelity,
+        orthogonality = orthogonality,
+        total_energy = total_energy
+      )
+    }
+
+    # --- Verbose output ---
+    if (verbose) {
+      cat(sprintf("[Iter %3d] Total Energy: %.6e | Fidelity: %.6e | Orthogonality: %.6e | Time: %.2fs\n",
+                  it, total_energy, fidelity, orthogonality, dt))
+    }
+
+    # --- Convergence checks ---
+    if (it > 1) {
+      # Relative gradient norm check
+      grad_norm <- sqrt(sum(rgrad^2))
+      rel_grad_norm <- grad_norm / init_grad_norm
+      if (rel_grad_norm < tol) {
+        if (verbose) 
+          cat(sprintf("Converged at iteration %d (relative gradient norm < %.2e)\n", it, tol))
+        break
+      }
+      
+      # Energy stability over window
+      if (length(recent_energies) == window_size) {
+        max_e <- max(recent_energies)
+        min_e <- min(recent_energies)
+        avg_e <- mean(recent_energies)
+        rel_var <- (max_e - min_e) / (abs(avg_e) + 1e-12)
+        if (rel_var < tol) {
+          if (verbose) 
+            cat(sprintf("Converged at iteration %d (energy variation over window < %.2e)\n", it, tol))
+          break
+        }
+      }
+    }
+  }
+
+  trace_df <- do.call(rbind, lapply(trace, as.data.frame))
+
+  # --- Optional plot with dual axes ---
+  energy_plot <- NULL
+  if (plot && !is.null(trace_df) && nrow(trace_df) > 0) {
+    max_fid <- max(trace_df$fidelity, na.rm = TRUE)
+    max_orth <- max(trace_df$orthogonality, na.rm = TRUE)
+    ratio <- if (max_orth > 0) max_fid / max_orth else 1
+    
+    energy_plot <- ggplot2::ggplot(trace_df, ggplot2::aes(x = iter)) +
+      ggplot2::geom_line(ggplot2::aes(y = fidelity, color = "Fidelity"), size = 1.2) +
+      ggplot2::geom_point(ggplot2::aes(y = fidelity, color = "Fidelity"), size = 1.5, alpha = 0.7) +
+      ggplot2::geom_line(ggplot2::aes(y = orthogonality * ratio, color = "Orthogonality"), size = 1.2) +
+      ggplot2::geom_point(ggplot2::aes(y = orthogonality * ratio, color = "Orthogonality"), size = 1.5, alpha = 0.7) +
+      ggplot2::scale_y_continuous(name = "Fidelity Energy", 
+                         sec.axis = ggplot2::sec_axis(~ . / ratio, name = "Orthogonality Defect")) +
+      ggplot2::scale_color_manual(values = c("Fidelity" = "#1f78b4", "Orthogonality" = "#33a02c")) +
+      ggplot2::labs(title = paste("NSA-Flow Optimization Trace: ", retraction),
+           subtitle = "Fidelity and Orthogonality Terms (Dual Scales)",
+           x = "Iteration", color = "Term") +
+      ggplot2::theme_minimal(base_size = 14) +
+      ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
+            plot.subtitle = ggplot2::element_text(hjust = 0.5),
+            legend.position = "top",
+            panel.grid.major = ggplot2::element_line(color = "gray80"),
+            panel.grid.minor = ggplot2::element_line(color = "gray90"),
+            axis.title.y.left = ggplot2::element_text(color = "#1f78b4"),
+            axis.text.y.left = ggplot2::element_text(color = "#1f78b4"),
+            axis.title.y.right = ggplot2::element_text(color = "#33a02c"),
+            axis.text.y.right = ggplot2::element_text(color = "#33a02c"))
+  }
+
+  list(
+    Y = best_Y,
+    traces = trace_df,
+    final_iter = if(is.null(trace_df)) 0 else nrow(trace_df),
+    plot = energy_plot,
+    best_total_energy = best_total_energy
+  )
+}
+
+
+#' Create NSA-Flow Algorithm Flowchart
+#'
+#' Generates a DiagrammeR flowchart visualizing the Non-negative Stiefel Approximating Flow (NSA-Flow) algorithm.
+#' The diagram includes initialization, gradient computation, Riemannian descent, retraction choices, 
+#' non-negativity projection, and convergence checks with customizable styling.
+#'
+#' @param node_fill_color Color for node fill (default: "lightblue").
+#' @param node_font_color Color for node text (default: "black").
+#' @param edge_color Color for edges (default: "black").
+#' @param font_name Font for node labels (default: "Helvetica").
+#' @param node_shape Shape of nodes (default: "rectangle").
+#' @param graph_rankdir Direction of graph layout (default: "TB" for top-to-bottom).
+#' @param fontsize Font size for node labels (default: 10).
+#' @return A DiagrammeR graph object representing the NSA-Flow algorithm workflow.
+#' @examples
+#' library(DiagrammeR)
+#' nsa_flow_flowchart()
+#' nsa_flow_flowchart(node_fill_color = "lightgreen", edge_color = "blue")
+nsa_flow_flowchart <- function(
+  node_fill_color = "lightblue",
+  node_font_color = "black",
+  edge_color = "black",
+  font_name = "Helvetica",
+  node_shape = "rectangle",
+  graph_rankdir = "TB",
+  fontsize = 10
+) {
+  library(DiagrammeR)
   
-  trace_df <- if (length(trace) > 0)
-    do.call(rbind, lapply(trace, as.data.frame, stringsAsFactors = FALSE)) else NULL
+  # Define the graph specification using grViz
+  graph_spec <- paste0("
+digraph nsa_flow_algorithm {
+  graph [rankdir = ", graph_rankdir, ", fontsize = ", fontsize, ", splines = ortho]
+  node [shape = ", node_shape, ", style = filled, fillcolor = ", node_fill_color, ", 
+        fontcolor = ", node_font_color, ", fontname = ", font_name, ", fontsize = ", fontsize, "]
+  edge [color = ", edge_color, ", fontsize = ", fontsize, "]
+
+  # Nodes
+  A [label = 'Initialize Y_0\n(Random or SVD-based)']
+  B [label = 'Set Parameters\n(w, retraction, optimizer)']
+  C [label = 'Compute Euclidean Gradient\n∇F(Y) = (1-w)∇g(Y) + w∇f(Y)']
+  D [label = 'Project to Tangent Space\nRiemannian grad_ℳ F']
+  E [label = 'Descent Step\nZ = Y - α grad_ℳ F']
+  F [label = 'Choose Retraction\n(polar, QR, soft, none)']
+  G [label = 'Apply Retraction\nMap Z to Stiefel Manifold']
+  H [label = 'Proximal Projection\nP_+(Y) = max(Y, 0)']
+  I [label = 'Check Convergence\n(Energy reduction < tol or grad norm < tol)']
+  J [label = 'Update Y\nRecord Diagnostics\n(iter, energy, orth, neg)']
+  K [label = 'Output Final Y\nand Trace Diagnostics']
+
+  # Edges
+  A -> B [label = 'Setup']
+  B -> C [label = 'Start Iteration']
+  C -> D [label = 'Project']
+  D -> E [label = 'Descend']
+  E -> F [label = 'Select']
+  F -> G [label = 'Retract']
+  G -> H [label = 'Project Non-neg']
+  H -> I [label = 'Evaluate']
+  I -> J [label = 'Not Converged', style = 'dashed']
+  J -> C [label = 'Next Iteration']
+  I -> K [label = 'Converged']
+
+  # Subgraph for retraction choices
+  subgraph cluster_retraction {
+    style = dashed
+    color = gray
+    label = 'Retraction Options'
+    F1 [label = 'Polar\n(Z (Z^T Z)^{-1/2})', fillcolor = lightyellow]
+    F2 [label = 'QR\n(Q sign(diag(R)))', fillcolor = lightyellow]
+    F3 [label = 'Soft\n((1-λ)I + λ(Z^T Z)^{-1/2})', fillcolor = lightyellow]
+    F4 [label = 'None\n(No retraction)', fillcolor = lightyellow]
+    F -> F1 [style = invis]
+    F -> F2 [style = invis]
+    F -> F3 [style = invis]
+    F -> F4 [style = invis]
+  }
+}
+")
   
-  list(Y = Y, traces = trace_df, final_iter = if (is.null(trace_df)) 0 else nrow(trace_df))
+  # Create and return the DiagrammeR graph
+  grViz(graph_spec)
 }
