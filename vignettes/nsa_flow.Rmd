@@ -491,7 +491,7 @@ nsa_flow = ANTsR::nsa_flow
 optype='bidirectional_armijo_gradient'
 optype='armijo_gradient'
 def_ret = "soft"
-nsa_default <- function(Y0, w, verbose=FALSE ) {
+nsa_default <- function(Y0, w, verbose = FALSE ) {
   nsa_flow(
     Y0 = Y0,
     X0 = NULL,
@@ -513,7 +513,7 @@ nsa_default <- function(Y0, w, verbose=FALSE ) {
 
 res_toy <- nsa_flow(Y0 = X0_toy, X0 = true_Y,  
     w = omega_default, retraction = "soft_polar",
-    initial_learning_rate = ini_default, plot=TRUE, verbose=FALSE )
+    initial_learning_rate = ini_default, plot=TRUE, verbose =FALSE )
 
 # Visualize
 
@@ -591,7 +591,7 @@ w=0.9
 mxit=50
 res_polar <- nsa_flow(X0,  w = w, retraction = "polar", plot=TRUE, max_iter = mxit, verbose = FALSE, seed = 1, record_every = 1, initial_learning_rate = ini_default)
 res_qr <- nsa_flow(X0,  w = w, retraction = "soft_polar", plot=TRUE, max_iter = mxit, seed = 1, record_every = 1, initial_learning_rate = ini_default, verbose = FALSE)
-res_soft <- nsa_flow(X0,  w = w, retraction = "soft", plot=TRUE, max_iter = mxit, seed = 1, record_every = 1, initial_learning_rate = ini_default, verbose= FALSE )
+res_soft <- nsa_flow(X0,  w = w, retraction = "soft", plot=TRUE, max_iter = mxit, seed = 1, record_every = 1, initial_learning_rate = ini_default, verbose = FALSE )
 grid.arrange(res_polar$plot,res_qr$plot,res_soft$plot, nrow=3, top='QR, Polar, Soft Retractions')
 ###
 ```
@@ -605,13 +605,15 @@ w_seq <- c( 0.5, 0.8, 0.9, 0.95, 0.99 )
 mytit = paste0("w = ", round(w_seq,3))
 mats <- list()
 # X0 = X0 - min(X0)
+convergeplots <- list()
 for(i in seq_along(w_seq)) {
   w_val <- w_seq[i]
-  res_soft_w <- nsa_default( X0, w = w_val, verbose=FALSE )
+  res_soft_w <- nsa_default( X0, w = w_val, verbose =FALSE )
   mytit[i] <- paste0("w = ", round(w_val, 3), ', orth = ', 
     round(invariant_orthogonality_defect(res_soft_w$Y),4), ', w.spar = ',
     1.0-round(sum(res_soft_w$Y/max(res_soft_w$Y) > 0.01)/length(res_soft_w$Y),3))
   mats[[i]] <- res_soft_w$Y
+  convergeplots[[i]] <- res_soft_w$plot+labs(title = NULL, subtitle = NULL) 
 }
 allvals <- unlist(lapply(mats, function(m) as.numeric(m)))
 rng <- c(0 , quantile(c(as.numeric(X0), allvals), c(0.95), na.rm = TRUE))
@@ -623,6 +625,8 @@ for(i in seq_along(mats)) {
   plots[[i+1]] <- pheatmap(mats[[i]][rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = mytit[i], silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
 }
 grid.arrange(grobs = lapply(plots, function(x) x$gtable), ncol = 3)
+
+grid.arrange(grobs=convergeplots, top='Convergence Plots for Different w Values')
 #----------#
 ```
 
@@ -805,13 +809,15 @@ This variant uses standard soft-thresholding for sparsity, making it aligned wit
 DEFAULT_W <- 0.5
 DEFAULT_MAX_ITS <- 200
 DEFAULT_TOL <- 1e-5
+
 sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001, 
                            max_iter = 100, 
                            proximal_type = "basic", 
                            optimizer = "adam",
-                           w_orth = 0.0, w_pca = 1.0, w = 0.5, 
+                           w_pca = 1.0, w = 0.5, 
                            apply_soft_thresh_in_nns = FALSE, tol = 1e-6, 
                            initial_learning_rate=1.0,
+                           retraction='soft',
                            grad_tol = 1e-4, verbose = FALSE) {
   # (assumes helper functions: grad_orth, orth_residual, inv_sqrt_sym,
   #  soft_threshold, nsa_flow, frob, sym, sparsity_level are defined elsewhere)
@@ -820,7 +826,6 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
   if (k <= 0 || k > min(n, p)) stop("k must be positive and not exceed min(n, p)")
   if (lambda < 0) stop("lambda must be non-negative")
   if (alpha <= 0) stop("alpha must be positive")
-  if (w_orth < 0 || w_orth > 1) stop("w_orth must be in [0,1]")
   if (w_pca <= 0) stop("w_pca must be positive")
   if (w < 0 || w > 1) stop("w must be in [0,1]")
   if (!(proximal_type %in% c("basic", "nsa_flow"))) stop("proximal_type must be 'basic' or 'nsa_flow'")
@@ -861,8 +866,8 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
 
     # Euclidean gradients
     grad_p <- - (t(Xc) %*% (Xc %*% Y)) / n          # p x k
-    grad_o <- matrix(0, p, k)
-    eu_grad <- w_orth * grad_o + w_pca * grad_p
+    grad_o <- 0#grad_orth(Y)
+    eu_grad <-  w_pca * grad_p
 
     if (any(!is.finite(eu_grad))) stop("Non-finite Euclidean gradient at iteration ", iter)
 
@@ -871,12 +876,7 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
     if (gnorm > max_grad_norm) eu_grad <- eu_grad * (max_grad_norm / gnorm)
 
     # Riemannian projection only if orth term involved (otherwise keep euclidean)
-    if (w_orth > 0) {
-      sym_ytg <- ANTsR::symm(t(Y) %*% eu_grad)
-      rgrad <- eu_grad - Y %*% sym_ytg
-    } else {
-      rgrad <- eu_grad
-    }
+    rgrad <- eu_grad
     rgrad_norm <- frob(rgrad)
 
     # Backtracking line search (Armijo)
@@ -886,7 +886,7 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
     energy_of <- function(M) {
       tr_val <- sum(diag(t(M) %*% t(Xc) %*% (Xc %*% M))) / n
       fid_term <- w_pca * (-0.5 * tr_val)
-      orth_term <- if (w_orth > 0) w_orth * orth_residual(M) else 0
+      orth_term <- 0
       prox_term <- lambda * sum(abs(M))
       fid_term + orth_term + prox_term
     }
@@ -904,25 +904,30 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
     }
     if (!is.finite(energy_new)) stop("Non-finite energy after backtracking at iteration ", iter)
 
-    Y_ret=Z
+    Y_ret <- Z
     # Proximal step
     thresh <- alpha * lambda
     if (proximal_type == "basic") {
       Y_new <- simlr_sparseness(Y_ret, 'none', positivity='positive', sparseness_quantile=0.8 )
-    } else {
-      Y_temp <- if (apply_soft_thresh_in_nns) soft_threshold(Y_ret, thresh) else Y_ret
-      prox_res <- nsa_default(Y_temp,  w = w )
+    } else if (proximal_type == "nsa_flow") {
+      prox_res <- nsa_flow(Y_ret, w = w, retraction=retraction )
       Y_new <- prox_res$Y
     }
     if (any(!is.finite(Y_new))) stop("Non-finite proximal step at iteration ", iter)
 
     # compute energy and stats
     energy <- energy_of(Y_new)
-    orth_e <- if (w_orth > 0) orth_residual(Y_new) else 0
-    tr_val <- sum(diag(t(Y_new) %*% t(Xc) %*% (Xc %*% Y_new))) / n
-    expl_var_ratio <- min(tr_val / total_var, 1)
+    # Orthonormalize to compute true explained variance
+    if (k == 1) {
+      Q <- Y_new / sqrt(sum(Y_new^2))
+    } else {
+      qr_decomp <- qr(Y_new)
+      Q <- qr.Q(qr_decomp)
+    }
+    tr_val <- sum(diag(t(Q) %*% t(Xc) %*% (Xc %*% Q))) / n
+    expl_var_ratio <- tr_val / total_var
 
-    energy_trace[iter] <- energy
+    energy_trace[iter] <- expl_var_ratio * -1.0
     # check for improvement (absolute)
     improved <- FALSE
     if (energy < best_energy - min_delta) {
@@ -952,8 +957,8 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
     stop_due_to_plateau <- (no_improve_count >= patience && lr_reductions >= max_lr_reductions)
 
     if (verbose) {
-      cat(sprintf("Iter %3d | Energy: %12.6e | Orth: %.4e | Sparsity: %.4e | ExplVar: %.4f | rgrad_norm: %.4e | bt: %2d | alpha: %.3e | t: %.2fs\n",
-                  iter, energy, orth_e, sparsity_level(Y_new), expl_var_ratio, rgrad_norm, bt, alpha, as.numeric(Sys.time() - t_start, units="secs")))
+      cat(sprintf("Iter %3d | Energy: %12.6e | Sparsity: %.4e | ExplVar: %.4f | rgrad_norm: %.4e | bt: %2d | alpha: %.3e | t: %.2fs\n",
+                  iter, energy, sparsity_level(Y_new), expl_var_ratio, rgrad_norm, bt, alpha, as.numeric(Sys.time() - t_start, units="secs")))
       if (!improved) cat(sprintf("  (no_improve_count=%d, lr_reductions=%d)\n", no_improve_count, lr_reductions))
     }
 
@@ -987,6 +992,15 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
   } # end iter loop
 
   energy_trace <- energy_trace[seq_len(iter)]
+  # Compute final expl_var_ratio for best_Y
+  if (k == 1) {
+    Q <- best_Y / sqrt(sum(best_Y^2))
+  } else {
+    qr_decomp <- qr(best_Y)
+    Q <- qr.Q(qr_decomp)
+  }
+  tr_val <- sum(diag(t(Q) %*% t(Xc) %*% (Xc %*% Q))) / n
+  expl_var_ratio <- tr_val / total_var
   list(
     Y = best_Y,
     energy_trace = energy_trace,
@@ -994,7 +1008,8 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
     best_energy = best_energy,
     converged = converged,
     no_improve_count = no_improve_count,
-    lr_reductions = lr_reductions
+    lr_reductions = lr_reductions,
+    expl_var_ratio = expl_var_ratio
   )
 }
 
@@ -1235,11 +1250,17 @@ ggplot(top_terms_combined, aes(x = Topic, y = Term, fill = Weight)) +
 We demonstrate the utility of our Sparse PCA implementation on the classic Golub et al. (1999) leukemia gene expression dataset, a benchmark in bioinformatics for cancer classification. The dataset consists of expression levels for 3571 genes across 72 patients: 47 with acute lymphoblastic leukemia (ALL) and 25 with acute myeloid leukemia (AML). Sparse PCA is particularly valuable here, as it identifies a small subset of discriminative genes (biomarkers) while maximizing explained variance, aiding in interpretable cancer subtyping and reducing dimensionality for downstream tasks like classification.
 
 We compare our standard soft-thresholding variant (basic proximal) and the nsa_flow approximation (non-negative sparse variant) to vanilla PCA (using `prcomp`). For evaluation:
+
 - **Core Metrics**: Explained variance ratio, sparsity (% zeros), orthogonality residual.
+
 - **Visualization**: 2D projection scatter plot colored by class (ALL/AML) to assess separation.
+
 - **Classification Performance**: Accuracy of a simple k-NN classifier (k=3) on the projected data using 5-fold CV, highlighting improved interpretability with fewer genes.
+
 - **Selected Genes**: List top 5 genes (by loading magnitude) for each component in the sparse variants, demonstrating biomarker selection.
+
 - **Expanded Analysis**: Biological interpretation of top genes, including known roles in leukemia subtypes.
+
 - **Sensitivity to Parameters**: Results for different lambda values to show sparsity trade-offs.
 
 Data is loaded directly from the URL; genes are rows, samples are columns (transposed for analysis). Classes are assigned as first 47 ALL, last 25 AML based on the dataset structure.
@@ -1316,7 +1337,7 @@ This section compares **Standard PCA**, **Sparse PCA (Soft Thresholding)**, and 
 ```{r golub_sparse_pca_analysis, echo=FALSE, fig.width=13, fig.height=6, message=FALSE, warning=FALSE}
 set.seed(1)
 myk <- 3
-mxit <- 25
+mxit <- 100
 ss <- 1:ncol(golub_scaled)
 golub_scaled_ss <- golub_scaled[, ss]
 
@@ -1327,12 +1348,12 @@ proj_std <- pca_std$x
 res_basic <- sparse_pca_imp(golub_scaled_ss, k = myk,
     lambda = 0.1, alpha = 0.001, max_iter = mxit,
     proximal_type = "basic",
-    w_orth = 0.5, tol = 1e-5, w = 0.5, verbose = FALSE)
+    tol = 1e-5, w = 0.2, verbose = FALSE)
 
 res_nns <- sparse_pca_imp(golub_scaled_ss, k = myk,
     lambda = 0.1, alpha = 0.001, max_iter = mxit,
     proximal_type = "nsa_flow",
-    w_orth = 0.5, tol = 1e-5, w = 0.5, verbose = FALSE)
+    tol = 1e-5, w = 0.2, verbose = FALSE)
 
 metrics_pca_g   <- compute_core_metrics(pca_std$rotation, golub_scaled_ss)
 metrics_basic_g <- compute_core_metrics(res_basic$Y, golub_scaled_ss)
@@ -1423,35 +1444,35 @@ ggplot(top_combined, aes(x = Component, y = Gene, fill = Loading)) +
 ```
 
 
-```{r pca_sens_metrics, echo=FALSE, fig.width=13, fig.height=6, message=FALSE, warning=FALSE,eval=FALSE}
+```{r pca_sens_metrics, echo=FALSE, fig.width=13, fig.height=6, message=FALSE, warning=FALSE,eval=TRUE}
 # Sensitivity Sweep (Ω)
-omega_vals <- seq(0, 0.5, by = 0.1)
+omega_vals <- seq(0.98, 1, by = 0.01)
+omega_vals = c(0.1, 0.5, 0.9,1 )
 n <- nrow(golub_scaled_ss)
 A <- t(golub_scaled_ss) %*% golub_scaled_ss / n
+Xc <- scale(X, center = TRUE, scale = FALSE)
+total_var <- sum( svd(proj_std/norm(proj_std,"F"))$d )
 sens_results <- lapply(omega_vals, function(omega) {
-    print( omega)
-  res <- sparse_pca_imp(
-    golub_scaled_ss, k = myk,
-    lambda = 0.1, alpha = 0.01, max_iter = 500,
-    proximal_type = "nsa_flow",
-    w_orth = 1., tol = 1e-2, w = omega, verbose = T
-  )
+  res <- sparse_pca_imp(golub_scaled_ss, k = myk,
+    lambda = 0.1, alpha = 0.001, max_iter = mxit,
+    proximal_type = "nsa_flow", retraction='qr',
+    tol = 1e-5, w = omega, verbose = FALSE)
   proj <- golub_scaled_ss %*% res$Y
   acc_res <- cv_acc(proj, labels)
-  tr_val <- sum(diag(t(res$Y) %*% A %*% res$Y))
-  total_var <- sum(diag(A))
-  expl_var_ratio <- min(tr_val / total_var, 1)
-  data.frame(
+  loc_var <- sum( svd(proj/norm(proj,"F"))$d )
+  spectral_ratio <- loc_var/total_var
+  xxx=data.frame(
     Omega = omega,
     Accuracy = acc_res$Accuracy,
-    Explained_Var_Ratio = expl_var_ratio,
+    Spectral_Ratio = spectral_ratio,
     Sparsity = sparsity_level(res$Y),
     Orth_Residual = invariant_orthogonality_defect(res$Y)
   )
+  xxx
 })
-sens_metrics <- do.call(rbind, sens_results)
+if ( ! exists("sens_metrics")) sens_metrics <- do.call(rbind, sens_results)
 sens_long <- sens_metrics %>%
-  pivot_longer(cols = c(Accuracy, Explained_Var_Ratio, Sparsity, Orth_Residual),
+  pivot_longer(cols = c(Accuracy, Spectral_Ratio, Sparsity, Orth_Residual),
                names_to = "Metric", values_to = "Value")
 ggplot(sens_long, aes(x = Omega, y = Value, color = Metric)) +
   geom_line(size = 1.2) + geom_point(size = 2) +
@@ -1468,7 +1489,7 @@ ggplot(sens_long, aes(x = Omega, y = Value, color = Metric)) +
 
 
 
-**Interpretation**: On this real high-dimensional dataset, our sparse PCA variants achieve high explained variance with substantial sparsity (>90% zeros), selecting a small number of genes while maintaining near-orthogonality. The nsa_flow variant enforces non-negativity, leading to interpretable positive loadings and slightly better classification accuracy due to reduced noise. Visualizations show clear ALL/AML separation in 2D and 3D, comparable to standard PCA but with far fewer genes—highlighting practical value for biomarker identification in oncology. 
+**Interpretation**: On this real high-dimensional dataset, our sparse PCA variants achieve high explained variance with substantial sparsity, selecting a small number of genes while maintaining near-orthogonality. The nsa_flow variant enforces non-negativity, leading to interpretable positive loadings and slightly better classification accuracy due to reduced noise. Visualizations show clear ALL/AML separation in 2D and 3D, comparable to standard PCA but with far fewer genes—highlighting practical value for biomarker identification in oncology. 
 
 The top genes often include known leukemia markers, such as CD33, a myeloid differentiation antigen expressed on AML blasts and a therapeutic target for gemtuzumab ozogamicin, and ZYXIN, involved in ALL translocations, cell adhesion, and hematopoiesis. These align with prior analyses of the Golub dataset, where CD33 and ZYXIN are frequently highlighted as discriminative features for AML and ALL, respectively. Sensitivity analysis shows higher lambda increases sparsity at the cost of explained variance, allowing users to tune for desired biomarker count. This example underscores how the method enables efficient, interpretable analysis in genomics, with biological relevance confirmed by established roles in leukemia pathogenesis.
 
