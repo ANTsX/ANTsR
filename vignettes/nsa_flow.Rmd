@@ -1613,18 +1613,37 @@ nmf_init <- tryCatch({
 # Normalize columns
 Y0_init <- sweep(nmf_init, 2, sqrt(colSums(nmf_init^2)), FUN = "/")
 Y0_init <- Y0_init * 1.0
+
+
+# Center data (important for PCA)
+X_centered <- scale(X, center = TRUE, scale = FALSE)  # N x p
+
+# Perform PCA
+pca_res <- prcomp(X_centered, rank. = k)  # Keep k components
+
+# PCA scores (N x k) and loadings (p x k)
+# NSA-Flow expects p x k (regions x components)
+Y0_pca <- pca_res$rotation  # columns = components, rows = regions (p x k)
+
+# Optionally scale columns to unit norm
+Y0_pca <- sweep(Y0_pca, 2, sqrt(colSums(Y0_pca^2)), FUN = "/")
+# Scale magnitude to moderate size
+Y0_pca <- Y0_pca * 1.0
+
+# Check dimensions
+dim(Y0_pca)  # should be p x k
+
 ```
 
 ### NSA-Flow Execution
 
 ```{r nsa-flow-run, eval=FALSE}
 M_nsa <- nsa_flow(
-  Y0 = Y0_init,
+  Y0 = Y0_pca,
   X0 = NULL,
-  w = 0.001,
+  w = 0.5,
   retraction = 'soft_svd',
   initial_learning_rate = 1e-3,
-  tol = 1e-3,
   optimizer = 'adam',
   plot = TRUE,
   max_iter = 200,
