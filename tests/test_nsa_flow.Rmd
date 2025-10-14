@@ -28,7 +28,7 @@ library(ANTsR)  # Assumes missing functions like create_optimizer, step are here
 
 This NSA-Flow test suite considers:
 
-- all retraction options ("soft", "qr", "polar", "none").
+- all retraction options.
 
 - diverse datasets: small, large, sparse with negatives.
 
@@ -118,6 +118,10 @@ generate_synth_data <- function(p=40, k=3, noise=0.5, corr=0.1,
 
 # Generate datasets
 data_small      <- generate_synth_data(p=90,  k=10, corr=0.2)
+data_wide = data_small  # Wide version
+for ( k in 1:length(data_wide) ) {
+  data_wide[[k]] <- t(data_wide[[k]])
+}
 data_large      <- generate_synth_data(p=200, k=20, corr=0.3)
 data_sparse_neg <- generate_synth_data(sparse_prob=0.5, include_neg=TRUE)
 
@@ -141,6 +145,7 @@ dataset_stats <- function(name, data) {
 
 summary_table <- rbind(
   dataset_stats("Small", data_small),
+  dataset_stats("Wide", data_wide),
   dataset_stats("Large", data_large),
   dataset_stats("Sparse_Neg", data_sparse_neg)
 )
@@ -181,6 +186,8 @@ From left to right:
 
 * Small dataset: moderately correlated structure with low noise.
 
+* Wide dataset: transposed small dataset.
+
 * Large dataset: increased dimensionality and correlation.
 
 * Sparse-negative dataset: structured sparsity and sign heterogeneity, introducing strong nonlinearity and nonnegativity challenges.
@@ -212,25 +219,32 @@ We explore the impact of:
 
 To ensure robustness, each configuration is repeated three times with independent random seeds, and timing is measured using `microbenchmark` for consistency.  
 
-```{r experiments}
+```{r experiments,echo=FALSE}
+
+filter_config_space <- function(configs) {
+  # Filter out invalid combinations: dataset "wide" with QR-based retractions
+  invalid <- configs$dataset == "wide" & configs$retraction %in% c("qr", "soft_qr")
+  configs[!invalid, ]
+}
+
 smallw=c(0.0, 0.001, 0.01)
-configs <- expand.grid(
+configs <- filter_config_space( expand.grid(
   w = c(smallw, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0), 
-  retraction = c("qr", "soft", "soft_polar", "none" ), 
+  retraction = c( "svd", "polar", "qr", "soft_svd", "soft_polar", "soft_qr" ), 
   apply_nonneg = c(FALSE, TRUE),
-  dataset = c("small", "large", "sparse_neg"),
+  dataset = c("small", "wide", "large", "sparse_neg"),
   x0_null = c(FALSE, TRUE),
   stringsAsFactors = FALSE
-)
+) )
 
-configs_fast <- expand.grid(
+configs <- filter_config_space( expand.grid(
   w = c(0.01,  0.25, 0.5, 0.75, 0.9 ), 
-  retraction = c("qr", "polar", "soft", "soft_polar", "none" ), 
-  apply_nonneg = c( TRUE, FALSE ),
-  dataset = c("small", "large", "sparse_neg"),
+  retraction = c( "svd", "polar", "qr", "soft_svd", "soft_polar", "soft_qr" ), 
+  apply_nonneg = c( TRUE ),
+  dataset = c("small", "wide", "large", "sparse_neg"),
   x0_null = c( TRUE ),
   stringsAsFactors = FALSE
-)
+) )
 
 if ( ! exists("results") ) {
   n_reps <- 3
@@ -412,7 +426,7 @@ edge_tests$zero <- safe_run({
            w = 0.5,
            max_iter = 20,
            tol = 1e-5,
-           retraction = "soft",
+           retraction = "soft_svd",
            verbose = FALSE)
 })
 
@@ -432,7 +446,7 @@ edge_tests$singular <- safe_run({
   ANTsR::nsa_flow(Y0 = data_singular$Y0,
            X0 = data_singular$X0,
            w = 0.3,
-           retraction = "qr",
+           retraction = "soft_svd",
            max_iter = 50,
            tol = 1e-5,
            verbose = FALSE)
@@ -453,7 +467,7 @@ edge_tests$tight_tol <- safe_run({
   ANTsR::nsa_flow(Y0 = matrix(runif(20), 5, 4),
            X0 = matrix(runif(20), 5, 4),
            w = 0.7,
-           retraction = "soft",
+           retraction = "soft_svd",
            tol = 1e-10,
            max_iter = 5,
            verbose = FALSE)
@@ -473,7 +487,7 @@ edge_tests$nonneg <- safe_run({
            X0 = NULL,
            w = 0.5,
            apply_nonneg = TRUE,
-           retraction = "soft",
+           retraction = "soft_svd",
            max_iter = 30,
            verbose = FALSE)
 })
@@ -492,7 +506,7 @@ edge_tests$retract_compare <- safe_run({
   Ytest <- matrix(runif(30), 6, 5)
   list(
     qr = ANTsR::nsa_flow(Y0 = Ytest, X0 = Ytest, w = 0.4, retraction = "qr", max_iter = 30),
-    soft = ANTsR::nsa_flow(Y0 = Ytest, X0 = Ytest, w = 0.4, retraction = "soft", max_iter = 30)
+    soft = ANTsR::nsa_flow(Y0 = Ytest, X0 = Ytest, w = 0.4, retraction = "soft_svd", max_iter = 30)
   )
 })
 
@@ -686,43 +700,101 @@ These patterns repeat across the results: Soft tends to offer a superior balance
 
 * The choice of $\omega$ is critical: moderate values (e.g. 0.25–0.6) often yield the best balanced behavior.
 
-## Mathematical Appendix: 
-
-
-Let (Y_{\text{cand}} \in \mathbb{R}^{p\times k}) be the candidate iterate; denote (Y^\top Y) by (A).
-
-### QR retraction
-
-Compute the (economy) QR decomposition (Y_{\text{cand}} = Q R). Then
-[
-Y_{\text{tilde}} = Q , \operatorname{diag}(\operatorname{sign}(\operatorname{diag}(R))).
-]
-This enforces exact orthonormal columns (up to column signs).
-
-## Polar retraction
-
-[
-Y_{\text{tilde}} = Y_{\text{cand}} , (Y_{\text{cand}}^\top Y_{\text{cand}})^{-1/2}.
-]
-Here ((\cdot)^{-1/2}) is the symmetric inverse square root of the matrix (A) (see Appendix).
-
-## Soft (QR-based) retraction
-
-Let (Q) be the QR-orthogonal factor of (Y_{\text{cand}}) (with sign-corrected columns). Interpolate:
-[
-Y_{\text{tilde}} = (1 - w),Y_{\text{cand}} + w,Q,
-]
-and then rescale (Y_{\text{tilde}}) to match the Frobenius norm of (Y_{\text{cand}}) to keep scale consistent.
-
-### Soft-Polar
-
-Interpolate in the polar-transform space:
-[
-Y_{\text{tilde}} = Y_{\text{cand}} \left[(1-w) I + w, (Y_{\text{cand}}^\top Y_{\text{cand}})^{-1/2}\right].
-]
+# Mathematical Appendix: 
 
 
 
+## Mathematical Implementations of Retraction Methods
+
+For a candidate matrix $Y \in \mathbb{R}^{m \times n}$ (with $m =$ rows, $n =$ columns; typically $m \geq n$ for well-posedness on Stiefel-like manifolds, but adaptable), the retraction $\Retr_w(Y) = \tilde{Y}$ maps $Y$ toward a nearby point on (or approximating) the Stiefel manifold of semi-orthogonal matrices (columns orthonormal, i.e., $\tilde{Y}^T \tilde{Y} = I_n$). The parameter $w \in [0,1]$ controls the blending strength toward orthogonality ($w=0$: identity; $w=1$: full retraction). All methods assume $Y$ has full column rank unless noted; numerical stabilizations (e.g., pseudoinverses) are implicit in decompositions.
+
+### none: No retraction applied
+
+No retraction applied. This preserves $Y$ exactly, useful for gradient steps without manifold enforcement.
+
+$$
+\tilde{Y} = Y
+$$
+
+### polar: Polar decomposition-based retraction
+
+Polar decomposition-based retraction. Decompose $Y = U P$ where $P = \sqrt{Y^T Y}$ is the (symmetric positive semi-definite) right polar factor. The retraction projects to the orthogonal left factor $U$.
+
+$$
+\tilde{Y} = Y \left( Y^T Y + \epsilon I \right)^{-\frac{1}{2}}
+$$
+
+Here, $(\cdot)^{-\frac{1}{2}}$ is the symmetric matrix inverse square root (with regularization $\epsilon > 0$ small for ill-conditioning). Independent of $w$ (full enforcement).
+
+### qr: Signed QR decomposition retraction
+
+Signed QR decomposition retraction. Decompose $Y = Q R$ (thin QR: $Q \in \mathbb{R}^{m \times \min(m,n)}$ orthonormal columns, $R$ upper triangular). Adjust signs to ensure positive diagonal in $R$ (for uniqueness/stability).
+
+$$
+\tilde{Y} = Q \, \Diag\left( \sign(\diag(R)) \right)
+$$
+
+where $\sign(0) = 1$, and $\Diag(\cdot)$ forms a diagonal matrix (padded if $m < n$). Independent of $w$. Fails dimensionally if $m < n$ without full QR.
+
+### soft (or soft_qr; identical in code): Soft (blended) QR retraction
+
+Soft (blended) QR retraction. Compute the QR orthogonal part $Q$ as above, then convex-combine with $Y$ and rescale to match the Frobenius norm $\|Y\|_F = \sqrt{\tr(Y^T Y)}$.
+
+$$
+\tilde{Y} = \frac{ \|Y\|_F \cdot \left[ (1-w) Y + w Q \right] }{ \left\| (1-w) Y + w Q \right\|_F }
+$$
+
+The rescaling ensures scale preservation (important for fidelity terms in optimization). Fails if $m < n$.
+
+### soft_polar: Soft polar retraction via right-multiplicative blending
+
+Soft polar retraction via right-multiplicative blending. Compute the polar transformation $T_1 = (Y^T Y)^{-\frac{1}{2}}$ as above, then blend with identity.
+
+$$
+\tilde{Y} = Y \left[ (1-w) I_n + w \, T_1 \right]
+$$
+
+No norm rescaling (norm may shrink/grow slightly). Preserves the row space of $Y$ multiplicatively.
+
+### svd: SVD-based orthogonal approximation (Procrustes solution)
+
+SVD-based orthogonal approximation (Procrustes solution). Decompose $Y = U \Sigma V^T$ (economy SVD: $U \in \mathbb{R}^{m \times r}$, $V \in \mathbb{R}^{n \times r}$, $r = \rank(Y) \leq \min(m,n)$, $\Sigma$ diagonal non-negative). The retraction discards singular values for the closest orthogonal matrix in Frobenius norm.
+
+$$
+\tilde{Y} = U V^T
+$$
+
+(Padded with zeros if $r < \min(m,n)$; full rank assumed.) Independent of $w$.
+
+### soft_svd: Soft SVD retraction
+
+Soft SVD retraction. Compute the SVD orthogonal part $Q = U V^T$ as above, then convex-combine with $Y$ and rescale to match $\|Y\|_F$.
+
+$$
+\tilde{Y} = \frac{ \|Y\|_F \cdot \left[ (1-w) Y + w (U V^T) \right] }{ \left\| (1-w) Y + w (U V^T) \right\|_F }
+$$
+
+Similar to soft QR but uses SVD's balanced approximation. Works for $m < n$.
+
+## Relationship Between Polar/SVD and Their Soft Variations
+
+The **polar** and **SVD** retractions both approximate the "nearest" orthogonal matrix to $Y$, but differ in geometry, optimality, and computational profile—making them complementary on Stiefel-like manifolds (e.g., for orthogonal dictionary learning in NSA-Flow). 
+
+### Core Differences
+
+- **Polar** ($Y (Y^T Y)^{-1/2}$) is a *right-multiplicative* retraction: it preserves the *left singular vectors* (column space of $Y$) exactly, projecting orthogonally in the *row space* via the polar factor. It's the unique solution to minimizing $\| Y - U P \|_F$ over orthogonal $U$ and PSD $P$, and it's a true *retraction* on the Stiefel manifold (first-order consistency with geodesics). Computation: $O(m n^2 + n^3)$ via eigendecomposition of $n \times n$ Gram $Y^T Y$; sensitive to $n > m$ (ill-conditioned Gram).
+  
+- **SVD** ($U V^T$) is an *additive* (or balanced) approximation: it solves the orthogonal Procrustes problem, minimizing $\| Y - Q \|_F$ directly over orthogonal $Q$ (no PSD constraint). It balances left/right singular vectors, discarding $\Sigma$ symmetrically. Equivalent to polar *only if* $Y$ is square/full-rank *and* $V = I$ (rare); generally, $\| Y - \tilde{Y}_\polar \|_F \neq \| Y - \tilde{Y}_\svd \|_F$, with SVD often closer in absolute Frobenius distance but polar better for column-space fidelity. Computation: $O(m n \min(m,n))$; robust to $m < n$ (economy mode).
+
+In practice, for overcomplete bases ($n > m$, e.g., wide matrices), polar may underperform due to Gram singularity (use pseudoinverse), while SVD naturally handles low rank via truncated modes. Both enforce $\tilde{Y}^T \tilde{Y} \approx I$ (up to regularization), but polar is "asymmetric" (right-action), SVD "symmetric."
+
+### Soft Variations
+
+- **Soft-polar** extends polar multiplicatively: $Y [(1-w) I + w (Y^T Y)^{-1/2}]$, a *geodesic convex combination* along the right-invariant metric (preserves scale directionally, no explicit norm fix). It's smoother for optimization (avoids abrupt jumps), tunable for partial enforcement, and inherits polar's column-space preservation. Ideal for Riemannian flows where tangent steps need gradual manifold pull-back.
+  
+- **Soft-SVD** (and analogously soft/soft_qr) is *additive*: $\|Y\|_F \cdot \frac{(1-w) Y + w Q}{\|(1-w) Y + w Q\|_F}$, a vector-space blend toward $Q$ (SVD or QR), with rescaling to match original scale (crucial for energy-preserving objectives like fidelity $\|Y - X\|_F^2$). This is more "Euclidean" than geodesic, potentially distorting geometry but computationally cheaper/simpler; rescaling mitigates norm drift in nonneg-constrained settings.
+
+**Relationships**: Soft-polar is the "Riemannian analog" of soft-SVD—multiplicative vs. additive blending mirrors polar vs. SVD's actions. For small $w$, both approximate the exponential map $\Retr(\eta) \approx Y + \eta$ (tangent $\eta$); for $w=1$, they reduce to pure polar/SVD. In NSA-Flow (balancing fidelity + orthogonality), soft-polar favors scale-stable convergence on tall matrices ($m \gg n$), while soft-SVD excels on wide/low-rank ($n > m$) by robustness. QR variants (hard/soft) are faster $O(m n^2)$ proxies to SVD (similar $Q \approx U V^T$ for full rank), but fail wide cases without mods. Overall, polar/SVD duality (asymmetric vs. balanced ortho) extends to soft: choose polar/soft-polar for space-preserving (e.g., neural embeddings), SVD/soft-SVD for minimal-distortion approximation (e.g., Procrustes alignment).
 
 ### computing ((Y^\top Y)^{-1/2})
 
@@ -738,6 +810,18 @@ To compute the symmetric inverse square root of the symmetric positive (semi-)de
 
 This yields a numerically stable symmetric inverse square root used by the polar/soft-polar retractions.
 
+## Computing $(Y^T Y)^{-1/2}$
+
+To compute the symmetric inverse square root of the symmetric positive (semi-)definite matrix $A = Y^T Y$:
+
+1. Compute eigen-decomposition: $A = U \Lambda U^T$ where $\Lambda = \operatorname{diag}(\lambda_i)$.
+
+2. Form $\Lambda^{-1/2} = \operatorname{diag}(\lambda_i^{-1/2})$, with small-eigenvalue regularization:  
+   $\lambda_i^{-1/2} \leftarrow (\lambda_i + \varepsilon)^{-1/2}$ for $\varepsilon = 10^{-12}$.
+
+3. Then $A^{-1/2} = U \Lambda^{-1/2} U^T$.
+
+This yields a numerically stable symmetric inverse square root used by the polar/soft-polar retractions.
 
 ```{r sessioninfo}
 sessionInfo()

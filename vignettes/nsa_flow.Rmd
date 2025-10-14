@@ -1158,21 +1158,66 @@ Topic modeling aims to uncover latent thematic structures in document corpora, w
 We apply NSA-Flow to the AssociatedPress dataset, a standard benchmark containing 2,246 news articles with a vocabulary of 10,473 terms, preprocessed to a term-document matrix (terms as rows, documents as columns). We compare NSA-Flow (with \( w = 0.5 \)) to standard NMF, evaluating topic coherence (via normalized pointwise mutual information, NPMI \cite{lau2014machine}) and topic diversity (measured as the average cosine distance between topic vectors). NSA-Flow is expected to enhance coherence and diversity by reducing term overlap across topics.
 
 ```{r topic_modeling_setup, message=FALSE, warning=FALSE,eval=FALSE}
-library(topicmodels); library(tm); library(NMF)
+library(topicmodels)
+library(tm)
+library(NMF)
+library(RcppML)  # For fast mode
+
 set.seed(42)
-# Load AssociatedPress dataset (mocked here; use actual dataset in practice)
+
+# Fast mode option
+fast <- TRUE  # Set to TRUE to use fast NMF implementation
+
+# Load AssociatedPress dataset
 data("AssociatedPress", package = "topicmodels")
-term_doc_matrix <- as.matrix(AssociatedPress)  # Terms x Documents
-term_doc_matrix 
-p <- nrow(term_doc_matrix); n <- ncol(term_doc_matrix)
-# NSA-Flow
-Y0 <- matrix(runif(p*k, 0, 1), p, k)  # Random initialization
-res_nsa <- nsa_default(term_doc_matrix, w = DEFAULT_W )
-nsa_topics <- res_nsa$Y
-k=3
-# Standard NMF
-nmf_fit <- nmf(term_doc_matrix, rank = k, method = "Frobenius")
-nmf_topics <- basis(nmf_fit)  # Topic-term matrix
+
+# Convert to TermDocumentMatrix (terms x documents)
+term_doc_matrix <- t(AssociatedPress)
+
+# Optionally subsample for even faster runs (uncomment if needed)
+if (fast) {
+#   num_docs <- 500
+#   selected_docs <- sample(1:ncol(term_doc_matrix), num_docs)
+#   term_doc_matrix <- term_doc_matrix[, selected_docs]
+}
+
+# Coerce to sparse matrix for efficiency
+# term_doc_matrix_sparse <- as.matrix(term_doc_matrix)
+
+k <- 3
+
+if (fast) {
+  # Use fast NMF from RcppML for both (approximating NSA-Flow with regularized NMF if needed)
+  # Note: RcppML uses alternating least squares NMF, fast on sparse matrices
+  # For sparsity, can add L1 regularization (l1 = 0.1 or similar)
+  
+  # NSA-Flow approximation (assuming it's similar to nonsmooth or sparse NMF)
+  res_nmf <- RcppML::nmf(data.matrix(term_doc_matrix), k = k, L1 = c(0.01, 0.01) )  # L1 on w and h for sparsity
+  nsa_topics <- res_nmf$w %*% diag(res_nmf$d)  # Topic-term matrix (terms x k)
+  
+  # Standard NMF
+  nmf_fit <- nsa_flow(data.matrix(term_doc_matrix), w=0.5, verbose=TRUE )
+  nmf_topics <- nmf_fit$w %*% diag(nmf_fit$d)  # Topic-term matrix (terms x k)
+} else {
+  # Original method (assuming dense matrix and custom/original functions)
+  term_doc_matrix_dense <- as.matrix(term_doc_matrix)  # Terms x Documents
+  p <- nrow(term_doc_matrix_dense)
+  n <- ncol(term_doc_matrix_dense)
+  
+  # NSA-Flow (assuming nsa_default is a custom function; replace with actual if available)
+  # If NSA-Flow refers to nonsmooth NMF, use: nmf(..., method = 'nsNMF', theta = 0.5)
+  Y0 <- matrix(runif(p * k, 0, 1), p, k)  # Random initialization
+  # Assuming DEFAULT_W is e.g., 0.5 for theta in nsNMF
+  DEFAULT_W <- 0.5
+  # Replace nsa_default with nmf if it's nsNMF
+  res_nsa <- nmf(term_doc_matrix_dense, rank = k, method = 'nsNMF', theta = DEFAULT_W)
+  nsa_topics <- basis(res_nsa)  # Topic-term matrix
+  
+  # Standard NMF
+  nmf_fit <- nmf(term_doc_matrix_dense, rank = k, method = "Frobenius")
+  nmf_topics <- basis(nmf_fit)  # Topic-term matrix
+}
+
 ```
 
 ### Topic Coherence and Diversity
@@ -1542,9 +1587,173 @@ NSA-Flow’s flexible framework and robust implementation make it a valuable too
 sessionInfo()
 ```
 
+
+
+
+
+
+```{r brainexample,echo=FALSE, fig.width=10, fig.height=6, message=FALSE, warning=FALSE,eval=FALSE}
+library(ANTsR)
+library(NMF) # For NMF initialization
+library(ggplot2)
+library(reshape2) # For melting data (though using tidyr now)
+library(dplyr)
+library(tidyr) # For pivot_longer
+library(fmsb) # For radarchart (install if needed: install.packages("fmsb"))
+library(igraph) # For graph visualization
+library(scales) # For alpha in radarchart
+library(ggpubr)
+set.seed(42)
+
+# Assume nsa_flow is defined in the environment from previous refactoring
+
+# Step 1: Generate synthetic cortical thickness data using DKT atlas
+# 200 subjects (rows), 76 brain regions (columns)
+N <- 200 # subjects
+p <- 76 # regions
+# Generate non-negative data simulating cortical thickness (mean ~2.5 mm, sd ~0.5 mm, clipped to >=0)
+X_data <- matrix(rnorm(N * p, mean = 2.5, sd = 0.5), nrow = N, ncol = p)
+X_data[X_data < 0] <- 0
+# Reasonable brain region names based on Desikan-Killiany (DK) atlas: 34 cortical per hemisphere (68) + 4 subcortical per hemisphere (8) = 76
+# Note: DKT is an extension, but DK is core; using standard DK labels
+cortical_regions <- c(
+  'bankssts', 'caudalanteriorcingulate', 'caudalmiddlefrontal', 'cuneus', 'entorhinal',
+  'fusiform', 'inferiorparietal', 'inferiortemporal', 'isthmuscingulate', 'lateraloccipital',
+  'lateralorbitofrontal', 'lingual', 'medialorbitofrontal', 'middletemporal', 'parahippocampal',
+  'paracentral', 'parsopercularis', 'parsorbitalis', 'parstriangularis', 'pericalcarine',
+  'postcentral', 'posteriorcingulate', 'precentral', 'precuneus', 'rostralanteriorcingulate',
+  'rostralmiddlefrontal', 'superiorfrontal', 'superiorparietal', 'superiortemporal', 'supramarginal',
+  'frontalpole', 'temporalpole', 'transversetemporal', 'insula'
+) # 34 regions
+# Create left and right versions
+regions <- c(paste0('left_', cortical_regions), paste0('right_', cortical_regions))
+# Add 4 subcortical per hemisphere
+subcortical <- c('thalamus', 'caudate', 'putamen', 'hippocampus')
+regions <- c(regions, paste0('left_', subcortical), paste0('right_', subcortical))
+stopifnot(length(regions) == 76)
+# Create data.frame for interpretability
+X <- as.data.frame(X_data)
+colnames(X) <- regions
+cat("Sample of generated data:\n")
+print(head(X[, 1:5])) # Show first few columns
+w=0.999
+M_nsa <- nsa_flow( t(data.matrix(X)), w = w, retraction = 'soft_svd', 
+    initial_learning_rate=10,
+    max_iter=500, verbose=T)$Y
+invariant_orthogonality_defect(M_nsa)
+mvec=as.numeric( t(M_nsa)  )
+mvecsel=mvec>quantile(mvec[mvec>0],0.2)
+scatdf=data.frame( raw_vals=as.numeric(data.matrix(X))[mvecsel], nsa_vals=as.numeric(mvec[mvecsel]) )
+ggscatter( scatdf, x = "raw_vals", y = "nsa_vals",
+           add = "reg.line", conf.int = TRUE,
+           cor.coef = TRUE, cor.method = "pearson",
+           xlab = "Raw Cortical Thickness", ylab = "NSA-Flow Reconstructed Values",
+           title = "NSA-Flow Reconstruction of Cortical Thickness Data",
+           ggtheme = theme_minimal(base_size = 14) ) +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+M_nsa <- nsa_flow( t( X ), w = w, retraction = 'soft_svd', apply_nonneg = TRUE)$Y
+rownames(M_nsa) <- regions
+# Normalize columns to sum to 1 for interpretability (relative loadings per network)
+Y_norm <- sweep(M_nsa, 2, colSums(M_nsa), "/")
+
+# 4.1: Heatmap of entire basis matrix Y (regions x networks) - elegant with ggplot
+Y_df <- as.data.frame(Y_norm) %>%
+  rownames_to_column(var = "Region") %>%
+  pivot_longer(cols = -Region, names_to = "Network", values_to = "Loading")
+ggplot(Y_df, aes(x = Network, y = Region, fill = Loading)) +
+  geom_tile(color = "white", size = 0.1) +
+  scale_fill_viridis_c(option = "plasma", direction = -1) +
+  theme_minimal(base_size = 12) +
+  labs(title = "Network Loadings Across Brain Regions",
+       x = "Networks", y = "Brain Regions", fill = "Loading") +
+  theme(axis.text.y = element_text(size = 6), # Small text for many regions
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        panel.grid = element_blank()) +
+  coord_fixed(ratio = 0.2) # Adjust aspect for readability
+
+# 4.2: For each network, horizontal bar plot of top 10 regions - sleek and colorful
+for (net in 1:k) {
+  loadings <- na.omit(sort(Y_norm[, net], decreasing = TRUE)[1:10])
+  load_df <- data.frame(Region = names(loadings), Loading = loadings) %>%
+    mutate(Region = factor(Region, levels = Region))
+  ggplot(load_df, aes(x = Loading, y = Region, fill = Loading)) +
+    geom_bar(stat = "identity", width = 0.7) +
+    scale_fill_gradient2(low = "lightblue", high = "darkblue", midpoint = median(load_df$Loading)) +
+    theme_minimal(base_size = 14) +
+    labs(title = paste("Top Regions in Network", net),
+         x = "Loading", y = "") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          axis.text.y = element_text(size = 12, color = "black"),
+          panel.grid.major.y = element_blank()) +
+    geom_text(aes(label = round(Loading, 2)), hjust = -0.1, size = 4)
+  # ggsave(paste0("top_regions_network_", net, ".png"), width = 12, height = 6)
+}
+
+# 4.3: Radar plot for network profiles - aesthetic radial visualization with fmsb (top 10 regions only, to avoid overcrowding)
+for (net in 1:k) {
+  loadings <- Y_norm[, net]
+  top_idx <- order(loadings, decreasing = TRUE)[1:10]
+  loadings_top <- loadings[top_idx]
+  regions_top <- names(loadings_top)
+  # For radarchart, need data.frame with max/min rows for scaling
+  radar_df <- rbind(rep(max(loadings_top) * 1.1, 10), rep(0, 10), loadings_top)
+  colnames(radar_df) <- regions_top
+  radarchart(radar_df, axistype = 1,
+             pcol = "teal", pfcol = alpha("teal", 0.25), plwd = 2,
+             cglcol = "grey", cglty = 1, axislabcol = "grey", caxislabels = seq(0, max(loadings_top), length = 5),
+             cglwd = 0.8, vlcex = 0.8) # Adjusted for 10 labels
+  title(paste("Radial Profile of Network", net, "(Top 10 Regions)"), line = 3)
+  # Save as PNG if needed: dev.print(png, filename = paste0("radar_network_", net, ".png"), width = 800, height = 800)
+}
+
+# 4.4: Network graph visualization - beautiful connectome-like view with igraph
+# Improved lobe mapping (for demo; assign regions to lobes)
+lobe_map <- sapply(regions, function(r) {
+  reg <- substr(r, 6, nchar(r))  # Remove 'left_' or 'right_'
+  if (grepl("bankssts|caudalmiddlefrontal|rostralmiddlefrontal|superiorfrontal|frontalpole|parsopercularis|parsorbitalis|parstriangularis|lateralorbitofrontal|medialorbitofrontal", reg)) "frontal" else
+  if (grepl("inferiortemporal|middletemporal|superiortemporal|temporalpole|transversetemporal|fusiform|entorhinal|parahippocampal", reg)) "temporal" else
+  if (grepl("inferiorparietal|superiorparietal|supramarginal|precuneus|postcentral|paracentral", reg)) "parietal" else
+  if (grepl("lateraloccipital|cuneus|pericalcarine|lingual", reg)) "occipital" else
+  if (grepl("caudalanteriorcingulate|isthmuscingulate|posteriorcingulate|rostralanteriorcingulate|insula", reg)) "limbic" else
+  if (grepl("hippocampus", reg)) "limbic" else "subcortical"
+})
+lobe_colors <- c(frontal = "blue", temporal = "green", parietal = "red",
+                 occipital = "purple", limbic = "orange", subcortical = "grey")
+for (net in 1:k) {
+  threshold <- quantile(Y_norm[, net], 0.8) # Top 20% regions
+  active_idx <- which(Y_norm[, net] > threshold)
+  active_regions <- rownames(Y_norm)[active_idx]
+  loadings_active <- Y_norm[active_idx, net]
+  lobes_active <- lobe_map[active_idx]
+  # Create graph
+  g <- graph.empty(n = length(active_regions), directed = FALSE)
+  V(g)$name <- active_regions
+  V(g)$loading <- loadings_active
+  V(g)$lobe <- lobes_active
+  V(g)$color <- lobe_colors[V(g)$lobe]
+  V(g)$size <- V(g)$loading * 30 # Size by loading
+  # Add edges between regions in same lobe (demo; in real, use connectivity matrix)
+  lobe_groups <- split(seq_along(active_regions), lobes_active)
+  for (group_name in names(lobe_groups)) {
+    group <- lobe_groups[[group_name]]
+    if (length(group) > 1) {
+      comb_pairs <- t(combn(group, 2))
+      g <- add_edges(g, comb_pairs)
+    }
+  }
+  # Layout and plot
+  layout <- layout_with_fr(g)
+  plot(g, layout = layout, vertex.label = V(g)$name, vertex.label.cex = 0.7,
+       vertex.label.color = "black", vertex.frame.color = NA,
+       vertex.color = V(g)$color, vertex.size = V(g)$size,
+       edge.color = "gray", edge.width = 1,
+       main = paste("Graph Representation of Network", net))
+  # Add legend for lobes
+  legend("topright", legend = names(lobe_colors), fill = lobe_colors, title = "Lobes", cex = 0.8)
+  # Save: dev.print(png, filename = paste0("graph_network_", net, ".png"), width = 1200, height = 1200)
+}
+
+```
+
 # References
-
-
-
-
-

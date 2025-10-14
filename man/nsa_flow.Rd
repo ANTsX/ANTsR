@@ -8,7 +8,7 @@ nsa_flow(
   Y0,
   X0 = NULL,
   w = 0.5,
-  retraction = c("soft", "polar", "qr", "none", "soft_polar"),
+  retraction = c("soft_svd", "polar", "qr", "none", "soft_polar", "svd", "soft_qr"),
   max_iter = 100,
   tol = 1e-06,
   verbose = FALSE,
@@ -25,7 +25,7 @@ nsa_flow(
   Y0,
   X0 = NULL,
   w = 0.5,
-  retraction = c("soft", "polar", "qr", "none", "soft_polar"),
+  retraction = c("soft_svd", "polar", "qr", "none", "soft_polar", "svd", "soft_qr"),
   max_iter = 100,
   tol = 1e-06,
   verbose = FALSE,
@@ -48,14 +48,7 @@ If \code{NULL}, initialized as \code{pmax(Y0, 0)} with a small perturbation adde
 (1 - w) and orthogonality (w). Default is 0.5.}
 
 \item{retraction}{Character string specifying the retraction method to enforce
-orthogonality constraints. Options are:
-\itemize{
-  \item \code{"soft"}: Smooth interpolation between identity and polar retraction.
-  \item \code{"polar"}: Polar decomposition-based retraction.
-  \item \code{"qr"}: QR decomposition-based retraction.
-  \item \code{"none"}: No retraction applied.
-}
-Default is \code{"soft"}.}
+orthogonality constraints.}
 
 \item{max_iter}{Integer, maximum number of iterations. Default is 100.}
 
