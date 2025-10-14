@@ -1489,7 +1489,7 @@ ggplot(top_combined, aes(x = Component, y = Gene, fill = Loading)) +
 ```{r pca_sens_metrics, echo=FALSE, fig.width=13, fig.height=6, message=FALSE, warning=FALSE,eval=TRUE}
 # Sensitivity Sweep (Ω)
 omega_vals <- seq(0.98, 1, by = 0.01)
-omega_vals = c(0.1, 0.5, 0.9,1 )
+omega_vals = c(0.001, 0.1,0.2, 0.3, 0.4, 0.5, 0.75)
 n <- nrow(golub_scaled_ss)
 A <- t(golub_scaled_ss) %*% golub_scaled_ss / n
 Xc <- scale(X, center = TRUE, scale = FALSE)
@@ -1497,7 +1497,7 @@ total_var <- sum( svd(proj_std/norm(proj_std,"F"))$d )
 sens_results <- lapply(omega_vals, function(omega) {
   res <- sparse_pca_imp(golub_scaled_ss, k = myk,
     lambda = 0.1, alpha = 0.001, max_iter = mxit,
-    proximal_type = "nsa_flow", retraction='qr',
+    proximal_type = "nsa_flow", retraction='soft_svd',
     tol = 1e-5, w = omega, verbose = FALSE)
   proj <- golub_scaled_ss %*% res$Y
   acc_res <- cv_acc(proj, labels)
@@ -1535,18 +1535,6 @@ ggplot(sens_long, aes(x = Omega, y = Value, color = Metric)) +
 
 The top genes often include known leukemia markers, such as CD33, a myeloid differentiation antigen expressed on AML blasts and a therapeutic target for gemtuzumab ozogamicin, and ZYXIN, involved in ALL translocations, cell adhesion, and hematopoiesis. These align with prior analyses of the Golub dataset, where CD33 and ZYXIN are frequently highlighted as discriminative features for AML and ALL, respectively. Sensitivity analysis shows higher lambda increases sparsity at the cost of explained variance, allowing users to tune for desired biomarker count. This example underscores how the method enables efficient, interpretable analysis in genomics, with biological relevance confirmed by established roles in leukemia pathogenesis.
 
-
----
-title: "Application of NSA-Flow on Cortical Thickness Data"
-author: "Your Name"
-date: "`r Sys.Date()`"
-output:
-  html_document:
-    toc: true
-    toc_depth: 3
-    fig_width: 10
-    fig_height: 6
----
 
 ```{r setupbrain, include=FALSE,echo=FALSE}
 library(ANTsR)
@@ -1638,7 +1626,7 @@ dim(Y0_pca)  # should be p x k
 
 ### NSA-Flow Execution
 
-```{r nsa-flow-run, eval=FALSE}
+```{r nsa-flow-run, eval=TRUE}
 M_nsa <- nsa_flow(
   Y0 = Y0_pca,
   X0 = NULL,
