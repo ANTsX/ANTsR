@@ -85,7 +85,7 @@ Now we apply the SiMLR algorithm to the simulated multi-view data to find a comm
 ```{r step2}
 # Applying SiMLR
 prepro=c( "centerAndScale","np")
-constr='orthox0.02x1' # good default
+constr='orthox0.02x50' # good default
 result <- simlr(matlist,constraint=constr,scale=prepro, 
   mixAlg='pca', energyType='acc', # recommended
   verbose=TRUE)
@@ -338,7 +338,7 @@ In this step, the simlr.parameters function is called to create a parameter list
 paster <- function(vec1, vec2) {
   paste0(rep(vec1, each = length(vec2)), vec2)
 }
-csearch = list( "orthox0x0", "orthox0.002x1")
+csearch = list( "orthox0.05x50", "orthox0.5x50")
 # the 10x10 are weights on the optimization term of the energy
 simparms = simlr.parameters( 
     nsimlr_options = list( 2 ),

@@ -26,7 +26,7 @@ library(ANTsR)
 
 # Abstract {-}
 
-Non-negative matrix approximation with orthogonality constraints enhances interpretability in high-dimensional non-negative data applications, such as neuroimaging, topic modeling, and recommender systems. Existing methods, however, often enforce strict orthogonality, leading to fidelity loss, or lack tunability for partial decorrelation. We propose Non-negative Stiefel Approximating Flow (NSA-Flow), a hybrid Riemannian-proximal optimization framework that balances reconstruction fidelity, column orthogonality, and non-negativity via a tunable parameter \( w \in [0,1] \). Using scale-invariant defect metrics, adaptive gradient descent, and flexible retractions (polar, QR, soft), NSA-Flow achieves >90% orthogonality defect reduction at <2% fidelity loss for low \( w \), outperforming NMF by up to 60% in fidelity. Empirical validation on the Golub leukemia dataset shows 15% accuracy gains, with applications in sparse PCA and topic modeling. NSA-Flow offers a scalable, interpretable solution for constrained matrix optimization and a new way to parameterize sparsity in terms of soft orthogonality constraints.
+Non-negative matrix approximation with orthogonality constraints enhances interpretability in high-dimensional non-negative data applications, such as neuroimaging, topic modeling, and recommender systems. Existing methods, however, often enforce strict orthogonality, leading to fidelity loss, or lack tunability for partial decorrelation. We propose Non-negative Stiefel Approximating Flow (NSA-Flow), a hybrid Riemannian-proximal optimization framework that balances reconstruction fidelity, column orthogonality, and non-negativity via a tunable parameter \( w \in [0,1] \). Using scale-invariant defect metrics, adaptive gradient descent, and flexible retractions (polar, QR, svd), NSA-Flow achieves >90% orthogonality defect reduction at <2% fidelity loss for low \( w \), outperforming NMF by up to 60% in fidelity FIXME. Empirical validation on the Golub leukemia dataset shows FIXME 15% accuracy gains, with applications in sparse PCA, topic modeling and data-driven network discovery in brain data. NSA-Flow offers a scalable, interpretable solution for constrained matrix optimization and a new way to parameterize sparsity globally across a matrix in terms of soft orthogonality constraints.  As such, this method has broad applicability in data science and machine learning.
 
 # Introduction
 
@@ -1499,25 +1499,27 @@ n <- nrow(golub_scaled_ss)
 A <- t(golub_scaled_ss) %*% golub_scaled_ss / n
 Xc <- scale(X, center = TRUE, scale = FALSE)
 total_var <- sum( svd(proj_std/norm(proj_std,"F"))$d )
-sens_results <- lapply(omega_vals, function(omega) {
-  res <- sparse_pca_imp(golub_scaled_ss, k = myk,
-    lambda = 0.1, alpha = 0.001, max_iter = mxit,
-    proximal_type = "nsa_flow", retraction='soft_svd',
-    tol = 1e-5, w = omega, verbose = FALSE)
-  proj <- golub_scaled_ss %*% res$Y
-  acc_res <- cv_acc(proj, labels)
-  loc_var <- sum( svd(proj/norm(proj,"F"))$d )
-  spectral_ratio <- loc_var/total_var
-  xxx=data.frame(
-    Omega = omega,
-    Accuracy = acc_res$Accuracy,
-    Spectral_Ratio = spectral_ratio,
-    Sparsity = sparsity_level(res$Y),
-    Orth_Residual = invariant_orthogonality_defect(res$Y)
-  )
-  xxx
-})
-if ( ! exists("sens_metrics")) sens_metrics <- do.call(rbind, sens_results)
+if ( ! exists("sens_metrics")) {
+    sens_results <- lapply(omega_vals, function(omega) {
+    res <- sparse_pca_imp(golub_scaled_ss, k = myk,
+        lambda = 0.1, alpha = 0.001, max_iter = mxit,
+        proximal_type = "nsa_flow", retraction='soft_svd',
+        tol = 1e-5, w = omega, verbose = FALSE)
+    proj <- golub_scaled_ss %*% res$Y
+    acc_res <- cv_acc(proj, labels)
+    loc_var <- sum( svd(proj/norm(proj,"F"))$d )
+    spectral_ratio <- loc_var/total_var
+    xxx=data.frame(
+        Omega = omega,
+        Accuracy = acc_res$Accuracy,
+        Spectral_Ratio = spectral_ratio,
+        Sparsity = sparsity_level(res$Y),
+        Orth_Residual = invariant_orthogonality_defect(res$Y)
+    )
+    xxx
+    })
+    sens_metrics <- do.call(rbind, sens_results)
+}
 sens_long <- sens_metrics %>%
   pivot_longer(cols = c(Accuracy, Spectral_Ratio, Sparsity, Orth_Residual),
                names_to = "Metric", values_to = "Value")
@@ -1592,7 +1594,7 @@ head(X[, 1:5], 3)
 
 
 library(readr)
-adnifn="../multidisorder/data/ppmiadni_filtered.csv"
+adnifn="../../multidisorder/data/ppmiadni_filtered.csv"
 use_adni=FALSE
 if ( file.exists(adnifn) ) {
     use_adni=TRUE
@@ -1792,9 +1794,9 @@ ggplot(Y_df, aes(x = Network, y = Region, fill = Loading)) +
 ## 
 ```
 
-#### Top Regions per Network (Bar Charts)
 
-```{r top-bars, fig.height=8, fig.width=10}
+```{r top-bars, fig.height=8, fig.width=10,eval=FALSE}
+#### Top Regions per Network (Bar Charts)
 for (net in 1:k) {
   loadings <- Y_norm[, net]
   top_idx <- head(order(loadings, decreasing = TRUE), 10)
@@ -1808,7 +1810,10 @@ for (net in 1:k) {
   print(p_bar)
 }
 
+```
 
+
+```{r radars, fig.height=8, fig.width=10,eval=TRUE}
 library(fmsb)
 library(scales)
 
