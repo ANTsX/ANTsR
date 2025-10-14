@@ -327,7 +327,6 @@ We systematically vary *w* from 0 to 1 and compare how these three retractions a
 - **Singular Value Spectrum**:  
   Distribution of singular values of the resulting matrices, showing how “balanced” each method keeps the column norms.
 
-The following code block runs the comparison and produces four vertically stacked panels summarizing the results.
 
 ```{r compare-retractions, fig.width=8, fig.height=12, echo=FALSE, message=FALSE, warning=FALSE}
 library(ggplot2)
@@ -583,7 +582,7 @@ X0 <- W_pos + matrix(rnorm(p*k, 0, 0.05), p, k)
 X0 <- X0 / max(abs(X0))
 Y_init <- matrix(runif(p*k, -0.5, 0.5), nrow = p, ncol = k)
 set.seed(1)
-X0 = generate_synth_data( p, k, 0.2 )$Y0
+X0 = generate_synth_data( p, k, corrval=0.3, noise=0.5, sparse_prob=0.0, include_neg=TRUE )$Y0
 w=0.9
 mxit=50
 res_polar <- nsa_flow(X0,  w = w, retraction = "polar", plot=TRUE, max_iter = mxit, verbose = FALSE, seed = 1, record_every = 1, initial_learning_rate = ini_default)
@@ -598,6 +597,7 @@ grid.arrange(res_polar$plot,res_qr$plot,res_soft$plot, nrow=3, top='QR, Polar, S
 ## Sparsity as a function of orthogonality via weight parameter \( w \)
 
 ```{r stiefel_sweep_full, fig.width=12, fig.height=8, echo=FALSE, message=FALSE}
+###
 w_seq <- c( 0.05, 0.25, 0.5, 0.75, 0.99 )
 mytit = paste0("w = ", round(w_seq,3))
 mats <- list()
@@ -613,11 +613,16 @@ for(i in seq_along(w_seq)) {
   convergeplots[[i]] <- res_soft_w$plot+labs(title = NULL, subtitle = NULL) 
 }
 allvals <- unlist(lapply(mats, function(m) as.numeric(m)))
-rng <- c(0 , quantile(c(as.numeric(X0), allvals), c(0.95), na.rm = TRUE))
+rng <- c(   
+    quantile(c(as.numeric(X0), allvals), c(0.05), na.rm = TRUE) , 
+    quantile(c(as.numeric(X0), allvals), c(0.95), na.rm = TRUE))
 cols <- rev(colorRampPalette(brewer.pal(9,"YlGnBu"))(120))
 plots <- vector("list", length(mats)+1)
 rows_show <- 1:nrow(X0)
-plots[[1]] <- pheatmap(X0[rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = "Original", silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
+ogtit = paste0("Original ",', orth = ', 
+    round(invariant_orthogonality_defect(X0),4), ', w.spar = ',
+    1.0-round(sum(X0/max(X0) > 0.01)/length(X0),3))
+plots[[1]] <- pheatmap(X0[rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = ogtit, silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
 for(i in seq_along(mats)) {
   plots[[i+1]] <- pheatmap(mats[[i]][rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = mytit[i], silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
 }
@@ -1489,7 +1494,7 @@ ggplot(top_combined, aes(x = Component, y = Gene, fill = Loading)) +
 ```{r pca_sens_metrics, echo=FALSE, fig.width=13, fig.height=6, message=FALSE, warning=FALSE,eval=TRUE}
 # Sensitivity Sweep (Ω)
 omega_vals <- seq(0.98, 1, by = 0.01)
-omega_vals = c(0.001, 0.1,0.2, 0.3, 0.4, 0.5, 0.75)
+omega_vals = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 0.9, 0.99 )
 n <- nrow(golub_scaled_ss)
 A <- t(golub_scaled_ss) %*% golub_scaled_ss / n
 Xc <- scale(X, center = TRUE, scale = FALSE)
@@ -1585,30 +1590,43 @@ X <- as.data.frame(X_data)
 colnames(X) <- regions
 head(X[, 1:5], 3)
 
+
+library(readr)
+adnifn="../multidisorder/data/ppmiadni_filtered.csv"
+use_adni=FALSE
+if ( file.exists(adnifn) ) {
+    use_adni=TRUE
+    ppmiadni=read_csv(adnifn)
+    ppmiadni=ppmiadni[(ppmiadni$studyName=='ADNI'),]
+    ppmiadni=ppmiadni[ppmiadni$yearsbl==0,]
+    regions_OG=subtyper::getNamesFromDataframe( c("T1Hier_thk_","LRAVG"), ppmiadni, exclusions=c('Asym','reference', 'adjusted' ))
+    adni_variable_names <- c(
+        "MMSE", "CDRSB", "ADAS13", "ADASQ4", 
+        "mPACCdigit", "mPACCtrailsB",
+    #    "RAVLT_immediate", "RAVLT_perc_forgetting", 
+        "FAQ",
+        "EcogPtTotal", "EcogSPTotal"
+    )
+    X = ppmiadni[,regions_OG]
+    X = X[complete.cases(X), ]
+    X = X[, colSums(is.na(X)) == 0]
+    regions=rep(NA,length(regions_OG))
+    for ( x in 1:length(regions_OG ) ) regions[x]=subtyper::decode_antspymm_idp(regions_OG[x])$anatomy
+    colnames(X)=regions
+}
+
 ```
 
 ### NSA-Flow Initialization
 We initialize NSA-Flow using non-negative matrix factorization (NMF) to provide a structured starting point:
 
 ```{r initialization}
-nmf_init <- tryCatch({
-  suppressWarnings(nmf_fit <- nmf(t(as.matrix(X)), rank = k, .options = "v"))
-  basis(nmf_fit)
-}, error = function(e) {
-  message("NMF failed, using random Gaussian initialization")
-  matrix(abs(rnorm(p * k)), nrow = p, ncol = k)
-})
-
-# Normalize columns
-# Y0_init <- sweep(nmf_init, 2, sqrt(colSums(nmf_init^2)), FUN = "/")
-# Y0_init <- Y0_init * 1.0
-
 
 # Center data (important for PCA)
 X_centered <- scale(X, center = TRUE, scale = FALSE)  # N x p
-
+netrank=10
 # Perform PCA
-pca_res <- prcomp(X_centered, rank. = k)  # Keep k components
+pca_res <- prcomp(X_centered, rank. = netrank)  # Keep k components
 
 # PCA scores (N x k) and loadings (p x k)
 # NSA-Flow expects p x k (regions x components)
@@ -1636,11 +1654,9 @@ M_nsa <- nsa_flow(
   optimizer = 'adam',
   plot = TRUE,
   max_iter = 200,
-  verbose = TRUE,
-  apply_nonneg = TRUE
+  verbose = TRUE
 )
 Ymat <- M_nsa$Y
-rownames(Ymat) <- regions
 ```
 
 ### Performance Evaluation
@@ -1671,7 +1687,99 @@ data.frame(Metric = c("Pearson correlation", "MSE", "Orthogonality defect"),
 
 #### Heatmap of Network Loadings
 
-```{r heatmap}
+```{r heatmap,echo=FALSE, fig.height=8, fig.width=10}
+
+
+map_region_to_lobe <- function(region_names) {
+  # --- Base mapping table (from user-provided list) ------------------------
+  mapping_df <- data.frame(
+    region = c(
+      "CA1", "Dentate Gyrus/CA3", "Anterolateral Entorhinal Cortex",
+      "Posteromedial Entorhinal Cortex", "Parahippocampal Gyrus", "Perirhinal Cortex",
+      "Medial Temporal Lobe", "Caudal Anterior Cingulate", "Caudal Middle Frontal Gyrus",
+      "Cuneus", "Entorhinal Cortex", "Fusiform Gyrus", "Inferior Parietal Lobule",
+      "Inferior Temporal Gyrus", "Insula", "Isthmus Cingulate", "Lateral Occipital Cortex",
+      "Lateral Orbitofrontal Cortex", "Lingual Gyrus", "Medial Orbitofrontal Cortex",
+      "Middle Temporal Gyrus", "Paracentral Cortex", "Pars Opercularis", "Pars Orbitalis",
+      "Pars Triangularis", "Pericalcarine Cortex", "Postcentral Gyrus",
+      "Posterior Cingulate", "Precentral Gyrus", "Precuneus",
+      "Rostral Anterior Cingulate", "Rostral Middle Frontal Gyrus",
+      "Superior Frontal Gyrus", "Superior Parietal Lobule",
+      "Superior Temporal Gyrus", "Supramarginal Gyrus", "Transverse Temporal Gyrus",
+      "Basal Forebrain Ch13", "Nucleus Basalis of Meynert Anterior",
+      "Nucleus Basalis of Meynert Middle", "Nucleus Basalis of Meynert Posterior",
+      "Globus Pallidus External", "Globus Pallidus Internal", "Ventral Pallidum",
+      "Nucleus Accumbens", "Putamen", "Diencephalon / Hypothalamus",
+      "Diencephalon / Hypothalamus Mammillary Nucleus", "Subthalamic Nucleus",
+      "Extended Amygdala", "Red Nucleus", "Substantia Nigra Compacta",
+      "Substantia Nigra Reticulata", "Parabrachial Pigmented Nucleus",
+      "Ventral Tegmental Area", "Thalamus Habenular Nucleus", "Caudate Nucleus"
+    ),
+    lobe = c(
+      "Temporal", "Temporal", "Temporal", "Temporal", "Temporal", "Temporal", "Temporal",
+      "Frontal", "Frontal", "Occipital", "Temporal", "Temporal", "Parietal", "Temporal",
+      "Limbic", "Limbic", "Occipital", "Frontal", "Occipital", "Frontal",
+      "Temporal", "Frontal", "Frontal", "Frontal", "Frontal", "Occipital",
+      "Parietal", "Limbic", "Frontal", "Parietal", "Limbic", "Frontal",
+      "Frontal", "Parietal", "Temporal", "Parietal", "Temporal", "Basal Forebrain",
+      "Basal Forebrain", "Basal Forebrain", "Basal Forebrain",
+      "Basal Ganglia", "Basal Ganglia", "Basal Ganglia",
+      "Basal Ganglia", "Basal Ganglia", "Diencephalon",
+      "Diencephalon", "Diencephalon", "Limbic", "Midbrain",
+      "Midbrain", "Midbrain", "Brainstem", "Midbrain",
+      "Diencephalon", "Basal Ganglia"
+    ),
+    stringsAsFactors = FALSE
+  )
+
+  # --- Extended mapping logic for unknown regions --------------------------
+  infer_lobe <- function(region) {
+    r <- tolower(region)
+    if (grepl("frontal|orbitofrontal|precentral|pars|rostral", r)) return("Frontal")
+    if (grepl("parietal|postcentral|supramarginal|precuneus|angular", r)) return("Parietal")
+    if (grepl("temporal|fusiform|entorhinal|parahippocampal", r)) return("Temporal")
+    if (grepl("occipital|cuneus|lingual|pericalcarine", r)) return("Occipital")
+    if (grepl("cingulate|insula|isthmus", r)) return("Limbic")
+    if (grepl("amygdala|hippocampus", r)) return("Medial Temporal / Limbic")
+    if (grepl("thalamus|habenular", r)) return("Diencephalon")
+    if (grepl("caudate|putamen|pallidum|accumbens", r)) return("Basal Ganglia")
+    if (grepl("brainstem|parabrachial|midbrain|pons|medulla|tegmental", r)) return("Brainstem")
+    if (grepl("cerebellum", r)) return("Cerebellum")
+    return("Unknown")
+  }
+
+  # --- Color palette (expanded) --------------------------------------------
+  bright_color_map <- c(
+    "Frontal" = "#FF6B6B",      # red
+    "Parietal" = "#45B7D1",     # blue
+    "Temporal" = "#4ECDC4",     # teal
+    "Occipital" = "#96CEB4",    # mint
+    "Limbic" = "#C06C84",       # rose
+    "Medial Temporal / Limbic" = "#E5989B", # pink
+    "Diencephalon" = "#F8B400", # amber
+    "Basal Ganglia" = "#9B59B6",# violet
+    "Basal Forebrain" = "#AF7AC5", # lavender
+    "Midbrain" = "#DDA0DD",     # plum
+    "Brainstem" = "#A3C4BC",    # desaturated cyan
+    "Cerebellum" = "#F7DC6F",   # yellow
+    "Unknown" = "#BDC3C7"       # gray
+  )
+
+  # --- Map regions ---------------------------------------------------------
+  library(dplyr)
+  mapped <- data.frame(region = region_names, stringsAsFactors = FALSE) %>%
+    left_join(mapping_df, by = "region") %>%
+    mutate(
+      lobe = ifelse(is.na(lobe), sapply(region, infer_lobe), lobe),
+      color = bright_color_map[ifelse(is.na(lobe), sapply(region, infer_lobe), lobe)]
+    )
+
+  # --- Return final data frame ---------------------------------------------
+  mapped %>%
+    rename(Region = region, Lobe = lobe, Color = color)
+}
+
+
 Y_norm <- sweep(Ymat, 2, colSums(Ymat), "/")
 Y_df <- as.data.frame(Y_norm) %>% rownames_to_column("Region") %>% pivot_longer(-Region, names_to = "Network", values_to = "Loading")
 
@@ -1681,6 +1789,7 @@ ggplot(Y_df, aes(x = Network, y = Region, fill = Loading)) +
   theme_minimal(base_size = 12) +
   labs(title = "Network Loadings Across Brain Regions", x = "Network", y = "Region", fill = "Rel. loading") +
   coord_fixed(ratio = 0.18)
+## 
 ```
 
 #### Top Regions per Network (Bar Charts)
@@ -1734,6 +1843,7 @@ for (net in 1:k) {
 
 # --- Step 8: Connectome-like graph for each network ------------------------
 # Assign lobes (crude mapping)
+if ( ! use_adni ) {
 lobe_map <- sapply(rownames(Y_norm), function(r) {
   reg <- sub("^(left_|right_)", "", r)
   if (grepl("frontal|rostral|caudal|pars|frontalpole", reg)) "frontal" else
@@ -1744,7 +1854,6 @@ lobe_map <- sapply(rownames(Y_norm), function(r) {
 })
 lobe_colors <- c(frontal = "blue", temporal = "green", parietal = "red",
                  occipital = "purple", limbic = "orange", subcortical = "grey")
-
 for (net in 1:k) {
   threshold <- quantile(Y_norm[, net], 0.8, na.rm = TRUE)
   active_idx <- which(Y_norm[, net] > threshold)
@@ -1775,6 +1884,73 @@ for (net in 1:k) {
        edge.color = "gray", edge.width = 1,
        main = paste("Graph — Network", net))
   legend("topright", legend = names(lobe_colors), fill = lobe_colors, title = "Lobes", cex = 0.8)
+  }
+} else {
+  lobe_map = map_region_to_lobe( regions )
+  library(igraph)
+  library(dplyr)
+  for (net in 1:k) {
+    netvec=Y_norm[, net]
+    netvec=netvec[netvec>0]
+    threshold <- quantile(netvec, 0.25, na.rm = TRUE)
+    active_idx <- which(Y_norm[, net] > threshold)
+    if (length(active_idx) < 2) next
+    
+    # Extract active region data
+    active_regions <- rownames(Y_norm)[active_idx]
+    loadings_active <- Y_norm[active_idx, net]
+    
+    # Map regions to lobes and colors using the new unified function
+    lobe_info <- map_region_to_lobe(active_regions)
+    lobes_active <- lobe_info$Lobe
+    colors_active <- lobe_info$Color
+    
+    # Create igraph object
+    g <- graph.empty(n = length(active_regions), directed = FALSE)
+    V(g)$name <- active_regions
+    V(g)$loading <- loadings_active
+    V(g)$lobe <- lobes_active
+    V(g)$color <- colors_active
+    V(g)$size <- pmax(5, V(g)$loading * 30)
+    
+    # Add edges among nodes in the same lobe
+    lobe_groups <- split(seq_along(active_regions), lobes_active)
+    for (grp in lobe_groups) {
+        if (length(grp) > 1) {
+        comb_pairs <- t(combn(grp, 2))
+        edge_vec <- as.vector(t(comb_pairs))
+        g <- add_edges(g, edge_vec)
+        }
+    }
+    
+    # Compute layout and plot
+    layout <- layout_with_fr(g)
+    plot(
+        g, layout = layout,
+        vertex.label = V(g)$name,
+        vertex.label.cex = 0.7,
+        vertex.label.color = "black",
+        vertex.frame.color = NA,
+        vertex.color = V(g)$color,
+        vertex.size = V(g)$size,
+        edge.color = "gray",
+        edge.width = 1,
+        main = paste("Graph — Network", net)
+    )
+    
+    # Build dynamic legend directly from map_region_to_lobe color map
+    color_key <- map_region_to_lobe(unique(lobes_active))
+    legend(
+        "topright",
+        legend = unique(color_key$Lobe),
+        fill = unique(color_key$Color),
+        title = "Lobes",
+        cex = 0.8,
+        bty = "n"
+    )
+
+  }
+
 }
 ```
 

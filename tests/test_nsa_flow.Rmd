@@ -227,9 +227,9 @@ filter_config_space <- function(configs) {
   configs[!invalid, ]
 }
 
-smallw=c(0.0, 0.001, 0.01)
+smallw=c( 0.01)
 configs <- filter_config_space( expand.grid(
-  w = c(smallw, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0), 
+  w = c(  0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 ), 
   retraction = c( "svd", "polar", "qr", "soft_svd", "soft_polar", "soft_qr" ), 
   apply_nonneg = c(FALSE, TRUE),
   dataset = c("small", "wide", "large", "sparse_neg"),
@@ -416,6 +416,49 @@ safe_run <- function(expr) {
   )
 }
 
+
+# 0. extreme weights 
+
+
+edge_tests$w_0 <- safe_run({
+  ANTsR::nsa_flow(Y0 = matrix(rnorm(20), 5, 4),
+           X0 = NULL,
+           w = 0.0,
+           max_iter = 20,
+           tol = 1e-5,
+           retraction = "soft_svd",
+           verbose = FALSE)
+})
+
+edge_tests$w_1 <- safe_run({
+  ANTsR::nsa_flow(Y0 = matrix(rnorm(20), 5, 4),
+           X0 = NULL,
+           w = 1.0,
+           max_iter = 20,
+           tol = 1e-5,
+           retraction = "soft_svd",
+           verbose = FALSE)
+})
+
+if (edge_tests$w_0$success) {
+  cat("✅ w=0 test: ran successfully.\n")
+  Y0 <- edge_tests$w_0$res$Y
+  cat("  → Output finite:", all(is.finite(Y0)), "\n")
+  cat("  → Mean abs(Y):", mean(abs(Y0)), "\n\n")
+} else {
+  cat("❌ w=0 test failed (unexpected):", edge_tests$w_0$message, "\n\n")
+}
+
+
+if (edge_tests$w_1$success) {
+  cat("✅ w=1 test: ran successfully.\n")
+  Y0 <- edge_tests$w_1$res$Y
+  cat("  → Output finite:", all(is.finite(Y0)), "\n")
+  cat("  → Mean abs(Y):", mean(abs(Y0)), "\n\n")
+} else {
+  cat("❌ w=0 test failed (unexpected):", edge_tests$w_0$message, "\n\n")
+}
+
 # 1. Zero data matrix ----------------------------------------------------
 set.seed(123)
 data_zero <- matrix(0, 10, 5)
@@ -590,20 +633,6 @@ print(
     )
 )
 
-# --- Optional: pretty visual summary ---
-library(ggplot2)
-ggplot(summary_df, aes(x = factor(w), y = mean_fid / mean_fid_0,
-                       fill = apply_nonneg)) +
-  geom_col(position = "dodge") +
-  facet_wrap(~retraction + x0_null, ncol = 2) +
-  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
-  labs(
-    title = "Relative Fidelity (mean_fid / mean_fid_0)",
-    x = "Weight w",
-    y = "Relative change (<1 means improvement)",
-    fill = "Nonnegativity"
-  ) +
-  theme_minimal(base_size = 12)
 
 
 
@@ -645,7 +674,23 @@ ggplot(tradeoff_df, aes(x = w, y = rel_fid, color = dataset, group = dataset)) +
   facet_wrap(~ retraction, scales = "free_y") +
   labs(title = "Relative Fidelity by Retraction and Dataset",
        y = "Relative Fidelity", x = "Tradeoff weight w") +
-  theme_minimal(base_size = 13)
+  theme_minimal(base_size = 13)+
+  coord_cartesian(ylim = c(0.45, 1.05))   # <── limits y-axis to 0–2
+
+ggplot(summary_df, aes(x = factor(w), y = mean_fid / mean_fid_0,
+                       fill = apply_nonneg)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~retraction + x0_null, ncol = 2) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  labs(
+    title = "Relative Fidelity (mean_fid / mean_fid_0)",
+    x = "Weight w",
+    y = "Relative change (<1 means improvement)",
+    fill = "Nonnegativity"
+  ) +
+  theme_minimal(base_size = 12)+
+  coord_cartesian(ylim = c(0, 1.05)) 
+
 ```
 
 ## Relative Orthogonality 
@@ -656,7 +701,24 @@ ggplot(tradeoff_df, aes(x = w, y = rel_orth, color = dataset, group = dataset)) 
   facet_wrap(~ retraction, scales = "free_y") +
   labs(title = "Relative Orthogonality by Retraction and Dataset",
        y = "Relative Orthogonality", x = "Tradeoff weight w") +
-  theme_minimal(base_size = 13)
+  theme_minimal(base_size = 13)# --- Optional: pretty visual summary ---
+
+ggplot(summary_df, aes(x = factor(w), y = mean_orth / mean_orth_0,
+                       fill = apply_nonneg)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~retraction + x0_null, ncol = 2) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  labs(
+    title = "Relative Orthogonality (mean_orth / mean_orth_0)",
+    x = "Weight w",
+    y = "Relative change (<1 means improvement)",
+    fill = "Nonnegativity"
+  ) +
+  theme_minimal(base_size = 12)+
+  coord_cartesian(ylim = c(0, 1.05)) 
+
+
+
 ```
 
 **Figure:** *Relative orthogonality and fidelity (lower = better) for each retraction method, dataset, and weighting parameter (`w`). QR retraction consistently yields the lowest combined error, with soft–polar offering a strong secondary balance. Unretracted (“none”) cases show incomplete convergence and weaker stability.*
