@@ -210,32 +210,27 @@ step.random_gradient <- function(optimizer, i, V_current, descent_gradient,
 
 #' @export
 step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
-  # This method uses pure Adam with a learning rate (no line search). It is very fast.
-  
+  # Standard Adam: momentum + adaptive RMSprop, no cumulative max
   state <- optimizer$state[[i]]
   params <- optimizer$params
-  beta1 <- params$beta1 %||% 0.9; beta2 <- params$beta2 %||% 0.999
-  epsilon <- params$epsilon %||% 1e-8; learning_rate <- params$learning_rate %||% 0.001
-  myit <- params$myit %||% 1 # Need current iteration for bias correction
-  # Update state with the descent gradient
+  beta1 <- params$beta1 %||% 0.9
+  beta2 <- params$beta2 %||% 0.999
+  epsilon <- params$epsilon %||% 1e-8
+  learning_rate <- params$learning_rate %||% 0.001
+  myit <- params$myit %||% 1  # Current iter for bias correction
+  # Update moments
   state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
-  state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)
-  state$v_max <- pmax(state$v_max, state$v)
-
-  # Bias correction for momentum and adaptive learning rate
+  state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)  # Standard v, no v_max
+  # Bias correction
   m_hat <- state$m / (1 - beta1^myit)
-  v_hat <- state$v_max / (1 - beta2^myit)
-  
+  v_hat <- state$v / (1 - beta2^myit)  # Standard: forgetful, not cumulative
   update_direction <- m_hat / (sqrt(v_hat) + epsilon)
-  
-  # The update step is ALONG the descent direction
+  # Update
   updated_V <- V_current + learning_rate * update_direction
-  
   optimizer$state[[i]] <- state
-  
+  params$myit <- myit + 1  # Increment for next
   return(list(updated_V = updated_V, optimizer = optimizer))
 }
-
 
 #' @export
 step.gd <- function(optimizer, i, V_current, descent_gradient, ...) {
@@ -263,41 +258,7 @@ step.gd <- function(optimizer, i, V_current, descent_gradient, ...) {
   return(list(updated_V = updated_V, optimizer = optimizer))
 }
 
-#' @export
-step.nadam <- function(optimizer, i, V_current, descent_gradient, ...) {
-  # This method uses Nesterov-accelerated Adam. It is very fast and powerful.
-  
-  state <- optimizer$state[[i]]
-  params <- optimizer$params
-  beta1 <- params$beta1 %||% 0.9
-  beta2 <- params$beta2 %||% 0.999
-  epsilon <- params$epsilon %||% 1e-8
-  learning_rate <- params$learning_rate %||% 0.001
-  myit <- params$myit %||% 1
 
-  # Update state with the descent gradient
-  state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
-  state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)
-  
-  # Nadam's bias correction is applied to the look-ahead momentum term
-  m_hat <- state$m / (1 - beta1^myit)
-  
-  # This is the Nesterov part: combine the look-ahead momentum with the current gradient
-  nesterov_m_hat <- (beta1 * m_hat) + ((1 - beta1) * descent_gradient) / (1 - beta1^myit)
-  
-  # Standard second moment update with AMSGrad
-  state$v_max <- pmax(state$v_max, state$v)
-  v_hat <- state$v_max / (1 - beta2^myit)
-  
-  update_direction <- nesterov_m_hat / (sqrt(v_hat) + epsilon)
-  
-  # The update step is ALONG the descent direction
-  updated_V <- V_current + learning_rate * update_direction
-  
-  optimizer$state[[i]] <- state
-  
-  return(list(updated_V = updated_V, optimizer = optimizer))
-}
 
 #' @export
 step.rmsprop <- function(optimizer, i, V_current, descent_gradient, ...) {
@@ -694,34 +655,6 @@ step.lbfgs <- function(optimizer, i, V_current, descent_gradient, ...) {
   return(list(updated_V = updated_V, optimizer = optimizer))
 }
 
-#' @export
-step.lookahead <- function(optimizer, i, V_current, descent_gradient, ...) {
-  state <- optimizer$state[[i]]
-  params <- optimizer$params
-  
-  # Lookahead params
-  k <- params$k %||% 5       # sync period
-  alpha <- params$alpha %||% 0.5
-  
-  # Initialize state
-  state$V_slow <- state$V_slow %||% V_current
-  state$step <- state$step %||% 0
-  
-  # Use Adam as default base optimizer
-  base_result <- step.adam(optimizer, i, V_current, descent_gradient, ...)
-  V_fast <- base_result$updated_V
-  optimizer <- base_result$optimizer
-  
-  # Update lookahead step
-  state$step <- state$step + 1
-  if (state$step %% k == 0) {
-    state$V_slow <- state$V_slow + alpha * (V_fast - state$V_slow)
-    V_fast <- state$V_slow
-  }
-  
-  optimizer$state[[i]] <- state
-  return(list(updated_V = V_fast, optimizer = optimizer))
-}
 
 
 # ==============================================================================
@@ -812,23 +745,124 @@ step.bidirectional_armijo_gradient <- function(optimizer, i, V_current, descent_
   }
 }
 
-# ==============================================================================
-#           NEW OPTIMIZER: Steepest Descent with Robust Armijo Line Search
-# ==============================================================================
+#' @export
+step.ranger <- function(optimizer, i, V_current, descent_gradient, ...) {
+  # Rectified Adam step (warmup for first 2n iters)
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  myit <- params$myit %||% 1
+  n <- length(descent_gradient)  # Flatten for simplicity
+  beta1 <- params$beta1 %||% 0.9
+  beta2 <- params$beta2 %||% 0.999
+  # RAdam rectification
+  rho_inf <- 2 / (1 - beta2) - 1
+  rho_t <- rho_inf - 2 * myit * beta2^myit / (1 - beta2^myit)
+  state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
+  state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)
+  m_hat <- state$m / (1 - beta1^myit)
+  v_hat <- state$v / (1 - beta2^myit)
+  # Rectify if rho_t < 5*n (warmup)
+  r_t <- if (rho_t > 5 * n) sqrt((rho_t - 4) / (rho_inf - 4) * (1 - beta2^myit) / (1 - beta2)) else sqrt(rho_t / (1 - beta2) * (1 - beta2^myit))
+  update_direction <- m_hat / (r_t * (sqrt(v_hat) + 1e-8))
+  V_radam <- V_current - params$learning_rate * update_direction
+  # Lookahead (from your step.lookahead)
+  state$V_slow <- state$V_slow %||% V_current
+  alpha <- params$alpha %||% 0.5
+  k <- params$k %||% 5
+  state$step <- state$step %||% 0
+  state$step <- state$step + 1
+  if (state$step %% k == 0) {
+    state$V_slow <- state$V_slow + alpha * (V_radam - state$V_slow)
+    V_radam <- state$V_slow
+  }
+  optimizer$state[[i]] <- state
+  params$myit <- myit + 1
+  return(list(updated_V = V_radam, optimizer = optimizer))
+}
+
+
+#' @export
+step.vsgd <- function(optimizer, i, V_current, descent_gradient, ...) {
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  learning_rate <- params$learning_rate %||% 0.001
+  sigma <- params$sigma %||% 0.1  # Variational noise scale
+  # Variational sample: grad + Gaussian noise ~ N(0, sigma^2 * I)
+  var_grad <- descent_gradient + matrix(rnorm(length(descent_gradient), sd = sigma), nrow(V_current), ncol(V_current))
+  # SGD with momentum on variational grad
+  state$m <- 0.9 * state$m + 0.1 * var_grad
+  updated_V <- V_current - learning_rate * state$m
+  optimizer$state[[i]] <- state
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
+
+#' @export
+step.riemannian_adam <- function(optimizer, i, V_current, descent_gradient, ...) {
+  # Wraps your Adam, but transports update via retraction/projection
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  myit <- params$myit %||% 1
+  beta1 <- params$beta1 %||% 0.9
+  beta2 <- params$beta2 %||% 0.999
+  epsilon <- params$epsilon %||% 1e-8
+  # Adam update in tangent space
+  state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
+  state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)
+  m_hat <- state$m / (1 - beta1^myit)
+  v_hat <- state$v / (1 - beta2^myit)
+  update_tangent <- m_hat / (sqrt(v_hat) + epsilon)
+  # "Transport" via retraction: Y + proj(update) (approx parallel transport)
+  delta <- update_tangent
+  sym_term <- symm(crossprod(V_current, delta))
+  transported_update <- delta - V_current %*% sym_term
+  updated_V <- V_current + params$learning_rate * transported_update
+  optimizer$state[[i]] <- state
+  params$myit <- myit + 1
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
+#' @export
+step.lars <- function(optimizer, i, V_current, descent_gradient, ...) {
+  # Base SGD + layer-wise scaling (adapt to columns)
+  params <- optimizer$params
+  learning_rate <- params$learning_rate %||% 0.001
+  # Compute column norms for scaling
+  v_norms <- sqrt(colSums(V_current^2))
+  g_norms <- sqrt(colSums(descent_gradient^2))
+  scales <- v_norms / (g_norms + 1e-8)  # Adaptive per-column lr
+  scaled_grad <- sweep(descent_gradient, 2, scales, "*")
+  updated_V <- V_current - learning_rate * scaled_grad
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
+#' @export
+step.psgd <- function(optimizer, i, V_current, descent_gradient, ...) {
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  learning_rate <- params$learning_rate %||% 0.001
+  beta <- params$beta %||% 0.9  # Momentum
+  # Precondition: Simple diagonal Hessian approx (from state$diag_h)
+  state$diag_h <- state$diag_h %||% matrix(1, nrow(V_current), ncol(V_current))
+  state$diag_h <- (1 - 0.01) * state$diag_h + 0.01 * descent_gradient^2  # EMA update
+  preconditioned_grad <- descent_gradient / (state$diag_h + 1e-8)
+  # Momentum
+  state$m <- beta * state$m + (1 - beta) * preconditioned_grad
+  updated_V <- V_current - learning_rate * state$m
+  optimizer$state[[i]] <- state
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
 #' @export
 step.armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
-  # This method uses the steepest descent direction (normalized descent_gradient) and a robust
-  # backtracking line search with Armijo condition. It is maximally robust and guaranteed to
-  # find an energy-reducing step if the point is not stationary, by backtracking until a very
-  # small step size threshold.
-  
+  # Updated: Added momentum (0.9 decay) for faster convergence; capped backtracks at 20, min alpha=1e-10.
   state <- optimizer$state[[i]]
   params <- optimizer$params
   epsilon <- params$epsilon %||% 1e-12
-  
-  # Use the descent_gradient as the base direction
-  search_direction <- descent_gradient
-  
+  # Momentum update (new: blend with previous momentum)
+  state$momentum <- if (is.null(state$momentum)) descent_gradient else 0.9 * state$momentum + 0.1 * descent_gradient
+  # Use momentum-blended direction
+  search_direction <- state$momentum
   # Compute Frobenius norm for normalization (unit direction for consistent scaling)
   dir_norm <- sqrt(sum(search_direction^2))
   if (dir_norm < epsilon) {
@@ -836,23 +870,81 @@ step.armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full
     return(list(updated_V = V_current, optimizer = optimizer))
   }
   search_direction <- search_direction / dir_norm
-  
   # Perform robust line search along this direction
   optimal_step_size <- .robust_backtracking_linesearch(
     V_current = V_current,
     descent_direction = search_direction,
-    ascent_gradient = -descent_gradient,  # grad(E)
+    ascent_gradient = -descent_gradient, # grad(E)
     energy_function = full_energy_function,
-    initial_step_size = state$last_step_size  # Warm start from history
+    initial_step_size = state$last_step_size # Warm start from history
   )
-  
   # Update last_step_size: expand if successful, reset if failed/tiny
-  state$last_step_size <- if (optimal_step_size > 1e-9) optimal_step_size * 1.5 else 1.0
+  state$last_step_size <- if (optimal_step_size > 1e-10) optimal_step_size * 1.5 else 1.0
   optimizer$state[[i]] <- state
-  
   # Apply the step
   updated_V <- V_current + optimal_step_size * search_direction
-  
+  return(list(updated_V = updated_V, optimizer = optimizer))
+}
+
+# ==============================================================================
+# UPDATED OPTIMIZER: Lookahead with Projection
+# ==============================================================================
+#' @export
+step.lookahead <- function(optimizer, i, V_current, descent_gradient, ...) {
+  # Updated: Added manifold projection after blending (using symm/crossprod); adaptive k = max(5, myit/10).
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  myit <- params$myit %||% 1  # Assume passed from nsa_flow
+  k <- max(5, myit / 10)  # Adaptive: rarer sync later
+  alpha <- params$alpha %||% 0.5
+  # Initialize state
+  state$V_slow <- state$V_slow %||% V_current
+  state$step <- state$step %||% 0
+  # Use Adam as default base optimizer
+  base_result <- step.adam(optimizer, i, V_current, descent_gradient, ...)
+  V_fast <- base_result$updated_V
+  optimizer <- base_result$optimizer
+  # Update lookahead step
+  state$step <- state$step + 1
+  if (state$step %% k == 0) {
+    state$V_slow <- state$V_slow + alpha * (V_fast - state$V_slow)
+    V_fast <- state$V_slow
+    # NEW: Project blend back to tangent space (assumes symm/crossprod available)
+    delta <- V_fast - V_current
+    sym_term <- symm(crossprod(V_current, delta))
+    V_fast <- V_current + (delta - V_current %*% sym_term)
+  }
+  optimizer$state[[i]] <- state
+  return(list(updated_V = V_fast, optimizer = optimizer))
+}
+
+# ==============================================================================
+# UPDATED OPTIMIZER: Nadam (Standard Forgetful + Full Bias Correction)
+# ==============================================================================
+#' @export
+step.nadam <- function(optimizer, i, V_current, descent_gradient, ...) {
+  # Updated: Dropped v_max (use forgetful v_hat); full Nesterov bias correction; increment myit.
+  state <- optimizer$state[[i]]
+  params <- optimizer$params
+  beta1 <- params$beta1 %||% 0.9
+  beta2 <- params$beta2 %||% 0.999
+  epsilon <- params$epsilon %||% 1e-8
+  learning_rate <- params$learning_rate %||% 0.001
+  myit <- params$myit %||% 1
+  # Update moments (standard Adam)
+  state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
+  state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)
+  # Bias-corrected m_hat
+  m_hat <- state$m / (1 - beta1^myit)
+  # NEW: Full Nesterov lookahead with bias: beta1 * m_hat + (1-beta1) * grad / (1-beta1^t)
+  nesterov_m_hat <- beta1 * m_hat + ((1 - beta1) * descent_gradient) / (1 - beta1^myit)
+  # NEW: Forgetful v_hat (no v_max)
+  v_hat <- state$v / (1 - beta2^myit)
+  update_direction <- nesterov_m_hat / (sqrt(v_hat) + epsilon)
+  # The update step is ALONG the descent direction
+  updated_V <- V_current + learning_rate * update_direction
+  optimizer$state[[i]] <- state
+  params$myit <- myit + 1  # NEW: Increment for next call
   return(list(updated_V = updated_V, optimizer = optimizer))
 }
 

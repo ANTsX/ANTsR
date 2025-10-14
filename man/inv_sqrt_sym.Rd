@@ -4,7 +4,7 @@
 \alias{inv_sqrt_sym}
 \title{Inverse Square Root of a Symmetric Matrix}
 \usage{
-inv_sqrt_sym(M)
+inv_sqrt_sym(M, epsilon = 1e-10)
 }
 \arguments{
 \item{M}{Numeric symmetric matrix (k x k).}

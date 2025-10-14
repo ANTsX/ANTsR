@@ -10189,12 +10189,116 @@ neg_violation <- function(Y) {
 #' M <- matrix(c(4, 1, 1, 2), 2, 2)
 #' inv_sqrt_sym(M)
 #' @export
-inv_sqrt_sym <- function(M) {
-  e <- eigen(M, symmetric = TRUE)
-  ev <- e$values
-  ev[ev < 1e-8] <- 1e-8
-  e$vectors %*% diag(1 / sqrt(ev)) %*% t(e$vectors)
+inv_sqrt_sym <- function(M, epsilon = 1e-10) {
+  if (!is.matrix(M) || nrow(M) != ncol(M)) stop("M must be a square matrix")
+  M <- (M + t(M)) / 2
+  eig <- eigen(M, symmetric = TRUE)
+  vals <- eig$values
+  vecs <- eig$vectors
+
+  # Clip to >= 0
+  vals_clipped <- pmax(vals, 0)
+  # Avoid dividing by zero: add epsilon
+  inv_sqrt_vals <- 1 / sqrt(vals_clipped + epsilon)
+
+  # If all values are tiny, return identity scaled by 1/sqrt(epsilon)
+  if (all(vals_clipped < sqrt(.Machine$double.eps))) {
+    return(diag(length(vals_clipped)) / sqrt(epsilon))
+  }
+
+  vecs %*% diag(inv_sqrt_vals) %*% t(vecs)
+} 
+
+#' @export
+nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
+  should_retract <- function(Y, retraction_type = "soft", tol = 1e-6, verbose = FALSE) {
+    # Return FALSE immediately if no retraction is specified
+    if (is.null(retraction_type) || retraction_type == "none") {
+      if (verbose) message("Skipping retraction (type='none').")
+      return(FALSE)
+    }
+    
+    # Handle degenerate input
+    if (is.null(Y) || any(!is.finite(Y))) {
+      warning("Matrix Y is NULL or contains non-finite values — forcing retraction.")
+      return(TRUE)
+    }
+    
+    # Compute orthogonality defect ‖YᵀY − I‖_F
+    defect <- invariant_orthogonality_defect(Y)
+    
+    # Adaptive tolerance: scale by matrix norm
+    normY <- norm(Y, "F")
+    thresh <- tol * max(1, normY)
+    
+    # Decision
+    do_retract <- defect > thresh
+    
+    if (verbose) {
+      msg <- sprintf(
+        "Retract? %s | defect = %.3e, threshold = %.3e, type = '%s'",
+        ifelse(do_retract, "YES", "NO"), defect, thresh, retraction_type
+      )
+      message(msg)
+    }
+    
+    return(do_retract)
+  }
+  # handle trivial case
+#  if (is.null(retraction_type) || retraction_type == "none" || !should_retract(Y_cand, retraction_type) ) return(Y_cand)
+  if (is.null(retraction_type) || retraction_type == "none"  ) return(Y_cand)
+  if (!is.matrix(Y_cand)) stop("Y_cand must be a matrix")
+  p <- nrow(Y_cand); k <- ncol(Y_cand)
+  YtY <- crossprod(Y_cand)  # k x k
+  normY <- sqrt(sum(Y_cand^2))
+
+  # helpers
+  qr_signed_Q <- function(Z) {
+    qrq <- qr(Z)
+    Q <- qr.Q(qrq)
+    Rmat <- qr.R(qrq)
+    sgn <- sign(diag(Rmat)); sgn[is.na(sgn)] <- 1
+    Q %*% diag(sgn)
+  }
+
+  if (retraction_type == "polar") {
+    T <- inv_sqrt_sym(YtY)
+    Ytilde <- Y_cand %*% T
+  } else if (retraction_type == "qr") {
+    Ytilde <- qr_signed_Q(Y_cand)
+  } else if (retraction_type == "soft_qr") {
+    Q <- qr_signed_Q(Y_cand)
+    col_norms <- sqrt(colSums(Y_cand^2))
+    D <- diag(col_norms)
+    Q_scaled <- Q %*% D
+    Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q_scaled
+  } else if (retraction_type == "soft") {
+    Q <- qr_signed_Q(Y_cand)
+    Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
+  } else if (retraction_type == "soft_polar") {
+    T <- inv_sqrt_sym(YtY)
+    T_w <- (1 - w_retract) * diag(k) + w_retract * T
+    Ytilde <- Y_cand %*% T_w
+  } else if (retraction_type == "svd") {
+    s <- svd(Y_cand, nu = min(p,k), nv = min(p,k))
+    Q <- s$u %*% t(s$v)
+    Ytilde <- Q
+  } else if (retraction_type == "soft_svd") {
+    s <- svd(Y_cand, nu = min(p,k), nv = min(p,k))
+    Q <- s$u %*% t(s$v)
+    Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
+  } else {
+    stop("Unknown retraction_type: ", retraction_type)
+  }
+
+  # optional: preserve Frobenius norm of candidate matrix
+  if (!is.null(normY) && normY > 1e-12) {
+    current_norm <- sqrt(sum(Ytilde^2))
+    if (current_norm > 0) Ytilde <- Ytilde / current_norm * normY
+  }
+  Ytilde
 }
+
 
 
 #' @title NSA-Flow Optimization
@@ -10227,6 +10331,7 @@ inv_sqrt_sym <- function(M) {
 #'   Default is 1 (record every iteration).
 #' @param window_size Integer, size of the window for energy stability convergence check.
 #'   Default is 5.
+#' @param c1_armijo Numeric, Armijo condition constant for line search.
 #' @param plot Logical, if \code{TRUE}, generates a ggplot of fidelity and orthogonality
 #'   traces with dual axes. Default is \code{FALSE}.
 #'
@@ -10272,7 +10377,7 @@ nsa_flow <- function(
   max_iter = 100, tol = 1e-6, verbose = FALSE, seed = 42,
   apply_nonneg = TRUE, optimizer = "adam",
   initial_learning_rate = 1e-3,
-  record_every = 1, window_size = 5,
+  record_every = 1, window_size = 5, c1_armijo=1e-6,
   plot = FALSE
 ) {
   # --- Input validation ---
@@ -10291,74 +10396,7 @@ nsa_flow <- function(
   stopifnot(is.logical(plot))
   stopifnot(!all(Y0==0))
 
-  .inv_sqrt_sym <- function(M, epsilon = 1e-10) {
-    M <- (M + t(M)) / 2 # Ensure symmetry
-    eig <- eigen(M, symmetric = TRUE)
-    eig$values[eig$values < 0] <- 0
-    inv_sqrt_vals <- 1 / sqrt(eig$values + epsilon)
-    eig$vectors %*% diag(inv_sqrt_vals) %*% t(eig$vectors)
-  }
 
-  .retract <- function(Y_cand, w_retract, retraction_type) {
-    if (retraction_type == "none") {
-      return(Y_cand)
-    }
-    YtY <- crossprod(Y_cand)
-    norm_Y <- sqrt(sum(Y_cand^2))  # Precompute for rescaling
-    if (retraction_type == "polar") {
-      T1 <- .inv_sqrt_sym(YtY)
-      Ytilde <- Y_cand %*% T1
-      # NEW: Rescale to preserve norm
-      if (norm_Y > 1e-12) {
-        Ytilde <- Ytilde / sqrt(sum(Ytilde^2)) * norm_Y
-      }
-    } else if (retraction_type == "qr") {
-      qrq <- qr(Y_cand)
-      Q <- qr.Q(qrq)
-      Rmat <- qr.R(qrq)
-      signs <- sign(diag(Rmat)); signs[signs == 0] <- 1
-      Ytilde <- Q %*% diag(signs)
-      # NEW: Rescale to preserve norm
-      if (norm_Y > 1e-12) {
-        Ytilde <- Ytilde / sqrt(sum(Ytilde^2)) * norm_Y
-      }
-    } else if (retraction_type %in% c("soft", "soft_qr")) {
-      qrq <- qr(Y_cand)
-      Q <- qr.Q(qrq)
-      Rmat <- qr.R(qrq)
-      signs <- sign(diag(Rmat)); signs[signs == 0] <- 1
-      Q <- Q %*% diag(signs)
-      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
-      # Already scale-preserving via rescaling
-      if (norm_Y > 1e-12) {
-        Ytilde <- Ytilde / sqrt(sum(Ytilde^2)) * norm_Y
-      }
-    } else if (retraction_type == "soft_polar") {
-      T1 <- .inv_sqrt_sym(YtY)
-      T_w <- (1 - w_retract) * diag(ncol(Y_cand)) + w_retract * T1
-      Ytilde <- Y_cand %*% T_w
-      # NEW: Rescale to preserve norm
-      if (norm_Y > 1e-12) {
-        Ytilde <- Ytilde / sqrt(sum(Ytilde^2)) * norm_Y
-      }
-    } else if (retraction_type == "svd") {
-      s <- svd(Y_cand)
-      Ytilde <- s$u %*% t(s$v)
-      # NEW: Rescale to preserve norm
-      if (norm_Y > 1e-12) {
-        Ytilde <- Ytilde / sqrt(sum(Ytilde^2)) * norm_Y
-      }
-    } else if (retraction_type == "soft_svd") {
-      s <- svd(Y_cand)
-      Q <- s$u %*% t(s$v)
-      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
-      # Already scale-preserving via rescaling
-      if (norm_Y > 1e-12) {
-        Ytilde <- Ytilde / sqrt(sum(Ytilde^2)) * norm_Y
-      }
-    }
-    return(Ytilde)
-  }
   # --- Fast helper functions ---
   # Fast defect (used in energy, tracking, and d0)
   defect_fast <- function(V) {
@@ -10421,7 +10459,7 @@ nsa_flow <- function(
   c_orth <- 4 * w / d0
   # --- Optimizer initialization ---
   # This assumes create_optimizer and step are defined in the global environment
-  opt <- create_optimizer(optimizer, vmats = list(Y0),
+  opt <- create_optimizer(optimizer, vmats = list(Y),
                           beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8,
                           learning_rate = initial_learning_rate,
                           k = 5, alpha = 0.5)
@@ -10448,7 +10486,7 @@ nsa_flow <- function(
   # --- Full energy function ---
   nsa_energy <- function(Vp) {
     # --- Retraction ---
-    Vp <- .retract(Vp, w, retraction)
+    Vp <- nsa_flow_retract(Vp, w, retraction)
     # --- Optional non-negativity ---
     Vp <- if (apply_nonneg) pmax(Vp, 0) else Vp
     e <- 0.5 * fid_eta * sum((Vp - X0)^2)
@@ -10487,45 +10525,61 @@ nsa_flow <- function(
     }
 
     # --- Optimizer step ---
-    step_result <- step(opt, i = 1, V_current = Y,
-                        descent_gradient = rgrad,
-                        learning_rate = lr,
-                        full_energy_function = nsa_energy,
-                        myit = it)
+    step_result <- step(
+      opt, i = 1, V_current = Y,
+      descent_gradient = rgrad,
+      learning_rate = lr,
+      full_energy_function = nsa_energy,
+      myit = it
+    )
     Y_prev <- Y
     Y <- step_result$updated_V
     opt <- step_result$optimizer
 
-    # --- Backtracking line search (with energy fast-path below) ---
+    # --- Backtracking line search ---
     prev_energy <- nsa_energy(Y_prev)
     current_energy <- nsa_energy(Y)
     alpha <- 1
     count <- 0
-    while (current_energy > prev_energy && count < 5) {  # Reduced to 5 for speed (tunable)
+    retracted_in_loop <- FALSE  # Track whether retraction already applied
+
+    while (current_energy > prev_energy && count < 5) {
       alpha <- alpha * 0.5
       Y <- Y_prev + alpha * (step_result$updated_V - Y_prev)
       current_energy <- nsa_energy(Y)
+      
+      if (current_energy < prev_energy) {
+        Y <- nsa_flow_retract(Y, w, retraction)
+        retracted_in_loop <- TRUE
+        break
+      }
       count <- count + 1
     }
-    if (count == 5) {  # Adjusted threshold
+
+    # --- Handle backtracking outcomes ---
+    if (count == 5) {
+      # Backtracking failed → revert
       Y <- Y_prev
-      if (verbose) cat("Backtracking failed to reduce energy. Reverting to previous Y.\n")
+      retracted_in_loop <- TRUE  # previous Y was already retracted
+      if (verbose) cat("Backtracking failed to reduce energy; reverting to previous Y.\n")
     }
 
     # --- Adaptive learning rate adjustment ---
-    if (count > 2) {  # Adjusted threshold
-      lr <- lr * 0.5
+    if (count > 2) {
+      lr <- lr * 0.95
       if (verbose) cat(sprintf("Reducing learning rate to %.6e due to backtracking\n", lr))
     } else if (count == 0 && it %% 5 == 0) {
-      lr <- lr * 1.1
+      lr <- lr * 1.05
       if (verbose) cat(sprintf("Increasing learning rate to %.6e\n", lr))
     }
 
-    # --- Retraction ---
-    Ytilde <- .retract(Y, w, retraction)
+    # --- Retraction safeguard ---
+    if (!retracted_in_loop) {
+      Y <- nsa_flow_retract(Y, w, retraction)
+    }
 
-    # --- Optional non-negativity ---
-    Y <- if (apply_nonneg) pmax(Ytilde, 0) else Ytilde
+    # --- Optional nonnegativity constraint ---
+    Y <- if (apply_nonneg) pmax(Y, 0) else Y
 
     # --- Check for NaN/Inf in Y ---
     if (any(is.na(Y)) || any(is.infinite(Y))) {
@@ -10629,24 +10683,26 @@ nsa_flow <- function(
 }
 
 
-#' Create NSA-Flow Algorithm Flowchart
+
+#' NSA-Flow Algorithm Flowchart
 #'
-#' Generates a DiagrammeR flowchart visualizing the Non-negative Stiefel Approximating Flow (NSA-Flow) algorithm.
-#' The diagram includes initialization, gradient computation, Riemannian descent, retraction choices, 
-#' non-negativity projection, and convergence checks with customizable styling.
+#' Generates a DiagrammeR flowchart summarizing the full NSA-Flow optimization pipeline, 
+#' including initialization, gradient computation, Riemannian projection, descent, 
+#' retraction, non-negativity, and convergence checks.
 #'
 #' @param node_fill_color Color for node fill (default: "lightblue").
 #' @param node_font_color Color for node text (default: "black").
 #' @param edge_color Color for edges (default: "black").
 #' @param font_name Font for node labels (default: "Helvetica").
-#' @param node_shape Shape of nodes (default: "rectangle").
-#' @param graph_rankdir Direction of graph layout (default: "TB" for top-to-bottom).
-#' @param fontsize Font size for node labels (default: 10).
-#' @return A DiagrammeR graph object representing the NSA-Flow algorithm workflow.
+#' @param node_shape Node shape (default: "rectangle").
+#' @param graph_rankdir Graph layout direction (default: "TB" = top to bottom).
+#' @param fontsize Font size (default: 10).
+#'
+#' @return A DiagrammeR graph object.
 #' @examples
 #' library(DiagrammeR)
 #' nsa_flow_flowchart()
-#' nsa_flow_flowchart(node_fill_color = "lightgreen", edge_color = "blue")
+#' @export
 nsa_flow_flowchart <- function(
   node_fill_color = "lightblue",
   node_font_color = "black",
@@ -10666,45 +10722,47 @@ digraph nsa_flow_algorithm {
         fontcolor = ", node_font_color, ", fontname = ", font_name, ", fontsize = ", fontsize, "]
   edge [color = ", edge_color, ", fontsize = ", fontsize, "]
 
-  # Nodes
-  A [label = 'Initialize Y_0\n(Random or SVD-based)']
-  B [label = 'Set Parameters\n(w, retraction, optimizer)']
-  C [label = 'Compute Euclidean Gradient\n∇F(Y) = (1-w)∇g(Y) + w∇f(Y)']
-  D [label = 'Project to Tangent Space\nRiemannian grad_ℳ F']
-  E [label = 'Descent Step\nZ = Y - α grad_ℳ F']
-  F [label = 'Choose Retraction\n(polar, QR, soft, none)']
-  G [label = 'Apply Retraction\nMap Z to Stiefel Manifold']
-  H [label = 'Proximal Projection\nP_+(Y) = max(Y, 0)']
-  I [label = 'Check Convergence\n(Energy reduction < tol or grad norm < tol)']
-  J [label = 'Update Y\nRecord Diagnostics\n(iter, energy, orth, neg)']
-  K [label = 'Output Final Y\nand Trace Diagnostics']
+  # Main nodes
+  A [label = 'Initialize Y₀\\n(Random, Orthogonal, or SVD-based)']
+  B [label = 'Set Parameters\\n(w, retraction, optimizer)']
+  C [label = 'Compute Euclidean Gradient\\n∇F(Y) = (1−w)∇g(Y) + w∇ₒᵣₜₕ(Y)']
+  D [label = 'Project to Tangent Space\\nRiemannian grad_ℳ F']
+  E [label = 'Descent Step\\nZ = Y − α · grad_ℳ F']
+  F [label = 'Choose Retraction\\n(polar, QR, soft, soft-polar, soft-QR, none)']
+  G [label = 'Apply Retraction\\nMap Z → 𝓜 (Stiefel manifold)']
+  H [label = 'Proximal Projection\\nP₊(Y) = max(Y, 0)']
+  I [label = 'Check Convergence\\n(ΔEnergy < tol or ∥grad∥ < tol)']
+  J [label = 'Update Y and Record\\n(iter, energy, orth, neg)']
+  K [label = 'Output Final Y*\\nand Diagnostic Traces']
 
   # Edges
   A -> B [label = 'Setup']
   B -> C [label = 'Start Iteration']
   C -> D [label = 'Project']
   D -> E [label = 'Descend']
-  E -> F [label = 'Select']
+  E -> F [label = 'Select Retraction']
   F -> G [label = 'Retract']
-  G -> H [label = 'Project Non-neg']
+  G -> H [label = 'Project Nonneg']
   H -> I [label = 'Evaluate']
   I -> J [label = 'Not Converged', style = 'dashed']
   J -> C [label = 'Next Iteration']
   I -> K [label = 'Converged']
 
-  # Subgraph for retraction choices
+  # Subgraph for retraction options
   subgraph cluster_retraction {
     style = dashed
     color = gray
     label = 'Retraction Options'
-    F1 [label = 'Polar\n(Z (Z^T Z)^{-1/2})', fillcolor = lightyellow]
-    F2 [label = 'QR\n(Q sign(diag(R)))', fillcolor = lightyellow]
-    F3 [label = 'Soft\n((1-λ)I + λ(Z^T Z)^{-1/2})', fillcolor = lightyellow]
-    F4 [label = 'None\n(No retraction)', fillcolor = lightyellow]
+    F1 [label = 'Polar\\nỸ = Y (YᵀY)^{−1/2}', fillcolor = lightyellow]
+    F2 [label = 'QR\\nỸ = Q sign(diag(R))', fillcolor = lightyellow]
+    F3 [label = 'Soft\\nỸ = (1−λ)Y + λQ', fillcolor = lightyellow]
+    F4 [label = 'Soft-Polar\\nỸ = Y[(1−λ)I + λ(YᵀY)^{−1/2}]', fillcolor = lightyellow]
+    F5 [label = 'None\\n(No retraction)', fillcolor = lightyellow]
     F -> F1 [style = invis]
     F -> F2 [style = invis]
     F -> F3 [style = invis]
     F -> F4 [style = invis]
+    F -> F5 [style = invis]
   }
 }
 ")

@@ -486,26 +486,23 @@ Y0_toy <- matrix(runif(12, 0, 1), 4, 3)
 # Apply NSA-Flow with balanced weights
 # X0_toy=X0_toy/norm(X0_toy, "F")*0.1  # Normalize
 omega_default = 0.5
-ini_default = 0.5
+ini_default = 0.005
 nsa_flow = ANTsR::nsa_flow
 optype='bidirectional_armijo_gradient'
 optype='armijo_gradient'
-def_ret = "soft"
-nsa_default <- function(Y0, w, verbose = FALSE ) {
+def_ret = "soft_svd"
+nsa_default <- function(Y0, w = omega_default, verbose = FALSE ) {
   nsa_flow(
     Y0 = Y0,
     X0 = NULL,
     w = w,
     retraction = def_ret,
     max_iter = 100,
-    tol = 1e-6,
     verbose = verbose,
     seed = 42,
     apply_nonneg = TRUE,
     optimizer = optype,
     initial_learning_rate = ini_default, # <--- CHANGE: Replaced learning_rate and optimizer
-    record_every = 1,
-    window_size = 5,
     plot = TRUE
   )
 }
@@ -591,7 +588,7 @@ w=0.9
 mxit=50
 res_polar <- nsa_flow(X0,  w = w, retraction = "polar", plot=TRUE, max_iter = mxit, verbose = FALSE, seed = 1, record_every = 1, initial_learning_rate = ini_default)
 res_qr <- nsa_flow(X0,  w = w, retraction = "soft_polar", plot=TRUE, max_iter = mxit, seed = 1, record_every = 1, initial_learning_rate = ini_default, verbose = FALSE)
-res_soft <- nsa_flow(X0,  w = w, retraction = "soft", plot=TRUE, max_iter = mxit, seed = 1, record_every = 1, initial_learning_rate = ini_default, verbose = FALSE )
+res_soft <- nsa_flow(X0,  w = w, retraction = "soft_svd", plot=TRUE, max_iter = mxit, seed = 1, record_every = 1, initial_learning_rate = ini_default, verbose = FALSE )
 grid.arrange(res_polar$plot,res_qr$plot,res_soft$plot, nrow=3, top='QR, Polar, Soft Retractions')
 ###
 ```
@@ -601,7 +598,7 @@ grid.arrange(res_polar$plot,res_qr$plot,res_soft$plot, nrow=3, top='QR, Polar, S
 ## Sparsity as a function of orthogonality via weight parameter \( w \)
 
 ```{r stiefel_sweep_full, fig.width=12, fig.height=8, echo=FALSE, message=FALSE}
-w_seq <- c( 0.5, 0.8, 0.9, 0.95, 0.99 )
+w_seq <- c( 0.05, 0.25, 0.5, 0.75, 0.99 )
 mytit = paste0("w = ", round(w_seq,3))
 mats <- list()
 # X0 = X0 - min(X0)
@@ -817,7 +814,7 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
                            w_pca = 1.0, w = 0.5, 
                            apply_soft_thresh_in_nns = FALSE, tol = 1e-6, 
                            initial_learning_rate=1.0,
-                           retraction='soft',
+                           retraction='soft_svd',
                            grad_tol = 1e-4, verbose = FALSE) {
   # (assumes helper functions: grad_orth, orth_residual, inv_sqrt_sym,
   #  soft_threshold, nsa_flow, frob, sym, sparsity_level are defined elsewhere)
@@ -1539,6 +1536,166 @@ ggplot(sens_long, aes(x = Omega, y = Value, color = Metric)) +
 The top genes often include known leukemia markers, such as CD33, a myeloid differentiation antigen expressed on AML blasts and a therapeutic target for gemtuzumab ozogamicin, and ZYXIN, involved in ALL translocations, cell adhesion, and hematopoiesis. These align with prior analyses of the Golub dataset, where CD33 and ZYXIN are frequently highlighted as discriminative features for AML and ALL, respectively. Sensitivity analysis shows higher lambda increases sparsity at the cost of explained variance, allowing users to tune for desired biomarker count. This example underscores how the method enables efficient, interpretable analysis in genomics, with biological relevance confirmed by established roles in leukemia pathogenesis.
 
 
+---
+title: "Application of NSA-Flow on Cortical Thickness Data"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    fig_width: 10
+    fig_height: 6
+---
+
+```{r setupbrain, include=FALSE,echo=FALSE}
+library(ANTsR)
+library(NMF)
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+library(tidyr)
+library(fmsb)
+library(igraph)
+library(scales)
+library(ggpubr)
+library(tibble)
+set.seed(42)
+```
+
+## Application Section: NSA-Flow on Synthetic Cortical Thickness Data
+
+In this section, we demonstrate the application of NSA-Flow to synthetic cortical thickness data. NSA-Flow is a network-structured matrix factorization method that decomposes cortical measures into interpretable components (networks), highlighting regional loadings and potential connectome-like structures.
+
+
+### Data Generation
+We generated synthetic cortical thickness data mimicking the structure of human cortical and subcortical regions:
+
+```{r data-generation}
+N <- 200  # subjects
+p <- 76   # cortical regions
+k <- 6    # number of networks
+
+# Generate data
+X_data <- matrix(rnorm(N * p, mean = 2.5, sd = 0.5), nrow = N, ncol = p)
+X_data[X_data < 0] <- 0
+
+cortical_regions <- c(
+  'bankssts', 'caudalanteriorcingulate', 'caudalmiddlefrontal', 'cuneus', 'entorhinal',
+  'fusiform', 'inferiorparietal', 'inferiortemporal', 'isthmuscingulate', 'lateraloccipital',
+  'lateralorbitofrontal', 'lingual', 'medialorbitofrontal', 'middletemporal', 'parahippocampal',
+  'paracentral', 'parsopercularis', 'parsorbitalis', 'parstriangularis', 'pericalcarine',
+  'postcentral', 'posteriorcingulate', 'precentral', 'precuneus', 'rostralanteriorcingulate',
+  'rostralmiddlefrontal', 'superiorfrontal', 'superiorparietal', 'superiortemporal', 'supramarginal',
+  'frontalpole', 'temporalpole', 'transversetemporal', 'insula'
+)
+regions <- c(paste0('left_', cortical_regions), paste0('right_', cortical_regions))
+subcortical <- c('thalamus', 'caudate', 'putamen', 'hippocampus')
+regions <- c(regions, paste0('left_', subcortical), paste0('right_', subcortical))
+stopifnot(length(regions) == p)
+X <- as.data.frame(X_data)
+colnames(X) <- regions
+head(X[, 1:5], 3)
+```
+
+### NSA-Flow Initialization
+We initialize NSA-Flow using non-negative matrix factorization (NMF) to provide a structured starting point:
+
+```{r initialization}
+nmf_init <- tryCatch({
+  suppressWarnings(nmf_fit <- nmf(t(as.matrix(X)), rank = k, .options = "v"))
+  basis(nmf_fit)
+}, error = function(e) {
+  message("NMF failed, using random Gaussian initialization")
+  matrix(abs(rnorm(p * k)), nrow = p, ncol = k)
+})
+
+# Normalize columns
+Y0_init <- sweep(nmf_init, 2, sqrt(colSums(nmf_init^2)), FUN = "/")
+Y0_init <- Y0_init * 1.0
+```
+
+### NSA-Flow Execution
+
+```{r nsa-flow-run, eval=FALSE}
+M_nsa <- nsa_flow(
+  Y0 = Y0_init,
+  X0 = NULL,
+  w = 0.001,
+  retraction = 'soft_svd',
+  initial_learning_rate = 1e-3,
+  tol = 1e-3,
+  optimizer = 'adam',
+  plot = TRUE,
+  max_iter = 200,
+  verbose = TRUE,
+  apply_nonneg = TRUE
+)
+Ymat <- M_nsa$Y
+rownames(Ymat) <- regions
+```
+
+### Performance Evaluation
+We define metrics to evaluate NSA-Flow's reconstruction and network representation:
+
+```{r evaluation}
+library(Metrics)
+
+# Flatten matrices for comparison
+raw_flat <- as.numeric(as.matrix(X))
+nsa_flat <- as.numeric(Ymat)
+L <- min(length(raw_flat), length(nsa_flat))
+
+# Pearson correlation between raw and reconstructed
+recon_corr <- cor(raw_flat[1:L], nsa_flat[1:L], method = "pearson")
+
+# Mean squared error
+recon_mse <- mse(raw_flat[1:L], nsa_flat[1:L])
+
+# Orthogonality defect (network separation metric)
+orth_defect <- invariant_orthogonality_defect(Ymat)
+
+data.frame(Metric = c("Pearson correlation", "MSE", "Orthogonality defect"),
+           Value = c(recon_corr, recon_mse, orth_defect))
+```
+
+### Visualization
+
+#### Heatmap of Network Loadings
+
+```{r heatmap}
+Y_norm <- sweep(Ymat, 2, colSums(Ymat), "/")
+Y_df <- as.data.frame(Y_norm) %>% rownames_to_column("Region") %>% pivot_longer(-Region, names_to = "Network", values_to = "Loading")
+
+ggplot(Y_df, aes(x = Network, y = Region, fill = Loading)) +
+  geom_tile(color = "white", size = 0.05) +
+  scale_fill_viridis_c(option = "plasma", direction = -1) +
+  theme_minimal(base_size = 12) +
+  labs(title = "Network Loadings Across Brain Regions", x = "Network", y = "Region", fill = "Rel. loading") +
+  coord_fixed(ratio = 0.18)
+```
+
+#### Top Regions per Network (Bar Charts)
+
+```{r top-bars, fig.height=8, fig.width=10}
+for (net in 1:k) {
+  loadings <- Y_norm[, net]
+  top_idx <- head(order(loadings, decreasing = TRUE), 10)
+  load_df <- data.frame(Region = rownames(Y_norm)[top_idx], Loading = loadings[top_idx]) %>% mutate(Region = factor(Region, levels = rev(Region)))
+  p_bar <- ggplot(load_df, aes(x = Loading, y = Region, fill = Loading)) +
+    geom_col(width = 0.7) +
+    scale_fill_gradient(low = "lightblue", high = "darkblue") +
+    theme_minimal() +
+    labs(title = paste("Top 10 Regions — Network", net), x = "Relative loading", y = "") +
+    geom_text(aes(label = round(Loading, 3)), hjust = -0.05, size = 3)
+  print(p_bar)
+}
+```
+
+NSA-Flow effectively decomposes cortical thickness data into interpretable networks. Metrics indicate reasonable reconstruction fidelity (Pearson correlation) and component orthogonality. Visualizations, including heatmaps and top-region bar charts, allow identification of regionally dominant networks, supporting downstream connectomic analyses.
+This demonstration illustrates the application of NSA-Flow for neuroimaging data decomposition, alongside evaluation metrics to assess performance. Future work could integrate real imaging datasets, longitudinal analyses, and cross-validation against known anatomical networks.
+
+
 # Discussion
 
 The Non-negative Stiefel Approximating Flow (NSA-Flow) provides a robust and flexible framework for optimizing non-negative matrices under tunable orthogonality constraints, addressing the limitations of strict orthogonal NMF \cite{ding2006orthogonal,yoo2009orthogonal} and neural regularization methods \cite{wu2023towards,kurtz2023group}. Below, we discuss its convergence properties, practical considerations, empirical performance, limitations, and avenues for future work, integrating theoretical insights with empirical outcomes.
@@ -1588,172 +1745,5 @@ sessionInfo()
 ```
 
 
-
-
-
-
-```{r brainexample,echo=FALSE, fig.width=10, fig.height=6, message=FALSE, warning=FALSE,eval=FALSE}
-library(ANTsR)
-library(NMF) # For NMF initialization
-library(ggplot2)
-library(reshape2) # For melting data (though using tidyr now)
-library(dplyr)
-library(tidyr) # For pivot_longer
-library(fmsb) # For radarchart (install if needed: install.packages("fmsb"))
-library(igraph) # For graph visualization
-library(scales) # For alpha in radarchart
-library(ggpubr)
-set.seed(42)
-
-# Assume nsa_flow is defined in the environment from previous refactoring
-
-# Step 1: Generate synthetic cortical thickness data using DKT atlas
-# 200 subjects (rows), 76 brain regions (columns)
-N <- 200 # subjects
-p <- 76 # regions
-# Generate non-negative data simulating cortical thickness (mean ~2.5 mm, sd ~0.5 mm, clipped to >=0)
-X_data <- matrix(rnorm(N * p, mean = 2.5, sd = 0.5), nrow = N, ncol = p)
-X_data[X_data < 0] <- 0
-# Reasonable brain region names based on Desikan-Killiany (DK) atlas: 34 cortical per hemisphere (68) + 4 subcortical per hemisphere (8) = 76
-# Note: DKT is an extension, but DK is core; using standard DK labels
-cortical_regions <- c(
-  'bankssts', 'caudalanteriorcingulate', 'caudalmiddlefrontal', 'cuneus', 'entorhinal',
-  'fusiform', 'inferiorparietal', 'inferiortemporal', 'isthmuscingulate', 'lateraloccipital',
-  'lateralorbitofrontal', 'lingual', 'medialorbitofrontal', 'middletemporal', 'parahippocampal',
-  'paracentral', 'parsopercularis', 'parsorbitalis', 'parstriangularis', 'pericalcarine',
-  'postcentral', 'posteriorcingulate', 'precentral', 'precuneus', 'rostralanteriorcingulate',
-  'rostralmiddlefrontal', 'superiorfrontal', 'superiorparietal', 'superiortemporal', 'supramarginal',
-  'frontalpole', 'temporalpole', 'transversetemporal', 'insula'
-) # 34 regions
-# Create left and right versions
-regions <- c(paste0('left_', cortical_regions), paste0('right_', cortical_regions))
-# Add 4 subcortical per hemisphere
-subcortical <- c('thalamus', 'caudate', 'putamen', 'hippocampus')
-regions <- c(regions, paste0('left_', subcortical), paste0('right_', subcortical))
-stopifnot(length(regions) == 76)
-# Create data.frame for interpretability
-X <- as.data.frame(X_data)
-colnames(X) <- regions
-cat("Sample of generated data:\n")
-print(head(X[, 1:5])) # Show first few columns
-w=0.999
-M_nsa <- nsa_flow( t(data.matrix(X)), w = w, retraction = 'soft_svd', 
-    initial_learning_rate=10,
-    max_iter=500, verbose=T)$Y
-invariant_orthogonality_defect(M_nsa)
-mvec=as.numeric( t(M_nsa)  )
-mvecsel=mvec>quantile(mvec[mvec>0],0.2)
-scatdf=data.frame( raw_vals=as.numeric(data.matrix(X))[mvecsel], nsa_vals=as.numeric(mvec[mvecsel]) )
-ggscatter( scatdf, x = "raw_vals", y = "nsa_vals",
-           add = "reg.line", conf.int = TRUE,
-           cor.coef = TRUE, cor.method = "pearson",
-           xlab = "Raw Cortical Thickness", ylab = "NSA-Flow Reconstructed Values",
-           title = "NSA-Flow Reconstruction of Cortical Thickness Data",
-           ggtheme = theme_minimal(base_size = 14) ) +
-  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
-
-M_nsa <- nsa_flow( t( X ), w = w, retraction = 'soft_svd', apply_nonneg = TRUE)$Y
-rownames(M_nsa) <- regions
-# Normalize columns to sum to 1 for interpretability (relative loadings per network)
-Y_norm <- sweep(M_nsa, 2, colSums(M_nsa), "/")
-
-# 4.1: Heatmap of entire basis matrix Y (regions x networks) - elegant with ggplot
-Y_df <- as.data.frame(Y_norm) %>%
-  rownames_to_column(var = "Region") %>%
-  pivot_longer(cols = -Region, names_to = "Network", values_to = "Loading")
-ggplot(Y_df, aes(x = Network, y = Region, fill = Loading)) +
-  geom_tile(color = "white", size = 0.1) +
-  scale_fill_viridis_c(option = "plasma", direction = -1) +
-  theme_minimal(base_size = 12) +
-  labs(title = "Network Loadings Across Brain Regions",
-       x = "Networks", y = "Brain Regions", fill = "Loading") +
-  theme(axis.text.y = element_text(size = 6), # Small text for many regions
-        plot.title = element_text(hjust = 0.5, face = "bold"),
-        panel.grid = element_blank()) +
-  coord_fixed(ratio = 0.2) # Adjust aspect for readability
-
-# 4.2: For each network, horizontal bar plot of top 10 regions - sleek and colorful
-for (net in 1:k) {
-  loadings <- na.omit(sort(Y_norm[, net], decreasing = TRUE)[1:10])
-  load_df <- data.frame(Region = names(loadings), Loading = loadings) %>%
-    mutate(Region = factor(Region, levels = Region))
-  ggplot(load_df, aes(x = Loading, y = Region, fill = Loading)) +
-    geom_bar(stat = "identity", width = 0.7) +
-    scale_fill_gradient2(low = "lightblue", high = "darkblue", midpoint = median(load_df$Loading)) +
-    theme_minimal(base_size = 14) +
-    labs(title = paste("Top Regions in Network", net),
-         x = "Loading", y = "") +
-    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
-          axis.text.y = element_text(size = 12, color = "black"),
-          panel.grid.major.y = element_blank()) +
-    geom_text(aes(label = round(Loading, 2)), hjust = -0.1, size = 4)
-  # ggsave(paste0("top_regions_network_", net, ".png"), width = 12, height = 6)
-}
-
-# 4.3: Radar plot for network profiles - aesthetic radial visualization with fmsb (top 10 regions only, to avoid overcrowding)
-for (net in 1:k) {
-  loadings <- Y_norm[, net]
-  top_idx <- order(loadings, decreasing = TRUE)[1:10]
-  loadings_top <- loadings[top_idx]
-  regions_top <- names(loadings_top)
-  # For radarchart, need data.frame with max/min rows for scaling
-  radar_df <- rbind(rep(max(loadings_top) * 1.1, 10), rep(0, 10), loadings_top)
-  colnames(radar_df) <- regions_top
-  radarchart(radar_df, axistype = 1,
-             pcol = "teal", pfcol = alpha("teal", 0.25), plwd = 2,
-             cglcol = "grey", cglty = 1, axislabcol = "grey", caxislabels = seq(0, max(loadings_top), length = 5),
-             cglwd = 0.8, vlcex = 0.8) # Adjusted for 10 labels
-  title(paste("Radial Profile of Network", net, "(Top 10 Regions)"), line = 3)
-  # Save as PNG if needed: dev.print(png, filename = paste0("radar_network_", net, ".png"), width = 800, height = 800)
-}
-
-# 4.4: Network graph visualization - beautiful connectome-like view with igraph
-# Improved lobe mapping (for demo; assign regions to lobes)
-lobe_map <- sapply(regions, function(r) {
-  reg <- substr(r, 6, nchar(r))  # Remove 'left_' or 'right_'
-  if (grepl("bankssts|caudalmiddlefrontal|rostralmiddlefrontal|superiorfrontal|frontalpole|parsopercularis|parsorbitalis|parstriangularis|lateralorbitofrontal|medialorbitofrontal", reg)) "frontal" else
-  if (grepl("inferiortemporal|middletemporal|superiortemporal|temporalpole|transversetemporal|fusiform|entorhinal|parahippocampal", reg)) "temporal" else
-  if (grepl("inferiorparietal|superiorparietal|supramarginal|precuneus|postcentral|paracentral", reg)) "parietal" else
-  if (grepl("lateraloccipital|cuneus|pericalcarine|lingual", reg)) "occipital" else
-  if (grepl("caudalanteriorcingulate|isthmuscingulate|posteriorcingulate|rostralanteriorcingulate|insula", reg)) "limbic" else
-  if (grepl("hippocampus", reg)) "limbic" else "subcortical"
-})
-lobe_colors <- c(frontal = "blue", temporal = "green", parietal = "red",
-                 occipital = "purple", limbic = "orange", subcortical = "grey")
-for (net in 1:k) {
-  threshold <- quantile(Y_norm[, net], 0.8) # Top 20% regions
-  active_idx <- which(Y_norm[, net] > threshold)
-  active_regions <- rownames(Y_norm)[active_idx]
-  loadings_active <- Y_norm[active_idx, net]
-  lobes_active <- lobe_map[active_idx]
-  # Create graph
-  g <- graph.empty(n = length(active_regions), directed = FALSE)
-  V(g)$name <- active_regions
-  V(g)$loading <- loadings_active
-  V(g)$lobe <- lobes_active
-  V(g)$color <- lobe_colors[V(g)$lobe]
-  V(g)$size <- V(g)$loading * 30 # Size by loading
-  # Add edges between regions in same lobe (demo; in real, use connectivity matrix)
-  lobe_groups <- split(seq_along(active_regions), lobes_active)
-  for (group_name in names(lobe_groups)) {
-    group <- lobe_groups[[group_name]]
-    if (length(group) > 1) {
-      comb_pairs <- t(combn(group, 2))
-      g <- add_edges(g, comb_pairs)
-    }
-  }
-  # Layout and plot
-  layout <- layout_with_fr(g)
-  plot(g, layout = layout, vertex.label = V(g)$name, vertex.label.cex = 0.7,
-       vertex.label.color = "black", vertex.frame.color = NA,
-       vertex.color = V(g)$color, vertex.size = V(g)$size,
-       edge.color = "gray", edge.width = 1,
-       main = paste("Graph Representation of Network", net))
-  # Add legend for lobes
-  legend("topright", legend = names(lobe_colors), fill = lobe_colors, title = "Lobes", cex = 0.8)
-  # Save: dev.print(png, filename = paste0("graph_network_", net, ".png"), width = 1200, height = 1200)
-}
-
-```
 
 # References

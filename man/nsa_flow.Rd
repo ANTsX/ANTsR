@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{nsa_flow}
 \alias{nsa_flow}
-\title{NSA-Flow Optimization (v4 - Robust Hybrid Riemannian-Euclidean)}
+\title{NSA-Flow Optimization}
 \usage{
 nsa_flow(
   Y0,
@@ -18,23 +18,7 @@ nsa_flow(
   initial_learning_rate = 0.001,
   record_every = 1,
   window_size = 5,
-  plot = FALSE
-)
-
-nsa_flow(
-  Y0,
-  X0 = NULL,
-  w = 0.5,
-  retraction = c("soft_svd", "polar", "qr", "none", "soft_polar", "svd", "soft_qr"),
-  max_iter = 100,
-  tol = 1e-06,
-  verbose = FALSE,
-  seed = 42,
-  apply_nonneg = TRUE,
-  optimizer = "adam",
-  initial_learning_rate = 0.001,
-  record_every = 1,
-  window_size = 5,
+  c1_armijo = 1e-06,
   plot = FALSE
 )
 }
@@ -75,22 +59,12 @@ Default is 1 (record every iteration).}
 \item{window_size}{Integer, size of the window for energy stability convergence check.
 Default is 5.}
 
+\item{c1_armijo}{Numeric, Armijo condition constant for line search.}
+
 \item{plot}{Logical, if \code{TRUE}, generates a ggplot of fidelity and orthogonality
 traces with dual axes. Default is \code{FALSE}.}
-
-\item{line_search_beta}{Numeric, shrinkage factor for backtracking (\code{0 < beta < 1}). Default is 0.5.}
 }
 \value{
-A list containing:
-  \itemize{
-    \item \code{Y}: Numeric matrix, the best solution found (lowest total energy).
-    \item \code{traces}: Data frame with convergence metrics.
-    \item \code{final_iter}: Integer, number of iterations performed.
-    \item \code{plot}: A ggplot object of the trace if \code{plot = TRUE}.
-    \item \code{best_total_energy}: Numeric, the lowest total energy achieved.
-    \item \code{X0}: The target matrix used in the optimization.
-  }
-
 A list containing:
   \itemize{
     \item \code{Y}: Numeric matrix, the best solution found (lowest total energy).
@@ -104,28 +78,11 @@ A list containing:
   }
 }
 \description{
-Performs a tunable optimization to balance fidelity to a target matrix and orthogonality
-of the solution matrix. This function implements a robust hybrid optimization strategy that
-correctly adapts to the user-specified weight `w`.
-
 Performs optimization to balance fidelity to a target matrix and orthogonality
 of the solution matrix using a weighted objective function.
 The function supports multiple retraction methods and includes robust convergence checks.
 }
 \details{
-This function solves the optimization problem:
-\deqn{E(Y) = (1 - w) \cdot \frac{1}{2}||Y - X0||_F^2 + w \cdot \lambda \cdot \text{defect}(Y)}
-where \code{defect(Y)} is a scale-invariant measure of orthogonality deviation, and
-\eqn{\lambda} is an internal scaling factor that balances the terms at initialization.
-
-The optimization strategy correctly adapts based on the weight `w`:
-\itemize{
-  \item **If `w = 0`:** The problem is a pure fidelity optimization. The algorithm uses a standard **Proximal Gradient Descent** in Euclidean space to minimize \eqn{||Y - X0||_F^2}, subject to non-negativity if `apply_nonneg = TRUE`. No Riemannian operations (projection, retraction) are performed.
-  \item **If `w = 1`:** The problem is a pure orthogonality optimization. The algorithm uses **Riemannian Gradient Descent** on the Stiefel manifold to minimize the orthogonality defect.
-  \item **If `0 < w < 1`:** The problem is a hybrid. The algorithm uses **Proximal Riemannian Gradient Descent**, where the combined Euclidean gradient is projected onto the tangent space of the Stiefel manifold before the update step.
-}
-This ensures correct and stable behavior across the entire range of `w`, passing the test cases for pure fidelity and pure orthogonality. Convergence is guaranteed by a robust backtracking line search that ensures monotonic energy decrease.
-
 The function minimizes a weighted objective combining fidelity to \code{X0} and
 orthogonality of \code{Y}, defined as:
 \deqn{E(Y) = (1 - w) * ||Y - X0||_F^2 / (2 * p * k) + w * defect(Y)}
@@ -136,21 +93,6 @@ retraction to enforce orthogonality constraints. Convergence is checked via
 relative gradient norm and energy stability over a window of iterations.
 }
 \examples{
-set.seed(123)
-Y0 <- matrix(runif(50), 10, 5)
-
-# Test Case 1: Pure Fidelity (w=0). Result should be close to pmax(Y0,0).
-res_fid <- nsa_flow(Y0, X0=Y0, w=0, apply_nonneg=TRUE, verbose=TRUE)
-print(paste("Fidelity error at w=0:", norm(res_fid$Y - pmax(Y0,0), "F")))
-
-# Test Case 2: Pure Orthogonality (w=1). Result should have low orth. defect.
-res_orth <- nsa_flow(Y0, X0=Y0, w=1, verbose=TRUE)
-print(paste("Orthogonality defect at w=1:", norm(crossprod(res_orth$Y) - diag(5),'F')))
-
-# Test Case 3: Hybrid (0 < w < 1).
-res_hybrid <- nsa_flow(Y0, X0=Y0, w=0.1, verbose=TRUE, plot=TRUE)
-if (!is.null(res_hybrid$plot)) print(res_hybrid$plot)
-
 set.seed(123)
 Y0 <- matrix(runif(20), 5, 4)
 X0 <- matrix(runif(20), 5, 4)

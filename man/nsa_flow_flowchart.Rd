@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{nsa_flow_flowchart}
 \alias{nsa_flow_flowchart}
-\title{Create NSA-Flow Algorithm Flowchart}
+\title{NSA-Flow Algorithm Flowchart}
 \usage{
 nsa_flow_flowchart(
   node_fill_color = "lightblue",
@@ -23,22 +23,21 @@ nsa_flow_flowchart(
 
 \item{font_name}{Font for node labels (default: "Helvetica").}
 
-\item{node_shape}{Shape of nodes (default: "rectangle").}
+\item{node_shape}{Node shape (default: "rectangle").}
 
-\item{graph_rankdir}{Direction of graph layout (default: "TB" for top-to-bottom).}
+\item{graph_rankdir}{Graph layout direction (default: "TB" = top to bottom).}
 
-\item{fontsize}{Font size for node labels (default: 10).}
+\item{fontsize}{Font size (default: 10).}
 }
 \value{
-A DiagrammeR graph object representing the NSA-Flow algorithm workflow.
+A DiagrammeR graph object.
 }
 \description{
-Generates a DiagrammeR flowchart visualizing the Non-negative Stiefel Approximating Flow (NSA-Flow) algorithm.
-The diagram includes initialization, gradient computation, Riemannian descent, retraction choices, 
-non-negativity projection, and convergence checks with customizable styling.
+Generates a DiagrammeR flowchart summarizing the full NSA-Flow optimization pipeline, 
+including initialization, gradient computation, Riemannian projection, descent, 
+retraction, non-negativity, and convergence checks.
 }
 \examples{
 library(DiagrammeR)
 nsa_flow_flowchart()
-nsa_flow_flowchart(node_fill_color = "lightgreen", edge_color = "blue")
 }
