@@ -1596,6 +1596,7 @@ stopifnot(length(regions) == p)
 X <- as.data.frame(X_data)
 colnames(X) <- regions
 head(X[, 1:5], 3)
+
 ```
 
 ### NSA-Flow Initialization
@@ -1611,8 +1612,8 @@ nmf_init <- tryCatch({
 })
 
 # Normalize columns
-Y0_init <- sweep(nmf_init, 2, sqrt(colSums(nmf_init^2)), FUN = "/")
-Y0_init <- Y0_init * 1.0
+# Y0_init <- sweep(nmf_init, 2, sqrt(colSums(nmf_init^2)), FUN = "/")
+# Y0_init <- Y0_init * 1.0
 
 
 # Center data (important for PCA)
@@ -1708,6 +1709,84 @@ for (net in 1:k) {
     labs(title = paste("Top 10 Regions — Network", net), x = "Relative loading", y = "") +
     geom_text(aes(label = round(Loading, 3)), hjust = -0.05, size = 3)
   print(p_bar)
+}
+
+
+library(fmsb)
+library(scales)
+
+# --- Step 7: Radar charts (top 10 regions per network) ----------------------
+for (net in 1:k) {
+  loadings <- Y_norm[, net]
+  if (all(is.na(loadings))) next
+  
+  # Top 10 regions
+  top_idx <- head(order(loadings, decreasing = TRUE), 10)
+  loadings_top <- loadings[top_idx]
+  regions_top <- names(loadings_top)
+  
+  # fmsb requires data.frame with max and min as first two rows
+  max_row <- rep(max(loadings_top, na.rm = TRUE) * 1.1, length(loadings_top))
+  min_row <- rep(0, length(loadings_top))
+  
+  radar_df <- rbind(max_row, min_row, loadings_top)
+  radar_df <- as.data.frame(radar_df)             
+  rownames(radar_df) <- c("max", "min", "loading")
+  colnames(radar_df) <- regions_top
+  
+  # Plot
+  par(mar = c(1,1,2,1))
+  radarchart(radar_df, axistype = 1,
+             pcol = "#008080", pfcol = alpha("#008080", 0.25), plwd = 2,
+             cglcol = "grey", cglty = 1, axislabcol = "grey",
+             cglwd = 0.8, vlcex = 0.8,
+             title = paste0("Network ", net))
+}
+
+
+# --- Step 8: Connectome-like graph for each network ------------------------
+# Assign lobes (crude mapping)
+lobe_map <- sapply(rownames(Y_norm), function(r) {
+  reg <- sub("^(left_|right_)", "", r)
+  if (grepl("frontal|rostral|caudal|pars|frontalpole", reg)) "frontal" else
+  if (grepl("temporal|fusiform|entorhinal|parahippocampal|temporalpole|transverse", reg)) "temporal" else
+  if (grepl("parietal|precuneus|postcentral|supramarginal", reg)) "parietal" else
+  if (grepl("occipital|cuneus|lingual|lateraloccipital|pericalcarine", reg)) "occipital" else
+  if (grepl("cingulate|insula|isthmus", reg)) "limbic" else "subcortical"
+})
+lobe_colors <- c(frontal = "blue", temporal = "green", parietal = "red",
+                 occipital = "purple", limbic = "orange", subcortical = "grey")
+
+for (net in 1:k) {
+  threshold <- quantile(Y_norm[, net], 0.8, na.rm = TRUE)
+  active_idx <- which(Y_norm[, net] > threshold)
+  if (length(active_idx) < 2) next
+  active_regions <- rownames(Y_norm)[active_idx]
+  loadings_active <- Y_norm[active_idx, net]
+  lobes_active <- lobe_map[active_idx]
+  g <- graph.empty(n = length(active_regions), directed = FALSE)
+  V(g)$name <- active_regions
+  V(g)$loading <- loadings_active
+  V(g)$lobe <- lobes_active
+  V(g)$color <- unname(lobe_colors[V(g)$lobe])
+  V(g)$size <- pmax(5, V(g)$loading * 30)
+  # add edges among nodes in same lobe
+  lobe_groups <- split(seq_along(active_regions), lobes_active)
+  for (grp in lobe_groups) {
+    if (length(grp) > 1) {
+      comb_pairs <- t(combn(grp, 2))
+      # add_edges expects vector, create pairs
+      edge_vec <- as.vector(t(comb_pairs))
+      g <- add_edges(g, edge_vec)
+    }
+  }
+  layout <- layout_with_fr(g)
+  plot(g, layout = layout, vertex.label = V(g)$name, vertex.label.cex = 0.7,
+       vertex.label.color = "black", vertex.frame.color = NA,
+       vertex.color = V(g)$color, vertex.size = V(g)$size,
+       edge.color = "gray", edge.width = 1,
+       main = paste("Graph — Network", net))
+  legend("topright", legend = names(lobe_colors), fill = lobe_colors, title = "Lobes", cex = 0.8)
 }
 ```
 
