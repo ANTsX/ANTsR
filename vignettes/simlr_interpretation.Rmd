@@ -85,7 +85,7 @@ Now we apply the SiMLR algorithm to the simulated multi-view data to find a comm
 ```{r step2}
 # Applying SiMLR
 prepro=c( "centerAndScale","np")
-constr='orthox0.02x50' # good default
+constr='orthox0.5x50' # good default
 result <- simlr(matlist,constraint=constr,scale=prepro, 
   mixAlg='pca', energyType='acc', # recommended
   verbose=TRUE)
@@ -268,10 +268,11 @@ We use a metric (`rvcoef`) that is not directly optimized to assess the signific
 ```{r permutation,fig.width=8,fig.height=8}
 diagcorr = function( X,Y ) mean(abs(diag(cor(X,Y))))
 initu = initializeSimlr( matlist, 3, jointReduction = TRUE  )
-np=40
+np=5
 myperm = simlr.perm(  matlist,
-  energyType='regression',
+  energyType='acc',
   constraint=constr,scale=prepro, 
+  mixAlg='pca', # recommended
   initialUMatrix=initu,
   iterations=500,
   nperms=np, FUN=adjusted_rvcoef, verbose=TRUE )
@@ -344,7 +345,7 @@ simparms = simlr.parameters(
     nsimlr_options = list( 2 ),
     prescaling_options = list( 
             c( "centerAndScale",  "np"), c( "center",  "np") ),
-    objectiver_options = list('acc','normalized_correlation','lrr',"regression"),
+    objectiver_options = list('acc','normalized_correlation', "regression"),
     mixer_options=list(  'pca' , 'ica'), 
     sparval_options=list(  c(0.5,0.5,0.5) ), # less relevant if orthowt > 0
     expBeta_options = list( c(0.0) ),
@@ -352,7 +353,7 @@ simparms = simlr.parameters(
             c("positive","positive","positive")),
     optimus_options=list( "adam",  'adagrad', 'nadam' ),
     constraint_options=csearch,
-    search_type="full",  # full or random
+    search_type="random",  # full or random
     num_samples=5
     )
 ``` 

@@ -1602,7 +1602,7 @@ if ( file.exists(adnifn) ) {
     ppmiadni=ppmiadni[(ppmiadni$studyName=='ADNI'),]
     ppmiadni=ppmiadni[ppmiadni$yearsbl==0,]
     regions_OG=subtyper::getNamesFromDataframe( c("T1Hier_thk_","LRAVG"), ppmiadni, exclusions=c('Asym','reference', 'adjusted' ))
-    adni_variable_names <- c(
+    adni_variables <- c(
         "MMSE", "CDRSB", "ADAS13", "ADASQ4", 
         "mPACCdigit", "mPACCtrailsB",
     #    "RAVLT_immediate", "RAVLT_perc_forgetting", 
@@ -1659,6 +1659,20 @@ M_nsa <- nsa_flow(
   verbose = TRUE
 )
 Ymat <- M_nsa$Y
+# add predictors to 
+proj = data.matrix(X) %*% data.matrix(Ymat)
+colnames(proj) = paste0("nsa_net",1:ncol(proj))
+ppmiadni=cbind(ppmiadni, proj)
+for ( cog in adni_variables ) {
+    covars=c("AGE", "PTGENDER", "PTEDUCAT", "APOE4")
+    covarsf=paste(covars, collapse="+")
+    myform=paste(cog, "~", covarsf, '+', paste(colnames(proj), collapse="+") )
+    temp=ppmiadni[, c(cog, covars, colnames(proj)) ]
+    mod=lm( myform  , data=temp )    
+    print( summary(mod) )
+    cat("cog:", cog, "\n" )
+    Sys.sleep(3)
+}
 ```
 
 ### Performance Evaluation
@@ -1744,7 +1758,7 @@ map_region_to_lobe <- function(region_names) {
     if (grepl("cingulate|insula|isthmus", r)) return("Limbic")
     if (grepl("amygdala|hippocampus", r)) return("Medial Temporal / Limbic")
     if (grepl("thalamus|habenular", r)) return("Diencephalon")
-    if (grepl("caudate|putamen|pallidum|accumbens", r)) return("Basal Ganglia")
+    if (grepl("thalamus|habenular", r)) return("Diencephalon")
     if (grepl("brainstem|parabrachial|midbrain|pons|medulla|tegmental", r)) return("Brainstem")
     if (grepl("cerebellum", r)) return("Cerebellum")
     return("Unknown")
@@ -1797,7 +1811,7 @@ ggplot(Y_df, aes(x = Network, y = Region, fill = Loading)) +
 
 ```{r top-bars, fig.height=8, fig.width=10,eval=FALSE}
 #### Top Regions per Network (Bar Charts)
-for (net in 1:k) {
+for (net in 1:netrank) {
   loadings <- Y_norm[, net]
   top_idx <- head(order(loadings, decreasing = TRUE), 10)
   load_df <- data.frame(Region = rownames(Y_norm)[top_idx], Loading = loadings[top_idx]) %>% mutate(Region = factor(Region, levels = rev(Region)))
@@ -1818,7 +1832,7 @@ library(fmsb)
 library(scales)
 
 # --- Step 7: Radar charts (top 10 regions per network) ----------------------
-for (net in 1:k) {
+for (net in 1:netrank) {
   loadings <- Y_norm[, net]
   if (all(is.na(loadings))) next
   
@@ -1859,7 +1873,7 @@ lobe_map <- sapply(rownames(Y_norm), function(r) {
 })
 lobe_colors <- c(frontal = "blue", temporal = "green", parietal = "red",
                  occipital = "purple", limbic = "orange", subcortical = "grey")
-for (net in 1:k) {
+for (net in 1:netrank) {
   threshold <- quantile(Y_norm[, net], 0.8, na.rm = TRUE)
   active_idx <- which(Y_norm[, net] > threshold)
   if (length(active_idx) < 2) next
@@ -1894,7 +1908,7 @@ for (net in 1:k) {
   lobe_map = map_region_to_lobe( regions )
   library(igraph)
   library(dplyr)
-  for (net in 1:k) {
+  for (net in 1:netrank) {
     netvec=Y_norm[, net]
     netvec=netvec[netvec>0]
     threshold <- quantile(netvec, 0.25, na.rm = TRUE)
@@ -1957,6 +1971,12 @@ for (net in 1:k) {
   }
 
 }
+```
+
+### statistical inference in ADNI
+
+```{r, lmadni,echo=FALSE}
+
 ```
 
 NSA-Flow effectively decomposes cortical thickness data into interpretable networks. Metrics indicate reasonable reconstruction fidelity (Pearson correlation) and component orthogonality. Visualizations, including heatmaps and top-region bar charts, allow identification of regionally dominant networks, supporting downstream connectomic analyses.
