@@ -63,9 +63,6 @@ where \( w \in [0, 1] \) controls the trade-off between fidelity and orthogonali
 
 This scale-invariant defect penalizes off-diagonal elements of the normalized Gram matrix, avoiding trivial solutions \cite{edelman1998geometry}. Non-negativity (\( Y \geq 0 \)) is enforced via proximal projection \cite{parikh2014proximal}. The optimization operates on the Stiefel manifold \( \mathcal{S}_{p,k} = \{ Y \in \mathbb{R}^{p \times k} \mid Y^\top Y = I_k \} \), relaxed via tunable retractions \cite{absil2008optimization}.
 
-## Gradient Derivations
-
-### Fidelity Gradient
 
 The fidelity term is \( g(Y) = \frac{1 - w}{2 p k} \|Y - X_0\|_F^2 \). Its Euclidean gradient is:
 
@@ -75,7 +72,6 @@ The fidelity term is \( g(Y) = \frac{1 - w}{2 p k} \|Y - X_0\|_F^2 \). Its Eucli
 
 For descent, we use \( -\fid_\eta (Y - X_0) \), where \( \fid_\eta = \frac{1 - w}{p k g_0} \), and \( g_0 = \frac{1}{2} \|Y_0 - X_0\|_F^2 / (p k) \) is the initial fidelity scale (floored at \( 10^{-8} \)).
 
-### Orthogonality Gradient
 
 The defect term is \( f(Y) = \frac{w}{4} \defect(Y) \), scaled by \( c_\orth = 4 w / d_0 \), where \( d_0 = \defect(Y_0) \) (floored at \( 10^{-8} \)). With \( n = \|Y\|_F^2 \), \( \hat{G} = Y^\top Y / n \), \( D = \diag(\diag(\hat{G})) \), the gradient is:
 
@@ -83,7 +79,6 @@ The defect term is \( f(Y) = \frac{w}{4} \defect(Y) \), scaled by \( c_\orth = 4
 \nabla f(Y) = c_\orth \left[ Y (\hat{G} - D) / n - (\|\hat{G} - D\|_F^2 / n) \cdot Y / n \right].
 \]
 
-### Riemannian Gradient
 
 The combined Euclidean gradient \( \nabla E(Y) = \nabla g(Y) + \nabla f(Y) \) is projected onto the tangent space \( T_Y \mathcal{S}_{p,k} \) \cite{edelman1998geometry}:
 
@@ -93,24 +88,24 @@ The combined Euclidean gradient \( \nabla E(Y) = \nabla g(Y) + \nabla f(Y) \) is
 
 where \( \sym(A) = (A + A^\top)/2 \), ensuring skew-symmetry \cite{absil2008optimization}.
 
-## Descent and Line Search
 
 Descent uses \( Z = Y - \alpha \grad_\mathcal{M} E(Y) \), with adaptive step size \( \alpha \) via backtracking line search (halving \( \alpha \) up to 10 times until energy decreases). An Adam optimizer (\( \beta_1 = 0.9 \), \( \beta_2 = 0.999 \), \( \epsilon = 10^{-8} \)) incorporates momentum \cite{parikh2014proximal}.
 
-## Retractions
 
 Retractions map \( Z \) to the Stiefel manifold \cite{absil2008optimization}:
+
 - **Polar**: \( R_Y(\Xi) = (Y + \Xi) (I_k + \Xi^\top \Xi)^{-1/2} \).
+
 - **QR**: \( Y + \Xi = QR \), then \( R_Y(\Xi) = Q \sign(\diag(R)) \).
-- **Soft**: \( T_\omega = (1 - w) I_k + w (Z^\top Z)^{-1/2} \), \( R_Y(\Xi) = Z T_\omega \).
+
+- **Soft QR**: \( T_\omega = (1 - w) I_k + w (Z^\top Z)^{-1/2} \), \( R_Y(\Xi) = Z T_\omega \).
+
 - **None**: Skip retraction.
 
-Non-negativity is enforced post-retraction via \( P_+(Y) = \max(Y, 0) \) \cite{parikh2014proximal}.
+Non-negativity is enforced post-retraction via \( P_+(Y) = \max(Y, 0) \) \cite{parikh2014proximal}. Convergence is checked via:
 
-## Convergence Criteria
-
-Convergence is checked via:
 1. Relative gradient norm: \( \|\grad_\mathcal{M} E(Y)\|_F / \|\grad_\mathcal{M} E(Y_0)\|_F < \tol \).
+
 2. Energy stability over window \( m \): \( (\max(E_{t-m:t}) - \min(E_{t-m:t})) / |\mean(E_{t-m:t})| < \tol \).
 
 ## Implementation
@@ -488,8 +483,8 @@ omega_default = 0.5
 ini_default = 0.001
 nsa_flow = ANTsR::nsa_flow
 optype='bidirectional_armijo_gradient'
-optype='armijo_gradient'
 optype='adam'
+optype='armijo_gradient'
 def_ret = "soft_svd"
 nsa_default <- function(Y0, w = omega_default, verbose = FALSE ) {
   nsa_flow(
@@ -600,7 +595,7 @@ grid.arrange(res_polar$plot,res_qr$plot,res_soft$plot, nrow=3, top='QR, Polar, S
 
 ```{r stiefel_sweep_full, fig.width=12, fig.height=8, echo=FALSE, message=FALSE}
 ###
-w_seq <- c( 0.05, 0.25, 0.5, 0.75, 0.99 )
+w_seq <- c( 0.05, 0.25, 0.5, 0.75, 0.95 )
 mytit = paste0("w = ", round(w_seq,3))
 mats <- list()
 # X0 = X0 - min(X0)
@@ -612,7 +607,7 @@ for(i in seq_along(w_seq)) {
     round(invariant_orthogonality_defect(res_soft_w$Y),4), ', w.spar = ',
     1.0-round(sum(res_soft_w$Y/max(res_soft_w$Y) > 0.01)/length(res_soft_w$Y),3))
   mats[[i]] <- res_soft_w$Y
-  convergeplots[[i]] <- res_soft_w$plot+labs(title = NULL, subtitle = NULL) 
+  convergeplots[[i]] <- res_soft_w$plot+labs(title = paste0("w = ", round(w_val, 3)), subtitle = NULL)
 }
 allvals <- unlist(lapply(mats, function(m) as.numeric(m)))
 rng <- c(   
@@ -770,7 +765,7 @@ class_props <- prop.table(table(labels))
 random_accuracy <- sum(class_props^2)
 
 # t-SNE visualization
-tsne_result <- Rtsne(data_X, dims = 2, perplexity = min(30, n_samples/4), verbose = TRUE, max_iter = 500)
+tsne_result <- Rtsne(data_X, dims = 2, perplexity = min(30, n_samples/4), verbose = FALSE, max_iter = 500)
 tsne_df <- data.frame(
   tSNE1 = tsne_result$Y[, 1],
   tSNE2 = tsne_result$Y[, 2],
@@ -1201,146 +1196,8 @@ ggplot(core_long, aes(x = Variant, y = value, fill = Variant)) +
 
 ```
 
-## Practical Applications: Topic Modeling on AssociatedPress Dataset
 
-Topic modeling aims to uncover latent thematic structures in document corpora, with applications in text mining and information retrieval \cite{blei2003latent}. Non-negative matrix factorization (NMF) is widely used for topic modeling due to its parts-based, interpretable representations, but it often produces correlated topics that overlap in term usage, reducing coherence \cite{ding2006orthogonal}. NSA-Flow addresses this by enforcing tunable orthogonality, ensuring topics are more distinct while maintaining non-negativity for interpretable term weights.
-
-We apply NSA-Flow to the AssociatedPress dataset, a standard benchmark containing 2,246 news articles with a vocabulary of 10,473 terms, preprocessed to a term-document matrix (terms as rows, documents as columns). We compare NSA-Flow (with \( w = 0.5 \)) to standard NMF, evaluating topic coherence (via normalized pointwise mutual information, NPMI \cite{lau2014machine}) and topic diversity (measured as the average cosine distance between topic vectors). NSA-Flow is expected to enhance coherence and diversity by reducing term overlap across topics.
-
-```{r topic_modeling_setup, message=FALSE, warning=FALSE,eval=FALSE}
-library(topicmodels)
-library(tm)
-library(NMF)
-library(RcppML)  # For fast mode
-
-set.seed(42)
-
-# Fast mode option
-fast <- TRUE  # Set to TRUE to use fast NMF implementation
-
-# Load AssociatedPress dataset
-data("AssociatedPress", package = "topicmodels")
-
-# Convert to TermDocumentMatrix (terms x documents)
-term_doc_matrix <- t(AssociatedPress)
-
-# Optionally subsample for even faster runs (uncomment if needed)
-if (fast) {
-#   num_docs <- 500
-#   selected_docs <- sample(1:ncol(term_doc_matrix), num_docs)
-#   term_doc_matrix <- term_doc_matrix[, selected_docs]
-}
-
-# Coerce to sparse matrix for efficiency
-# term_doc_matrix_sparse <- as.matrix(term_doc_matrix)
-
-k <- 3
-
-if (fast) {
-  # Use fast NMF from RcppML for both (approximating NSA-Flow with regularized NMF if needed)
-  # Note: RcppML uses alternating least squares NMF, fast on sparse matrices
-  # For sparsity, can add L1 regularization (l1 = 0.1 or similar)
-  
-  # NSA-Flow approximation (assuming it's similar to nonsmooth or sparse NMF)
-  res_nmf <- RcppML::nmf(data.matrix(term_doc_matrix), k = k, L1 = c(0.01, 0.01) )  # L1 on w and h for sparsity
-  nsa_topics <- res_nmf$w %*% diag(res_nmf$d)  # Topic-term matrix (terms x k)
-  
-  # Standard NMF
-  nmf_fit <- nsa_flow(data.matrix(term_doc_matrix), w=0.5, verbose=TRUE )
-  nmf_topics <- nmf_fit$w %*% diag(nmf_fit$d)  # Topic-term matrix (terms x k)
-} else {
-  # Original method (assuming dense matrix and custom/original functions)
-  term_doc_matrix_dense <- as.matrix(term_doc_matrix)  # Terms x Documents
-  p <- nrow(term_doc_matrix_dense)
-  n <- ncol(term_doc_matrix_dense)
-  
-  # NSA-Flow (assuming nsa_default is a custom function; replace with actual if available)
-  # If NSA-Flow refers to nonsmooth NMF, use: nmf(..., method = 'nsNMF', theta = 0.5)
-  Y0 <- matrix(runif(p * k, 0, 1), p, k)  # Random initialization
-  # Assuming DEFAULT_W is e.g., 0.5 for theta in nsNMF
-  DEFAULT_W <- 0.5
-  # Replace nsa_default with nmf if it's nsNMF
-  res_nsa <- nmf(term_doc_matrix_dense, rank = k, method = 'nsNMF', theta = DEFAULT_W)
-  nsa_topics <- basis(res_nsa)  # Topic-term matrix
-  
-  # Standard NMF
-  nmf_fit <- nmf(term_doc_matrix_dense, rank = k, method = "Frobenius")
-  nmf_topics <- basis(nmf_fit)  # Topic-term matrix
-}
-
-```
-
-### Topic Coherence and Diversity
-
-We compute NPMI for the top 10 terms per topic and cosine distance between topic pairs to assess diversity. Figure 7 visualizes the results.
-
-```{r topic_coherence, fig.width=8, fig.height=5,eval=FALSE}
-# Helper function for NPMI (simplified)
-npmi <- function(top_terms, term_doc_matrix) {
-  # Mock NPMI calculation (replace with actual co-occurrence stats)
-  set.seed(42)
-  runif(length(top_terms), 0.1, 0.3)  # Placeholder
-}
-# Get top 10 terms per topic
-get_top_terms <- function(W, terms, n_top = 10) {
-  lapply(1:ncol(W), function(i) terms[order(W[,i], decreasing = TRUE)[1:n_top]])
-}
-terms <- rownames(term_doc_matrix)
-nmf_top_terms <- get_top_terms(nmf_topics, terms)
-nsa_top_terms <- get_top_terms(nsa_topics, terms)
-nmf_npmi <- mean(unlist(lapply(nmf_top_terms, npmi, term_doc_matrix)))
-nsa_npmi <- mean(unlist(lapply(nsa_top_terms, npmi, term_doc_matrix)))
-# Cosine distance for diversity
-cos_dist <- function(W) {
-  W_norm <- W / sqrt(rowSums(W^2))
-  dist <- as.dist(1 - tcrossprod(W_norm))
-  mean(dist[dist > 0])
-}
-nmf_diversity <- cos_dist(nmf_topics)
-nsa_diversity <- cos_dist(nsa_topics)
-# Plot
-metrics <- data.frame(
-  Method = c("NMF", "NSA-Flow"),
-  Coherence = c(nmf_npmi, nsa_npmi),
-  Diversity = c(nmf_diversity, nsa_diversity)
-)
-library(ggplot2)
-ggplot(metrics, aes(x = Coherence, y = Diversity, color = Method, label = Method)) +
-  geom_point(size = 4) +
-  geom_text(vjust = -1, size = 4) +
-  scale_color_manual(values = c("NMF" = "#1f78b4", "NSA-Flow" = "#e31a1c")) +
-  labs(title = "Figure 7: Topic Coherence vs. Diversity", 
-       x = "NPMI Coherence", y = "Average Cosine Distance") +
-  theme_minimal(base_size = 14) +
-  theme(plot.title = element_text(face = "bold", hjust = 0.5), legend.position = "none")
-```
-
-### Top Terms Visualization
-
-Figure 8 shows the top 5 terms for selected topics, highlighting NSA-Flow’s ability to produce distinct, interpretable topics.
-
-```{r topic_terms, fig.width=10, fig.height=6,eval=FALSE}
-top_terms_combined <- rbind(
-  data.frame(Method = "NMF", Topic = rep(1:3, each = 5), 
-             Term = unlist(lapply(nmf_top_terms[1:3], function(x) x[1:5])), 
-             Weight = unlist(lapply(1:3, function(i) nmf_topics[order(nmf_topics[,i], decreasing = TRUE)[1:5], i]))),
-  data.frame(Method = "NSA-Flow", Topic = rep(1:3, each = 5), 
-             Term = unlist(lapply(nsa_top_terms[1:3], function(x) x[1:5])), 
-             Weight = unlist(lapply(1:3, function(i) nsa_topics[order(nsa_topics[,i], decreasing = TRUE)[1:5], i])))
-)
-ggplot(top_terms_combined, aes(x = Topic, y = Term, fill = Weight)) +
-  geom_tile() +
-  facet_wrap(~Method, ncol = 2) +
-  scale_fill_viridis_c(option = "magma") +
-  labs(title = "Figure 8: Top 5 Terms per Topic", x = "Topic", y = "Term") +
-  theme_minimal(base_size = 14) +
-  theme(plot.title = element_text(face = "bold", hjust = 0.5), axis.text.y = element_text(size = 8))
-```
-
-**Interpretation**: NSA-Flow improves topic coherence by 10–20% and diversity by 15% compared to NMF, as shown in Figure 7. Figure 8 illustrates that NSA-Flow topics have less term overlap, enhancing interpretability. For example, topics related to politics or sports are more distinct, aligning with findings in \cite{ding2006orthogonal} that orthogonality reduces redundancy in topic modeling.
-
-
-## Practical Applications with Real Data: Sparse PCA on Golub Leukemia Gene Expression Dataset
+## Practical Application with Real Data: Sparse PCA on Golub Leukemia Gene Expression Dataset
 
 We demonstrate the utility of our Sparse PCA implementation on the classic Golub et al. (1999) leukemia gene expression dataset, a benchmark in bioinformatics for cancer classification. The dataset consists of expression levels for 3571 genes across 72 patients: 47 with acute lymphoblastic leukemia (ALL) and 25 with acute myeloid leukemia (AML). Sparse PCA is particularly valuable here, as it identifies a small subset of discriminative genes (biomarkers) while maximizing explained variance, aiding in interpretable cancer subtyping and reducing dimensionality for downstream tasks like classification.
 
@@ -1460,7 +1317,8 @@ golub_metrics <- data.frame(
   Sparsity = c(metrics_pca_g$Sparsity, metrics_basic_g$Sparsity, metrics_nns_g$Sparsity),
   Orth_Residual = c(metrics_pca_g$Orth_Residual, metrics_basic_g$Orth_Residual, metrics_nns_g$Orth_Residual)
 )
-knitr::kable(golub_metrics, digits = 4, caption = "Table 1: Core Metrics for PCA Variants")
+gt::gt(golub_metrics, caption = "Table 1: Core Metrics for PCA Variants") %>% 
+    gt::fmt_number(columns = where(is.numeric), decimals = 2)
 
 # Visualization: 2D projections
 plot_proj <- function(df, title) {
@@ -1606,22 +1464,16 @@ library(tibble)
 set.seed(42)
 ```
 
-## Application Section: NSA-Flow on ADNI Cortical Thickness Data
+## Application of NSA-Flow to ADNI Cortical Thickness Data
 
 In this section, we demonstrate the application of NSA-Flow to synthetic cortical thickness data. NSA-Flow is a network-structured matrix factorization method that decomposes cortical measures into interpretable components (networks), highlighting regional loadings and potential connectome-like structures.
-
-# Application of NSA-Flow to ADNI Cortical Thickness Data
-
-## Motivation
 
 Neuroimaging datasets, such as those from the Alzheimer's Disease Neuroimaging Initiative (ADNI), provide rich multidimensional insights into brain structure, including cortical thickness measurements across numerous regions. However, extracting biologically interpretable patterns from these data remains challenging due to high dimensionality and inherent noise. Traditional methods like Principal Component Analysis (PCA) reduce dimensionality by identifying orthogonal components of maximum variance but often produce dense loadings that obscure regional specificity and network-like structures relevant to neurodegenerative processes. Motivated by the need for more interpretable decompositions, we apply NSA-Flow—a network-structured matrix factorization technique—to refine PCA-derived components. NSA-Flow enforces sparsity and tunable orthogonality, potentially revealing connectome-inspired networks that better align with clinical outcomes, such as cognitive performance and diagnostic status in Alzheimer's disease (AD). This approach aims to bridge the gap between statistical efficiency and biological plausibility, enhancing the utility of neuroimaging features in predictive modeling and hypothesis generation.
 
 ## Application of NSA-Flow to PCA Maps
 
-### Layperson Explanation
-Imagine the brain's cortical thickness data as a complex puzzle with many overlapping pieces representing different regions. PCA acts like an initial sorting tool, grouping these pieces into a few broad categories (components) based on how much they vary across individuals. However, these categories often include too many pieces, making it hard to see clear patterns. NSA-Flow refines this by "flowing" adjustments over the PCA map: it prunes unnecessary pieces (enforcing sparsity) to focus on key regions per category and fine-tunes how separate these categories are from each other (tuning orthogonality). The result is a set of streamlined "networks" that highlight specific brain areas, much like simplifying a wiring diagram to show only the most important connections. A key parameter, *w*, controls how aggressively this pruning occurs—lower values allow more regions, while higher values create sparser, more focused networks.
+In this application, the brain's cortical thickness data is analgous to a complex puzzle with many overlapping pieces representing different regions. PCA acts like an initial sorting tool, grouping these pieces into a few broad categories (components) based on how much they vary across individuals. However, these categories often include too many pieces, making it hard to see clear patterns. NSA-Flow refines this by "flowing" adjustments over the PCA map: it prunes unnecessary pieces (enforcing sparsity) to focus on key regions per category and fine-tunes how separate these categories are from each other (tuning orthogonality). The result is a set of streamlined "networks" that highlight specific brain areas, much like simplifying a wiring diagram to show only the most important connections. A key parameter, *w*, controls how aggressively this pruning occurs—lower values allow more regions, while higher values create sparser, more focused networks.
 
-### Mathematical Formulation
 Let \( X \in \mathbb{R}^{N \times p} \) denote the centered cortical thickness matrix, where \( N \) is the number of subjects and \( p = 76 \) is the number of regions (bilateral cortical and subcortical areas from ADNI). PCA decomposes \( X \) via singular value decomposition (SVD), yielding loadings \( Y_0 \in \mathbb{R}^{p \times k} \) (with \( k = 5 \) networks), where each column of \( Y_0 \) is a principal component normalized to unit length: \( Y_0 = U \), with \( X \approx U \Sigma V^T \) from \( \text{svd}(X) \), and columns scaled as \( Y_0[:, j] \leftarrow Y_0[:, j] / \| Y_0[:, j] \|_2 \).
 
 NSA-Flow initializes with \( Y_0 \) and optimizes a refined loading matrix \( Y \in \mathbb{R}^{p \times k} \) using manifold optimization on the Stiefel manifold (for orthogonality constraints) with a sparsity-inducing retraction. The objective minimizes a reconstruction loss while promoting network structure:
@@ -1631,8 +1483,6 @@ NSA-Flow initializes with \( Y_0 \) and optimizes a refined loading matrix \( Y 
 \]
 
 where \( \mathcal{R}(Y) \) is a regularization term (e.g., a soft-thresholded \( \ell_1 \)-norm or group sparsity to encourage connectome-like patterns), and \( w \in (0,1) \) parameterizes sparsity strength. The optimization employs an Armijo line search gradient descent (`armijo_gradient`), with soft SVD retraction to enforce approximate orthogonality and non-negativity. We sampled 100 random \( w \) values uniformly from [0.01, 0.99] and ran 200 iterations per configuration, discarding runs with zero-variance components. The output \( Y \) provides sparse, near-orthogonal loadings that parameterize regional contributions to each network.
-
-## Comparison to PCA
 
 To rigorously compare NSA-Flow with PCA, we projected the data onto both sets of loadings: \( \text{proj}_{\text{PCA}} = X Y_0 \) and \( \text{proj}_{\text{NSA}} = X Y \), yielding subject-specific network scores (\( N \times k \)). We evaluated their incremental predictive value for ADNI clinical outcomes beyond baseline covariates (age, gender, education, APOE4 status) using linear models for continuous cognitive variables and extended this to a binary classification task for diagnosis.
 
@@ -1650,14 +1500,12 @@ Performance metrics further supported NSA-Flow: Pearson correlation between flat
 
 Visualizations reinforced these findings. Heatmaps of normalized loadings (\( Y / \sum Y[:, j] \)) showed sparse, region-focused networks (e.g., Network 1 emphasizing temporal lobes). Radar charts illustrated top-10 loadings per network, highlighting dominance in limbic and frontal areas. Connectome-like graphs depicted intra-lobe connections among high-loading regions, color-coded by lobes (e.g., frontal in red, temporal in teal), revealing AD-relevant hubs.
 
-## Novelty and General Applicability as an ML Tool
+### Novelty and General Applicability as an ML Tool
 
 NSA-Flow's novelty lies in its manifold-based optimization framework, which parameterizes sparsity (*w*) and orthogonality at the matrix level—unlike component-wise sparse PCA (e.g., via \( \ell_1 \)-penalized SVD), which ignores inter-component network structure. By treating loadings as evolving on a "flow" (gradient trajectory with retractions), it enables fine-grained control over trade-offs: low *w* approximates dense PCA, while high *w* yields ultra-sparse, interpretable factors. The orthogonality defect metric quantifies global separation, allowing users to tune for decorrelated features without full enforcement.
 
 As a general tool in the machine learning toolbelt, NSA-Flow extends beyond neuroimaging to any high-dimensional dataset requiring sparse factorization, such as gene expression matrices (identifying co-regulated modules) or financial portfolios (sparse risk factors). It integrates seamlessly into pipelines—e.g., as a preprocessor before random forests or neural networks—enhancing interpretability without sacrificing performance. Future work could incorporate domain-specific priors (e.g., anatomical constraints) to further boost its applicability in precision medicine.
 
-### Data Generation
-We generated synthetic cortical thickness data mimicking the structure of human cortical and subcortical regions:
 
 ```{r data-generation}
 N <- 200  # subjects
@@ -1712,8 +1560,6 @@ if ( file.exists(adnifn) ) {
 
 ```
 
-### NSA-Flow Initialization
-We initialize NSA-Flow using PCA to provide a structured starting point:
 
 ```{r initialization}
 
@@ -1877,32 +1723,6 @@ gt::gt(data.frame(summary_stats), caption='Summary Statistics for Log-P Values i
 # print(t_test_result)
 #
 ```
-
-### Performance Evaluation
-We define metrics to evaluate NSA-Flow's reconstruction and network representation:
-
-```{r evaluation}
-library(Metrics)
-
-# Flatten matrices for comparison
-raw_flat <- as.numeric(as.matrix(X))
-nsa_flat <- as.numeric(Ymat)
-L <- min(length(raw_flat), length(nsa_flat))
-
-# Pearson correlation between raw and reconstructed
-recon_corr <- cor(raw_flat[1:L], nsa_flat[1:L], method = "pearson")
-
-# Mean squared error
-recon_mse <- mse(raw_flat[1:L], nsa_flat[1:L])
-
-# Orthogonality defect (network separation metric)
-orth_defect <- invariant_orthogonality_defect(Ymat)
-
-data.frame(Metric = c("Pearson correlation", "MSE", "Orthogonality defect"),
-           Value = c(recon_corr, recon_mse, orth_defect))
-```
-
-### Visualization
 
 #### Heatmap of Network Loadings
 
@@ -2283,7 +2103,6 @@ for (ww in seq(0.05, 0.95, by = 0.05)) {
     test <- temp[folds[[f]], ]
     
     # Check classes in test set
-    cat("Fold:", f, "Weight:", ww, "Classes in test$diagnosis:", levels(test$diagnosis)[table(test$diagnosis) > 0], "\n")
     
     # Calculate random assignment accuracy for this fold
     class_props <- prop.table(table(test$diagnosis))
@@ -2291,7 +2110,7 @@ for (ww in seq(0.05, 0.95, by = 0.05)) {
     
     # Skip fold if fewer than two classes
     if (length(unique(test$diagnosis)) < 2) {
-      cat("Warning: Fold", f, "for weight", ww, "has fewer than 2 classes. Skipping AUC calculation.\n")
+#      cat("Warning: Fold", f, "for weight", ww, "has fewer than 2 classes. Skipping AUC calculation.\n")
       auc_nsa[f] <- NA
       auc_pca[f] <- NA
       next
@@ -2360,7 +2179,7 @@ for (ww in seq(0.05, 0.95, by = 0.05)) {
   
   # Store results for this weight
   random_accuracy <- mean(auc_random, na.rm = TRUE)
-  cat("Weight:", ww, "Random Assignment Accuracy:", random_accuracy, "\n")
+#  cat("Weight:", ww, "Random Assignment Accuracy:", random_accuracy, "\n")
   
   log_results_df <- rbind(log_results_df, data.frame(
     w = ww,
@@ -2386,7 +2205,7 @@ log_summary <- log_results_df %>%
       error = function(e) NA
     )
   )
-gt::gt(log_results_df,caption='Cross-Validated AUC Summary for Diagnosis Prediction: Full results.')
+# gt::gt(log_results_df,caption='Cross-Validated AUC Summary for Diagnosis Prediction: Full results.')
 
 gt::gt(log_summary,caption='Cross-Validated AUC Summary for Diagnosis Prediction: Statistical Summary.')
 
@@ -2432,8 +2251,6 @@ print(p2)
 ```
 
 These enhancements reveal significant differences (e.g., average t-statistic < -2 across cognitives, p < 0.05), with moderate effect sizes (Cohen's d ≈ 0.3-0.5). For diagnosis, NSA-Flow's CV-AUC (mean 0.81) exceeds PCA's (0.76), with paired t-test confirming superiority (p < 0.01).
-
-### Beautiful Visualizations of Comparisons
 
 We visualize comparisons using ggplot2 for clarity and aesthetics. Boxplots show \( \log(p) \) distributions by method and cognitive variable. Violin plots depict \( \log(p) \) differences (NSA - PCA), with negative values favoring NSA. A scatter plot relates sparsity (tuned by w) to performance gains. For diagnosis, we plot average ROC curves across folds.
 
