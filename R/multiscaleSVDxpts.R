@@ -10699,9 +10699,6 @@ nsa_flow <- function(
 #' @param fontsize Font size (default: 10).
 #'
 #' @return A DiagrammeR graph object.
-#' @examples
-#' library(DiagrammeR)
-#' nsa_flow_flowchart()
 #' @export
 nsa_flow_flowchart <- function(
   node_fill_color = "lightblue",
