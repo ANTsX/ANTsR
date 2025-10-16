@@ -485,7 +485,7 @@ Y0_toy <- matrix(runif(12, 0, 1), 4, 3)
 # Apply NSA-Flow with balanced weights
 # X0_toy=X0_toy/norm(X0_toy, "F")*0.1  # Normalize
 omega_default = 0.5
-ini_default = 0.005
+ini_default = 0.001
 nsa_flow = ANTsR::nsa_flow
 optype='bidirectional_armijo_gradient'
 optype='armijo_gradient'
@@ -496,7 +496,7 @@ nsa_default <- function(Y0, w = omega_default, verbose = FALSE ) {
     X0 = NULL,
     w = w,
     retraction = def_ret,
-    max_iter = 100,
+    max_iter = 1000,
     verbose = verbose,
     seed = 42,
     apply_nonneg = TRUE,
@@ -2170,8 +2170,9 @@ print(t_test_results)
 
 # For diagnosis prediction (logistic)
 log_results_df <- data.frame()  # New DF for logistic results
-
-for (ww in unique(comparison_df$w)) {
+roc_nsa_list=list()
+roc_pca_list=list()
+for ( ww in c(1:9)/10 ) {
   # Re-run NSA for each w (or cache if possible)
   M_nsa <- nsa_default(Y0 = Y0_pca, w = ww )  # Abbrev; use full params
   Ymat <- M_nsa$Y
@@ -2183,14 +2184,16 @@ for (ww in unique(comparison_df$w)) {
   temp <- cbind(ppmiadni[, c("diagnosis", covars)], proj_nsa, proj_pca)
   dx2='AD'
   dx1='MCI'
-  temp = temp[ temp$diagnosis %in% c(dx1,dx2), ]
+  dx0='CN'
+  temp = temp[ temp$diagnosis %in% c(dx0,dx1), ]
   temp$diagnosis_bin = 0
-  temp$diagnosis_bin[ temp$diagnosis == dx2 ] = 1
+  temp$diagnosis_bin[ temp$diagnosis == dx1 ] = 1
   # 5-fold CV for logistic
-  folds <- createFolds(temp$diagnosis_bin, k = 5)
-  auc_nsa <- auc_pca <- numeric(5)
-  
-  for (f in 1:5) {
+  nfoled = 8 
+  folds <- createFolds(temp$diagnosis_bin, k = nfoled)
+  auc_nsa <- auc_pca <- numeric(nfoled)
+
+  for (f in 1:nfoled) {
     train <- temp[-folds[[f]], ]
     test <- temp[folds[[f]], ]
     
@@ -2209,6 +2212,8 @@ for (ww in unique(comparison_df$w)) {
     full_pca <- glm(as.formula(full_pca_form), family = binomial, data = train)
     preds_pca <- predict(full_pca, test, type = "response")
     auc_pca[f] <- roc(test$diagnosis_bin, preds_pca)$auc
+    roc_nsa_list[[paste0("f",f,as.character(ww))]] <- roc(test$diagnosis_bin, preds_nsa)
+    roc_nsa_list[[paste0("f",f,as.character(ww))]] <- roc(test$diagnosis_bin, preds_nsa)
   }
   
   log_results_df <- rbind(log_results_df, data.frame(
@@ -2270,16 +2275,19 @@ p3 <- ggplot(comparison_df, aes(x = w, y = log_p_diff, color = better_method)) +
 
 # ROC curves (averaged; requires storing fold ROCs, simplified here)
 # Assume roc_nsa_list and roc_pca_list collected in loop
-avg_roc_nsa <- roc(ppmiadni$diagnosis, rowMeans(sapply(roc_nsa_list, function(r) approx(r$specificities, r$sensitivities, xout = seq(0,1,0.01))$y)))
-avg_roc_pca <- roc(ppmiadni$diagnosis, rowMeans(sapply(roc_pca_list, function(r) approx(r$specificities, r$sensitivities, xout = seq(0,1,0.01))$y)))
-p4 <- ggroc(list(NSA = avg_roc_nsa, PCA = avg_roc_pca), size = 1.2) +
-  scale_color_manual(values = c("NSA" = "#4ECDC4", "PCA" = "#FF6B6B")) +
-  labs(title = "Average ROC for Diagnosis Prediction", color = "Method") +
-  theme(legend.position = "bottom")
+# Assume roc_nsa_list and roc_pca_list collected in loop
+if ( exists("roc_nsa_list")  ) {
+    avg_roc_nsa <- roc(temp$diagnosis_bin, rowMeans(sapply(roc_nsa_list, function(r) approx(r$specificities, r$sensitivities, xout = seq(0,1,0.01))$y)))
+    avg_roc_pca <- roc(temp$diagnosis, rowMeans(sapply(roc_pca_list, function(r) approx(r$specificities, r$sensitivities, xout = seq(0,1,0.01))$y)))
+    p4 <- ggroc(list(NSA = avg_roc_nsa, PCA = avg_roc_pca), size = 1.2) +
+    scale_color_manual(values = c("NSA" = "#4ECDC4", "PCA" = "#FF6B6B")) +
+    labs(title = "Average ROC for Diagnosis Prediction", color = "Method") +
+    theme(legend.position = "bottom")
+print(p4)
+}
 
 # Combine
 (p1 + p2) / p3 + plot_layout(heights = c(1, 1.5))
-print(p4)
 ```
 
 These visualizations elegantly highlight NSA-Flow's consistent edge, particularly at moderate sparsity levels, underscoring its value in extracting clinically predictive, sparse networks from neuroimaging data.
