@@ -489,6 +489,7 @@ ini_default = 0.001
 nsa_flow = ANTsR::nsa_flow
 optype='bidirectional_armijo_gradient'
 optype='armijo_gradient'
+optype='adam'
 def_ret = "soft_svd"
 nsa_default <- function(Y0, w = omega_default, verbose = FALSE ) {
   nsa_flow(
@@ -501,6 +502,7 @@ nsa_default <- function(Y0, w = omega_default, verbose = FALSE ) {
     seed = 42,
     apply_nonneg = TRUE,
     optimizer = optype,
+    tol = 1e-4,
     initial_learning_rate = ini_default, # <--- CHANGE: Replaced learning_rate and optimizer
     plot = TRUE
   )
@@ -628,7 +630,7 @@ for(i in seq_along(mats)) {
 }
 grid.arrange(grobs = lapply(plots, function(x) x$gtable), ncol = 3)
 
-grid.arrange(grobs=convergeplots, top='Convergence Plots for Different w Values')
+grid.arrange(grobs=convergeplots, top='Convergence Plots for Different w Values', ncol=2 )
 #----------#
 ```
 
@@ -708,31 +710,84 @@ We enhance the applications of NSA-Flow by grounding them in meaningful biomedic
 In this example, NSA-Flow performs dimensionality reduction on synthetic gene expression data (1000 samples/patients, 50 genes/features) with 3 disease subtypes. The data is generated as mixtures of orthogonal nonnegative gene modules associated with each subtype, plus noise. Reduced features (projections onto the learned basis) are used in a logistic regression classifier. We compare to NMF, PCA (absolute values for nonnegativity), and raw features using 5-fold CV accuracy. NSA-Flow's constraints lead to better-separated features, improving classification.
 
 ```{r improved_prediction_setup, warning=FALSE, message=FALSE}
-library(caret)
-library(Rtsne)  # For visualization
+
+
+# Load required packages
+library(caret)    # For createFolds (if needed later)
+library(Rtsne)    # For t-SNE visualization
+library(ggplot2)  # For plotting
+library(dplyr)    # For data manipulation
+
+# Set seed for reproducibility
 set.seed(2025)
-n_samples <- 1000; n_features <- 100; k_basis <- 10; n_classes <- 3
 
-# True orthogonal nonnegative basis (genes x modules)
-true_basis <- matrix(0, n_features, k_basis)
+# Parameters
+n_samples <- 200      # Number of samples
+n_features <- 20     # Number of features
+k_basis <- 10        # Number of basis components
+n_classes <- 3       # Number of classes (subtypes)
+
+# True nonnegative basis (features x components)
+true_basis <- matrix(0, nrow = n_features, ncol = k_basis)
+rows_per_component <- ceiling(n_features / k_basis)  # Approx rows per component
 for (i in 1:k_basis) {
-  start <- (i-1)*10 + 1; end <- min(start+14, n_features)
-  true_basis[start:end, i] <- runif(end-start+1, 0.5, 1)
+  start <- ((i-1) * rows_per_component + 1) %% n_features
+  if (start == 0) start <- n_features  # Handle modulo edge case
+  end <- min(start + rows_per_component - 1, n_features)
+  if (start <= end) {
+    true_basis[start:end, i] <- runif(end - start + 1, 0.5, 1)
+  } else {
+    # Wrap around to beginning if start > end
+    true_basis[start:n_features, i] <- runif(n_features - start + 1, 0.5, 1)
+    true_basis[1:(end %% n_features), i] <- runif((end %% n_features), 0.5, 1)
+  }
 }
-true_basis <- pmax(true_basis %*% solve(chol(crossprod(true_basis))), 0)
+# Normalize to approximate orthonormal basis while preserving nonnegativity
+true_basis <- pmax(true_basis / sqrt(colSums(true_basis^2)), 0)  # Normalize columns to unit length
 
-# Mixing coefficients biased by subtype (samples x modules)
-subtypes <- sample( rep(1:n_classes, each = n_samples / n_classes+ 1), n_samples )
-mix_coeffs <- matrix(runif(n_samples * k_basis, 0, 1), n_samples, k_basis)
+# Generate subtypes (balanced classes)
+subtypes <- rep(1:n_classes, length.out = n_samples)  # Evenly distribute classes
+subtypes <- sample(subtypes, n_samples)  # Shuffle to randomize order
+labels <- factor(subtypes, labels = c("CN", "MCI", "AD"))  # Name classes for clarity
+
+# Mixing coefficients biased by subtype (samples x components)
+mix_coeffs <- matrix(runif(n_samples * k_basis, 0, 1), nrow = n_samples, ncol = k_basis)
 for (i in 1:n_classes) {
   idx <- subtypes == i
-  mix_coeffs[idx, ((i-1) %% k_basis) + 1] <- mix_coeffs[idx, ((i-1) %% k_basis) + 1] + 0.5  # Bias
+  component_idx <- ((i-1) %% k_basis) + 1
+  mix_coeffs[idx, component_idx] <- mix_coeffs[idx, component_idx] + 0.5
 }
+mix_coeffs <- pmax(mix_coeffs, 0)  # Ensure nonnegativity
+
+# Generate data (samples x features)
 data_X <- mix_coeffs %*% t(true_basis) + matrix(rnorm(n_samples * n_features, 0, 0.05), n_samples, n_features)
-data_X <- pmax(data_X, 0)
-labels <- factor(subtypes)
+data_X <- pmax(data_X, 0)  # Ensure nonnegativity
 
+# Verify dimensions and data
 
+# Compute random assignment accuracy (multiclass baseline)
+class_props <- prop.table(table(labels))
+random_accuracy <- sum(class_props^2)
+
+# t-SNE visualization
+tsne_result <- Rtsne(data_X, dims = 2, perplexity = min(30, n_samples/4), verbose = TRUE, max_iter = 500)
+tsne_df <- data.frame(
+  tSNE1 = tsne_result$Y[, 1],
+  tSNE2 = tsne_result$Y[, 2],
+  Subtype = labels
+)
+
+# Plot t-SNE
+p <- ggplot(tsne_df, aes(x = tSNE1, y = tSNE2, color = Subtype)) +
+  geom_point(size = 2) +
+  scale_color_manual(values = c("CN" = "#4ECDC4", "MCI" = "#FF6B6B", "AD" = "#1F77B4")) +
+  labs(title = "t-SNE Visualization of Synthetic Data by Subtype",
+       x = "t-SNE Dimension 1",
+       y = "t-SNE Dimension 2",
+       color = "Subtype") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+print(p)
 
 # NMF
 library(NMF)
@@ -760,8 +815,7 @@ acc_pca <- cv_accuracy(reduced_pca, labels)
 acc_nmf <- cv_accuracy(reduced_nmf, labels)
 acc_raw <- cv_accuracy(reduced_raw, labels)
 
-w_values = c(0.0, 0.001, 0.01, 0.1, 0.2, 0.5 )
-w_values = c( 0.005 )
+w_values = c( 0.2, 0.5 )
 odf=data.frame()
 for ( ww in  w_values ) {
   res_pred <- nsa_default(data_X,  w = ww )
@@ -778,19 +832,13 @@ pred_metrics <- data.frame(
   CV_Accuracy = c(acc_nns[,'Accuracy'], acc_nmf[,'Accuracy'], acc_pca[,'Accuracy'], acc_raw[,'Accuracy']),
   CV_Accuracy_SD = c(acc_nns[,'AccuracySD'], acc_nmf[,'AccuracySD'], acc_pca[,'AccuracySD'], acc_raw[,'AccuracySD'])
 )
-kable(pred_metrics, digits = 3, caption = "Cross-validated accuracy for disease subtype classification (simulated data)")
+
+gt::gt(pred_metrics, caption = "Cross-validated accuracy for disease subtype classification (simulated data)") %>% 
+    gt::fmt_number(columns = where(is.numeric), decimals = 2)
+
 
 ```
 
-```{r improved_prediction_vis, fig.width=8, fig.height=5, warning=FALSE}
-# t-SNE visualization of reduced features colored by subtypes (using w=0.05)
-tsne_nns <- Rtsne(reduced_nns, perplexity = 30)
-df_vis <- data.frame(PC1 = tsne_nns$Y[,1], PC2 = tsne_nns$Y[,2], Subtype = labels)
-ggplot(df_vis, aes(x = PC1, y = PC2, color = Subtype)) +
-  geom_point(alpha = 0.7) +
-  theme_minimal() +
-  ggtitle("t-SNE of NSA-Flow Reduced Features by Disease Subtype")
-```
 
 **Interpretation**: NSA-Flow achieves ~15% higher average accuracy than baselines by preserving orthogonal, nonnegative gene modules tied to subtypes. Sensitivity to w shows optimal performance around 0.05-0.1, balancing fidelity and orthogonality. The t-SNE plot shows clear subtype separation in the reduced space, reflecting improved predictive features.
 
@@ -1685,7 +1733,6 @@ Y0_pca <- sweep(Y0_pca, 2, sqrt(colSums(Y0_pca^2)), FUN = "/")
 Y0_pca <- Y0_pca * 1.0
 
 # Check dimensions
-dim(Y0_pca)  # should be p x k
 
 # Assuming required libraries and data (e.g., Y0_pca, X, ppmiadni, adni_variables) are already loaded/defined.
 
@@ -1804,11 +1851,13 @@ comparison_df <- results_df %>%
   )
 
 # Print summary tables
-cat("\nFull Results Table:\n")
-print(results_df)
+# cat("\nFull Results Table:\n")
+# gt::gt(results_df)%>% 
+#    gt::fmt_number(columns = where(is.numeric), decimals = 2)
 
-cat("\nComparison Table (NSA vs PCA):\n")
-print(comparison_df)
+# cat("\nComparison Table (NSA vs PCA):\n")
+#gt::gt(comparison_df)%>% 
+#    gt::fmt_number(columns = where(is.numeric), decimals = 2)
 
 # Optional: Summary statistics, e.g., average log_p per method across all
 summary_stats <- results_df %>%
@@ -1818,15 +1867,15 @@ summary_stats <- results_df %>%
     median_log_p = median(log_p, na.rm = TRUE),
     n_better = sum(log_p == min(log_p[method == "nsa" | method == "pca"]), na.rm = TRUE)  # Simplified count
   )
-cat("\nSummary Statistics:\n")
-print(data.frame(summary_stats))
-zz=subtyper::na2f(comparison_df$nsa < comparison_df$pca)
-data.frame(comparison_df[zz,])
-
+gt::gt(data.frame(summary_stats), caption='Summary Statistics for Log-P Values in ADNI Cognition: PCA vs NSA') %>% 
+    gt::fmt_number(columns = where(is.numeric), decimals = 2)
+# zz=subtyper::na2f(comparison_df$nsa < comparison_df$pca)
+# data.frame(comparison_df[zz,])
+#
 # You can further analyze, e.g., paired t-test on log_p between NSA and PCA if needed:
 # t_test_result <- t.test(log_p ~ method, data = results_df, paired = TRUE)
 # print(t_test_result)
-
+#
 ```
 
 ### Performance Evaluation
@@ -2139,7 +2188,7 @@ We perform paired t-tests on \( \log(p) \) values across runs to test if NSA-Flo
 
 For the diagnosis task, we use 5-fold cross-validation to compute area under the ROC curve (AUC), sensitivity, and specificity, ensuring robustness against overfitting.
 
-```{r enhanced-stats}
+```{r enhanced-stats-cog,echo=FALSE}
 library(dplyr)
 library(broom)  # For tidy t-test output
 library(pROC)   # For ROC analysis
@@ -2165,77 +2214,221 @@ t_test_results <- by(comparison_df, comparison_df$cog, function(x) {
 t_test_results <- do.call(rbind, t_test_results)
 
 
-cat("\nPaired t-test Results by Cognitive Variable:\n")
-print(t_test_results)
+gt::gt(t_test_results)
+```
 
-# For diagnosis prediction (logistic)
-log_results_df <- data.frame()  # New DF for logistic results
-roc_nsa_list=list()
-roc_pca_list=list()
-for ( ww in c(1:9)/10 ) {
-  # Re-run NSA for each w (or cache if possible)
-  M_nsa <- nsa_default(Y0 = Y0_pca, w = ww )  # Abbrev; use full params
+
+
+```{r enhanced-stats-dx,echo=FALSE}
+
+# Load required packages
+library(caret)    # For createFolds
+library(pROC)     # For multiclass.roc
+library(ggplot2)  # For plotting
+library(dplyr)    # For summarize
+library(nnet)     # For multinom
+
+# Check for required variables
+if (!exists("X") || !exists("Y0_pca") || !exists("ppmiadni") || !exists("covars") || !exists("nsa_default")) {
+  stop("One or more required variables (X, Y0_pca, ppmiadni, covars, nsa_default) are not defined.")
+}
+if (!all(c("diagnosis", covars) %in% names(ppmiadni))) {
+  stop("ppmiadni must contain 'diagnosis' and all variables in covars.")
+}
+
+# Initialize data frame for logistic results and ROC lists
+log_results_df <- data.frame()
+roc_nsa_list <- list()
+roc_pca_list <- list()
+
+
+# Loop over weight values
+for (ww in seq(0.05, 0.95, by = 0.05)) {
+  # Run NSA (assumes nsa_default is a custom function)
+  M_nsa <- tryCatch(
+    nsa_default(Y0 = Y0_pca, w = ww),
+    error = function(e) {
+      cat("Error in nsa_default for weight", ww, ":", e$message, "\n")
+      return(NULL)
+    }
+  )
+  if (is.null(M_nsa)) {
+    cat("Skipping weight", ww, "due to NSA failure.\n")
+    next
+  }
   Ymat <- M_nsa$Y
   proj_nsa <- as.matrix(X) %*% Ymat
   proj_pca <- as.matrix(X) %*% Y0_pca
-  colnames(proj_nsa)=paste0("nsa",1:ncol(proj_nsa))
-  colnames(proj_pca)=paste0("pca",1:ncol(proj_pca))
+  colnames(proj_nsa) <- paste0("nsa", 1:ncol(proj_nsa))
+  colnames(proj_pca) <- paste0("pca", 1:ncol(proj_pca))
   
+  # Combine data with covariates and projections
   temp <- cbind(ppmiadni[, c("diagnosis", covars)], proj_nsa, proj_pca)
-  dx2='AD'
-  dx1='MCI'
-  dx0='CN'
-  temp = temp[ temp$diagnosis %in% c(dx0,dx1), ]
-  temp$diagnosis_bin = 0
-  temp$diagnosis_bin[ temp$diagnosis == dx1 ] = 1
-  # 5-fold CV for logistic
-  nfoled = 8 
-  folds <- createFolds(temp$diagnosis_bin, k = nfoled)
-  auc_nsa <- auc_pca <- numeric(nfoled)
-
-  for (f in 1:nfoled) {
+  dx2 <- "AD"
+  dx1 <- "MCI"
+  dx0 <- "CN"
+  
+  # Set diagnosis as a factor with three levels
+  temp$diagnosis <- factor(temp$diagnosis, levels = c(dx0, dx1, dx2))
+  temp <- temp[!is.na(temp$diagnosis), ]  # Remove NA diagnoses
+ 
+  # 4-fold cross-validation
+  nfold <- 4
+  set.seed(123)  # For reproducibility
+  folds <- createFolds(temp$diagnosis, k = nfold, list = TRUE, returnTrain = FALSE)
+  auc_nsa <- auc_pca <- auc_random <- numeric(nfold)
+  
+  for (f in 1:nfold) {
     train <- temp[-folds[[f]], ]
     test <- temp[folds[[f]], ]
     
-    # Base model
-    base_form <- "diagnosis_bin ~ AGE + PTGENDER "
-    base_mod <- glm(as.formula(base_form), family = binomial, data = train)
-    covarsbin = "AGE + PTGENDER "
-    # NSA full
-    full_nsa_form <- paste("diagnosis_bin ~", covarsf, "+", paste(colnames(proj_nsa), collapse = "+"))
-    full_nsa <- glm(as.formula(full_nsa_form), family = binomial, data = train)
-    preds_nsa <- predict(full_nsa, test, type = "response")
-    auc_nsa[f] <- roc(test$diagnosis_bin, preds_nsa)$auc
+    # Check classes in test set
+    cat("Fold:", f, "Weight:", ww, "Classes in test$diagnosis:", levels(test$diagnosis)[table(test$diagnosis) > 0], "\n")
     
-    # PCA full
-    full_pca_form <- paste("diagnosis_bin ~", covarsf, "+", paste(colnames(proj_pca), collapse = "+"))
-    full_pca <- glm(as.formula(full_pca_form), family = binomial, data = train)
-    preds_pca <- predict(full_pca, test, type = "response")
-    auc_pca[f] <- roc(test$diagnosis_bin, preds_pca)$auc
-    roc_nsa_list[[paste0("f",f,as.character(ww))]] <- roc(test$diagnosis_bin, preds_nsa)
-    roc_nsa_list[[paste0("f",f,as.character(ww))]] <- roc(test$diagnosis_bin, preds_nsa)
+    # Calculate random assignment accuracy for this fold
+    class_props <- prop.table(table(test$diagnosis))
+    auc_random[f] <- sum(class_props^2)
+    
+    # Skip fold if fewer than two classes
+    if (length(unique(test$diagnosis)) < 2) {
+      cat("Warning: Fold", f, "for weight", ww, "has fewer than 2 classes. Skipping AUC calculation.\n")
+      auc_nsa[f] <- NA
+      auc_pca[f] <- NA
+      next
+    }
+    
+    # Base model (AGE and PTGENDER)
+    base_mod <- tryCatch(
+      multinom(as.formula("diagnosis ~ AGE + PTGENDER"), data = train, trace = FALSE),
+      error = function(e) {
+        cat("Error in base model for fold", f, "weight", ww, ":", e$message, "\n")
+        return(NULL)
+      }
+    )
+    covarsbin <- "AGE + PTGENDER"
+    
+    # NSA full model
+    full_nsa_form <- paste("diagnosis ~", covarsbin, "+", paste(colnames(proj_nsa), collapse = "+"))
+    full_nsa <- tryCatch(
+      multinom(as.formula(full_nsa_form), data = train, trace = FALSE),
+      error = function(e) {
+        cat("Error in NSA model for fold", f, "weight", ww, ":", e$message, "\n")
+        return(NULL)
+      }
+    )
+    if (!is.null(full_nsa)) {
+      preds_nsa <- predict(full_nsa, test, type = "probs")
+      roc_nsa <- tryCatch(
+        multiclass.roc(test$diagnosis, preds_nsa, levels = levels(test$diagnosis), quiet = TRUE),
+        error = function(e) {
+          cat("Error in NSA ROC for fold", f, "weight", ww, ":", e$message, "\n")
+          return(NULL)
+        }
+      )
+      auc_nsa[f] <- if (!is.null(roc_nsa)) as.numeric(roc_nsa$auc) else NA
+    } else {
+      auc_nsa[f] <- NA
+    }
+    
+    # PCA full model
+    full_pca_form <- paste("diagnosis ~", covarsbin, "+", paste(colnames(proj_pca), collapse = "+"))
+    full_pca <- tryCatch(
+      multinom(as.formula(full_pca_form), data = train, trace = FALSE),
+      error = function(e) {
+        cat("Error in PCA model for fold", f, "weight", ww, ":", e$message, "\n")
+        return(NULL)
+      }
+    )
+    if (!is.null(full_pca)) {
+      preds_pca <- predict(full_pca, test, type = "probs")
+      roc_pca <- tryCatch(
+        multiclass.roc(test$diagnosis, preds_pca, levels = levels(test$diagnosis), quiet = TRUE),
+        error = function(e) {
+          cat("Error in PCA ROC for fold", f, "weight", ww, ":", e$message, "\n")
+          return(NULL)
+        }
+      )
+      auc_pca[f] <- if (!is.null(roc_pca)) as.numeric(roc_pca$auc) else NA
+    } else {
+      auc_pca[f] <- NA
+    }
+    
+    # Store ROC objects (if valid)
+    if (!is.null(roc_nsa)) roc_nsa_list[[paste0("f", f, "_w", sprintf("%.2f", ww))]] <- roc_nsa
+    if (!is.null(roc_pca)) roc_pca_list[[paste0("f", f, "_w", sprintf("%.2f", ww))]] <- roc_pca
   }
+  
+  # Store results for this weight
+  random_accuracy <- mean(auc_random, na.rm = TRUE)
+  cat("Weight:", ww, "Random Assignment Accuracy:", random_accuracy, "\n")
   
   log_results_df <- rbind(log_results_df, data.frame(
     w = ww,
-    auc_nsa = mean(auc_nsa),
-    auc_pca = mean(auc_pca),
-    auc_diff = mean(auc_nsa) - mean(auc_pca)
+    auc_nsa = mean(auc_nsa, na.rm = TRUE),
+    auc_pca = mean(auc_pca, na.rm = TRUE),
+    auc_diff = mean(auc_nsa, na.rm = TRUE) - mean(auc_pca, na.rm = TRUE),
+    random_accuracy = random_accuracy
   ))
 }
 
-# Summary for logistic
+# Summary for logistic regression
 log_summary <- log_results_df %>%
-  summarize(
-    mean_auc_nsa = mean(auc_nsa),
-    mean_auc_pca = mean(auc_pca),
-    t_stat = t.test(auc_nsa - auc_pca)$statistic,
-    p_value = t.test(auc_nsa - auc_pca)$p.value
+  summarise(
+    mean_auc_nsa = mean(auc_nsa, na.rm = TRUE),
+    mean_auc_pca = mean(auc_pca, na.rm = TRUE),
+    mean_random_accuracy = mean(random_accuracy, na.rm = TRUE),
+    t_stat = tryCatch(
+      t.test(auc_nsa, auc_pca, paired = TRUE)$statistic,
+      error = function(e) NA
+    ),
+    p_value = tryCatch(
+      t.test(auc_nsa, auc_pca, paired = TRUE)$p.value,
+      error = function(e) NA
+    )
   )
+gt::gt(log_results_df,caption='Cross-Validated AUC Summary for Diagnosis Prediction: Full results.')
 
-cat("\nCross-Validated AUC Summary for Diagnosis Prediction:\n")
-print(log_summary)
-###################
+gt::gt(log_summary,caption='Cross-Validated AUC Summary for Diagnosis Prediction: Statistical Summary.')
+
+# Plot results
+log_results_long <- log_results_df %>%
+  dplyr::select(w, auc_nsa, auc_pca, random_accuracy) %>%
+  pivot_longer(cols = c(auc_nsa, auc_pca, random_accuracy), 
+               names_to = "Metric", 
+               values_to = "Value")
+
+p1 <- ggplot(log_results_long, aes(x = w, y = Value, color = Metric, linetype = Metric)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  scale_color_manual(values = c("auc_nsa" = "#4ECDC4", "auc_pca" = "#FF6B6B", "random_accuracy" = "#555555"),
+                     labels = c("NSA AUC", "PCA AUC", "Random Accuracy")) +
+  scale_linetype_manual(values = c("auc_nsa" = "solid", "auc_pca" = "dashed", "random_accuracy" = "dotted"),
+                        labels = c("NSA AUC", "PCA AUC", "Random Accuracy")) +
+  labs(title = "Model Performance vs. Weight (w) for CN, MCI, AD",
+       x = "Weight (w)",
+       y = "AUC / Accuracy",
+       color = "Metric",
+       linetype = "Metric") +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.2))
+
+# print(p1)
+
+# Optional: Plot AUC difference
+p2 <- ggplot(log_results_df, aes(x = w, y = auc_diff)) +
+  geom_line(color = "#1F77B4", size = 1) +
+  geom_point(size = 2) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  labs(title = "AUC Difference (NSA - PCA) vs. Weight (w)",
+       x = "Weight (w)",
+       y = "AUC Difference") +
+  theme_minimal() +
+  scale_y_continuous(limits = c(min(log_results_df$auc_diff, na.rm = TRUE) - 0.01, 
+                               max(log_results_df$auc_diff, na.rm = TRUE) + 0.01))
+
+print(p2)
+
 ```
 
 These enhancements reveal significant differences (e.g., average t-statistic < -2 across cognitives, p < 0.05), with moderate effect sizes (Cohen's d ≈ 0.3-0.5). For diagnosis, NSA-Flow's CV-AUC (mean 0.81) exceeds PCA's (0.76), with paired t-test confirming superiority (p < 0.01).
@@ -2272,19 +2465,6 @@ p3 <- ggplot(comparison_df, aes(x = w, y = log_p_diff, color = better_method)) +
   scale_color_manual(values = c("NSA" = "#4ECDC4", "PCA" = "#FF6B6B", "Tie" = "gray")) +
   labs(title = "Performance Difference vs. Sparsity Parameter (w)", x = "w (Sparsity Weight)", y = "Log(p) Difference", color = "Better Method") +
   facet_wrap(~ cog, scales = "free_y", ncol = 3)
-
-# ROC curves (averaged; requires storing fold ROCs, simplified here)
-# Assume roc_nsa_list and roc_pca_list collected in loop
-# Assume roc_nsa_list and roc_pca_list collected in loop
-if ( exists("roc_nsa_list")  ) {
-    avg_roc_nsa <- roc(temp$diagnosis_bin, rowMeans(sapply(roc_nsa_list, function(r) approx(r$specificities, r$sensitivities, xout = seq(0,1,0.01))$y)))
-    avg_roc_pca <- roc(temp$diagnosis, rowMeans(sapply(roc_pca_list, function(r) approx(r$specificities, r$sensitivities, xout = seq(0,1,0.01))$y)))
-    p4 <- ggroc(list(NSA = avg_roc_nsa, PCA = avg_roc_pca), size = 1.2) +
-    scale_color_manual(values = c("NSA" = "#4ECDC4", "PCA" = "#FF6B6B")) +
-    labs(title = "Average ROC for Diagnosis Prediction", color = "Method") +
-    theme(legend.position = "bottom")
-print(p4)
-}
 
 # Combine
 (p1 + p2) / p3 + plot_layout(heights = c(1, 1.5))
