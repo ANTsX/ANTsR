@@ -229,7 +229,7 @@ filter_config_space <- function(configs) {
 
 smallw=c( 0.01)
 configs <- filter_config_space( expand.grid(
-  w = c(  0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9 ), 
+  w = c(  0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99 ), 
   retraction = c( "svd", "polar", "qr", "soft_svd", "soft_polar", "soft_qr" ), 
   apply_nonneg = c(FALSE, TRUE),
   dataset = c("small", "wide", "large", "sparse_neg"),
@@ -257,9 +257,9 @@ if ( ! exists("results") ) {
     rep_results <- lapply(1:n_reps, function(rep) {
       mb <- microbenchmark(
         res <- ANTsR::nsa_flow( data$Y0, X0=X0_use, w=cfg$w, retraction=cfg$retraction, 
-          optimizer='armijo_gradient',
-          initial_learning_rate=1e-3,
-          apply_nonneg=cfg$apply_nonneg, seed=42+rep, verbose=FALSE, plot=TRUE),
+          optimizer='adam',
+          initial_learning_rate=1e-3, max_iter=1000, tol=1e-4,
+          apply_nonneg=cfg$apply_nonneg, seed=42+rep, verbose=TRUE, plot=TRUE),
         times=3
       )
       res$timing <- mb$time / 1e9  # Seconds
