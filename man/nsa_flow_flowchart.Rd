@@ -37,7 +37,3 @@ Generates a DiagrammeR flowchart summarizing the full NSA-Flow optimization pipe
 including initialization, gradient computation, Riemannian projection, descent, 
 retraction, non-negativity, and convergence checks.
 }
-\examples{
-library(DiagrammeR)
-nsa_flow_flowchart()
-}
