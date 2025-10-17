@@ -227,19 +227,20 @@ filter_config_space <- function(configs) {
   configs[!invalid, ]
 }
 
+rtypes = c( "polar", "soft_polar", "none" )
 smallw=c( 0.01)
 configs <- filter_config_space( expand.grid(
-  w = c(  0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99 ), 
-  retraction = c( "svd", "polar", "qr", "soft_svd", "soft_polar", "soft_qr" ), 
+  w = c(  0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99 ), 
+  retraction = rtypes, 
   apply_nonneg = c(FALSE, TRUE),
-  dataset = c("small", "wide", "large", "sparse_neg"),
-  x0_null = c(FALSE, TRUE),
+  dataset = c("small", "wide", "large" ),
+  x0_null = c(TRUE), # c(FALSE, TRUE),
   stringsAsFactors = FALSE
 ) )
 
 configs_fast <- filter_config_space( expand.grid(
   w = c(0.01,  0.25, 0.5, 0.75, 0.9 ), 
-  retraction = c( "svd", "polar", "qr", "soft_svd", "soft_polar", "soft_qr" ), 
+  retraction = rtypes, 
   apply_nonneg = c( TRUE ),
   dataset = c("small", "wide", "large", "sparse_neg"),
   x0_null = c( TRUE ),
@@ -255,11 +256,13 @@ if ( ! exists("results") ) {
     data <- get(paste0("data_", cfg$dataset))
     X0_use <- if (cfg$x0_null) data$Y0 else data$X0
     rep_results <- lapply(1:n_reps, function(rep) {
+      v=FALSE
       mb <- microbenchmark(
-        res <- ANTsR::nsa_flow( data$Y0, X0=X0_use, w=cfg$w, retraction=cfg$retraction, 
-          optimizer='adam',
-          initial_learning_rate=1e-3, max_iter=1000, tol=1e-4,
-          apply_nonneg=cfg$apply_nonneg, seed=42+rep, verbose=TRUE, plot=TRUE),
+        res <- ANTsR::nsa_flow( data$Y0, X0=X0_use, w=cfg$w, 
+          retraction=cfg$retraction, 
+          optimizer=m, tol=1e-6,
+          initial_learning_rate=0.001, max_iter=cfg$max_iter,
+          apply_nonneg=cfg$apply_nonneg, seed=42+rep, verbose=v, plot=TRUE),
         times=3
       )
       res$timing <- mb$time / 1e9  # Seconds
@@ -426,7 +429,7 @@ edge_tests$w_0 <- safe_run({
            w = 0.0,
            max_iter = 20,
            tol = 1e-5,
-           retraction = "soft_svd",
+           retraction = "soft_polar",
            verbose = FALSE)
 })
 
@@ -436,7 +439,7 @@ edge_tests$w_1 <- safe_run({
            w = 1.0,
            max_iter = 20,
            tol = 1e-5,
-           retraction = "soft_svd",
+           retraction = "soft_polar",
            verbose = FALSE)
 })
 
@@ -469,7 +472,7 @@ edge_tests$zero <- safe_run({
            w = 0.5,
            max_iter = 20,
            tol = 1e-5,
-           retraction = "soft_svd",
+           retraction = "soft_polar",
            verbose = FALSE)
 })
 
@@ -489,7 +492,7 @@ edge_tests$singular <- safe_run({
   ANTsR::nsa_flow(Y0 = data_singular$Y0,
            X0 = data_singular$X0,
            w = 0.3,
-           retraction = "soft_svd",
+           retraction = "soft_polar",
            max_iter = 50,
            tol = 1e-5,
            verbose = FALSE)
@@ -510,7 +513,7 @@ edge_tests$tight_tol <- safe_run({
   ANTsR::nsa_flow(Y0 = matrix(runif(20), 5, 4),
            X0 = matrix(runif(20), 5, 4),
            w = 0.7,
-           retraction = "soft_svd",
+           retraction = "soft_polar",
            tol = 1e-10,
            max_iter = 5,
            verbose = FALSE)
@@ -530,7 +533,7 @@ edge_tests$nonneg <- safe_run({
            X0 = NULL,
            w = 0.5,
            apply_nonneg = TRUE,
-           retraction = "soft_svd",
+           retraction = "soft_polar",
            max_iter = 30,
            verbose = FALSE)
 })
@@ -548,8 +551,8 @@ if (edge_tests$nonneg$success) {
 edge_tests$retract_compare <- safe_run({
   Ytest <- matrix(runif(30), 6, 5)
   list(
-    qr = ANTsR::nsa_flow(Y0 = Ytest, X0 = Ytest, w = 0.4, retraction = "qr", max_iter = 30),
-    soft = ANTsR::nsa_flow(Y0 = Ytest, X0 = Ytest, w = 0.4, retraction = "soft_svd", max_iter = 30)
+    qr = ANTsR::nsa_flow(Y0 = Ytest,  w = 0.4, retraction = "polar", max_iter = 30),
+    soft = ANTsR::nsa_flow(Y0 = Ytest, w = 0.4, retraction = "soft_polar", max_iter = 30)
   )
 })
 
@@ -655,27 +658,57 @@ Together, these tests validate both the correctness and numerical resilience of 
 # Discussion
 
 ## Relative Fidelity 
-```{r,fig.width=10, fig.height=6}
+```{r,fig.width=10, fig.height=3.5}
 
 
-tradeoff_df <- summary_df %>%
+
+tradeoff_df_signed <- summary_df %>%
   # filter to mixed or target conditions if desired
-  # filter(target_type == "mixed") %>%
-  group_by(retraction, dataset, w) %>%
+  filter(apply_nonneg == FALSE) %>%
+  group_by(retraction, dataset, w, apply_nonneg) %>%
   summarise(
+    orth = mean(mean_orth , na.rm = TRUE),
     rel_orth = mean(mean_orth / mean_orth_0, na.rm = TRUE),
     rel_fid  = mean(mean_fid  / mean_fid_0,  na.rm = TRUE),
     .groups = "drop"
   )
 
-ggplot(tradeoff_df, aes(x = w, y = rel_fid, color = dataset, group = dataset)) +
+ggplot(tradeoff_df_signed, aes(x = w, y = rel_fid, color = dataset, group = dataset)) +
   geom_line(linewidth = 1.1) +
   geom_point(size = 2) +
   facet_wrap(~ retraction, scales = "free_y") +
-  labs(title = "Relative Fidelity by Retraction and Dataset",
+  labs(title = "Relative Fidelity by Retraction and Dataset: (+/-)",
        y = "Relative Fidelity", x = "Tradeoff weight w") +
-  theme_minimal(base_size = 13)+
-  coord_cartesian(ylim = c(0.45, 1.05))   # <── limits y-axis to 0–2
+  theme_minimal(base_size = 13)
+
+tradeoff_df_unsigned <- summary_df %>%
+  # filter to mixed or target conditions if desired
+  filter(apply_nonneg == TRUE) %>%
+  group_by(retraction, dataset, w, apply_nonneg) %>%
+  summarise(
+    orth = mean(mean_orth , na.rm = TRUE),
+    rel_orth = mean(mean_orth / mean_orth_0, na.rm = TRUE),
+    rel_fid  = mean(mean_fid  / mean_fid_0,  na.rm = TRUE),
+    .groups = "drop"
+  )
+
+tradeoff_df <- summary_df %>%
+  group_by(retraction, dataset, w, apply_nonneg) %>%
+  summarise(
+    orth = mean(mean_orth , na.rm = TRUE),
+    rel_orth = mean(mean_orth / mean_orth_0, na.rm = TRUE),
+    rel_fid  = mean(mean_fid  / mean_fid_0,  na.rm = TRUE),
+    .groups = "drop"
+  )
+
+ggplot(tradeoff_df_unsigned, aes(x = w, y = rel_fid, color = dataset, group = dataset)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2) +
+  facet_wrap(~ retraction, scales = "free_y") +
+  labs(title = "Relative Fidelity by Retraction and Dataset: (+)",
+       y = "Relative Fidelity", x = "Tradeoff weight w") +
+  theme_minimal(base_size = 13)
+#  coord_cartesian(ylim = c(0.35, 0.7))   # <── limits y-axis to 0–2
 
 ggplot(summary_df, aes(x = factor(w), y = mean_fid / mean_fid_0,
                        fill = apply_nonneg)) +
@@ -693,13 +726,58 @@ ggplot(summary_df, aes(x = factor(w), y = mean_fid / mean_fid_0,
 
 ```
 
-## Relative Orthogonality 
-```{r,fig.width=10, fig.height=6}
-ggplot(tradeoff_df, aes(x = w, y = rel_orth, color = dataset, group = dataset)) +
+## Orthogonality Defect
+```{r,fig.width=10, fig.height=4}
+ggplot(tradeoff_df_signed, aes(x = w, y = orth, color = dataset, group = dataset)) +
   geom_line(linewidth = 1.1) +
   geom_point(size = 2) +
   facet_wrap(~ retraction, scales = "free_y") +
-  labs(title = "Relative Orthogonality by Retraction and Dataset",
+  labs(title = "Orthogonality Defect by Retraction and Dataset: (+/-)",
+       y = "Orthogonality Defect", x = "Tradeoff weight w") +
+  theme_minimal(base_size = 13)# --- Optional: pretty visual summary ---
+
+ggplot(tradeoff_df_unsigned, aes(x = w, y = orth, color = dataset, group = dataset)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2) +
+  facet_wrap(~ retraction, scales = "free_y") +
+  labs(title = "Orthogonality Defect by Retraction and Dataset: (+)",
+       y = "Orthogonality Defect", x = "Tradeoff weight w") +
+  theme_minimal(base_size = 13)# --- Optional: pretty visual summary ---
+
+ggplot(summary_df, aes(x = factor(w), y = mean_orth / mean_orth_0,
+                       fill = apply_nonneg)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~retraction + x0_null, ncol = 2) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  labs(
+    title = "Relative Orthogonality (mean_orth / mean_orth_0)",
+    x = "Weight w",
+    y = "Relative change (<1 means improvement)",
+    fill = "Nonnegativity"
+  ) +
+  theme_minimal(base_size = 12)+
+  coord_cartesian(ylim = c(0, 1.05)) 
+
+
+
+```
+
+
+## Relative Orthogonality 
+```{r,fig.width=10, fig.height=4}
+ggplot(tradeoff_df_signed, aes(x = w, y = rel_orth, color = dataset, group = dataset)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2) +
+  facet_wrap(~ retraction, scales = "free_y") +
+  labs(title = "Relative Orthogonality by Retraction and Dataset: (+/-)",
+       y = "Relative Orthogonality", x = "Tradeoff weight w") +
+  theme_minimal(base_size = 13)# --- Optional: pretty visual summary ---
+
+ggplot(tradeoff_df_unsigned, aes(x = w, y = rel_orth, color = dataset, group = dataset)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2) +
+  facet_wrap(~ retraction, scales = "free_y") +
+  labs(title = "Relative Orthogonality by Retraction and Dataset: (+)",
        y = "Relative Orthogonality", x = "Tradeoff weight w") +
   theme_minimal(base_size = 13)# --- Optional: pretty visual summary ---
 
@@ -827,7 +905,7 @@ $$
 
 (Padded with zeros if $r < \min(m,n)$; full rank assumed.) Independent of $w$.
 
-### soft_svd: Soft SVD retraction
+### soft_polar: Soft SVD retraction
 
 Soft SVD retraction. Compute the SVD orthogonal part $Q = U V^T$ as above, then convex-combine with $Y$ and rescale to match $\|Y\|_F$.
 

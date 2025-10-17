@@ -10209,6 +10209,7 @@ inv_sqrt_sym <- function(M, epsilon = 1e-10) {
   vecs %*% diag(inv_sqrt_vals) %*% t(vecs)
 } 
 
+#' Retraction onto the Stiefel Manifold
 #' @export
 nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
   should_retract <- function(Y, retraction_type = "soft", tol = 1e-6, verbose = FALSE) {
@@ -10251,47 +10252,31 @@ nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
   p <- nrow(Y_cand); k <- ncol(Y_cand)
   YtY <- crossprod(Y_cand)  # k x k
   normY <- sqrt(sum(Y_cand^2))
-
-  # helpers
-  qr_signed_Q <- function(Z) {
-    qrq <- qr(Z)
-    Q <- qr.Q(qrq)
-    Rmat <- qr.R(qrq)
-    sgn <- sign(diag(Rmat)); sgn[is.na(sgn)] <- 1
-    Q %*% diag(sgn)
-  }
-
-  if (retraction_type == "polar") {
-    T <- inv_sqrt_sym(YtY)
-    Ytilde <- Y_cand %*% T
-  } else if (retraction_type == "qr") {
-    Ytilde <- qr_signed_Q(Y_cand)
-  } else if (retraction_type == "soft_qr") {
-    Q <- qr_signed_Q(Y_cand)
-    col_norms <- sqrt(colSums(Y_cand^2))
-    D <- diag(col_norms)
-    Q_scaled <- Q %*% D
-    Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q_scaled
-  } else if (retraction_type == "soft") {
-    Q <- qr_signed_Q(Y_cand)
-    Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
-  } else if (retraction_type == "soft_polar") {
-    T <- inv_sqrt_sym(YtY)
-    T_w <- (1 - w_retract) * diag(k) + w_retract * T
-    Ytilde <- Y_cand %*% T_w
-  } else if (retraction_type == "svd") {
+  rtypes <- c("polar", "svd")
+  srtypes = paste0("soft_", rtypes)
+  # Unified polar (handles both "polar" and former "svd")
+  if (retraction_type %in% rtypes ) {
+    # Use economy SVD for efficiency (faster on wide p < k)
     s <- svd(Y_cand, nu = min(p,k), nv = min(p,k))
-    Q <- s$u %*% t(s$v)
-    Ytilde <- Q
-  } else if (retraction_type == "soft_svd") {
-    s <- svd(Y_cand, nu = min(p,k), nv = min(p,k))
-    Q <- s$u %*% t(s$v)
-    Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
+    Ytilde <- s$u %*% t(s$v)
+  } else if (retraction_type %in% srtypes) {
+    # Compute full polar T; use SVD if wide for speed
+    if (p < k) {
+      s <- svd(Y_cand, nu = min(p,k), nv = min(p,k))
+      Q <- s$u %*% t(s$v)
+      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q  # Fallback to soft SVD style for wide
+    } else {
+      YtY <- crossprod(Y_cand)
+      T <- inv_sqrt_sym(YtY)
+      T_w <- (1 - w_retract) * diag(k) + w_retract * T
+      Ytilde <- Y_cand %*% T_w
+    }
   } else {
-    stop("Unknown retraction_type: ", retraction_type)
+    outmessage <- sprintf("Unknown retraction_type: %s. Supported: none and %s.", retraction_type, paste(c(rtypes, srtypes), collapse = ", "))
+    stop(outmessage)
   }
-
-  # optional: preserve Frobenius norm of candidate matrix
+  #
+  # Optional: preserve Frobenius norm
   if (!is.null(normY) && normY > 1e-12) {
     current_norm <- sqrt(sum(Ytilde^2))
     if (current_norm > 0) Ytilde <- Ytilde / current_norm * normY
@@ -10299,14 +10284,11 @@ nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
   Ytilde
 }
 
-
-
 #' @title NSA-Flow Optimization
 #'
 #' @description
 #' Performs optimization to balance fidelity to a target matrix and orthogonality
-#' of the solution matrix using a weighted objective function.
-#' The function supports multiple retraction methods and includes robust convergence checks.
+#' of the solution matrix using a weighted objective function. The function supports multiple retraction methods and includes robust convergence checks.  These constraints provide global control over column-wise sparseness by projecting the matrix onto the approximate Stiefel manifold.
 #'
 #' @param Y0 Numeric matrix of size \code{p x k}, the initial guess for the solution.
 #' @param X0 Numeric matrix of size \code{p x k}, the target matrix for fidelity.
@@ -10373,9 +10355,9 @@ nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
 #' @export
 nsa_flow <- function(
   Y0, X0 = NULL, w = 0.5,
-  retraction = c( "soft_svd", "polar", "qr", "none", "soft_polar", "svd", "soft_qr"),
-  max_iter = 100, tol = 1e-6, verbose = FALSE, seed = 42,
-  apply_nonneg = TRUE, optimizer = "adam",
+  retraction = c( "polar",  "soft_polar",  "none" ),
+  max_iter = 500, tol = 1e-5, verbose = FALSE, seed = 42,
+  apply_nonneg = TRUE, optimizer = "armijo_gradient",
   initial_learning_rate = 1e-3,
   record_every = 1, window_size = 5, c1_armijo=1e-6,
   plot = FALSE
@@ -10439,16 +10421,21 @@ nsa_flow <- function(
   k <- ncol(Y0)
   # --- Initialize X0 if missing ---
   if (is.null(X0)) {
-    X0 <- pmax(Y0, 0)
-    perturb_scale <- 0.1 * sqrt(sum(Y0^2)) / sqrt(length(Y0))
-    Y0 <- Y0 + matrix(rnorm(p * k, sd = perturb_scale), p, k)
-    if (verbose) cat("Added small perturbation to Y0\n")
+    if ( apply_nonneg ) X0 <- pmax(Y0, 0) else X0 = Y0
+    perturb_scale <- sqrt(sum(Y0^2)) / sqrt(length(Y0))
+    Y0 <- matrix(rnorm(p * k, sd = perturb_scale), p, k)
+    if (verbose) cat("Added perturbation to Y0\n")
   } else {
-    X0 <- pmax(X0, 0)
+    if ( apply_nonneg ) X0 <- pmax(X0, 0)
     if (nrow(X0) != p || ncol(X0) != k) stop("X0 must have same dimensions as Y0")
   }
   retraction <- match.arg(retraction)
-  Y <- Y0
+  if ( retraction %in% c("polar","soft_polar") ) {
+#    Y0 <- nsa_flow_retract(Y0, w_retract = 1.0, retraction = 'polar')
+  } else {
+#      Y <- Y0
+  }
+  Y <- Y0# <- nsa_flow_retract(Y0, w_retract = 1.0, retraction = 'polar')  
   # --- Compute initial scales ---
   g0 <- 0.5 * sum((Y0 - X0)^2) / (p * k)
   if (g0 < 1e-8) g0 <- 1e-8
@@ -10459,10 +10446,7 @@ nsa_flow <- function(
   c_orth <- 4 * w / d0
   # --- Optimizer initialization ---
   # This assumes create_optimizer and step are defined in the global environment
-  opt <- create_optimizer(optimizer, vmats = list(Y),
-                          beta1 = 0.9, beta2 = 0.999, epsilon = 1e-8,
-                          learning_rate = initial_learning_rate,
-                          k = 5, alpha = 0.5)
+  opt <- create_optimizer( optimizer, vmats = list(Y), learning_rate = initial_learning_rate )
   trace <- list()
   recent_energies <- numeric(0)
   t0 <- Sys.time()
@@ -10532,23 +10516,21 @@ nsa_flow <- function(
       full_energy_function = nsa_energy,
       myit = it
     )
-    Y_prev <- Y
     Y <- step_result$updated_V
     opt <- step_result$optimizer
 
     # --- Backtracking line search ---
-    prev_energy <- nsa_energy(Y_prev)
     current_energy <- nsa_energy(Y)
     alpha <- 1
     count <- 0
+    max_bt_count = 20
     retracted_in_loop <- FALSE  # Track whether retraction already applied
 
-    while (current_energy > prev_energy && count < 5) {
+    while (current_energy > best_total_energy && count < max_bt_count) {
       alpha <- alpha * 0.5
-      Y <- Y_prev + alpha * (step_result$updated_V - Y_prev)
+      Y <- best_Y + alpha * (step_result$updated_V - best_Y)
       current_energy <- nsa_energy(Y)
-      
-      if (current_energy < prev_energy) {
+      if (current_energy < best_total_energy) {
         Y <- nsa_flow_retract(Y, w, retraction)
         retracted_in_loop <- TRUE
         break
@@ -10557,9 +10539,9 @@ nsa_flow <- function(
     }
 
     # --- Handle backtracking outcomes ---
-    if (count == 5) {
+    if (count == max_bt_count) {
       # Backtracking failed → revert
-      Y <- Y_prev
+      Y <- best_Y
       retracted_in_loop <- TRUE  # previous Y was already retracted
       if (verbose) cat("Backtracking failed to reduce energy; reverting to previous Y.\n")
     }
@@ -10567,10 +10549,10 @@ nsa_flow <- function(
     # --- Adaptive learning rate adjustment ---
     if (count > 2) {
       lr <- lr * 0.95
-      if (verbose) cat(sprintf("Reducing learning rate to %.6e due to backtracking\n", lr))
+#      if (verbose) cat(sprintf("Reducing learning rate to %.6e due to backtracking\n", lr))
     } else if (count == 0 && it %% 5 == 0) {
-      lr <- lr * 1.05
-      if (verbose) cat(sprintf("Increasing learning rate to %.6e\n", lr))
+      lr <- lr * 1.01
+#      if (verbose) cat(sprintf("Increasing learning rate to %.6e\n", lr))
     }
 
     # --- Retraction safeguard ---
@@ -10597,6 +10579,7 @@ nsa_flow <- function(
     if (total_energy < best_total_energy) {
       best_total_energy <- total_energy
       best_Y <- Y
+      best_Y_iteration <- it
     }
 
     # --- Append to recent energies ---
@@ -10678,7 +10661,9 @@ nsa_flow <- function(
     traces = trace_df,
     final_iter = if(is.null(trace_df)) 0 else nrow(trace_df),
     plot = energy_plot,
-    best_total_energy = best_total_energy
+    best_total_energy = best_total_energy, 
+    best_Y_iteration = best_Y_iteration,
+    target = X0
   )
 }
 

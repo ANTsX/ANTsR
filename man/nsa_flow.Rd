@@ -8,13 +8,13 @@ nsa_flow(
   Y0,
   X0 = NULL,
   w = 0.5,
-  retraction = c("soft_svd", "polar", "qr", "none", "soft_polar", "svd", "soft_qr"),
-  max_iter = 100,
-  tol = 1e-06,
+  retraction = c("polar", "soft_polar", "none"),
+  max_iter = 500,
+  tol = 1e-05,
   verbose = FALSE,
   seed = 42,
   apply_nonneg = TRUE,
-  optimizer = "adam",
+  optimizer = "armijo_gradient",
   initial_learning_rate = 0.001,
   record_every = 1,
   window_size = 5,
@@ -79,8 +79,7 @@ A list containing:
 }
 \description{
 Performs optimization to balance fidelity to a target matrix and orthogonality
-of the solution matrix using a weighted objective function.
-The function supports multiple retraction methods and includes robust convergence checks.
+of the solution matrix using a weighted objective function. The function supports multiple retraction methods and includes robust convergence checks.  These constraints provide global control over column-wise sparseness by projecting the matrix onto the approximate Stiefel manifold.
 }
 \details{
 The function minimizes a weighted objective combining fidelity to \code{X0} and

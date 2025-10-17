@@ -129,7 +129,6 @@ step.random_search <- function(optimizer, i, V_current, descent_gradient,
   # It proposes n_trials random perturbations and picks the candidate
   # that yields the lowest energy (greedy). If no energy function is given,
   # it returns a single perturbation.
-  
   state <- optimizer$state[[i]]
   params <- optimizer$params
   n_trials <- params$n_trials %||% 16L
@@ -176,6 +175,7 @@ step.random_gradient <- function(optimizer, i, V_current, descent_gradient,
   # This optimizer ignores the actual gradient and generates a random one.
   # It then uses backtracking line search to find an acceptable step size.
   
+  descent_gradient = descent_gradient * (-1.0)  
   state <- optimizer$state[[i]]
   params <- optimizer$params
   epsilon <- params$epsilon %||% 1e-8
@@ -236,7 +236,7 @@ step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
 step.gd <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Naive gradient descent with exponential learning rate decay
   # update: V_{t+1} = V_t - η_t * ∇f(V_t)
-  
+  descent_gradient = descent_gradient * (-1.0)
   state <- optimizer$state[[i]]
   params <- optimizer$params
   
@@ -540,7 +540,7 @@ step.ls_nadam <- function(optimizer, i, V_current, descent_gradient, full_energy
 #' @export
 step.amsgrad <- function(optimizer, i, V_current, descent_gradient, ...) {
   # AMSGrad optimizer
-  
+  descent_gradient = descent_gradient * (-1.0)
   state <- optimizer$state[[i]]
   params <- optimizer$params
   beta1 <- params$beta1 %||% 0.9
@@ -575,6 +575,7 @@ step.amsgrad <- function(optimizer, i, V_current, descent_gradient, ...) {
 #' @export
 step.adadelta <- function(optimizer, i, V_current, descent_gradient, ...) {
   # AdaDelta update rule
+  descent_gradient = descent_gradient * (-1.0)
   
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -748,6 +749,7 @@ step.bidirectional_armijo_gradient <- function(optimizer, i, V_current, descent_
 #' @export
 step.ranger <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Rectified Adam step (warmup for first 2n iters)
+  descent_gradient = descent_gradient * (-1.0)
   state <- optimizer$state[[i]]
   params <- optimizer$params
   myit <- params$myit %||% 1
@@ -783,6 +785,7 @@ step.ranger <- function(optimizer, i, V_current, descent_gradient, ...) {
 
 #' @export
 step.vsgd <- function(optimizer, i, V_current, descent_gradient, ...) {
+  descent_gradient = descent_gradient * (-1.0)  
   state <- optimizer$state[[i]]
   params <- optimizer$params
   learning_rate <- params$learning_rate %||% 0.001
@@ -800,6 +803,7 @@ step.vsgd <- function(optimizer, i, V_current, descent_gradient, ...) {
 #' @export
 step.riemannian_adam <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Wraps your Adam, but transports update via retraction/projection
+  descent_gradient = descent_gradient * (-1.0)
   state <- optimizer$state[[i]]
   params <- optimizer$params
   myit <- params$myit %||% 1
@@ -825,6 +829,7 @@ step.riemannian_adam <- function(optimizer, i, V_current, descent_gradient, ...)
 #' @export
 step.lars <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Base SGD + layer-wise scaling (adapt to columns)
+  descent_gradient = descent_gradient * (-1.0)
   params <- optimizer$params
   learning_rate <- params$learning_rate %||% 0.001
   # Compute column norms for scaling
@@ -838,6 +843,7 @@ step.lars <- function(optimizer, i, V_current, descent_gradient, ...) {
 
 #' @export
 step.psgd <- function(optimizer, i, V_current, descent_gradient, ...) {
+  descent_gradient = descent_gradient * (-1.0)
   state <- optimizer$state[[i]]
   params <- optimizer$params
   learning_rate <- params$learning_rate %||% 0.001
@@ -1069,6 +1075,6 @@ step.bidirectional_lookahead <- function(optimizer, i, V_current, descent_gradie
 list_simlr_optimizers <- function() {
   methods_vec <- as.character(methods("step"))
   optimizers <- gsub("^step\\.|\\*$", "", methods_vec)
-  optimizers=optimizers[ !(optimizers %in% c("lbfgs", "random_search"))]
+  optimizers=optimizers[ !(optimizers %in% c("lbfgs", "random_search", "random_gradient"))]
   return(optimizers)
 }
