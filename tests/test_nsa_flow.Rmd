@@ -235,20 +235,22 @@ configs <- filter_config_space( expand.grid(
   apply_nonneg = c(FALSE, TRUE),
   dataset = c("small", "wide", "large" ),
   x0_null = c(TRUE), # c(FALSE, TRUE),
+  max_iter = c( 500 ),
   stringsAsFactors = FALSE
 ) )
 
-configs_fast <- filter_config_space( expand.grid(
-  w = c(0.01,  0.25, 0.5, 0.75, 0.9 ), 
+configs <- filter_config_space( expand.grid(
+  w = c(  0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99 ), 
   retraction = rtypes, 
   apply_nonneg = c( TRUE ),
-  dataset = c("small", "wide", "large", "sparse_neg"),
+  dataset = c("small", "wide", "large"), # , "sparse_neg"
   x0_null = c( TRUE ),
+  max_iter = c( 500 ),
   stringsAsFactors = FALSE
 ) )
 
 if ( ! exists("results") ) {
-  n_reps <- 3
+  n_reps <- 1
   results <- list()
   maxcfnfigs <- nrow(configs)
   for (i in 1:maxcfnfigs) {
@@ -260,8 +262,8 @@ if ( ! exists("results") ) {
       mb <- microbenchmark(
         res <- ANTsR::nsa_flow( data$Y0, X0=X0_use, w=cfg$w, 
           retraction=cfg$retraction, 
-          optimizer=m, tol=1e-6,
           initial_learning_rate=0.001, max_iter=cfg$max_iter,
+          tol = 1e-6,
           apply_nonneg=cfg$apply_nonneg, seed=42+rep, verbose=v, plot=TRUE),
         times=3
       )
@@ -658,28 +660,28 @@ Together, these tests validate both the correctness and numerical resilience of 
 # Discussion
 
 ## Relative Fidelity 
-```{r,fig.width=10, fig.height=3.5}
+```{r relfid,fig.width=10, fig.height=3.5}
 
 
 
 tradeoff_df_signed <- summary_df %>%
   # filter to mixed or target conditions if desired
   filter(apply_nonneg == FALSE) %>%
-  group_by(retraction, dataset, w, apply_nonneg) %>%
+  group_by(retraction, dataset, w) %>%
   summarise(
     orth = mean(mean_orth , na.rm = TRUE),
     rel_orth = mean(mean_orth / mean_orth_0, na.rm = TRUE),
     rel_fid  = mean(mean_fid  / mean_fid_0,  na.rm = TRUE),
     .groups = "drop"
   )
-
-ggplot(tradeoff_df_signed, aes(x = w, y = rel_fid, color = dataset, group = dataset)) +
-  geom_line(linewidth = 1.1) +
-  geom_point(size = 2) +
-  facet_wrap(~ retraction, scales = "free_y") +
-  labs(title = "Relative Fidelity by Retraction and Dataset: (+/-)",
-       y = "Relative Fidelity", x = "Tradeoff weight w") +
-  theme_minimal(base_size = 13)
+if ( nrow(tradeoff_df_signed > 0)) 
+  ggplot(tradeoff_df_signed, aes(x = w, y = rel_fid, color = dataset, group = dataset)) +
+    geom_line(linewidth = 1.1) +
+    geom_point(size = 2) +
+    facet_wrap(~ retraction, scales = "free_y") +
+    labs(title = "Relative Fidelity by Retraction and Dataset: (+/-)",
+        y = "Relative Fidelity", x = "Tradeoff weight w") +
+    theme_minimal(base_size = 13)
 
 tradeoff_df_unsigned <- summary_df %>%
   # filter to mixed or target conditions if desired
@@ -707,8 +709,8 @@ ggplot(tradeoff_df_unsigned, aes(x = w, y = rel_fid, color = dataset, group = da
   facet_wrap(~ retraction, scales = "free_y") +
   labs(title = "Relative Fidelity by Retraction and Dataset: (+)",
        y = "Relative Fidelity", x = "Tradeoff weight w") +
-  theme_minimal(base_size = 13)
-#  coord_cartesian(ylim = c(0.35, 0.7))   # <── limits y-axis to 0–2
+  theme_minimal(base_size = 13) +
+  coord_cartesian(ylim = c(0.35, 1.1))   # <── limits y-axis to 0–2
 
 ggplot(summary_df, aes(x = factor(w), y = mean_fid / mean_fid_0,
                        fill = apply_nonneg)) +
@@ -727,7 +729,9 @@ ggplot(summary_df, aes(x = factor(w), y = mean_fid / mean_fid_0,
 ```
 
 ## Orthogonality Defect
-```{r,fig.width=10, fig.height=4}
+```{r ordef,fig.width=10, fig.height=4}
+
+if ( nrow(tradeoff_df_signed > 0)) 
 ggplot(tradeoff_df_signed, aes(x = w, y = orth, color = dataset, group = dataset)) +
   geom_line(linewidth = 1.1) +
   geom_point(size = 2) +
@@ -764,7 +768,8 @@ ggplot(summary_df, aes(x = factor(w), y = mean_orth / mean_orth_0,
 
 
 ## Relative Orthogonality 
-```{r,fig.width=10, fig.height=4}
+```{r rel_orth,fig.width=10, fig.height=4}
+if ( nrow(tradeoff_df_signed > 0)) 
 ggplot(tradeoff_df_signed, aes(x = w, y = rel_orth, color = dataset, group = dataset)) +
   geom_line(linewidth = 1.1) +
   geom_point(size = 2) +

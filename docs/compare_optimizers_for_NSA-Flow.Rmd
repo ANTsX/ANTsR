@@ -11,44 +11,43 @@ library(ggplot2)
 library(dplyr)
 library(patchwork)
 library(ANTsR)
-library(gganimate)
 library(scales)
+library(subtyper)
+library(gt)
 ```
 
 ```{r run_experiment,echo=FALSE}
-# Initialize data
 set.seed(123)
 p <- 100; k <- 50
 mat1 <- matrix(rnorm(p*k), p, k)
 mat1 <- mat1 / norm(mat1, 'F')
 
 # Transpose if needed (consistent with your setup)
-if (exists("option") && option != "wide") mat1 <- t(mat1)
+if (exists("matoption") && matoption == "wide") mat1 <- t(mat1)
 
-# Define experiment parameters
 ws <- seq(0.05, 0.95, by = 0.05)
 optimizers <- list_simlr_optimizers()
-max_iter <- 15
-tol <- 1e-5
-if ( ! exists("raw_results") ) {
+max_iter <- 500
+tol <- 1e-6
+def_ret <- "soft_polar"
+
+if (!exists("raw_results")) {
   raw_results <- data.frame()
 
-  # Benchmark across optimizers
   for (o in optimizers) {
-  #  cat(sprintf("\nRunning optimizer: %s\n", o))
     for (w in ws) {
       start_time <- Sys.time()
       res <- tryCatch({
-        nsa_flow(mat1, w = w, verbose = FALSE, retraction = "soft_polar",
-                optimizer = o, tol = tol, max_iter = max_iter)
+        nsa_flow(mat1, w = w, verbose = FALSE, retraction = def_ret,
+                 optimizer = o, tol = tol, max_iter = max_iter)
       }, error = function(e) NULL)
-      
+
       end_time <- Sys.time()
       runtime <- as.numeric(difftime(end_time, start_time, units = "secs"))
-      
+
       if (!is.null(res)) {
         o_def <- invariant_orthogonality_defect(res$Y)
-        fid <- norm(res$Y - res$target, "F") / norm(res$target, "F")
+        fid <- norm(res$Y - res$target, "F") # / norm(res$target, "F")
         raw_results <- rbind(raw_results, data.frame(
           Optimizer = o,
           w = w,
@@ -56,7 +55,6 @@ if ( ! exists("raw_results") ) {
           Fidelity = fid,
           Runtime = runtime
         ))
-  #      cat(sprintf("  w=%.2f | Orth=%.4e | Fid=%.4e | t=%.2fs\n", w, o_def, fid, runtime))
       }
     }
   }
@@ -71,29 +69,25 @@ if ( ! exists("raw_results") ) {
 ```{r ws_trends, fig.width=10, fig.height=12,echo=FALSE}
 raw_results$Optimizer <- factor(raw_results$Optimizer, levels = unique(raw_results$Optimizer))
 
-# Orthogonality trend
 p1 <- ggplot(raw_results, aes(x = w, y = Orthogonality, color = Optimizer)) +
   geom_line(linewidth = 1) + geom_point(size = 2, alpha = 0.8) +
   geom_smooth(method = "loess", se = FALSE, linetype = "dashed", linewidth = 0.6) +
   facet_wrap(~Optimizer, scales = "free_y") +
-  labs(
-    title = "Orthogonality Defect vs. Retraction Weight (w)",
-    y = "Orthogonality Defect (↓)", x = "w"
-  ) +
-  theme_minimal(base_size = 14) + ylim(0,0.05)+
-  theme(strip.text = element_text(face = "bold"),legend.position = "none")
+  labs(title = "Orthogonality Defect vs Retraction Weight (w)",
+       y = "Orthogonality Defect (↓)", x = "w") +
+  theme_minimal(base_size = 14) +
+  ylim(0, 0.05) +
+  theme(strip.text = element_text(face = "bold"), legend.position = "none")
 
-# Fidelity trend
 p2 <- ggplot(raw_results, aes(x = w, y = Fidelity, color = Optimizer)) +
   geom_line(linewidth = 1) + geom_point(size = 2, alpha = 0.8) +
   geom_smooth(method = "loess", se = FALSE, linetype = "dashed", linewidth = 0.6) +
   facet_wrap(~Optimizer, scales = "free_y") +
-  labs(
-    title = "Fidelity vs. Retraction Weight (w)",
-    y = "Fidelity (↓)", x = "w"
-  ) +
-  theme_minimal(base_size = 14) + ylim(0.1,2.0) +
-  theme(strip.text = element_text(face = "bold"),legend.position = "none")
+  labs(title = "Fidelity vs Retraction Weight (w)",
+       y = "Fidelity (↓)", x = "w") +
+  theme_minimal(base_size = 14) +
+  ylim(0.1, 2.0) +
+  theme(strip.text = element_text(face = "bold"), legend.position = "none")
 
 combined <- p1 / p2
 ggsave("orth_fid_trends.png", combined, width = 10, height = 8, dpi = 300)
@@ -102,36 +96,9 @@ combined
 
 ---
 
-<!--
-
-## Animated Tradeoff Plot
-
-```{r animation, fig.width=8, fig.height=6,eval=FALSE}
-anim <- ggplot(raw_results, aes(x = Orthogonality, y = Fidelity, color = Optimizer)) +
-  geom_point(size = 3, alpha = 0.8) +
-  geom_path(linewidth = 1, alpha = 0.6) +
-  transition_states(w, transition_length = 2, state_length = 1) +
-  labs(
-    title = "Fidelity–Orthogonality Tradeoff by Optimizer",
-    subtitle = "Retraction weight: {closest_state}",
-    x = "Orthogonality Defect (↓)",
-    y = "Fidelity (↓)",
-    color = "Optimizer"
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(plot.title = element_text(face = "bold", hjust = 0.5))
-
-anim_file <- "optimizer_tradeoff.gif"
-animate(anim, width = 800, height = 600, res = 120, duration = 10, fps = 10)
-anim_save(anim_file)
-anim
-```
--->
-
 ## Decision Analysis
 
-```{r decision_analysis}
-# Summaries
+```{r decision_analysis,echo=FALSE}
 summary_df <- raw_results %>%
   group_by(Optimizer) %>%
   summarise(
@@ -142,7 +109,6 @@ summary_df <- raw_results %>%
     SD_Fidelity = sd(Fidelity, na.rm = TRUE)
   )
 
-# Normalize metrics (for fair weighting)
 norm_df <- summary_df %>%
   mutate(
     Norm_Defect = rescale(Mean_Defect),
@@ -152,7 +118,6 @@ norm_df <- summary_df %>%
     Score_WithTime = Norm_Defect + Norm_Fid + Norm_Runtime
   )
 
-# Best optimizer ignoring runtime
 best_no_time <- norm_df$Optimizer[which.min(norm_df$Score_NoTime)]
 best_with_time <- norm_df$Optimizer[which.min(norm_df$Score_WithTime)]
 
@@ -174,7 +139,7 @@ if (!"Optimizer" %in% names(summary_df)) {
   summary_df$Optimizer <- as.factor(summary_df$Optimizer)
 }
 
-pareto <- ggplot(summary_df[summary_df$Optimizer != 'amsgrad',], aes(
+pareto <- ggplot(summary_df, aes(
   x = Mean_Defect,
   y = Mean_Fidelity,
   color = Optimizer,
@@ -187,7 +152,7 @@ pareto <- ggplot(summary_df[summary_df$Optimizer != 'amsgrad',], aes(
     x = "Mean Orthogonality Defect (↓)",
     y = "Mean Fidelity (↓)"
   ) +
-  theme_minimal(base_size = 14)+theme(legend.position = "none")
+  theme_minimal(base_size = 14) + theme(legend.position = "none")
 
 ggsave("pareto_frontier.png", pareto, width = 8, height = 5, dpi = 300)
 pareto
@@ -195,10 +160,34 @@ pareto
 
 ---
 
+## Multi-Criteria Ranking
+
+```{r multi_criteria_ranking,echo=FALSE}
+weights_df <- data.frame(
+  metric_name = c("Mean_Defect", "Mean_Fidelity", "Mean_Runtime"),
+  display_name = c("Orthogonality Defect", "Fidelity", "Runtime (s)"),
+  weight = c(0.5, 0.5, 0.50),
+  direction = c("low", "low", "low")
+)
+
+rank_results <- subtyper::rank_methods_by_performance(
+  df = summary_df,
+  id_col = "Optimizer",
+  weights_df = weights_df,
+  method = "rank",
+  head_value = 10
+)
+
+rank_results$gt_table %>% fmt_number(
+ columns = where(is.numeric), decimals = 3
+) 
+```
+
+---
+
 ### 🧠 Interpretation
 
-* The **best optimizer (ignoring runtime)** minimizes both orthogonality defect and fidelity loss simultaneously.
-
-* The **runtime-weighted best** may differ if one optimizer converges much faster with only a small performance loss.
-
-* The **animated plot** shows each optimizer’s *trajectory* in the orthogonality–fidelity plane as ( w ) increases, offering insight into tradeoffs between strong orthogonalization and fidelity preservation.
+* **Without runtime:** prioritizes algorithmic accuracy — orthogonality and fidelity.
+* **With runtime:** incorporates efficiency; slight tradeoffs tolerated for speed.
+* **Pareto plot:** reveals whether an optimizer is *dominated* (worse on both metrics).
+* **Top-ranked optimizers** balance all three dimensions quantitatively.

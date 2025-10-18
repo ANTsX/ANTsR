@@ -10422,8 +10422,8 @@ nsa_flow <- function(
   # --- Initialize X0 if missing ---
   if (is.null(X0)) {
     if ( apply_nonneg ) X0 <- pmax(Y0, 0) else X0 = Y0
-    perturb_scale <- sqrt(sum(Y0^2)) / sqrt(length(Y0))
-    Y0 <- matrix(rnorm(p * k, sd = perturb_scale), p, k)
+    perturb_scale <- sqrt(sum(Y0^2)) / sqrt(length(Y0)) * 0.05
+    Y0 <- Y0 + matrix(rnorm(p * k, sd = perturb_scale), p, k)
     if (verbose) cat("Added perturbation to Y0\n")
   } else {
     if ( apply_nonneg ) X0 <- pmax(X0, 0)
@@ -10656,6 +10656,8 @@ nsa_flow <- function(
                      axis.title.y.right = ggplot2::element_text(color = "#33a02c"),
                      axis.text.y.right = ggplot2::element_text(color = "#33a02c"))
   }
+  rownames(best_Y) <- rownames(Y0)
+  colnames(best_Y) <- colnames(Y0)
   list(
     Y = best_Y,
     traces = trace_df,

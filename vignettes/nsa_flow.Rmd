@@ -313,20 +313,17 @@ sparsity_level <- function(M, tol = 1e-8) {
 
 ## Comparing Retraction Methods
 
-Retraction methods define how an iterative optimization algorithm projects an updated matrix back onto a constraint manifold—in this case, the **orthogonality constraint** (\( \|Y^\top Y - I_k\|_F \approx 0 \)).  
-Two key strategies are illustrated here:
+The retraction methods define how NSA-Flow projects the updated matrix back onto a constraint manifold. Two key strategies are illustrated here:
 
 1. **Polar Retraction**: Computes SVD \( Y = U \Sigma V^\top \), retracts to \( U V^\top \) (setting singular values to 1). This is the orthogonal Procrustes solution, minimizing Frobenius distance to the Stiefel manifold, ensuring \( (U V^\top)^\top (U V^\top) = V U^\top U V^\top = I_k \) (assuming full rank).
 
 2. **Soft Polar Retraction**: For tall matrices (\( p \geq k \)), computes \( T = (Y^\top Y)^{-1/2} \) via eigendecomposition, forms \( T_\omega = (1 - \omega) I_k + \omega T \), then \( Y T_\omega \). For wide matrices (\( p < k \)), falls back to SVD-based \( Q = U V^\top \), then \( (1 - \omega) Y + \omega Q \). This interpolates between no change and full polar, enabling gradual enforcement.
 
-All retractions optionally preserve the Frobenius norm: scale output \( Y \) by \( \|Y_{\cand}\|_F / \|Y\|_F \) if \( \|Y\|_F > 0 \), focusing optimization on directions.
+Both are compared to no retraction.  We, by default, also preserve the Frobenius norm  scaling output \( Y \) by \( \|Y_{\cand}\|_F / \|Y\|_F \) if \( \|Y\|_F > 0 \), focusing optimization on directions.
 
-An optional precondition checks if retraction is needed via the scale-invariant orthogonality defect \( \delta(Y) = \frac{\|Y^\top Y - \diag(\diag(Y^\top Y))\|_F^2}{\|Y\|_F^4} \), computed efficiently as off-diagonal Frobenius squared over norm squared (avoiding temporary matrices). If \( \delta(Y) \leq \tol \cdot \max(1, \|Y\|_F) \), skip for efficiency.
+An optional precondition checks if retraction is needed via the scale-invariant orthogonality defect \( \delta(Y) = \frac{\|Y^\top Y - \diag(\diag(Y^\top Y))\|_F^2}{\|Y\|_F^4} \), computed efficiently as off-diagonal Frobenius squared over norm squared (avoiding temporary matrices). 
 
-To ensure comparability, input matrices are normalized to unit Frobenius norm before retraction.
-
-We systematically vary \( \omega \) from 0 to 1 and compare how these two retractions affect tall (\( p > k \), e.g., 200 $\times$ 20), wide (\( p < k \), e.g., 20 $\times$ 200), and nearly square (\( p \approx k \), e.g., 100 $\times$ 100) matrices:
+We systematically vary \( \omega \) from 0 to 1 and compare how these retraction approaches impact tall (\( p > k \), e.g., 200 $\times$ 20), wide (\( p < k \), e.g., 20 $\times$ 200), and square (\( p \approx k \), e.g., 100 $\times$ 100) matrices:
 
 - **Orthogonality Defect**:  
   \( \delta(Y) = \left\| \frac{Y^\top Y}{\|Y\|_F^2} - \diag\left( \frac{\diag(Y^\top Y)}{\|Y\|_F^2} \right) \right\|_F^2 \) — a scale-invariant measure of deviation from column orthogonality.  
@@ -336,98 +333,11 @@ We systematically vary \( \omega \) from 0 to 1 and compare how these two retrac
 
 Note that the orthogonality defect is scale-invariant, while fidelity depends on the input scale. Here, we normalize inputs to unit Frobenius norm for consistency.  Furthermore, wide data cannot achieve perfect orthogonality due to rank limitations, so defect values will be higher.
 
-```{r compare-retractions, fig.width=6, fig.height=9, echo=FALSE, message=FALSE, warning=FALSE}
+```{r compare-retractions, fig.width=8, fig.height=5, echo=FALSE, message=FALSE, warning=FALSE,eval=FALSE}
 library(ggplot2)
 library(reshape2)
 library(patchwork)
 
-# --- Helper functions from new code -----------------------------------------------------
-inv_sqrt_sym <- function(M) {
-  e <- eigen(M)
-  vals <- pmax(e$values, 1e-12)  # Clip for stability
-  e$vectors %*% diag(1 / sqrt(vals)) %*% t(e$vectors)
-}
-
-defect_fast <- function(V) {
-  norm2 <- sum(V^2)
-  if (norm2 <= 1e-12) return(0)
-  S <- crossprod(V)
-  diagS <- diag(S)
-  off_f2 <- sum(S * S) - sum(diagS^2)
-  off_f2 / norm2^2
-}
-
-# Updated nsa_flow_retract function
-nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
-  should_retract <- function(Y, retraction_type = "soft", tol = 1e-6, verbose = FALSE) {
-    # Return FALSE immediately if no retraction is specified
-    if (is.null(retraction_type) || retraction_type == "none") {
-      if (verbose) message("Skipping retraction (type='none').")
-      return(FALSE)
-    }
-    
-    # Handle degenerate input
-    if (is.null(Y) || any(!is.finite(Y))) {
-      warning("Matrix Y is NULL or contains non-finite values — forcing retraction.")
-      return(TRUE)
-    }
-    
-    # Compute orthogonality defect ‖YᵀY − I‖_F
-    defect <- defect_fast(Y)
-    
-    # Adaptive tolerance: scale by matrix norm
-    normY <- norm(Y, "F")
-    thresh <- tol * max(1, normY)
-    
-    # Decision
-    do_retract <- defect > thresh
-    
-    if (verbose) {
-      msg <- sprintf(
-        "Retract? %s | defect = %.3e, threshold = %.3e, type = '%s'",
-        ifelse(do_retract, "YES", "NO"), defect, thresh, retraction_type
-      )
-      message(msg)
-    }
-    
-    return(do_retract)
-  }
-  # handle trivial case
-#  if (is.null(retraction_type) || retraction_type == "none" || !should_retract(Y_cand, retraction_type) ) return(Y_cand)
-  if (is.null(retraction_type) || retraction_type == "none"  ) return(Y_cand)
-  if (!is.matrix(Y_cand)) stop("Y_cand must be a matrix")
-  p <- nrow(Y_cand); k <- ncol(Y_cand)
-  YtY <- crossprod(Y_cand)  # k x k
-  normY <- sqrt(sum(Y_cand^2))
-
-  # Unified polar (handles both "polar" and former "svd")
-  if (retraction_type %in% c("polar", "svd")) {
-    # Use economy SVD for efficiency (faster on wide p < k)
-    s <- svd(Y_cand, nu = min(p,k), nv = min(p,k))
-    Ytilde <- s$u %*% t(s$v)
-  } else if (retraction_type == "soft_polar") {
-    # Compute full polar T; use SVD if wide for speed
-    if (p < k) {
-      s <- svd(Y_cand, nu = min(p,k), nv = min(p,k))
-      Q <- s$u %*% t(s$v)
-      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q  # Fallback to soft SVD style for wide
-    } else {
-      YtY <- crossprod(Y_cand)
-      T <- inv_sqrt_sym(YtY)
-      T_w <- (1 - w_retract) * diag(k) + w_retract * T
-      Ytilde <- Y_cand %*% T_w
-    }
-  } else {
-    stop("Unknown retraction_type: ", retraction_type, ". Supported: 'polar', 'soft_polar', 'none'.")
-  }
-  
-  # Optional: preserve Frobenius norm
-  if (!is.null(normY) && normY > 1e-12) {
-    current_norm <- sqrt(sum(Ytilde^2))
-    if (current_norm > 0) Ytilde <- Ytilde / current_norm * normY
-  }
-  Ytilde
-}
 
 # --- Data setup for three shapes ---------------------------------------------------
 set.seed(42)
@@ -461,12 +371,12 @@ run_eval <- function(Z, shape_label) {
     
     # Polar
     Y_polar <- nsa_flow_retract(Z, omega, "polar")
-    results$orth_polar[i] <- defect_fast(Y_polar)
+    results$orth_polar[i] <- invariant_orthogonality_defect(Y_polar)
     results$fid_polar[i] <- norm(Y_polar - Z, "F")
     
     # Soft Polar
-    Y_soft_polar <- nsa_flow_retract(Z, omega, "soft_polar")
-    results$orth_soft_polar[i] <- defect_fast(Y_soft_polar)
+    Y_soft_polar <- nsa_flow_retract(Z, omega, def_ret)
+    results$orth_soft_polar[i] <- invariant_orthogonality_defect(Y_soft_polar)
     results$fid_soft_polar[i] <- norm(Y_soft_polar - Z, "F")
   }
   
@@ -486,7 +396,7 @@ df_melt <- melt(results_all, id.vars = c("omega", "shape"))
 
 # Color palette
 method_colors <- c(
-  "polar" = "#1f78b4", "soft_polar" = "#6a3d9a"
+  "polar" = "#1f78b4", def_ret = "#6a3d9a"
 )
 
 # Prefix for orth, fid
@@ -503,19 +413,19 @@ p1 <- ggplot(subset(df_melt, grepl("orth_", variable)),
   geom_line(size = 1.2) + geom_point(size = 2) +
   scale_color_manual(values = orth_colors, labels = gsub("_", " ", names(orth_colors))) +
   labs(title = "Orthogonality Defect vs \u03C9",
-       y = "||Y\u1D40Y - diag(Y\u1D40Y)||\u00B2 / ||Y||_F^4", x = "Interpolation weight (\u03C9)", color = "Method") +
+       y = "Defect", x = "Orth. weight (\u03C9)", color = "Method") +
   facet_wrap(~ shape) +
-  theme_minimal(base_size = 14)
+  theme_minimal(base_size = 11) + theme(legend.position = "top")
 
 # --- Plot 2: Fidelity -----------------------------------------------------
 p2 <- ggplot(subset(df_melt, grepl("fid_", variable)),
              aes(x = omega, y = value, color = variable)) +
   geom_line(size = 1.2) + geom_point(size = 2) +
   scale_color_manual(values = fid_colors, labels = gsub("_", " ", names(fid_colors))) +
-  labs(title = "Fidelity (Deviation from Z) vs \u03C9",
-       y = "||Y - Z||_F", x = "Interpolation weight (\u03C9)", color = "Method") +
+  labs(title = "Fidelity (Deviation from target Z) vs \u03C9",
+       y = "||Y - Z||_F", x = "Orth. weight (\u03C9)", color = "Method") +
   facet_wrap(~ shape) +
-  theme_minimal(base_size = 14)
+  theme_minimal(base_size = 11) + theme(legend.position = "top")
 
 # --- Combine plots --------------------------------------------------------
 (p1 / p2) + plot_layout(guides = "collect")
@@ -543,14 +453,16 @@ Y0_toy <- matrix(runif(12, 0, 1), 4, 3)
 
 # Apply NSA-Flow with balanced weights
 # X0_toy=X0_toy/norm(X0_toy, "F")*0.1  # Normalize
-omega_default = 0.5
+omega_default = 0.05
 ini_default = 0.001
 nsa_flow = ANTsR::nsa_flow
 optype='bidirectional_armijo_gradient'
 optype='adam'
 optype='armijo_gradient'
+optype='riemannian_adam'
+optype='adagrad'
 def_ret = "soft_polar"
-nsa_default <- function(Y0, w = omega_default, verbose = FALSE ) {
+nsa_default <- function(Y0, w = omega_default, o=optype, verbose = FALSE ) {
   nsa_flow(
     Y0 = Y0,
     X0 = NULL,
@@ -560,16 +472,17 @@ nsa_default <- function(Y0, w = omega_default, verbose = FALSE ) {
     verbose = verbose,
     seed = 42,
     apply_nonneg = TRUE,
-    optimizer = optype,
-    tol = 1e-4,
-    initial_learning_rate = ini_default, # <--- CHANGE: Replaced learning_rate and optimizer
+    tol = 1e-6,
+    window_size=10,
+    initial_learning_rate = ini_default, 
+    optimizer = o,
     plot = TRUE
   )
 }
 
 
 res_toy <- nsa_flow(Y0 = X0_toy, X0 = true_Y,  
-    w = omega_default, retraction = "soft_polar",
+    w = omega_default, retraction = def_ret,
     initial_learning_rate = ini_default, plot=TRUE, verbose =FALSE )
 
 # Visualize
@@ -649,26 +562,26 @@ generate_synth_data <- function(p=40, k=3, corrval=0.3,noise=0.5, sparse_prob=0.
 }
 
 set.seed(123)
-p <- 20; k <- 10
-X0 = generate_synth_data( p, k, corrval=0.3, noise=0.5, sparse_prob=0.0, include_neg=TRUE )$Y0
+p <- 200; k <- 40
+X0 = generate_synth_data( p, k, corrval=0.35, noise=0.05, sparse_prob=0.0, include_neg=FALSE )$Y0
 ```
 
 
-```{r stiefel_sweep_full, fig.width=8, fig.height=5.3, echo=FALSE, message=FALSE}
+```{r stiefel_sweep_full, fig.width=8, fig.height=10, echo=FALSE, message=FALSE}
 ###
-w_seq <- c( 0.05, 0.25, 0.5, 0.75, 0.95 )
+w_seq <- c( 0.005,  0.05, 0.1, 0.2, 0.5 )
+w_seq <- c( 0.05,  0.25, 0.5, 0.75, 0.95 )
 mytit = paste0("w = ", round(w_seq,3))
 mats <- list()
-# X0 = X0 - min(X0)
 convergeplots <- list()
 for(i in seq_along(w_seq)) {
   w_val <- w_seq[i]
-  res_soft_w <- nsa_default( X0, w = w_val, verbose =FALSE )
+  res_soft_w <- nsa_default( X0, w = w_val, o=optype, verbose =FALSE )
   mytit[i] <- paste0("w = ", round(w_val, 3), ', orth = ', 
     round(invariant_orthogonality_defect(res_soft_w$Y),4), ', w.spar = ',
-    1.0-round(sum(res_soft_w$Y/max(res_soft_w$Y) > 0.01)/length(res_soft_w$Y),3))
+    1.0-round(sum(res_soft_w$Y/max(res_soft_w$Y) > quantile(res_soft_w$Y,0.1))/length(res_soft_w$Y),3))
   mats[[i]] <- res_soft_w$Y
-  convergeplots[[i]] <- res_soft_w$plot+labs(title = paste0("w = ", round(w_val, 3)), subtitle = NULL)
+  convergeplots[[i]] <- res_soft_w$plot+labs(title =   mytit[i], subtitle = NULL)
 }
 allvals <- unlist(lapply(mats, function(m) as.numeric(m)))
 rng <- c(   
@@ -679,7 +592,7 @@ plots <- vector("list", length(mats)+1)
 rows_show <- 1:nrow(X0)
 ogtit = paste0("Original ",', orth = ', 
     round(invariant_orthogonality_defect(X0),4), ', w.spar = ',
-    1.0-round(sum(X0/max(X0) > 0.01)/length(X0),3))
+    1.0-round(sum(X0/max(X0) > quantile(X0,0.1))/length(X0),3))
 plots[[1]] <- pheatmap(X0[rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = ogtit, silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
 for(i in seq_along(mats)) {
   plots[[i+1]] <- pheatmap(mats[[i]][rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = mytit[i], silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
@@ -687,7 +600,9 @@ for(i in seq_along(mats)) {
 grid.arrange(grobs = lapply(plots, function(x) x$gtable), ncol = 3)
 
 grid.arrange(grobs=convergeplots, top='Convergence Plots for Different w Values', ncol=2 )
+
 #----------#
+
 ```
 
 
@@ -779,9 +694,9 @@ library(dplyr)    # For data manipulation
 set.seed(2025)
 
 # Parameters
-n_samples <- 200      # Number of samples
-n_features <- 20     # Number of features
-k_basis <- 10        # Number of basis components
+n_samples <- 50      # Number of samples
+n_features <- 10     # Number of features
+k_basis <- 5        # Number of basis components
 n_classes <- 3       # Number of classes (subtypes)
 
 # True nonnegative basis (features x components)
@@ -920,11 +835,10 @@ DEFAULT_TOL <- 1e-5
 sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001, 
                            max_iter = 100, 
                            proximal_type = "basic", 
-                           optimizer = "adam",
                            w_pca = 1.0, w = 0.5, 
                            apply_soft_thresh_in_nns = FALSE, tol = 1e-6, 
                            initial_learning_rate=1.0,
-                           retraction='soft_polar',
+                           retraction=def_ret,
                            grad_tol = 1e-4, verbose = FALSE) {
   # (assumes helper functions: grad_orth, orth_residual, inv_sqrt_sym,
   #  soft_threshold, nsa_flow, frob, sym, sparsity_level are defined elsewhere)
@@ -1017,7 +931,7 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
     if (proximal_type == "basic") {
       Y_new <- simlr_sparseness(Y_ret, 'none', positivity='positive', sparseness_quantile=0.8 )
     } else if (proximal_type == "nsa_flow") {
-      prox_res <- nsa_flow(Y_ret, w = w, retraction=retraction )
+      prox_res <- nsa_flow(Y_ret, w = w, retraction=def_ret, optimizer=optype )
       Y_new <- prox_res$Y
     }
     if (any(!is.finite(Y_new))) stop("Non-finite proximal step at iteration ", iter)
@@ -1204,18 +1118,18 @@ explained_variance_ratio_by_orthonormalizing <- function(X = NULL, Y, use = c("q
   list(ratio = ratio, proj_var = proj_var, Q = Q)
 }
 
-X=generate_synth_data( p=40, k=20, corrval=0.35)$Y0
-
+X=generate_synth_data( p=100, k=20, corrval=0.35)$Y0
+nembed = 4
 # --- Compute results for both methods ---
 res_soft <- sparse_pca_imp(
-  X, k = k, lambda = 0.05, alpha = 0.1, max_iter = 200,
+  X, k = nembed, lambda = 0.05, alpha = 0.1, max_iter = 20,
   tol = 1e-5, verbose = FALSE
 )
-
+#
 res_nns <- sparse_pca_imp(
-  X, k = k, lambda = 0.05, alpha = 0.1, max_iter = 200,
-  proximal_type = "nsa_flow",
-  w = 0.01, tol = 1e-5, verbose = FALSE
+  X, k = nembed, lambda = 0.05, alpha = 0.1, max_iter = 20,
+  proximal_type = "nsa_flow", w = 0.95, 
+  tol = 1e-5, verbose = FALSE
 )
 
 
@@ -1362,12 +1276,12 @@ proj_std <- pca_std$x
 res_basic <- sparse_pca_imp(golub_scaled_ss, k = myk,
     lambda = 0.1, alpha = 0.001, max_iter = mxit,
     proximal_type = "basic",
-    tol = 1e-5, w = 0.2, verbose = FALSE)
+    tol = 1e-5, w = 0.5, verbose = FALSE)
 
 res_nns <- sparse_pca_imp(golub_scaled_ss, k = myk,
     lambda = 0.1, alpha = 0.001, max_iter = mxit,
     proximal_type = "nsa_flow",
-    tol = 1e-5, w = 0.2, verbose = FALSE)
+    tol = 1e-5, w = 0.5, verbose = FALSE)
 
 metrics_pca_g   <- compute_core_metrics(pca_std$rotation, golub_scaled_ss)
 metrics_basic_g <- compute_core_metrics(res_basic$Y, golub_scaled_ss)
@@ -1421,6 +1335,8 @@ class_metrics <- data.frame(
   CV_Accuracy = c(acc_std$Accuracy, acc_basic$Accuracy, acc_nns$Accuracy),
   CV_Accuracy_SD = c(acc_std$AccuracySD, acc_basic$AccuracySD, acc_nns$AccuracySD)
 )
+class_metrics
+
 
 ggplot(class_metrics, aes(x = Method, y = CV_Accuracy, fill = Method)) +
   geom_col(width = 0.6, color = "black", alpha = 0.9) +
@@ -1463,7 +1379,6 @@ ggplot(top_combined, aes(x = Component, y = Gene, fill = Loading)) +
 # Sensitivity Sweep (Ω)
 omega_vals <- seq(0.98, 1, by = 0.01)
 omega_vals = c(0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 0.9, 0.99 )
-omega_vals = c( 0.25,  0.5, 0.75  )
 n <- nrow(golub_scaled_ss)
 A <- t(golub_scaled_ss) %*% golub_scaled_ss / n
 Xc <- scale(X, center = TRUE, scale = FALSE)
@@ -1472,8 +1387,8 @@ if ( ! exists("sens_metrics")) {
     sens_results <- lapply(omega_vals, function(omega) {
     res <- sparse_pca_imp(golub_scaled_ss, k = myk,
         lambda = 0.1, alpha = 0.001, max_iter = mxit,
-        proximal_type = "nsa_flow", retraction='soft_polar',
-        tol = 1e-5, w = omega, verbose = TRUE)
+        proximal_type = "nsa_flow", retraction=def_ret,
+        tol = 1e-5, w = omega, verbose = FALSE)
     proj <- golub_scaled_ss %*% res$Y
     acc_res <- cv_acc(proj, labels)
     loc_var <- sum( svd(proj/norm(proj,"F"))$d )
@@ -1650,7 +1565,7 @@ Y0_pca <- Y0_pca * 1.0
 myopts <- 'armijo_gradient' # list_simlr_optimizers()
 
 # Weights to test (uncomment full list if needed)
-wws <- runif( 100, 0.01, 0.99)
+wws <- runif( 10, 0.01, 0.99)
 
 # Initialize a data frame to collect results for comparisons
 results_df <- data.frame(
@@ -1672,11 +1587,11 @@ for (oo in myopts) {
       Y0 = Y0_pca,
       X0 = NULL,
       w = ww,
-      retraction = 'soft_polar',
+      retraction = def_ret,
       initial_learning_rate = 0.001,
       optimizer = oo,
       plot = TRUE,
-      max_iter = 200,
+      max_iter = 50,
       verbose = FALSE
     )
     if ( any( apply( M_nsa$Y, FUN=var, MARGIN=2) == 0 ) ) {
@@ -1686,7 +1601,7 @@ for (oo in myopts) {
     
     # Extract NSA projection matrix
     Ymat <- M_nsa$Y
-    
+    rownames(Ymat) <- rownames(Y0_pca)
     # Compute projections
     proj_pca <- as.matrix(X) %*% as.matrix(Y0_pca)
     colnames(proj_pca) <- paste0("pca_net", 1:ncol(proj_pca))
@@ -1915,37 +1830,6 @@ for (net in 1:netrank) {
 
 
 ```{r radars, fig.height=5.6, fig.width=7,eval=TRUE}
-library(fmsb)
-library(scales)
-
-# --- Step 7: Radar charts (top 10 regions per network) ----------------------
-for (net in 1:netrank) {
-  loadings <- Y_norm[, net]
-  if (all(is.na(loadings))) next
-  
-  # Top 10 regions
-  top_idx <- head(order(loadings, decreasing = TRUE), 10)
-  loadings_top <- loadings[top_idx]
-  regions_top <- names(loadings_top)
-  
-  # fmsb requires data.frame with max and min as first two rows
-  max_row <- rep(max(loadings_top, na.rm = TRUE) * 1.1, length(loadings_top))
-  min_row <- rep(0, length(loadings_top))
-  
-  radar_df <- rbind(max_row, min_row, loadings_top)
-  radar_df <- as.data.frame(radar_df)             
-  rownames(radar_df) <- c("max", "min", "loading")
-  colnames(radar_df) <- regions_top
-  
-  # Plot
-  par(mar = c(1,1,2,1))
-  radarchart(radar_df, axistype = 1,
-             pcol = "#008080", pfcol = alpha("#008080", 0.25), plwd = 2,
-             cglcol = "grey", cglty = 1, axislabcol = "grey",
-             cglwd = 0.8, vlcex = 0.8,
-             title = paste0("Network ", net))
-}
-
 
 # --- Step 8: Connectome-like graph for each network ------------------------
 # Assign lobes (crude mapping)
@@ -2058,6 +1942,41 @@ for (net in 1:netrank) {
   }
 
 }
+####
+
+
+library(fmsb)
+library(scales)
+
+# --- Step 7: Radar charts (top 10 regions per network) ----------------------
+for (net in 1:netrank) {
+  loadings <- Y_norm[, net]
+  if (all(is.na(loadings))) next
+  
+  # Top 10 regions
+  top_idx <- head(order(loadings, decreasing = TRUE), 10)
+  loadings_top <- loadings[top_idx]
+  regions_top <- names(loadings_top)
+  
+  # fmsb requires data.frame with max and min as first two rows
+  max_row <- rep(max(loadings_top, na.rm = TRUE) * 1.1, length(loadings_top))
+  min_row <- rep(0, length(loadings_top))
+  
+  radar_df <- rbind(max_row, min_row, loadings_top)
+  radar_df <- as.data.frame(radar_df)             
+  rownames(radar_df) <- c("max", "min", "loading")
+  colnames(radar_df) <- regions_top
+  
+  # Plot
+  par(mar = c(1,1,2,1))
+  radarchart(radar_df, axistype = 1,
+             pcol = "#008080", pfcol = alpha("#008080", 0.25), plwd = 2,
+             cglcol = "grey", cglty = 1, axislabcol = "grey",
+             cglwd = 0.8, vlcex = 0.8,
+             title = paste0("Network ", net))
+}
+
+
 ```
 
 
