@@ -1,6 +1,5 @@
 # Test optimizer update direction
 library(testthat)
-source("R/simlr_optimizers.R")
 
 # Mock energy function (simple quadratic: x^2 + y^2)
 nsa_energy <- function(V, it) {
