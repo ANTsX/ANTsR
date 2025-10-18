@@ -567,7 +567,7 @@ X0 = generate_synth_data( p, k, corrval=0.35, noise=0.05, sparse_prob=0.0, inclu
 ```
 
 
-```{r stiefel_sweep_full, fig.width=8, fig.height=10, echo=FALSE, message=FALSE}
+```{r stiefel_sweep_full, fig.width=7, fig.height=5, echo=FALSE, message=FALSE}
 ###
 w_seq <- c( 0.005,  0.05, 0.1, 0.2, 0.5 )
 w_seq <- c( 0.05,  0.25, 0.5, 0.75, 0.95 )
@@ -581,7 +581,8 @@ for(i in seq_along(w_seq)) {
     round(invariant_orthogonality_defect(res_soft_w$Y),4), ', w.spar = ',
     1.0-round(sum(res_soft_w$Y/max(res_soft_w$Y) > quantile(res_soft_w$Y,0.1))/length(res_soft_w$Y),3))
   mats[[i]] <- res_soft_w$Y
-  convergeplots[[i]] <- res_soft_w$plot+labs(title =   mytit[i], subtitle = NULL)
+  convergeplots[[i]] <- res_soft_w$plot+labs(title =mytit[i], subtitle = NULL)+
+  theme_minimal(base_size = 8)+theme(legend.position = "top")
 }
 allvals <- unlist(lapply(mats, function(m) as.numeric(m)))
 rng <- c(   
@@ -593,9 +594,9 @@ rows_show <- 1:nrow(X0)
 ogtit = paste0("Original ",', orth = ', 
     round(invariant_orthogonality_defect(X0),4), ', w.spar = ',
     1.0-round(sum(X0/max(X0) > quantile(X0,0.1))/length(X0),3))
-plots[[1]] <- pheatmap(X0[rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = ogtit, silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
+plots[[1]] <- pheatmap(X0[rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = ogtit, fontsize=6, silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
 for(i in seq_along(mats)) {
-  plots[[i+1]] <- pheatmap(mats[[i]][rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = mytit[i], silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
+  plots[[i+1]] <- pheatmap(mats[[i]][rows_show,], cluster_rows = FALSE, cluster_cols = FALSE, color = cols, main = mytit[i], fontsize=6, silent = TRUE, breaks = seq(rng[1], rng[2], length.out = 121))
 }
 grid.arrange(grobs = lapply(plots, function(x) x$gtable), ncol = 3)
 
@@ -1303,7 +1304,7 @@ plot_proj <- function(df, title) {
     geom_point(size = 2, alpha = 0.8) +
     theme_minimal(base_size = 13) +
     labs(title = title, x = "PC1", y = "PC2") +
-    theme(plot.title = element_text(face = "bold", hjust = 0.5))
+    theme(plot.title = element_text(face = "bold", hjust = 0.5), legend.position = "top") 
 }
 df_list <- list(
   "Standard PCA" = data.frame(proj_std[, 1:2], Class = labels),
@@ -1335,7 +1336,6 @@ class_metrics <- data.frame(
   CV_Accuracy = c(acc_std$Accuracy, acc_basic$Accuracy, acc_nns$Accuracy),
   CV_Accuracy_SD = c(acc_std$AccuracySD, acc_basic$AccuracySD, acc_nns$AccuracySD)
 )
-class_metrics
 
 
 ggplot(class_metrics, aes(x = Method, y = CV_Accuracy, fill = Method)) +
