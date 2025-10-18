@@ -599,7 +599,7 @@ for(i in seq_along(mats)) {
 }
 grid.arrange(grobs = lapply(plots, function(x) x$gtable), ncol = 3)
 
-grid.arrange(grobs=convergeplots, top='Convergence Plots for Different w Values', ncol=2 )
+grid.arrange(grobs=convergeplots[c(1,2,3,5)], top='Convergence Plots for Different w Values', ncol=2 )
 
 #----------#
 
