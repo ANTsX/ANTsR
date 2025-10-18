@@ -1,6 +1,6 @@
 # Test optimizer update direction
 library(testthat)
-
+library(ANTsR)
 # Mock energy function (simple quadratic: x^2 + y^2)
 nsa_energy <- function(V, it) {
   sum(V^2)
