@@ -8524,13 +8524,13 @@ simlr_sparseness <- function(v,
   } else {
     if ( constraint_type == "ortho" & constraint_weight >= 0 ){
       if ( constraint_weight == 1 ) {
-        v = nsa_flow( v, w = constraint_weight, retraction='soft_svd', 
-          optimizer='adam', max_iter=constraint_iterations, verbose=FALSE)$Y
+        v = nsa_flow( v, w = constraint_weight, retraction='soft_polar', 
+          optimizer='adagrad', max_iter=constraint_iterations, verbose=FALSE)$Y
 #      v = project_to_orthonormal_nonnegative( v, 
 #        max_iter=constraint_iterations, constraint=positivity)
       } else {
-        v = nsa_flow( v, w = constraint_weight, retraction='soft_svd', 
-          max_iter=constraint_iterations, optimizer='adam', verbose=F )$Y
+        v = nsa_flow( v, w = constraint_weight, retraction='soft_polar', 
+          max_iter=constraint_iterations, optimizer='adagrad', verbose=F )$Y
 #      v = project_to_partially_orthonormal_nonnegative( v, 
 #        max_iter=constraint_iterations, constraint=positivity, ortho_strength=constraint_weight )
       }
