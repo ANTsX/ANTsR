@@ -10314,6 +10314,9 @@ nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
 #' @param window_size Integer, size of the window for energy stability convergence check.
 #'   Default is 5.
 #' @param c1_armijo Numeric, Armijo condition constant for line search.
+#' @param simplified Logical, if \code{TRUE}, uses the simplified objective
+#'   \deqn{\min_U (1 - w) \frac{1}{2} ||U - Z||_F^2 + w \frac{1}{2} ||U^\top U - I_k||_F^2}.
+#'   If \code{FALSE}, uses the invariant defect objective. Default is \code{FALSE}.
 #' @param plot Logical, if \code{TRUE}, generates a ggplot of fidelity and orthogonality
 #'   traces with dual axes. Default is \code{FALSE}.
 #'
@@ -10360,6 +10363,7 @@ nsa_flow <- function(
   apply_nonneg = TRUE, optimizer = "armijo_gradient",
   initial_learning_rate = 1e-3,
   record_every = 1, window_size = 5, c1_armijo=1e-6,
+  simplified = FALSE,
   plot = FALSE
 ) {
   # --- Input validation ---
@@ -10391,7 +10395,7 @@ nsa_flow <- function(
   }
 
   # Fast ortho terms (used in gradients; optional c_orth scaling)
-  compute_ortho_terms <- function(Y, c_orth = 1) {
+  compute_ortho_terms <- function(Y, c_orth = 1, simplified = FALSE ) {
     norm2 <- sum(Y^2)
     if (norm2 <= 1e-12 || c_orth <= 0) {
       return(list(grad_orth = matrix(0, nrow(Y), ncol(Y)), defect = 0, norm2 = norm2))
@@ -10405,7 +10409,11 @@ nsa_flow <- function(
     Y_diag_scale <- sweep(Y, 2, diagS, "*")  # Columns of Y scaled by diagS
     term1 <- (Y_S - Y_diag_scale) / norm2^2
     term2 <- (defect / norm2) * Y
-    grad_orth <- c_orth * (term1 - term2)
+    if ( simplified ) {
+      grad_orth <- - c_orth * 2 * Y %*% (S - diag(ncol(Y)))
+      } else {
+      grad_orth <- c_orth * (term1 - term2)
+      }
     list(grad_orth = grad_orth, defect = defect, norm2 = norm2)
   }
 
@@ -10455,7 +10463,7 @@ nsa_flow <- function(
   best_total_energy <- Inf
   # --- Compute initial gradient for relative norm tolerance ---
   grad_fid_init <- fid_eta * (Y - X0) * (-1.0)
-  ortho_init <- compute_ortho_terms(Y, c_orth)
+  ortho_init <- compute_ortho_terms(Y, c_orth, simplified=simplified)
   grad_orth_init <- ortho_init$grad_orth
   if (c_orth > 0) {
     sym_term_orth_init <- symm(crossprod(Y, grad_orth_init))  # t(Y) %*% = crossprod(Y, .)
@@ -10488,7 +10496,7 @@ nsa_flow <- function(
     grad_fid <- fid_eta * (Y - X0) * (-1.0)
 
     # --- Orthogonality descent dir ---
-    ortho_terms <- compute_ortho_terms(Y, c_orth)
+    ortho_terms <- compute_ortho_terms(Y, c_orth, simplified=simplified)
     grad_orth <- ortho_terms$grad_orth
 
     # --- Riemannian projection ---
