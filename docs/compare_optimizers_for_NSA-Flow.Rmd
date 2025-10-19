@@ -38,7 +38,7 @@ if (!exists("raw_results")) {
     for (w in ws) {
       start_time <- Sys.time()
       res <- tryCatch({
-        nsa_flow(mat1, w = w, verbose = FALSE, retraction = def_ret,
+        nsa_flow(mat1, w = w, verbose = F, retraction = def_ret, simplified = FALSE,
                  optimizer = o, tol = tol, max_iter = max_iter)
       }, error = function(e) NULL)
 
@@ -76,7 +76,7 @@ p1 <- ggplot(raw_results, aes(x = w, y = Orthogonality, color = Optimizer)) +
   labs(title = "Orthogonality Defect vs Retraction Weight (w)",
        y = "Orthogonality Defect (↓)", x = "w") +
   theme_minimal(base_size = 14) +
-  ylim(0, 0.05) +
+#  ylim(0, 0.05) +
   theme(strip.text = element_text(face = "bold"), legend.position = "none")
 
 p2 <- ggplot(raw_results, aes(x = w, y = Fidelity, color = Optimizer)) +
@@ -86,7 +86,7 @@ p2 <- ggplot(raw_results, aes(x = w, y = Fidelity, color = Optimizer)) +
   labs(title = "Fidelity vs Retraction Weight (w)",
        y = "Fidelity (↓)", x = "w") +
   theme_minimal(base_size = 14) +
-  ylim(0.1, 2.0) +
+#  ylim(0.1, 2.0) +
   theme(strip.text = element_text(face = "bold"), legend.position = "none")
 
 combined <- p1 / p2

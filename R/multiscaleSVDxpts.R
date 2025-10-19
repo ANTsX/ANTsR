@@ -10305,8 +10305,10 @@ nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
 #'   Default is 42.
 #' @param apply_nonneg Logical, if \code{TRUE}, enforces non-negativity on the solution
 #'   after retraction. Default is \code{TRUE}.
-#' @param optimizer Character string, optimization algorithm to use.
-#'   Currently only \code{"adam"} is supported. Default is \code{"adam"}.
+#' @param optimizer Character string, optimization algorithm to use. The "fast" option 
+#'   will select the best option based on whether simplified = TRUE or FALSE. 
+#'   otherwise, pass the names of optimizers supported by \code{create_optimizer()} 
+#'   as seen in \code{list_simlr_optimizers()}. Default is "fast".
 #' @param initial_learning_rate Numeric, initial learning rate for the optimizer.
 #'   Default is 1e-3.
 #' @param record_every Integer, frequency of recording iteration metrics.
@@ -10360,7 +10362,7 @@ nsa_flow <- function(
   Y0, X0 = NULL, w = 0.5,
   retraction = c( "polar",  "soft_polar",  "none" ),
   max_iter = 500, tol = 1e-5, verbose = FALSE, seed = 42,
-  apply_nonneg = TRUE, optimizer = "armijo_gradient",
+  apply_nonneg = TRUE, optimizer = "fast",
   initial_learning_rate = 1e-3,
   record_every = 1, window_size = 5, c1_armijo=1e-6,
   simplified = FALSE,
@@ -10382,6 +10384,14 @@ nsa_flow <- function(
   stopifnot(is.logical(plot))
   stopifnot(!all(Y0==0))
 
+  if ( optimizer == "fast" ) {
+    if ( simplified ) {
+      optimizer <- "lars"
+    } else {
+      optimizer <- "adagrad"
+    }
+    if ( verbose ) cat("Selected optimizer:", optimizer, "\n")
+  }
 
   # --- Fast helper functions ---
   # Fast defect (used in energy, tracking, and d0)

@@ -14,11 +14,12 @@ nsa_flow(
   verbose = FALSE,
   seed = 42,
   apply_nonneg = TRUE,
-  optimizer = "armijo_gradient",
+  optimizer = "fast",
   initial_learning_rate = 0.001,
   record_every = 1,
   window_size = 5,
   c1_armijo = 1e-06,
+  simplified = FALSE,
   plot = FALSE
 )
 }
@@ -47,8 +48,10 @@ Default is 42.}
 \item{apply_nonneg}{Logical, if \code{TRUE}, enforces non-negativity on the solution
 after retraction. Default is \code{TRUE}.}
 
-\item{optimizer}{Character string, optimization algorithm to use.
-Currently only \code{"adam"} is supported. Default is \code{"adam"}.}
+\item{optimizer}{Character string, optimization algorithm to use. The "fast" option 
+will select the best option based on whether simplified = TRUE or FALSE. 
+otherwise, pass the names of optimizers supported by \code{create_optimizer()} 
+as seen in \code{list_simlr_optimizers()}. Default is "fast".}
 
 \item{initial_learning_rate}{Numeric, initial learning rate for the optimizer.
 Default is 1e-3.}
@@ -60,6 +63,10 @@ Default is 1 (record every iteration).}
 Default is 5.}
 
 \item{c1_armijo}{Numeric, Armijo condition constant for line search.}
+
+\item{simplified}{Logical, if \code{TRUE}, uses the simplified objective
+\deqn{\min_U (1 - w) \frac{1}{2} ||U - Z||_F^2 + w \frac{1}{2} ||U^\top U - I_k||_F^2}.
+If \code{FALSE}, uses the invariant defect objective. Default is \code{FALSE}.}
 
 \item{plot}{Logical, if \code{TRUE}, generates a ggplot of fidelity and orthogonality
 traces with dual axes. Default is \code{FALSE}.}

@@ -261,11 +261,9 @@ if ( ! exists("results") ) {
       v=FALSE
       mb <- microbenchmark(
         res <- ANTsR::nsa_flow( data$Y0, X0=X0_use, w=cfg$w, 
-          retraction=cfg$retraction, 
-          initial_learning_rate=0.001, max_iter=cfg$max_iter,
-          tol = 1e-6,
-          apply_nonneg=cfg$apply_nonneg, seed=42+rep, verbose=v, plot=TRUE),
-        times=3
+          retraction=cfg$retraction,  max_iter=cfg$max_iter, optimizer='fast',
+          apply_nonneg=cfg$apply_nonneg, seed=42+rep, verbose=v, plot=TRUE, simplified=FALSE),
+        times=1
       )
       res$timing <- mb$time / 1e9  # Seconds
       res$rep <- rep
