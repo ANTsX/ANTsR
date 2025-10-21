@@ -312,7 +312,7 @@ make_heatmap <- function(mat, title) {
     geom_tile() +
     scale_fill_viridis_c(option = "plasma") +
     coord_equal() +
-    theme_minimal(base_size = 12) +
+    theme_minimal(base_size = 8) +
     theme(
       axis.title = element_blank(),
       axis.text = element_blank(),
@@ -362,7 +362,7 @@ We systematically vary \( \omega \) from 0 to 1 and compare how these retraction
 Note that the orthogonality defect is scale-invariant, while fidelity depends on the input scale. Here, we normalize inputs to unit Frobenius norm for consistency.  Furthermore, wide data cannot achieve perfect orthogonality due to rank limitations, so defect values will be higher.
 
 
-```{r pollen2, echo = FALSE, fig.cap = "The impact of regularization on measures of both orthogonality and fidelity error relative to the original matrix.  For both metrics, lower values are better. We vary ($\\omega$) from 0 (no orthogonality enforcement) to 1 (full enforcement) and compare three retraction methods: polar, soft polar, and none.  Results are shown for three matrix shapes: tall ($p > k$), wide ($p < k$), and square."}
+```{r pollen2, echo = FALSE, fig.cap = "The impact of regularization on measures of both orthogonality and fidelity error relative to the original matrix.  For both metrics, lower values are better. We vary ($\\omega$) from 0 (no orthogonality enforcement) to 1 (full enforcement) and compare three retraction methods: polar, soft polar, and none.  Results are shown for three matrix shapes: tall ($p > k$), wide ($p < k$), and square.",fig.width=5}
 knitr::include_graphics("figs/compare_retractions_and_matrix_shapes.pdf")
 ```
 
@@ -469,7 +469,7 @@ p2 <- ggplot(subset(df_melt, grepl("fid_", variable)),
 
 A second key choice in NSA-Flow is the optimization algorithm used for the descent step. We compare several optimizers: standard gradient descent, Adam, Armijo gradient descent, AdaGrad and others. Each has different convergence properties and sensitivities to hyperparameters and we evaluate them with standard defaults and a common learning rate (0.001). We evaluate them on the same synthetic data setup as above, measuring convergence speed (energy vs iterations) and final orthogonality/fidelity metrics.  Performance across $\omega$ values are shown in Figure X.  A data-driven ranking of the methods based on execution time and objective values shows that AdaGrad [@duchi2011adaptive] and Layer-wise Adaptive Rate Scaling (LARS) [@you2017large] perform well. `ANTsR` includes implementations of these optimizers for easy experimentation as well as this full comparison of methods.
 
-```{r pollen3, echo = FALSE, fig.cap = "The impact of optimization method on convergence speed and final metrics.  We compare several optimizers (standard gradient descent, Adam, Armijo gradient descent, AdaGrad, etc.) on the same synthetic data setup, measuring energy vs iterations across different ($\\omega$) values.  Results indicate that AdaGrad and LARS perform well in terms of execution time and objective values."}
+```{r pollen3, echo = FALSE, fig.cap = "The impact of optimization method on convergence speed and final metrics.  We compare several optimizers (standard gradient descent, Adam, Armijo gradient descent, AdaGrad, etc.) on the same synthetic data setup, measuring energy vs iterations across different ($\\omega$) values.  Results indicate that AdaGrad and LARS perform well in terms of execution time and objective values.",fig.width=5}
 knitr::include_graphics("figs/compare_opt.png")
 ```
 
@@ -665,7 +665,7 @@ true_basis <- pmax(true_basis / sqrt(colSums(true_basis^2)), 0)  # Normalize col
 # Generate subtypes (balanced classes)
 subtypes <- rep(1:n_classes, length.out = n_samples)  # Evenly distribute classes
 subtypes <- sample(subtypes, n_samples)  # Shuffle to randomize order
-labels <- factor(subtypes, labels = c("CN", "MCI", "AD"))  # Name classes for clarity
+labels <- factor(subtypes, labels = c("G0", "G1", "G2"))  # Name classes for clarity
 
 # Mixing coefficients biased by subtype (samples x components)
 mix_coeffs <- matrix(runif(n_samples * k_basis, 0, 1), nrow = n_samples, ncol = k_basis)
@@ -985,9 +985,9 @@ sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001,
 
 This variant replaces the soft-thresholding proximal on the retracted V (Y_ret) with an approximation using `nsa_flow(Y_ret, X0 = Y_ret, ...)`, introducing non-negativity for interpretable positive loadings.
 
-### Run Comparison on Synthetic Data
 
 ```{r run_comp, echo=FALSE}
+### Run Comparison on Synthetic Data
 # Per-component explained variance (after orthonormalization)
 explained_variance_components <- function(X, Y, use = "qr") {
   res <- explained_variance_ratio_by_orthonormalizing(X, Y, use = use)
@@ -1107,10 +1107,10 @@ ggplot(core_long, aes(x = Variant, y = value, fill = Variant)) +
   facet_wrap(~ variable, scales = "free_y", ncol = 3) +
   geom_text(aes(label = sprintf("%.3f", value)), vjust = -0.5, size = 3.5) +
   scale_fill_manual(values = c("#4E79A7", "#E15759")) +
-  theme_minimal(base_size = 13) +
+  theme_minimal(base_size = 8) +
   theme(
     legend.position = "none",
-    strip.text = element_text(face = "bold", size = 12),
+    strip.text = element_text(face = "bold", size = 8),
     axis.title = element_blank(),
     axis.text.x = element_text(angle = 15, hjust = 1)
   )
@@ -1246,7 +1246,7 @@ plot_proj <- function(df, title) {
   colnames(df)[1:2] <- c("PC1", "PC2")
   ggplot(df, aes(PC1, PC2, color = Class)) +
     geom_point(size = 2, alpha = 0.8) +
-    theme_minimal(base_size = 13) +
+    theme_minimal(base_size = 8) +
     labs(title = title, x = "PC1", y = "PC2") +
     theme(plot.title = element_text(face = "bold", hjust = 0.5), legend.position = "top") 
 }
@@ -1294,8 +1294,8 @@ ggplot(class_metrics, aes(x = Method, y = CV_Accuracy, fill = Method)) +
   labs(title = "Figure 5: Cross-Validation Accuracy (5-Fold, kNN Classifier)",
        subtitle = "Mean ± SD accuracy for PCA variants",
        x = NULL, y = "CV Accuracy") +
-  theme_minimal(base_size = 14) +
-  theme(legend.position = "none", plot.title = element_text(face = "bold", size = 16, hjust = 0.5))
+  theme_minimal(base_size = 10) +
+  theme(legend.position = "none", plot.title = element_text(face = "bold", size = 8, hjust = 0.5))
 
 # Top Genes Heatmap
 get_top_genes <- function(Y, gene_names, n_top = 5) {
@@ -1314,7 +1314,7 @@ ggplot(top_combined, aes(x = Component, y = Gene, fill = Loading)) +
   facet_wrap(~Method, ncol = 2) +
   scale_fill_viridis_c(option = "magma") +
   labs(title = "Figure 6: Top 5 Genes per Component", x = "Component", y = "Gene") +
-  theme_minimal(base_size = 14)
+  theme_minimal(base_size = 10)
 
 ```
 
@@ -1644,7 +1644,6 @@ gt::gt(data.frame(summary_stats), caption='Summary Statistics for Log-P Values i
 #
 ```
 
-#### Heatmap of Network Loadings
 
 ```{r heatmap,echo=FALSE, fig.height=5.6, fig.width=7}
 
@@ -1745,7 +1744,7 @@ Y_df <- as.data.frame(Y_norm) %>% rownames_to_column("Region") %>% pivot_longer(
 ggplot(Y_df, aes(x = Network, y = Region, fill = Loading)) +
   geom_tile(color = "white", size = 0.05) +
   scale_fill_viridis_c(option = "plasma", direction = -1) +
-  theme_minimal(base_size = 12) +
+  theme_minimal(base_size = 10) +
   labs(title = "Network Loadings Across Brain Regions", x = "Network", y = "Region", fill = "Rel. loading") +
   coord_fixed(ratio = 0.18)
 ## 
@@ -2093,53 +2092,10 @@ net2display = as.integer( gsub("nsa", "", psel))
 
 # --- Step 8: Connectome-like graph for each network ------------------------
 # Assign lobes (crude mapping)
-if ( ! use_adni ) {
-lobe_map <- sapply(rownames(Y_norm), function(r) {
-  reg <- sub("^(left_|right_)", "", r)
-  if (grepl("frontal|rostral|caudal|pars|frontalpole", reg)) "frontal" else
-  if (grepl("temporal|fusiform|entorhinal|parahippocampal|temporalpole|transverse", reg)) "temporal" else
-  if (grepl("parietal|precuneus|postcentral|supramarginal", reg)) "parietal" else
-  if (grepl("occipital|cuneus|lingual|lateraloccipital|pericalcarine", reg)) "occipital" else
-  if (grepl("cingulate|insula|isthmus", reg)) "limbic" else "subcortical"
-})
-lobe_colors <- c(frontal = "blue", temporal = "green", parietal = "red",
-                 occipital = "purple", limbic = "orange", subcortical = "grey")
-for (net in net2display) {
-  threshold <- quantile(Y_norm[, net], 0.8, na.rm = TRUE)
-  active_idx <- which(Y_norm[, net] > threshold)
-  if (length(active_idx) < 2) next
-  active_regions <- rownames(Y_norm)[active_idx]
-  loadings_active <- Y_norm[active_idx, net]
-  lobes_active <- lobe_map[active_idx]
-  g <- graph.empty(n = length(active_regions), directed = FALSE)
-  V(g)$name <- active_regions
-  V(g)$loading <- loadings_active
-  V(g)$lobe <- lobes_active
-  V(g)$color <- unname(lobe_colors[V(g)$lobe])
-  V(g)$size <- pmax(5, V(g)$loading * 30)
-  # add edges among nodes in same lobe
-  lobe_groups <- split(seq_along(active_regions), lobes_active)
-  for (grp in lobe_groups) {
-    if (length(grp) > 1) {
-      comb_pairs <- t(combn(grp, 2))
-      # add_edges expects vector, create pairs
-      edge_vec <- as.vector(t(comb_pairs))
-      g <- add_edges(g, edge_vec)
-    }
-  }
-  layout <- layout_with_fr(g)
-  plot(g, layout = layout, vertex.label = V(g)$name, vertex.label.cex = 0.7,
-       vertex.label.color = "black", vertex.frame.color = NA,
-       vertex.color = V(g)$color, vertex.size = V(g)$size,
-       edge.color = "gray", edge.width = 1,
-       main = paste("Graph — Network", net))
-  legend("topright", legend = names(lobe_colors), fill = lobe_colors, title = "Lobes", cex = 0.8)
-  }
-} else {
-  lobe_map = map_region_to_lobe( regions )
-  library(igraph)
-  library(dplyr)
-  for (net in net2display ) {
+lobe_map = map_region_to_lobe( regions )
+library(igraph)
+library(dplyr)
+for (net in net2display ) {
     netvec=Y_norm[, net]
     netvec=netvec[netvec>0]
     threshold <- quantile(netvec, 0.25, na.rm = TRUE)
@@ -2175,41 +2131,52 @@ for (net in net2display) {
     
     # Compute layout and plot
     layout <- layout_with_fr(g)
-    plot(
-        g, layout = layout,
-        vertex.label = V(g)$name,
-        vertex.label.cex = 0.7,
-        vertex.label.color = "black",
-        vertex.frame.color = NA,
-        vertex.color = V(g)$color,
-        vertex.size = V(g)$size,
-        edge.color = "gray",
-        edge.width = 1,
-        main = paste("Graph — Network", net)
-    )
+    if (FALSE) {
+      plot(
+          g, layout = layout,
+          vertex.label = V(g)$name,
+          vertex.label.cex = 0.7,
+          vertex.label.color = "black",
+          vertex.frame.color = NA,
+          vertex.color = V(g)$color,
+          vertex.size = V(g)$size,
+          edge.color = "gray",
+          edge.width = 1,
+          main = paste("Graph — Network", net)
+      )
     
     # Build dynamic legend directly from map_region_to_lobe color map
-    color_key <- map_region_to_lobe(unique(lobes_active))
-    legend(
-        "topright",
-        legend = unique(color_key$Lobe),
-        fill = unique(color_key$Color),
-        title = "Lobes",
-        cex = 0.8,
-        bty = "n"
-    )
+#    color_key <- map_region_to_lobe(unique(lobes_active))
+#    legend(
+#        "topright",
+#        legend = unique(color_key$Lobe),
+#        fill = unique(color_key$Color),
+#        title = "Lobes",
+#        cex = 0.8,
+#        bty = "n"
+#    )
+    }
 
   }
 
-}
+
 ####
 
 
-library(fmsb)
-library(scales)
+# Load required libraries
+library(ggradar)
+library(gridExtra)
+library(dplyr)  # For data manipulation
 
 # --- Step 7: Radar charts (top 10 regions per network) ----------------------
-for (net in net2display ) {
+
+# Collect all plots in a list
+radar_plots <- list()
+
+# Optional: Find global max for consistent scaling across plots
+global_max <- max(Y_norm[, net2display], na.rm = TRUE) * 1.1
+
+for (net in net2display) {
   loadings <- Y_norm[, net]
   if (all(is.na(loadings))) next
   
@@ -2218,24 +2185,48 @@ for (net in net2display ) {
   loadings_top <- loadings[top_idx]
   regions_top <- names(loadings_top)
   
-  # fmsb requires data.frame with max and min as first two rows
-  max_row <- rep(max(loadings_top, na.rm = TRUE) * 1.1, length(loadings_top))
-  min_row <- rep(0, length(loadings_top))
-  
-  radar_df <- rbind(max_row, min_row, loadings_top)
-  radar_df <- as.data.frame(radar_df)             
-  rownames(radar_df) <- c("max", "min", "loading")
+  # Prepare data frame for ggradar: add 'group' column
+  radar_df <- data.frame(rbind(loadings_top))
   colnames(radar_df) <- regions_top
+  radar_df <- cbind(group = "Loading", radar_df)
   
-  # Plot
-  par(mar = c(1,1,2,1))
-  radarchart(radar_df, axistype = 1,
-             pcol = "#008080", pfcol = alpha("#008080", 0.25), plwd = 2,
-             cglcol = "grey", cglty = 1, axislabcol = "grey",
-             cglwd = 0.8, vlcex = 0.8,
-             title = paste0("Network ", net))
+  # Create the radar plot with ggradar
+  p <- ggradar(
+    radar_df,
+    values.radar = c("0", sprintf("%.2f", global_max / 2), sprintf("%.2f", global_max)),  # Custom radar labels
+    grid.min = 0,
+    grid.max = global_max,
+    grid.mid = global_max / 2,
+    plot.legend = FALSE,  # No legend needed for single group
+    group.colours = "#008080",
+    group.line.width = 1,
+    group.point.size = 3,
+    background.circle.colour = "white",
+    background.circle.transparency = 0.2,
+    gridline.min.colour = "grey",
+    gridline.mid.colour = "grey",
+    gridline.max.colour = "grey",
+    gridline.min.linetype = "dashed",
+    gridline.mid.linetype = "dashed",
+    gridline.max.linetype = "dashed",
+    axis.label.size = 3,
+    axis.label.offset = 1.1,
+    fill = TRUE,
+    fill.alpha = 0.25
+  ) +
+    ggtitle(paste0("Network ", net)) +theme_minimal(base_size = 8) +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),
+      legend.position = "none"  # Ensure no legend
+    )
+  
+  radar_plots[[length(radar_plots) + 1]] <- p
 }
 
+# Arrange plots in a grid (e.g., 2 columns; adjust based on number of plots)
+n_plots <- length(radar_plots)
+n_cols <- ceiling(sqrt(n_plots))  # For a roughly square grid
+grid.arrange(grobs = radar_plots, ncol = n_cols)
 
 ```
 
@@ -2248,14 +2239,14 @@ We visualize comparisons using ggplot2 for clarity and aesthetics. Boxplots show
 ```{r beautiful-viz, fig.height=7, fig.width=7}
 library(ggplot2)
 library(patchwork)  # For combining plots
-theme_set(theme_minimal(base_size = 12) + theme(panel.grid.major = element_line(color = "gray90")))
+theme_set(theme_minimal(base_size = 10) + theme(panel.grid.major = element_line(color = "gray90")))
 
 # Boxplot of log_p by method and cog
 p1 <- ggplot(comparison_df, aes(x = cog, y = nsa, fill = "NSA")) +
   geom_boxplot(alpha = 0.7) +
   geom_boxplot(aes(y = pca, fill = "PCA"), alpha = 0.7, position = position_dodge(0.8)) +
   scale_fill_manual(values = c("NSA" = "#4ECDC4", "PCA" = "#FF6B6B")) +
-  labs(title = "Log(p) by Method and Cognitive Variable", x = "Cognitive Measure", y = "Log(p)", fill = "Method") +
+  labs(title = "Log(p) by Method and Cognitive Variable", x = "Cognitive Measure", y = "Log(p)", fill = "Method") +theme_minimal(base_size = 10) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # Violin plot of differences
@@ -2263,7 +2254,7 @@ p2 <- ggplot(comparison_df, aes(x = cog, y = log_p_diff)) +
   geom_violin(trim = FALSE, fill = "#C06C84", alpha = 0.7) +
   geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
   stat_summary(fun = median, geom = "point", color = "black") +
-  labs(title = "Distribution of Log(p) Differences (NSA - PCA)", x = "Cognitive Measure", y = "Difference", subtitle = "Negative = NSA better") +
+  labs(title = "Distribution of Log(p) Differences (NSA - PCA)", x = "Cognitive Measure", y = "Difference", subtitle = "Negative = NSA better") +theme_minimal(base_size = 10)+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 # Scatter: w vs diff, colored by better_method
@@ -2271,7 +2262,7 @@ p3 <- ggplot(comparison_df, aes(x = w, y = log_p_diff, color = better_method)) +
   geom_point(alpha = 0.6, size = 2) +
   geom_smooth(method = "loess", se = FALSE, color = "black", linetype = "dotted") +
   scale_color_manual(values = c("NSA" = "#4ECDC4", "PCA" = "#FF6B6B", "Tie" = "gray")) +
-  labs(title = "Performance Difference vs. Sparsity Parameter (w)", x = "w (Sparsity Weight)", y = "Log(p) Difference", color = "Better Method") +
+  labs(title = "Performance Difference vs. Sparsity Parameter (w)", x = "w (Sparsity Weight)", y = "Log(p) Difference", color = "Better Method")+theme_minimal(base_size = 10) +
   facet_wrap(~ cog, scales = "free_y", ncol = 3)
 
 # Combine
