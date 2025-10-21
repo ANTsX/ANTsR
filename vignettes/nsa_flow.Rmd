@@ -61,107 +61,84 @@ The paper is organized as follows: Section 2 derives the formulation and algorit
 
 # Methods
 
-
-We consider the problem of learning or adapting an orthonormal basis matrix  \( Y \in \mathbb{R}^{p \times k} \) to approximate a target \( X_0 \in \mathbb{R}^{p \times k} \) while enforcing column orthogonality and non-negativity. This formulation is common in orthogonal factorization, manifold learning, and related optimization problems[@parikh2014proximal; @absil2008optimization; @edelman1998geometry].  The NSA-Flow optimization problem is defined as
-
-\[
-\min_{Y \in \mathbb{R}^{p \times k}} 
-E(Y) 
-= (1 - w) \, \| Y - X_0 \|_F^2 
-+ w \, \text{Orth}(Y),
-\]
-where \( 0 \leq w \leq 1 \) is a weight parameter trading off fidelity to the target
-against column orthogonality. The orthogonality penalty is given by
-\[
-\text{Orth}(Y) \;=\; \frac{1}{2} \, \| Y^\top Y - I_k \|_F^2,
-\]
-which vanishes when the columns of \( Y \) are orthonormal and grows quadratically
-with orthogonality defect.
-
-The gradient of the orthogonality term is
-\[
-\nabla_Y \text{Orth}(Y) \;=\; Y \, ( Y^\top Y - I_k ),
-\]
-and the total gradient of the energy is
-\[
-\nabla_Y E(Y) \;=\; 2 (1 - w)(Y - X_0) \;+\; w \, Y ( Y^\top Y - I_k ).
-\]
-
-A simple gradient descent step
-\[
-Y \leftarrow Y - \eta \, \nabla_Y E(Y)
-\]
-does not preserve orthogonality and typically requires a retraction step or alternative stabilization.  NSA-Flow uses a **soft retraction-free (soft-RF)** update rule that interpolates between the raw gradient descent iterate and its polar retraction:
+We consider the problem of finding a matrix \( Y \in \mathbb{R}^{p \times k} \) that optimally approximates a target matrix \( X_0 \in \mathbb{R}^{p \times k} \) while satisfying column orthogonality and, optionally, non-negativity. This general formulation is central to a wide range of problems in machine learning and signal processing, including orthogonal dictionary learning, Independent Component Analysis (ICA), and the orthogonal Procrustes problem [@lee2001algorithms; @hyvarinen2000independent; @schonemann1966generalized]. The NSA-Flow optimization problem is defined by the minimization of a composite energy function \( E(Y) \):
 
 \[
-Y^{(t+1)} \;=\; (1 - \lambda) \, \widetilde{Y}^{(t+1)} \;+\; 
-\lambda \, \mathrm{Retract} \bigl( \widetilde{Y}^{(t+1)} \bigr),
+\min_{Y \in \mathbb{R}^{p \times k}, Y \ge 0}
+E(Y)
+= (1 - w) \, L_{fid}(Y, X_0)
++ w \, L_{orth}(Y),
+\label{eq:objective}
 \]
-with \( 0 \leq \lambda \leq 1 \) and
-\(
+
+where \( w \in [0, 1] \) is a hyperparameter that balances the fidelity loss \(L_{fid}\) against the orthogonality loss \(L_{orth}\). For numerical stability, the loss terms are internally re-weighted based on their initial magnitudes, but we omit these scaling factors for notational clarity. The fidelity term is the standard squared Frobenius norm distance, \( L_{fid}(Y, X_0) = \frac{1}{2} \| Y - X_0 \|_F^2 \). The primary orthogonality loss, used in the `simplified` mode, is:
+\[
+L_{orth}(Y) = \frac{1}{2} \| Y^\top Y - I_k \|_F^2.
+\]
+This penalty is zero if and only if \( Y \) belongs to the Stiefel manifold \( St(p, k) = \{ Y \in \mathbb{R}^{p \times k} : Y^\top Y = I_k \} \) and grows quadratically with the orthogonality defect. The Euclidean gradient of this objective is:
+\[
+\nabla_Y E(Y) = (1 - w)(Y - X_0) + w \, Y ( Y^\top Y - I_k ).
+\]
+
+#### The Optimization Challenge and the NSA-Flow Approach
+
+A standard Euclidean gradient descent step, \( Y \leftarrow Y - \eta \nabla_Y E(Y) \), is ill-suited for this problem as it does not respect the orthogonality constraint. The conventional solution is to employ Riemannian optimization methods, which involve projecting the gradient onto the tangent space of the Stiefel manifold and then using a **retraction** to pull the updated iterate back onto the manifold [@absil2008optimization; @boumal2023intro]. While theoretically sound, full retraction steps can be computationally expensive (requiring an SVD or matrix square root inverse) and can sometimes hinder convergence on the fidelity term by abruptly correcting the geometry of the iterate.
+
+NSA-Flow introduces a **soft-retraction flow** that elegantly circumvents these issues. Instead of enforcing a hard constraint at every step, it defines an update rule that simultaneously descends on the energy landscape and continuously "pulls" the iterates towards the Stiefel manifold. This is achieved by directly linking the update rule's geometry to the objective function's weight parameter \(w\).
+
+#### The Soft-Retraction Method: A Geometrically-Aware Update
+
+Let \( \widetilde{Y}^{(t+1)} \) be the iterate after a standard Euclidean gradient step from \( Y^{(t)} \):
+\[
 \widetilde{Y}^{(t+1)} = Y^{(t)} - \eta \, \nabla_Y E(Y^{(t)}).
-\).
-
-For \( \lambda = 1 \), the method recovers a full polar/SVD retraction step. For \( \lambda = 0 \), the update is purely Euclidean.  Intermediate values provide a **low-cost, stable correction** that reduces orthogonality defect without performing an expensive retraction every iteration [@vary2024optimization; @ablin2022fast].
-
-### Pseudo-Proof of Stability (Soft-RF)
-
-**Claim.**  
-Let \( \widetilde{Y} = Y - \eta \nabla_Y E(Y) \) and \( Q = \mathrm{Retract}(\widetilde{Y}) \).
-Then for \( 0 \leq \lambda \leq 1 \),
-\[
-\| Y^{\text{new}\,\top} Y^{\text{new}} - I \|_F
-\;\leq\;
-(1 - \lambda) \| \widetilde{Y}^\top \widetilde{Y} - I \|_F.
 \]
+Let \( Q^{(t+1)} = \mathrm{Retract}(\widetilde{Y}^{(t+1)}) = \widetilde{Y}^{(t+1)} (\widetilde{Y}^{(t+1)\top} \widetilde{Y}^{(t+1)})^{-1/2} \) be the polar retraction of \( \widetilde{Y}^{(t+1)} \), which is the closest point to \( \widetilde{Y}^{(t+1)} \) on the Stiefel manifold in the Frobenius norm [@edelman1998geometry]. The NSA-Flow update is a convex combination of the gradient step and its retraction, where the interpolation parameter is the objective weight \(w\) itself:
+\[
+Y^{(t+1)} = (1 - w) \, \widetilde{Y}^{(t+1)} + w \, Q^{(t+1)}.
+\]
+This design choice creates a powerful, self-consistent algorithm:
+*   When \(w\) is small (fidelity is prioritized), the update is mostly a standard Euclidean gradient step.
+*   When \(w\) is large (orthogonality is prioritized), the update is strongly pulled towards the manifold via the polar retraction.
 
-**Sketch of proof.**  
-The polar retraction minimizes the Frobenius distance to the Stiefel manifold. By convexity of the Frobenius norm and linearity of interpolation,
+This method can be viewed as an instance of an **averaged operator** scheme, which is known to exhibit stable and smooth convergence properties [@bauschke2017convex]. It provides a computationally efficient and geometrically intuitive alternative to full Riemannian optimization, similar in spirit to other fast, retraction-free, or approximate manifold methods [@vary2024optimization; @ablin2022fast].
+
+#### Geometric Stability and Convergence
+
+The stability of the soft-retraction flow is guaranteed by its contractive nature with respect to the constraint set.
+
+**Proposition:** Let \( \tilde{Y} \in \mathbb{R}^{p \times k} \), \( Q = \mathrm{Retract}(\tilde{Y}) \), and \( Y_{\text{new}} = (1-w)\tilde{Y} + w Q \) for \( w \in [0, 1] \). The Frobenius distance of the new iterate to the Stiefel manifold is strictly reduced for any \( w > 0 \):
+\[
+\| Y_{\text{new}} - Q \|_F = (1 - w) \| \tilde{Y} - Q \|_F.
+\]
+*Proof.* The proof follows directly from the linearity of the norm:
 \(
-\| (1-\lambda)\widetilde{Y} + \lambda Q \|_F
+\| Y_{\text{new}} - Q \|_F = \| ((1-w)\tilde{Y} + w Q) - Q \|_F = \| (1-w)(\tilde{Y} - Q) \|_F = (1 - w) \| \tilde{Y} - Q \|_F.
 \)
-cannot increase the orthogonality defect relative to the unretracted iterate. Since \( Q \) lies on the manifold, the inequality follows directly. This guarantees strict decrease in defect for any \( \lambda > 0 \).
+Since \(Q\) is the projection of \(\tilde{Y}\) onto the manifold, this proposition shows that each soft-retraction step provably reduces the iterate's distance to the feasible set. This property, fundamental to proximal point and averaged operator algorithms, ensures that the iterates are progressively and smoothly drawn towards the manifold, preventing divergence and promoting stable convergence [@parikh2014proximal; @combettes2011proximal].
 
-To stabilize optimization across scales, NSA-Flow optionally employs a **scale-invariant orthogonality defect** defined as
+#### Scale-Invariant Orthogonality Penalty
 
+To enhance robustness, NSA-Flow's default (`simplified = FALSE`) setting uses a **scale-invariant orthogonality defect**. The standard penalty \( \| Y^\top Y - I \|_F^2 \) is sensitive to the norm of \(Y\), as scaling \(Y \to cY\) scales the penalty by \(c^4\). This can lead to poorly conditioned optimization problems where the learning rate must be carefully tuned. Following the principles in [@wen2013feasible], we use a normalized penalty that is invariant to the global scale of \(Y\):
 \[
-\mathrm{Defect}(Y) \;=\; 
-\frac{\| Y^\top Y - I \|_F}{\max(1, \|Y\|_F)}.
+L_{orth, inv}(Y) = \frac{\| Y^\top Y - \text{diag}(\text{diag}(Y^\top Y)) \|_F^2}{\|Y\|_F^4}.
 \]
+This objective purely measures the cosine of the angles between columns, decoupling the orthogonality constraint from the magnitude of the column vectors. This results in a better-conditioned optimization landscape and more consistent convergence behavior.
 
-This normalization prevents large norms from dominating the penalty, allowing robust step-size selection and more consistent convergence [@liu2021quadratic; @song2025distributed].
+#### Relationship to Alternative Manifold Optimization Methods
 
-### Cayley Transform (Future Work)
+*   **Cayley Transform:** An alternative for preserving orthogonality is the **Cayley transform**, which defines an exact retraction-free update. For a skew-symmetric matrix \( A = \text{grad}E(Y) Y^\top - Y (\text{grad}E(Y))^\top \), the update \(Y^{(t+1)} = ( I - \frac{\eta}{2} A )^{-1} ( I + \frac{\eta}{2} A ) Y^{(t)}\) exactly preserves orthogonality [@gao2019parallelizing]. However, it requires solving a \(p \times p\) linear system, making it computationally prohibitive for large \(p\).
+*   **Riemannian Optimization Frameworks:** Standard toolboxes like `Manopt` [@boumal2014manopt] implement sophisticated algorithms like Riemannian trust-region and conjugate gradient methods. NSA-Flow's soft-retraction can be seen as a lightweight, problem-specific solver that is simpler to implement while providing a geometrically sound and computationally efficient alternative.
 
-The Cayley transform defines an **exact retraction-free** orthogonal update:
+#### Computational Complexity
 
-\[
-Y^{(t+1)} \;=\; \bigl( I - \tfrac{\eta}{2} A \bigr)^{-1}
-\bigl( I + \tfrac{\eta}{2} A \bigr) Y^{(t)},
-\]
-where \( A \) is a skew-symmetric matrix constructed from the gradient.
-This update preserves orthogonality exactly but requires solving linear systems
-at each iteration. We regard scalable low-rank Cayley implementations
-as promising future work.
+| Method             | Dominant Operation        | Complexity ($p \ge k$)        | Orthogonality | Notes                                       |
+| ------------------ | ------------------------- | ----------------------------- | --------------- | ------------------------------------------- |
+| Euclidean GD       | Gradient Computation      | \( O(pk^2) \)                 | ✗ (Unstable)    | Fails to enforce constraints.               |
+| Full Polar Retraction | Gradient + SVD / Polar    | \( O(pk^2) \)                 | ✓ (Exact)       | Costly; can have sharp, non-smooth updates. |
+| **Soft-RF (ours)** | Gradient + Polar + Interp. | \( O(pk^2) \)                 | ≈ (Controlled)  | Offers a smoother path and often faster practical convergence. |
+| Cayley Transform   | Linear Solve (\(p \times p\)) | \( O(p^3) \) or \( O(pk^2) \) (w/ low rank) | ✓ (Exact)       | Prohibitively expensive for large \(p\) without approximations. |
 
-### Computational Complexity
-
-We summarize the **per-iteration complexity** of different update mechanisms:
-
-| Method                 | Dominant Operation                    | Complexity                                 | Orthogonality |
-|-------------------------|---------------------------------------|---------------------------------------------|---------------|
-| Euclidean GD (none)     | Gradient + matmul                     | \( O(p k^2) \)                              | ✗             |
-| Polar Retraction        | SVD or polar decomposition            | \( O(\min(p,k) k^2) \) to \( O(p k^2) \)     | ✓ (exact)     |
-| Soft-RF (ours)          | Matmul + partial retraction           | \( O(p k^2) \) (reduced constant factor)    | ≈ (controlled)|
-| Cayley Transform        | Linear solve (low rank)               | \( O(p k^2) \) to \( O(k^3) \)              | ✓ (exact)     |
-
-- For **tall-skinny** matrices (\( p \gg k \)), soft-RF avoids unnecessary work on the null space and outperforms full retraction.
-
-- For **square** cases (\( p \approx k \)), SVD and Cayley have similar asymptotics, but soft-RF retains lower constants.
-
-- For **wide** matrices (\( k \gg p \)), soft-RF maintains efficiency via fast matmul and structured updates.
-
-Overall, soft-RF achieves stable convergence at significantly reduced computational cost compared to full retraction, with tunable defect control via \( \lambda \).
+For tall-skinny matrices (\( p \gg k \)), the asymptotic cost is dominated by \( O(pk^2) \) matrix multiplications. The primary advantage of the soft-retraction flow is not in its asymptotic complexity but in its superior convergence dynamics, offering a stable and smooth optimization trajectory that effectively balances multiple objectives at a reduced computational cost per iteration.
 
 
 ```{r pollen, echo = FALSE, fig.cap = "Illustration of the NSA-Flow optimization as a function of ($\\omega$).  The colored manifold is a conceptual representation of the Stiefel manifold, with the curves representing optimization paths for evolving $Y$.  When ($\\omega$) is small, the retraction is mild, allowing more deviation from orthonormality; when ($\\omega$) is large, the retraction strongly enforces orthonormality, pulling $Y$ closer to the manifold."}
