@@ -17,22 +17,25 @@
   y domain=-1:1,
   grid=major,
   colormap/viridis,
-  title={Optimization trajectories near a 2D manifold $\mathcal{M}$},
+  title={Optimization trajectories diverging from manifold $\mathcal{M}$},
   title style={font=\small},
 ]
 
 % --- True 2D manifold surface
-\addplot3 [surf, opacity=0.45, shader=interp, draw=none]
+\addplot3 [surf, opacity=0.4, shader=interp, draw=none]
   {sin(deg(0.5*x))*cos(deg(0.5*y))};
 
-% --- omega values (distance from manifold)
+% Distance parameters
 \pgfmathsetmacro{\omegaHigh}{0.0}
 \pgfmathsetmacro{\omegaMid}{0.3}
 \pgfmathsetmacro{\omegaLow}{0.8}
 
-% === omega_high trajectory (on manifold) ===
+% --- Common starting point
+\pgfmathsetmacro{\xstart}{-6.0}
+
+% === omega_high trajectory (on manifold)
 \addplot3 [
-  domain=-6.0:6.0,
+  domain=\xstart:6.0,
   samples=200,
   samples y=0,
   thick,
@@ -43,9 +46,9 @@
  {0.5*sin(deg(x))},
  {sin(deg(0.5*x))*cos(deg(0.25*sin(deg(x))))});
 
-% === omega_mid trajectory (near manifold) ===
+% === omega_mid trajectory (quadratic divergence)
 \addplot3 [
-  domain=-6.0:6.0,
+  domain=\xstart:6.0,
   samples=200,
   samples y=0,
   very thick,
@@ -53,11 +56,11 @@
 ]
 ({x},
  {0.5*sin(deg(x))},
- {sin(deg(0.5*x))*cos(deg(0.25*sin(deg(x)))) + \omegaMid});
+ {sin(deg(0.5*x))*cos(deg(0.25*sin(deg(x)))) + \omegaMid * ((x-\xstart)/(12.0))^2});
 
-% === omega_low trajectory (farther) ===
+% === omega_low trajectory (stronger quadratic divergence)
 \addplot3 [
-  domain=-6.0:6.0,
+  domain=\xstart:6.0,
   samples=200,
   samples y=0,
   very thick,
@@ -65,23 +68,18 @@
 ]
 ({x},
  {0.5*sin(deg(x))},
- {sin(deg(0.5*x))*cos(deg(0.25*sin(deg(x)))) + \omegaLow});
+ {sin(deg(0.5*x))*cos(deg(0.25*sin(deg(x)))) + \omegaLow * ((x-\xstart)/(12.0))^2});
 
-% === Normal connectors (vertical offsets for illustration)
-\foreach \xx in {-5.5,-3.2,-1.1,1.1,3.4,5.3}{
+% --- Vertical connectors at selected x locations
+\foreach \xx in {-6.0,-3.5,-1.0,1.5,4.0,6.0}{
   \pgfmathsetmacro{\yy}{0.5*sin(deg(\xx))}
   \pgfmathsetmacro{\zz}{sin(deg(0.5*\xx))*cos(deg(0.25*sin(deg(\xx))))}
+  \pgfmathsetmacro{\zmid}{\zz + \omegaMid * ((\xx-\xstart)/(12.0))^2}
+  \pgfmathsetmacro{\zlow}{\zz + \omegaLow * ((\xx-\xstart)/(12.0))^2}
   \addplot3 [orange!80!black, dashed, thin]
-    coordinates {(\xx,\yy,\zz) (\xx,\yy,\zz+\omegaMid)};
+    coordinates {(\xx,\yy,\zz) (\xx,\yy,\zmid)};
   \addplot3 [red!80!black, dashed, thin]
-    coordinates {(\xx,\yy,\zz) (\xx,\yy,\zz+\omegaLow)};
-}
-
-\legend{
-  True manifold $\mathcal{M}$,
-  $\omega_{\text{high}}$ (on $\mathcal{M}$),
-  $\omega_{\text{mid}}$ (near),
-  $\omega_{\text{low}}$ (distant)
+    coordinates {(\xx,\yy,\zz) (\xx,\yy,\zlow)};
 }
 
 \end{axis}

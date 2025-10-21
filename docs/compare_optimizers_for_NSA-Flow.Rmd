@@ -39,7 +39,7 @@ if (!exists("raw_results")) {
       start_time <- Sys.time()
       res <- tryCatch({
         nsa_flow(mat1, w = w, verbose = F, retraction = def_ret, simplified = FALSE,
-                 optimizer = o, tol = tol, max_iter = max_iter)
+                 optimizer = o, tol = tol, max_iter = max_iter, initial_learning_rate=0.01 )
       }, error = function(e) NULL)
 
       end_time <- Sys.time()

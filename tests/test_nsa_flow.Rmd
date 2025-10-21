@@ -14,7 +14,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.width=12, fig.height=8)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.width=7, fig.height=3.5)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
@@ -22,6 +22,123 @@ library(gridExtra)
 library(knitr)
 library(microbenchmark)  # For timing
 library(ANTsR)  # Assumes missing functions like create_optimizer, step are here
+
+
+inv_sqrt_sym_adaptive <- function(A, method = "auto", eig_thresh = NULL,
+                                  diag_thresh = NULL, ns_iter = 10L, epsilon = 1e-8,
+                                  verbose = FALSE) {
+  k <- nrow(A)
+  eig_thresh   <- eig_thresh   %||% getOption("nsa.eig_thresh",   512L)
+  diag_thresh  <- diag_thresh  %||% getOption("nsa.diag_thresh", 1024L)
+  
+  # decide method adaptively
+  method_use <- method
+  if (method == "auto") {
+    if (k <= eig_thresh) method_use <- "eig"
+    else if (k <= diag_thresh) method_use <- "newton"
+    else method_use <- "diag"
+  }
+  
+  if (verbose) cat("[inv_sqrt_sym_adaptive] k =", k, "method =", method_use, "\n")
+  
+  if (method_use == "eig") {
+    s <- eigen((A + t(A))/2, symmetric = TRUE)
+    vals <- pmax(s$values, epsilon)
+    T <- s$vectors %*% (diag(1 / sqrt(vals))) %*% t(s$vectors)
+    return((T + t(T))/2)
+  } else if (method_use == "newton") {
+    return(inv_sqrt_sym_newton(A, epsilon = epsilon, max_iter = ns_iter))
+  } else if (method_use == "diag") {
+    d <- diag(A)
+    return(diag(1 / sqrt(pmax(d, epsilon))))
+  } else stop("Unknown method")
+}
+
+# -------------------------------------------------------------------------
+# Auto-calibrate inv_sqrt_sym_adaptive thresholds
+# -------------------------------------------------------------------------
+auto_calibrate_inv_sqrt <- function(
+  shapes = list(c(4096, 64), c(1024, 1024), c(256, 4096)),
+  reps = 5L,
+  ns_iter = 10L,
+  verbose = TRUE
+) {
+  methods <- c("eig", "newton")
+  
+  benchmark_one <- function(p, k, method) {
+    Y <- matrix(rnorm(p * k), p, k)
+    A <- crossprod(Y) # k x k SPD
+    t <- system.time({
+      inv_sqrt_sym_adaptive(A, inv_method = method, ns_iter = ns_iter, verbose = FALSE)
+    })[["elapsed"]]
+    t
+  }
+  
+  results <- data.frame()
+  
+  for (shape in shapes) {
+    p <- shape[1]; k <- shape[2]
+    for (m in methods) {
+      times <- replicate(reps, benchmark_one(p, k, m))
+      results <- rbind(
+        results,
+        data.frame(
+          method = m,
+          p = p,
+          k = k,
+          median_time = median(times),
+          mean_time = mean(times),
+          max_time = max(times)
+        )
+      )
+    }
+  }
+  
+  if (verbose) print(results)
+  
+  # --- Threshold selection heuristic ---
+  # For each k, decide at which point Newton–Schulz beats eig
+  eig_times <- results[results$method == "eig", ]
+  ns_times  <- results[results$method == "newton", ]
+  
+  # merge by k
+  merged <- merge(eig_times, ns_times, by = c("p", "k"), suffixes = c("_eig", "_newton"))
+  
+  # choose threshold at the smallest k where newton < eig
+  winning <- merged[merged$median_time_newton < merged$median_time_eig, ]
+  eig_thresh <- if (nrow(winning) > 0) min(winning$k) else max(merged$k)
+  
+  # pick diag_thresh more aggressively (e.g., 2x eig_thresh)
+  diag_thresh <- 2 * eig_thresh
+  
+  if (verbose) {
+    cat("\n===== Auto Calibration Result =====\n")
+    cat("  eig_thresh   :", eig_thresh, "\n")
+    cat("  diag_thresh  :", diag_thresh, "\n")
+    cat("====================================\n")
+  }
+  
+  # Optionally: set in global options
+  options(nsa.eig_thresh = eig_thresh)
+  options(nsa.diag_thresh = diag_thresh)
+  
+  return(list(
+    results = results,
+    eig_thresh = eig_thresh,
+    diag_thresh = diag_thresh
+  ))
+}
+
+
+# Run calibration (will take a few seconds)
+if ( ! exists("nsa.eig_thresh") || ! exists("nsa.diag_thresh") ) {
+ # cal <- auto_calibrate_inv_sqrt()
+}
+
+# View thresholds
+# getOption("nsa.eig_thresh")
+# getOption("nsa.diag_thresh")
+
 ```
 
 # Overview
@@ -30,7 +147,7 @@ This NSA-Flow test suite considers:
 
 - all retraction options.
 
-- diverse datasets: small, large, sparse with negatives.
+- diverse datasets: tall, large, sparse with negatives.
 
 - Multiple reps (n=3) per config for mean/sd stats.
 
@@ -63,7 +180,7 @@ To systematically evaluate the behavior of the retraction methods under controll
 
 | Dataset name    | Description |
 |-----------------|--------------|
-| **small**       | Moderate dimension (p = 90, k = 10), low correlation (ρ = 0.2); emulates structured, small-scale settings. |
+| **tall**       | Moderate dimension (p = 90, k = 10), low correlation (ρ = 0.2); emulates structured, small-scale settings. |
 | **large**       | Larger system (p = 200, k = 20), moderate correlation (ρ = 0.3); tests scalability and performance under multicollinearity. |
 | **sparse_neg**  | Sparse with mixed signs (≈ 50% zeros, negative entries included); tests stability and nonnegativity effects. |
 
@@ -117,12 +234,10 @@ generate_synth_data <- function(p=40, k=3, noise=0.5, corr=0.1,
 }
 
 # Generate datasets
-data_small      <- generate_synth_data(p=90,  k=10, corr=0.2)
-data_wide = data_small  # Wide version
-for ( k in 1:length(data_wide) ) {
-  data_wide[[k]] <- t(data_wide[[k]])
-}
-data_large      <- generate_synth_data(p=200, k=20, corr=0.3)
+data_tall      <- generate_synth_data(p=120,  k=40, corr=0.34)
+data_wide      <- generate_synth_data(p=ncol(data_tall$Y0),  k=nrow(data_tall$Y0), corr=0.34)
+data_large_tall     <- generate_synth_data(p=400, k=100, corr=0.3)
+data_large_wide     <- generate_synth_data(p=ncol(data_large_tall$Y0),  k=nrow(data_large_tall$Y0), corr=0.3)
 data_sparse_neg <- generate_synth_data(sparse_prob=0.5, include_neg=TRUE)
 
 
@@ -144,9 +259,10 @@ dataset_stats <- function(name, data) {
 }
 
 summary_table <- rbind(
-  dataset_stats("Small", data_small),
+  dataset_stats("Tall", data_tall),
   dataset_stats("Wide", data_wide),
-  dataset_stats("Large", data_large),
+  dataset_stats("LargeTall", data_large_tall),
+  dataset_stats("LargeWide", data_large_wide),
   dataset_stats("Sparse_Neg", data_sparse_neg)
 )
 
@@ -174,19 +290,19 @@ plot_heat <- function(mat, title) {
     labs(title=title, x=NULL, y=NULL, fill="Value")
 }
 
-p_small  <- plot_heat(data_small$Y0, "Small Dataset (ρ=0.2)")
-p_large  <- plot_heat(data_large$Y0, "Large Dataset (ρ=0.3)")
+p_tall  <- plot_heat(data_tall$Y0, "Tall Dataset (ρ=0.3)")
+p_large  <- plot_heat(data_large_tall$Y0, "Large Dataset (ρ=0.3)")
 p_sparse <- plot_heat(data_sparse_neg$Y0, "Sparse Negative Dataset")
 
-(p_small | p_large | p_sparse) + plot_layout(guides = "collect")
+(p_tall | p_large | p_sparse) + plot_layout(guides = "collect")
 ```
 
 Figure 1. Synthetic data matrices used for benchmarking.
 From left to right:
 
-* Small dataset: moderately correlated structure with low noise.
+* Tall dataset: moderately correlated structure with low noise.
 
-* Wide dataset: transposed small dataset.
+* Wide dataset: transposed tall dataset.
 
 * Large dataset: increased dimensionality and correlation.
 
@@ -215,7 +331,7 @@ We explore the impact of:
 
 - **Non-negativity enforcement**, and  
 
-- **Dataset characteristics**, including *small*, *large*, and *sparse-negative* synthetic data.  
+- **Dataset characteristics**, including *tall*, *large*, and *sparse-negative* synthetic data.  
 
 To ensure robustness, each configuration is repeated three times with independent random seeds, and timing is measured using `microbenchmark` for consistency.  
 
@@ -227,14 +343,16 @@ filter_config_space <- function(configs) {
   configs[!invalid, ]
 }
 
-rtypes = c( "polar", "soft_polar", "none" )
+datasetsq=c("tall", "wide" )
+datasets=c(datasetsq, "large_tall", "large_wide")
+rtypes=c( "none","polar", "soft_polar") #,  "soft_cayley")
 smallw=c( 0.01)
 configs <- filter_config_space( expand.grid(
-  w = c(  0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99 ), 
+  w = c(  0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99 ), 
   retraction = rtypes, 
   apply_nonneg = c(FALSE, TRUE),
-  dataset = c("small", "wide", "large" ),
-  x0_null = c(TRUE), # c(FALSE, TRUE),
+  dataset = datasets,
+  x0_null = c(FALSE, TRUE),
   max_iter = c( 500 ),
   stringsAsFactors = FALSE
 ) )
@@ -243,9 +361,9 @@ configs <- filter_config_space( expand.grid(
   w = c(  0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99 ), 
   retraction = rtypes, 
   apply_nonneg = c( TRUE ),
-  dataset = c("small", "wide", "large"), # , "sparse_neg"
+  dataset = datasets, # , "sparse_neg"
   x0_null = c( TRUE ),
-  max_iter = c( 500 ),
+  max_iter = c( 200 ),
   stringsAsFactors = FALSE
 ) )
 
@@ -260,8 +378,9 @@ if ( ! exists("results") ) {
     rep_results <- lapply(1:n_reps, function(rep) {
       v=FALSE
       mb <- microbenchmark(
-        res <- ANTsR::nsa_flow( data$Y0, X0=X0_use, w=cfg$w, 
+        res <- nsa_flow( data$Y0, X0=X0_use, w=cfg$w, 
           retraction=cfg$retraction,  max_iter=cfg$max_iter, optimizer='fast',
+          initial_learning_rate=0.01,
           apply_nonneg=cfg$apply_nonneg, seed=42+rep, verbose=v, plot=TRUE, simplified=FALSE),
         times=1
       )
@@ -657,15 +776,15 @@ Together, these tests validate both the correctness and numerical resilience of 
 
 # Discussion
 
-## Relative Fidelity 
-```{r relfid,fig.width=10, fig.height=3.5}
+## Raw and Relative Fidelity 
+```{r relfid}
 
 
 
 tradeoff_df_signed <- summary_df %>%
   # filter to mixed or target conditions if desired
   filter(apply_nonneg == FALSE) %>%
-  group_by(retraction, dataset, w) %>%
+  group_by(retraction, dataset, w ) %>%
   summarise(
     orth = mean(mean_orth , na.rm = TRUE),
     rel_orth = mean(mean_orth / mean_orth_0, na.rm = TRUE),
@@ -687,6 +806,7 @@ tradeoff_df_unsigned <- summary_df %>%
   group_by(retraction, dataset, w, apply_nonneg) %>%
   summarise(
     orth = mean(mean_orth , na.rm = TRUE),
+    fid = mean(mean_fid , na.rm = TRUE),
     rel_orth = mean(mean_orth / mean_orth_0, na.rm = TRUE),
     rel_fid  = mean(mean_fid  / mean_fid_0,  na.rm = TRUE),
     .groups = "drop"
@@ -701,15 +821,24 @@ tradeoff_df <- summary_df %>%
     .groups = "drop"
   )
 
+ggplot(tradeoff_df_unsigned, aes(x = w, y = fid, color = dataset, group = dataset)) +
+  geom_line(linewidth = 1.1) +
+  geom_point(size = 2) +
+  facet_wrap(~ retraction, scales = "free_y") +
+  labs(title = "Fidelity Error by Retraction and Dataset: (+)",
+       y = "Fidelity Error", x = "Tradeoff weight w") +
+  theme_minimal(base_size = 13)+theme(legend.position = "bottom")
+
 ggplot(tradeoff_df_unsigned, aes(x = w, y = rel_fid, color = dataset, group = dataset)) +
   geom_line(linewidth = 1.1) +
   geom_point(size = 2) +
   facet_wrap(~ retraction, scales = "free_y") +
   labs(title = "Relative Fidelity by Retraction and Dataset: (+)",
        y = "Relative Fidelity", x = "Tradeoff weight w") +
-  theme_minimal(base_size = 13) +
-  coord_cartesian(ylim = c(0.35, 1.1))   # <── limits y-axis to 0–2
+  theme_minimal(base_size = 13)+theme(legend.position = "bottom")+
+  coord_cartesian(ylim = c(0.6, 1.1))  
 
+if ( FALSE )
 ggplot(summary_df, aes(x = factor(w), y = mean_fid / mean_fid_0,
                        fill = apply_nonneg)) +
   geom_col(position = "dodge") +
@@ -727,7 +856,7 @@ ggplot(summary_df, aes(x = factor(w), y = mean_fid / mean_fid_0,
 ```
 
 ## Orthogonality Defect
-```{r ordef,fig.width=10, fig.height=4}
+```{r ordef}
 
 if ( nrow(tradeoff_df_signed > 0)) 
 ggplot(tradeoff_df_signed, aes(x = w, y = orth, color = dataset, group = dataset)) +
@@ -744,8 +873,10 @@ ggplot(tradeoff_df_unsigned, aes(x = w, y = orth, color = dataset, group = datas
   facet_wrap(~ retraction, scales = "free_y") +
   labs(title = "Orthogonality Defect by Retraction and Dataset: (+)",
        y = "Orthogonality Defect", x = "Tradeoff weight w") +
-  theme_minimal(base_size = 13)# --- Optional: pretty visual summary ---
+  theme_minimal(base_size = 13)+theme(legend.position = "bottom") +
+  coord_cartesian(ylim = c(0.125, 0))
 
+if (FALSE )
 ggplot(summary_df, aes(x = factor(w), y = mean_orth / mean_orth_0,
                        fill = apply_nonneg)) +
   geom_col(position = "dodge") +
@@ -766,7 +897,7 @@ ggplot(summary_df, aes(x = factor(w), y = mean_orth / mean_orth_0,
 
 
 ## Relative Orthogonality 
-```{r rel_orth,fig.width=10, fig.height=4}
+```{r rel_orth}
 if ( nrow(tradeoff_df_signed > 0)) 
 ggplot(tradeoff_df_signed, aes(x = w, y = rel_orth, color = dataset, group = dataset)) +
   geom_line(linewidth = 1.1) +
@@ -774,7 +905,7 @@ ggplot(tradeoff_df_signed, aes(x = w, y = rel_orth, color = dataset, group = dat
   facet_wrap(~ retraction, scales = "free_y") +
   labs(title = "Relative Orthogonality by Retraction and Dataset: (+/-)",
        y = "Relative Orthogonality", x = "Tradeoff weight w") +
-  theme_minimal(base_size = 13)# --- Optional: pretty visual summary ---
+  theme_minimal(base_size = 13)+theme(legend.position = "bottom")# --- Optional: pretty visual summary ---
 
 ggplot(tradeoff_df_unsigned, aes(x = w, y = rel_orth, color = dataset, group = dataset)) +
   geom_line(linewidth = 1.1) +
@@ -782,8 +913,10 @@ ggplot(tradeoff_df_unsigned, aes(x = w, y = rel_orth, color = dataset, group = d
   facet_wrap(~ retraction, scales = "free_y") +
   labs(title = "Relative Orthogonality by Retraction and Dataset: (+)",
        y = "Relative Orthogonality", x = "Tradeoff weight w") +
-  theme_minimal(base_size = 13)# --- Optional: pretty visual summary ---
+  theme_minimal(base_size = 13)+theme(legend.position = "bottom")+
+  coord_cartesian(ylim = c(0., 1.6))# --- Optional: pretty visual summary ---
 
+if ( FALSE )
 ggplot(summary_df, aes(x = factor(w), y = mean_orth / mean_orth_0,
                        fill = apply_nonneg)) +
   geom_col(position = "dodge") +
@@ -803,6 +936,126 @@ ggplot(summary_df, aes(x = factor(w), y = mean_orth / mean_orth_0,
 ```
 
 **Figure:** *Relative orthogonality and fidelity (lower = better) for each retraction method, dataset, and weighting parameter (`w`). QR retraction consistently yields the lowest combined error, with soft–polar offering a strong secondary balance. Unretracted (“none”) cases show incomplete convergence and weaker stability.*
+
+
+## Method timing comparisons: Retraction method only
+
+
+```{r timing_data_collection,echo=FALSE,eval=TRUE,cache=FALSE}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# --- Benchmark function ---
+benchmark_nsa_flow <- function(p_values = c(50, 50, 10),
+                               k_values = c(5, 50, 200),
+                               reps = 3,
+                               max_iter = 50,
+                               w = 0.5) {
+  retract_opts <- rtypes
+  timings <- list()
+
+  for (i in seq_along(p_values)) {
+    p <- p_values[i]
+    k <- k_values[i]
+    cat(sprintf("\n=== Benchmark case %d: p = %d, k = %d ===\n", i, p, k))
+    Y0 <- matrix(rnorm(p * k), p, k)
+    for (retract in retract_opts) {
+      for (r in seq_len(reps)) {
+        cat(sprintf("  [%s] Rep %d ... ", retract, r))
+        gc()
+        t1 <- Sys.time()
+        if (FALSE) {
+          # Warm-up run (not timed)
+          res = nsa_flow(
+            Y0,
+            w = w,
+            retraction = retract,
+            max_iter = 10,
+            tol = 1e-4,
+            plot = FALSE,
+            verbose = FALSE
+          )
+        } else {
+          res = nsa_flow_retract(
+                      Y0,
+                      w = w,
+                      retraction = retract #, Y_prev=Y0, step_size=0.1
+                    )
+        }
+        t2 <- Sys.time()
+        elapsed <- as.numeric(difftime(t2, t1, units = "secs"))
+        cat(sprintf("time = %.3f s\n", elapsed))
+        timings[[length(timings) + 1]] <- data.frame(
+          p = p,
+          k = k,
+          shape = ifelse(p > k, "thin",
+                         ifelse(p == k, "square", "wide")),
+          retraction = retract,
+          rep = r,
+          time = elapsed,
+          final_energy = invariant_orthogonality_defect(res)
+        )
+      }
+    }
+  }
+  dplyr::bind_rows(timings)
+}
+
+# --- Run the benchmark ---
+set.seed(123)
+if ( ! exists("timing_results") )
+timing_results <- benchmark_nsa_flow(
+  p_values = c(2000, 1000, 200),
+  k_values = c(50, 1000, 2000),
+  reps = 3,
+  max_iter = 50,
+  w = 0.5
+)
+
+```
+
+
+
+```{r timing_data_collection_plot,echo=FALSE,eval=TRUE,cache=FALSE}
+# --- Plot timing results ---
+print( ggplot(timing_results, aes(x = retraction, y = time, fill = retraction)) +
+  geom_boxplot(outlier.alpha = 0.2) +
+  facet_wrap(~ shape, scales = "free_y") +
+  theme_minimal(base_size = 14) +
+  labs(
+    title = "Timing Comparison of Retraction Options",
+    x = "Retraction Type",
+    y = "Time (seconds)"
+  ) +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  ) )
+########  
+```
+
+
+## Method timing comparisons: NSA-Flow execution time
+
+
+```{r timing,fig.width=7, fig.height=6,eval=TRUE}
+
+library(ggplot2)
+
+ggplot(summary_df, aes(x = w, y = mean_timing, color = retraction)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ dataset) +
+  labs(title = "Mean Timing across w by Retraction Type and Dataset",
+       subtitle = "Visualizing mean_timing trends",
+       x = "w",
+       y = "Mean Timing",
+       color = "Retraction Type") +
+  theme_classic() +
+  theme(legend.position = "bottom")
+
+```
 
 
 ## Summary and Recommendations on Retraction Choices in NSA-Flow

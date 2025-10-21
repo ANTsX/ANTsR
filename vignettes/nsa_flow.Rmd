@@ -5,6 +5,7 @@ date: "October 11, 2025"
 output:
   pdf_document:
     keep_tex: true
+    latex_engine: xelatex
 header-includes:
   - \newcommand{\diag}{\operatorname{diag}}
   - \newcommand{\fid}{\operatorname{fid}}
@@ -33,7 +34,7 @@ library(ANTsR)
 
 # Abstract {-}
 
-Interpretable representation learning is a central challenge in modern machine learning, particularly in high-dimensional settings such as neuroimaging, genomics, and text analysis. Dimensionality reduction techniques like PCA, ICA, and sparse coding have provided powerful means to uncover latent structure, but they often trade interpretability for flexibility, or sparsity for stability. We introduce Non-negative Stiefel Approximating Flow (NSA-Flow), a general-purpose optimization framework that unifies ideas from sparse matrix factorization, orthogonalization, and constrained manifold learning. NSA-Flow enforces structured sparsity through a continuous balance between reconstruction fidelity and column-wise decorrelation, parameterized by a single tunable weight. The method operates as a smooth flow on the Stiefel manifold with proximal updates for non-negativity and adaptive gradient control, yielding representations that are simultaneously sparse, stable, and interpretable. Unlike classical regularization schemes, NSA-Flow provides an intuitive geometric mechanism for exploring what sparsity means—interpreting it as a form of soft orthogonality that preserves global structure while simplifying latent features. We demonstrate that the NSA-Flow objective can be optimized smoothly, integrates seamlessly with existing pipelines for dimensionality reduction while improving interpretability and generalization in simulated and biomedical data. Empirical validation on the Golub leukemia dataset and in Alzheimer's disease demonstrate that the NSA-Flow constraints can maintain or improve performance with little additional computational or methodoligical effort. NSA-Flow offers a scalable, general-purpose tool for interpretable ML, applicable across data science domains.
+Interpretable representation learning is a central challenge in modern machine learning, particularly in high-dimensional settings such as neuroimaging, genomics, and text analysis. Current methods often struggle to balance the competing demands of interpretability and model flexibility, limiting their effectiveness in extracting meaningful insights from complex data. We introduce Non-negative Stiefel Approximating Flow (NSA-Flow), a general-purpose optimization framework that unifies ideas from sparse matrix factorization, orthogonalization, and constrained manifold learning. NSA-Flow enforces structured sparsity through a continuous balance between reconstruction fidelity and column-wise decorrelation, parameterized by a single tunable weight. The method operates as a smooth flow on the Stiefel manifold with proximal updates for non-negativity and adaptive gradient control, yielding representations that are simultaneously sparse, stable, and interpretable. Unlike classical regularization schemes, NSA-Flow provides an intuitive geometric mechanism for manipulating sparsity at the level of global structure while simplifying latent features. We demonstrate that the NSA-Flow objective can be optimized smoothly, integrates seamlessly with existing pipelines for dimensionality reduction while improving interpretability and generalization in simulated and biomedical data. Empirical validation on the Golub leukemia dataset and in Alzheimer's disease demonstrate that the NSA-Flow constraints can maintain or improve performance with little additional computational or methodological effort. NSA-Flow offers a scalable, general-purpose tool for interpretable ML, applicable across data science domains.
 
 # Introduction
 
@@ -60,71 +61,112 @@ The paper is organized as follows: Section 2 derives the formulation and algorit
 
 # Methods
 
-NSA-Flow optimizes a matrix \( Y \in \mathbb{R}^{p \times k} \) to balance fidelity to a target matrix \( X_0 \in \mathbb{R}^{p \times k} \), column orthogonality, and optional non-negativity. The core optimization step involves solving a simplified subproblem at each descent update \( Z \), defined by the objective:
+
+We consider the problem of learning or adapting an orthonormal basis matrix  \( Y \in \mathbb{R}^{p \times k} \) to approximate a target \( X_0 \in \mathbb{R}^{p \times k} \) while enforcing column orthogonality and non-negativity. This formulation is common in orthogonal factorization, manifold learning, and related optimization problems[@parikh2014proximal; @absil2008optimization; @edelman1998geometry].  The NSA-Flow optimization problem is defined as
 
 \[
-\min_U \ (1 - w) \frac{1}{2} \|U - Z\|_F^2 + w \frac{1}{2} \|U^\top U - I_k\|_F^2,
+\min_{Y \in \mathbb{R}^{p \times k}} 
+E(Y) 
+= (1 - w) \, \| Y - X_0 \|_F^2 
++ w \, \text{Orth}(Y),
+\]
+where \( 0 \leq w \leq 1 \) is a weight parameter trading off fidelity to the target
+against column orthogonality. The orthogonality penalty is given by
+\[
+\text{Orth}(Y) \;=\; \frac{1}{2} \, \| Y^\top Y - I_k \|_F^2,
+\]
+which vanishes when the columns of \( Y \) are orthonormal and grows quadratically
+with orthogonality defect.
+
+The gradient of the orthogonality term is
+\[
+\nabla_Y \text{Orth}(Y) \;=\; Y \, ( Y^\top Y - I_k ),
+\]
+and the total gradient of the energy is
+\[
+\nabla_Y E(Y) \;=\; 2 (1 - w)(Y - X_0) \;+\; w \, Y ( Y^\top Y - I_k ).
 \]
 
-where \( w \in [0, 1] \) controls the trade-off between proximity to \( Z \) and orthogonality, and \( \|\cdot\|_F \) is the Frobenius norm. This formulation assumes a fixed scale for the Gram matrix, penalizing deviations from exact orthonormality. Non-negativity (\( Y \geq 0 \)) is enforced via proximal projection [@parikh2014proximal]. The optimization operates on the Stiefel manifold \( \mathcal{S}_{p,k} = \{ Y \in \mathbb{R}^{p \times k} \mid Y^\top Y = I_k \} \), relaxed via tunable retractions [@absil2008optimization].
-
-The Euclidean gradient of this objective is:
+A simple gradient descent step
+\[
+Y \leftarrow Y - \eta \, \nabla_Y E(Y)
+\]
+does not preserve orthogonality and typically requires a retraction step or alternative stabilization.  NSA-Flow uses a **soft retraction-free (soft-RF)** update rule that interpolates between the raw gradient descent iterate and its polar retraction:
 
 \[
-\nabla_U = (1 - w) (U - Z) + 2w U (U^\top U - I_k).
+Y^{(t+1)} \;=\; (1 - \lambda) \, \widetilde{Y}^{(t+1)} \;+\; 
+\lambda \, \mathrm{Retract} \bigl( \widetilde{Y}^{(t+1)} \bigr),
+\]
+with \( 0 \leq \lambda \leq 1 \) and
+\(
+\widetilde{Y}^{(t+1)} = Y^{(t)} - \eta \, \nabla_Y E(Y^{(t)}).
+\).
+
+For \( \lambda = 1 \), the method recovers a full polar/SVD retraction step. For \( \lambda = 0 \), the update is purely Euclidean.  Intermediate values provide a **low-cost, stable correction** that reduces orthogonality defect without performing an expensive retraction every iteration [@vary2024optimization; @ablin2022fast].
+
+### Pseudo-Proof of Stability (Soft-RF)
+
+**Claim.**  
+Let \( \widetilde{Y} = Y - \eta \nabla_Y E(Y) \) and \( Q = \mathrm{Retract}(\widetilde{Y}) \).
+Then for \( 0 \leq \lambda \leq 1 \),
+\[
+\| Y^{\text{new}\,\top} Y^{\text{new}} - I \|_F
+\;\leq\;
+(1 - \lambda) \| \widetilde{Y}^\top \widetilde{Y} - I \|_F.
 \]
 
-This is projected onto the tangent space \( T_Y \mathcal{S}_{p,k} \) [@edelman1998geometry]:
+**Sketch of proof.**  
+The polar retraction minimizes the Frobenius distance to the Stiefel manifold. By convexity of the Frobenius norm and linearity of interpolation,
+\(
+\| (1-\lambda)\widetilde{Y} + \lambda Q \|_F
+\)
+cannot increase the orthogonality defect relative to the unretracted iterate. Since \( Q \) lies on the manifold, the inequality follows directly. This guarantees strict decrease in defect for any \( \lambda > 0 \).
+
+To stabilize optimization across scales, NSA-Flow optionally employs a **scale-invariant orthogonality defect** defined as
 
 \[
-\nabla_\mathcal{M} = \nabla_U - U \sym(U^\top \nabla_U),
+\mathrm{Defect}(Y) \;=\; 
+\frac{\| Y^\top Y - I \|_F}{\max(1, \|Y\|_F)}.
 \]
 
-where \( \sym(A) = (A + A^\top)/2 \).
+This normalization prevents large norms from dominating the penalty, allowing robust step-size selection and more consistent convergence [@liu2021quadratic; @song2025distributed].
 
-Descent uses \( Z = Y - \alpha \nabla_\mathcal{M} \), with adaptive step size \( \alpha \) via backtracking line search (halving \( \alpha \) up to 10 times until energy decreases). An Adam optimizer (\( \beta_1 = 0.9 \), \( \beta_2 = 0.999 \), \( \epsilon = 10^{-8} \)) incorporates momentum [@parikh2014proximal].
+### Cayley Transform (Future Work)
 
-Retractions map the descent update \( Z = Y + \eta \) to (or near) the Stiefel manifold [@absil2008optimization], where \(\eta = - \alpha \nabla_\mathcal{M} \):
-
-- **Polar**: \( R_Y(\eta) = (Y + \eta) (I_k + \eta^\top \eta)^{-1/2} \). This provides a standard retraction onto the manifold.
-
-- **Soft Polar**: \( T_w = (1 - w) I_k + w ((Y + \eta)^\top (Y + \eta))^{-1/2} \), \( R_Y(\eta) = (Y + \eta) T_w \). For wide matrices (\( p < k \)), where \( (Y + \eta)^\top (Y + \eta) \) may be rank-deficient and not invertible, this adapts by computing the polar projection \( Q \) of \( Z = Y + \eta \) via economy SVD (\( Z = U \Sigma V^\top \), \( Q = U V^\top \)) and interpolating as \( (1 - w) Z + w Q \), ensuring numerical stability.
-
-- **None**: Skip retraction, returning \( Z \) directly.
-
-The parameter \( w \) in the soft polar retraction is deliberately linked to the trade-off weight \( w \) in the objective. This coupling ensures that the degree of orthogonality enforcement during retraction aligns with the objective's emphasis on the orthogonality term. When \( w \) is small, the objective prioritizes proximity to \( Z \) and tolerates larger deviations from orthonormality; correspondingly, the soft retraction applies a milder correction, avoiding excessive projection that could increase the proximity error and lead to oscillatory or slow convergence. Conversely, when \( w \) is large, the objective emphasizes reducing \( \|U^\top U - I_k\|_F^2 \), so a stronger retraction accelerates progress toward near-orthogonality without conflicting with the penalty.
-
-While the exact minimizer of this objective lacks a closed form, the soft polar retraction serves as an efficient approximation, particularly near the manifold, by emulating a single gradient descent step on the objective. This can be seen by considering one step from \( U_0 = Z \), yielding an update that matches the soft form up to first order in deviations from orthonormality. This linkage is motivated heuristically from penalty-based and retraction-free methods in manifold optimization [@vary2024optimization; @ablin2022fast]. In penalty approaches for Stiefel constraints, a parameter (analogous to \( w \)) balances the original objective against constraint violation, often increased adaptively to push iterates toward the manifold [@liu2021quadratic]. Retraction-free methods similarly use growing penalties to ``land'' on the manifold without explicit projections [@song2025distributed]. The soft polar retraction acts as a parameterized hybrid, interpolating between no correction (\( w=0 \), pure Euclidean update) and full projection (\( w=1 \), standard polar). By tying the retraction parameter to the objective's \( w \), the method maintains a consistent trade-off across gradient projection, descent, and retraction steps, mimicking the balanced enforcement in adaptive penalty schemes. This promotes stable convergence by preventing mismatch—e.g., a strict retraction with small \( w \) would over-enforce orthonormality, counteracting the objective's tolerance for defects. Empirical alignment with such heuristics in the literature suggests this linkage is a prudent design choice for tunable orthogonality, though future work could explore decoupling or adaptive tuning for further refinement.
-
-Non-negativity is enforced post-retraction via \( P_+(Y) = \max(Y, 0) \) [@parikh2014proximal]. Convergence is checked via:
-
-1. Relative gradient norm: \( \|\nabla_\mathcal{M}(Y)\|_F / \|\nabla_\mathcal{M}(Y_0)\|_F < \tol \).
-
-2. Energy stability over window \( m \): \( (\max(E_{t-m:t}) - \min(E_{t-m:t})) / |\mean(E_{t-m:t})| < \tol \).
-
-This simplified objective provides a foundational approach for soft orthogonality, but in domains like NMF where column scales may vary (e.g., due to data normalization or interpretability needs), a scale-invariant variant is beneficial. Building on the same idea, we extend the orthogonality penalty to focus on angular deviations independent of norms, replacing \( \|U^\top U - I_k\|_F^2 \) with the invariant defect:
+The Cayley transform defines an **exact retraction-free** orthogonal update:
 
 \[
-\delta(Y) = \left\| \frac{Y^\top Y}{\|Y\|_F^2} - \diag\left( \frac{\diag(Y^\top Y)}{\|Y\|_F^2} \right) \right\|_F^2.
+Y^{(t+1)} \;=\; \bigl( I - \tfrac{\eta}{2} A \bigr)^{-1}
+\bigl( I + \tfrac{\eta}{2} A \bigr) Y^{(t)},
 \]
+where \( A \) is a skew-symmetric matrix constructed from the gradient.
+This update preserves orthogonality exactly but requires solving linear systems
+at each iteration. We regard scalable low-rank Cayley implementations
+as promising future work.
 
-This penalizes off-diagonal elements of the normalized Gram matrix, avoiding trivial solutions by ignoring overall scale [@edelman1998geometry]. The full objective becomes:
+### Computational Complexity
 
-\[
-E(Y) = (1 - w) \cdot \frac{\|Y - X_0\|_F^2}{2 p k} + w \cdot \delta(Y),
-\]
+We summarize the **per-iteration complexity** of different update mechanisms:
 
-with the fidelity term normalized for balance. The Euclidean gradient for the defect term is derived as:
+| Method                 | Dominant Operation                    | Complexity                                 | Orthogonality |
+|-------------------------|---------------------------------------|---------------------------------------------|---------------|
+| Euclidean GD (none)     | Gradient + matmul                     | \( O(p k^2) \)                              | ✗             |
+| Polar Retraction        | SVD or polar decomposition            | \( O(\min(p,k) k^2) \) to \( O(p k^2) \)     | ✓ (exact)     |
+| Soft-RF (ours)          | Matmul + partial retraction           | \( O(p k^2) \) (reduced constant factor)    | ≈ (controlled)|
+| Cayley Transform        | Linear solve (low rank)               | \( O(p k^2) \) to \( O(k^3) \)              | ✓ (exact)     |
 
-\[
-\nabla f(Y) = c_{\orth} \left[ Y (\hat{G} - D) / n - (\|\hat{G} - D\|_F^2 / n) \cdot Y / n \right],
-\]
+- For **tall-skinny** matrices (\( p \gg k \)), soft-RF avoids unnecessary work on the null space and outperforms full retraction.
 
-where \( n = \|Y\|_F^2 \), \( \hat{G} = Y^\top Y / n \), \( D = \diag(\diag(\hat{G})) \), and \( c_{\orth} = 4 w / d_0 \) scales based on initial defect \( d_0 = \delta(Y_0) \) (floored at \( 10^{-8} \)). The fidelity gradient is \( \nabla g(Y) = \frac{1 - w}{p k} (Y - X_0) \), scaled adaptively as \( -\fid_\eta (Y - X_0) \) with \( \fid_\eta = \frac{1 - w}{p k g_0} \) and initial \( g_0 = \frac{1}{2} \|Y_0 - X_0\|_F^2 / (p k) \) (floored at \( 10^{-8} \)).
+- For **square** cases (\( p \approx k \)), SVD and Cayley have similar asymptotics, but soft-RF retains lower constants.
 
-The combined gradient follows the same projection and descent process as the simplified version. Notably, the soft polar retraction remains appropriate for this invariant extension. While the defect \( \delta(Y) \) decouples from absolute scales, near convergence (where \( \|Y\|_F^2 \approx k \) under near-orthonormality), the behavior approximates the simplified objective's penalty. The retraction's interpolation preserves this by adjusting columns without disproportionate rescaling, maintaining geometric stability. This continuity justifies reusing the soft polar as a robust approximation, enabling flexible one-sided refinements in NMF-style domains without sacrificing the tunable trade-off established in the simplified case.
+- For **wide** matrices (\( k \gg p \)), soft-RF maintains efficiency via fast matmul and structured updates.
 
-The described methods align well with the R code implementation, particularly for the retraction step, with consistencies in polar and soft polar handling, including the wide-matrix fallback via SVD interpolation. The code's use of `w_retract` (potentially independent) allows tuning, but linking it to \( w \) ensures objective-retraction synergy.
+Overall, soft-RF achieves stable convergence at significantly reduced computational cost compared to full retraction, with tunable defect control via \( \lambda \).
+
+
+```{r pollen, echo = FALSE, fig.cap = "Illustration of the NSA-Flow optimization as a function of ($\\omega$).  The colored manifold is a conceptual representation of the Stiefel manifold, with the curves representing optimization paths for evolving $Y$.  When ($\\omega$) is small, the retraction is mild, allowing more deviation from orthonormality; when ($\\omega$) is large, the retraction strongly enforces orthonormality, pulling $Y$ closer to the manifold."}
+knitr::include_graphics("figs/nsa_flow_manifolds_fig.pdf")
+```
 
 ## Implementation
 
@@ -138,93 +180,7 @@ Helper functions handle symmetric matrix operations, Frobenius norms, scale-inva
 
 The implementation is designed for research-grade use, with verbose output for debugging and extensibility for alternative optimizers or retractions. It scales efficiently for moderate \( k \), with potential bottlenecks in large \( p \) addressed through sparse matrix support in future extensions [@boumal2011rtrmc].
 
-<!--
-## Pseudocode
-
-```
-Algorithm: NSA-Flow
-Input:
-  Y_0: Initial matrix (p $\times$ k)
-  X_0: Target matrix (p $\times$ k, optional, default: pmax(Y_0, 0) + perturbation)
-  w: Orthogonality weight (0 ≤ w ≤ 1)
-  retraction: Type ("polar", "qr", "soft", "none")
-  max_iter: Maximum iterations
-  tol: Convergence tolerance
-  apply_nonneg: Boolean for non-negativity enforcement
-  optimizer: Optimization method (e.g., "adam")
-  initial_lr: Initial learning rate
-  record_every: Diagnostic recording frequency
-  window_size: Convergence window size
-  plot: Boolean for generating trace plot
-
-Output:
-  Y: Optimized matrix
-  traces: Diagnostics (iteration, time, fidelity, orthogonality, energy)
-  plot: Optional visualization of optimization trace
-
-1. Initialize:
-   - Set Y ← Y_0
-   - If X_0 is NULL, set X_0 ← pmax(Y_0, 0) + small random perturbation
-   - Compute initial fidelity g_0 ← (1/2) ||Y_0 - X_0||_F^2 / (p k)
-   - Compute initial defect d_0 ← ||(Y_0^T Y_0 / ||Y_0||_F^2) - diag(...)||_F^2
-   - Set fid_eta ← (1 - w) / (p k g_0), c_orth ← 4 w / d_0
-   - Initialize optimizer (e.g., Adam with β_1 = 0.9, β_2 = 0.999, ε = 10^-8)
-   - Initialize traces, best_Y ← Y, best_energy ← ∞
-   - Compute initial gradient norm for convergence check
-
-2. For iteration = 1 to max_iter:
-   a. Compute fidelity gradient:
-      - grad_fid ← -fid_eta (Y - X_0)
-   b. Compute orthogonality gradient:
-      - If c_orth > 0 and ||Y||_F^2 > 0:
-        - AtA ← Y^T Y / ||Y||_F^2
-        - D ← diag(diag(AtA))
-        - defect ← ||AtA - D||_F^2
-        - term1 ← Y (AtA - D) / ||Y||_F^2
-        - term2 ← (defect / ||Y||_F^2) Y
-        - grad_orth ← c_orth (term1 - term2)
-      - Else: grad_orth ← 0
-   c. Project to tangent space:
-      - rgrad ← grad_fid + grad_orth - Y sym(Y^T (grad_fid + grad_orth))
-   d. Perform descent:
-      - Z ← Y - α rgrad (using optimizer, e.g., Adam)
-   e. Backtrack line search:
-      - While energy(Z) > energy(Y) and tries < 10:
-        - α ← α / 2
-        - Z ← Y - α rgrad
-   f. Apply retraction:
-      - If retraction = "polar":
-        - Z ← Z (Z^T Z)^(-1/2)
-      - Else if retraction = "qr":
-        - Z ← QR(Z).Q * sign(diag(QR(Z).R))
-      - Else if retraction = "soft":
-        - T_ω ← (1 - w) I_k + w (Z^T Z)^(-1/2)
-        - Z ← Z T_ω
-      - Else: Skip retraction
-   g. Apply non-negativity:
-      - If apply_nonneg: Y ← max(Z, 0)
-      - Else: Y ← Z
-   h. Compute diagnostics:
-      - Fidelity ← (1/2) fid_eta ||Y - X_0||_F^2
-      - Orthogonality ← defect(Y)
-      - Total_energy ← Fidelity + (c_orth / 4) Orthogonality
-      - If Total_energy < best_energy:
-        - best_Y ← Y, best_energy ← Total_energy
-   i. Record traces (if iteration mod record_every = 0)
-   j. Check convergence:
-      - If relative gradient norm < tol, break
-      - If energy variation over window_size < tol, break
-   k. Update learning rate (increase if no backtracking, decrease if excessive)
-
-3. If plot = TRUE:
-   - Generate dual-axis plot of fidelity and orthogonality vs. iteration
-
-4. Return:
-   - best_Y, traces, final_iter, plot, best_total_energy
-```
--->
-
-The following flowchart, generated by the `nsa_flow_flowchart()` function, visualizes the NSA-Flow algorithm's workflow, highlighting the iterative process, retraction choices, and convergence checks.
+The following flowchart visualizes the NSA-Flow algorithm's workflow, highlighting the iterative process, retraction choices, and convergence checks.
 
 ```{r nsa_flowchart, fig.cap="NSA-Flow Algorithm Workflow", fig.width=6, fig.height=4,echo=FALSE}
 nsa_flow_flowchart <- function(
@@ -248,8 +204,8 @@ digraph nsa_flow_algorithm {
   C [label = 'Compute Euclidean Gradient\\n∇F(Y) = (1-w)∇g(Y) + w∇f(Y)']
   D [label = 'Project to Tangent Space\\ngrad_ℳ F']
   E [label = 'Descent Step\\nZ = Y - α grad_ℳ F']
-  F [label = 'Choose Retraction\\n(polar, QR, soft, none)']
-  G [label = 'Apply Retraction\\nMap Z to Stiefel Manifold']
+  F [label = 'Choose Retraction\\n(polar, soft, none)']
+  G [label = 'Apply Retraction\\nMap Z toward Stiefel Manifold']
   H [label = 'Proximal Projection\\nP_+(Y) = max(Y, 0)']
   I [label = 'Check Convergence\\n(Energy reduction < tol or grad norm < tol)']
   J [label = 'Update Y\\nRecord Diagnostics\\n(iter, energy, orth, neg)']
@@ -270,13 +226,11 @@ digraph nsa_flow_algorithm {
     color = gray
     label = 'Retraction Options'
     F1 [label = 'Polar\\n(Z (Z^T Z)^{-1/2})', fillcolor = lightyellow]
-    F2 [label = 'QR\\n(Q sign(diag(R)))', fillcolor = lightyellow]
-    F3 [label = 'Soft\\n((1-w)I + w(Z^T Z)^{-1/2})', fillcolor = lightyellow]
-    F4 [label = 'None\\n(No retraction)', fillcolor = lightyellow]
+    F2 [label = 'Soft\\n((1-w)I + w(Z^T Z)^{-1/2})', fillcolor = lightyellow]
+    F3 [label = 'None\\n(No retraction)', fillcolor = lightyellow]
     F -> F1 [style = invis]
     F -> F2 [style = invis]
     F -> F3 [style = invis]
-    F -> F4 [style = invis]
   }
 }
 ")
@@ -313,6 +267,103 @@ sparsity_level <- function(M, tol = 1e-8) {
 
 # Results 
 
+## Toy Example: Decomposing a Small Mixed-Signal Matrix
+
+To intuitively illustrate NSA-Flow, consider a toy 4x3 matrix \( X_0 \) representing mixed signals: each column is a nonnegative orthogonal basis vector (e.g., distinct patterns), but observed with noise and scaling. NSA-Flow approximates an orthogonal nonnegative basis \( Y \) close to \( X_0 \).
+
+```{r toy_example, echo=FALSE, fig.width=6, fig.height=3}
+set.seed(42)
+# True orthogonal nonnegative basis
+true_Y <- matrix(c(1,0,0,0, 0,1,0,0, 0,0,1,0), 4, 3)  # Nearly orthogonal, nonnegative
+true_Y <- true_Y + matrix(runif(12, 0, 0.1), 4, 3)  # Add small perturbations
+true_Y <- pmax(true_Y, 0)
+true_Y <- true_Y %*% solve(chol(crossprod(true_Y)))  # Orthogonalize
+
+# Noisy target
+X0_toy <- true_Y + matrix(rnorm(12, 0, 0.2), 4, 3)
+X0_toy <- pmax(X0_toy, 0)  # Ensure nonnegative
+
+# Initial random guess
+Y0_toy <- matrix(runif(12, 0, 1), 4, 3)
+
+# Apply NSA-Flow with balanced weights
+# X0_toy=X0_toy/norm(X0_toy, "F")*0.1  # Normalize
+omega_default = 0.5
+ini_default = 0.001
+optype='bidirectional_armijo_gradient'
+optype='adam'
+optype='armijo_gradient'
+optype='riemannian_adam'
+optype='fast'
+def_ret = "soft_polar"
+simplified_param=FALSE
+nsa_default <- function(Y0, w = omega_default, o=optype, verbose = FALSE ) {
+  nsa_flow(
+    Y0 = Y0,
+    X0 = NULL,
+    w = w,
+    retraction = def_ret,
+    max_iter = 500,
+    verbose = verbose,
+    seed = 42,
+    apply_nonneg = TRUE,
+    tol = 1e-6,
+    window_size=10,
+    initial_learning_rate = ini_default, 
+    optimizer = o,
+    simplified=simplified_param,
+    plot = TRUE
+  )
+}
+
+
+res_toy <- nsa_flow(Y0 = X0_toy, X0 = true_Y,  
+    w = omega_default, retraction = def_ret,
+    simplified=simplified_param,
+    initial_learning_rate = ini_default, plot=TRUE, verbose =FALSE )
+
+# Visualize
+
+library(ggplot2)
+library(reshape2)
+library(patchwork)   # or cowplot
+
+# Helper: convert a matrix to a ggplot heatmap
+make_heatmap <- function(mat, title) {
+  df <- melt(mat)
+  ggplot(df, aes(Var2, Var1, fill = value)) +
+    geom_tile() +
+    scale_fill_viridis_c(option = "plasma") +
+    coord_equal() +
+    theme_minimal(base_size = 12) +
+    theme(
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      panel.grid = element_blank(),
+      plot.title = element_text(face = "bold", hjust = 0.5)
+    ) + theme(legend.position = "none") +
+    ggtitle(title)
+}
+
+# Create the four ggplots
+p1 <- make_heatmap(X0_toy,  "Noisy Target X0")
+p2 <- make_heatmap(Y0_toy,  "Initial Y0")
+p3 <- make_heatmap(res_toy$Y, "NSA-Flow Y (w=0.1)")
+p4 <- make_heatmap(true_Y,  "True Basis")
+
+# Arrange them in a 1x4 grid for better visibility
+(p1 | p2 | p3 | p4 ) 
+# Metrics
+toy_metrics <- data.frame(
+  Metric = c("Recon Error", "Orth Residual", "Neg Violation"),
+  Value = c(frob(res_toy$Y - X0_toy), orth_residual(res_toy$Y), neg_violation(res_toy$Y))
+)
+# kable(toy_metrics, digits = 4, caption = "Toy Example Metrics")
+```
+
+**Interpretation**: Starting from a random \( Y_0 \), NSA-Flow recovers a basis close to the true orthogonal nonnegative patterns in \( X_0 \), with low reconstruction error and near-zero orthogonality/nonnegativity residuals. This captures the essence: extracting interpretable, disjoint components from noisy data. The visualizations show progressive decorrelation and pattern sharpening.
+
+
 ## Comparing Retraction Methods
 
 The retraction methods define how NSA-Flow projects the updated matrix back onto a constraint manifold. Two key strategies are illustrated here:
@@ -323,8 +374,6 @@ The retraction methods define how NSA-Flow projects the updated matrix back onto
 
 Both are compared to no retraction.  We, by default, also preserve the Frobenius norm  scaling output \( Y \) by \( \|Y_{\cand}\|_F / \|Y\|_F \) if \( \|Y\|_F > 0 \), focusing optimization on directions.
 
-An optional precondition checks if retraction is needed via the scale-invariant orthogonality defect \( \delta(Y) = \frac{\|Y^\top Y - \diag(\diag(Y^\top Y))\|_F^2}{\|Y\|_F^4} \), computed efficiently as off-diagonal Frobenius squared over norm squared (avoiding temporary matrices). 
-
 We systematically vary \( \omega \) from 0 to 1 and compare how these retraction approaches impact tall (\( p > k \), e.g., 200 $\times$ 20), wide (\( p < k \), e.g., 20 $\times$ 200), and square (\( p \approx k \), e.g., 100 $\times$ 100) matrices:
 
 - **Orthogonality Defect**:  
@@ -334,6 +383,12 @@ We systematically vary \( \omega \) from 0 to 1 and compare how these retraction
   \( \|Y - Z\|_F \) — measures deviation from the input update.  
 
 Note that the orthogonality defect is scale-invariant, while fidelity depends on the input scale. Here, we normalize inputs to unit Frobenius norm for consistency.  Furthermore, wide data cannot achieve perfect orthogonality due to rank limitations, so defect values will be higher.
+
+
+```{r pollen2, echo = FALSE, fig.cap = "The impact of regularization on measures of both orthogonality and fidelity error relative to the original matrix.  For both metrics, lower values are better. We vary ($\\omega$) from 0 (no orthogonality enforcement) to 1 (full enforcement) and compare three retraction methods: polar, soft polar, and none.  Results are shown for three matrix shapes: tall ($p > k$), wide ($p < k$), and square."}
+knitr::include_graphics("figs/compare_retractions_and_matrix_shapes.pdf")
+```
+
 
 ```{r compare-retractions, fig.width=8, fig.height=5, echo=FALSE, message=FALSE, warning=FALSE,eval=FALSE}
 library(ggplot2)
@@ -414,8 +469,8 @@ p1 <- ggplot(subset(df_melt, grepl("orth_", variable)),
              aes(x = omega, y = value, color = variable)) +
   geom_line(size = 1.2) + geom_point(size = 2) +
   scale_color_manual(values = orth_colors, labels = gsub("_", " ", names(orth_colors))) +
-  labs(title = "Orthogonality Defect vs \u03C9",
-       y = "Defect", x = "Orth. weight (\u03C9)", color = "Method") +
+  labs(title = "Orthogonality Defect vs ω",
+       y = "Defect", x = "Orth. weight (ω)", color = "Method") +
   facet_wrap(~ shape) +
   theme_minimal(base_size = 11) + theme(legend.position = "top")
 
@@ -424,8 +479,8 @@ p2 <- ggplot(subset(df_melt, grepl("fid_", variable)),
              aes(x = omega, y = value, color = variable)) +
   geom_line(size = 1.2) + geom_point(size = 2) +
   scale_color_manual(values = fid_colors, labels = gsub("_", " ", names(fid_colors))) +
-  labs(title = "Fidelity (Deviation from target Z) vs \u03C9",
-       y = "||Y - Z||_F", x = "Orth. weight (\u03C9)", color = "Method") +
+  labs(title = "Fidelity (Deviation from target Z) vs ω",
+       y = "||Y - Z||_F", x = "Orth. weight (ω)", color = "Method") +
   facet_wrap(~ shape) +
   theme_minimal(base_size = 11) + theme(legend.position = "top")
 
@@ -433,106 +488,13 @@ p2 <- ggplot(subset(df_melt, grepl("fid_", variable)),
 (p1 / p2) + plot_layout(guides = "collect")
 ```
 
+## Comparing Optimization Methods
 
-## Toy Example: Decomposing a Small Mixed-Signal Matrix
+A second key choice in NSA-Flow is the optimization algorithm used for the descent step. We compare several optimizers: standard gradient descent, Adam, Armijo gradient descent, AdaGrad and others. Each has different convergence properties and sensitivities to hyperparameters and we evaluate them with standard defaults and a common learning rate (0.001). We evaluate them on the same synthetic data setup as above, measuring convergence speed (energy vs iterations) and final orthogonality/fidelity metrics.  Performance across $\omega$ values are shown in Figure X.  A data-driven ranking of the methods based on execution time and objective values shows that AdaGrad [@duchi2011adaptive] and Layer-wise Adaptive Rate Scaling (LARS) [@you2017large] perform well. `ANTsR` includes implementations of these optimizers for easy experimentation as well as this full comparison of methods.
 
-To intuitively illustrate NSA-Flow, consider a toy 4x3 matrix \( X_0 \) representing mixed signals: each column is a nonnegative orthogonal basis vector (e.g., distinct patterns), but observed with noise and scaling. NSA-Flow approximates an orthogonal nonnegative basis \( Y \) close to \( X_0 \).
-
-```{r toy_example, echo=FALSE, fig.width=6, fig.height=3}
-set.seed(42)
-# True orthogonal nonnegative basis
-true_Y <- matrix(c(1,0,0,0, 0,1,0,0, 0,0,1,0), 4, 3)  # Nearly orthogonal, nonnegative
-true_Y <- true_Y + matrix(runif(12, 0, 0.1), 4, 3)  # Add small perturbations
-true_Y <- pmax(true_Y, 0)
-true_Y <- true_Y %*% solve(chol(crossprod(true_Y)))  # Orthogonalize
-
-# Noisy target
-X0_toy <- true_Y + matrix(rnorm(12, 0, 0.2), 4, 3)
-X0_toy <- pmax(X0_toy, 0)  # Ensure nonnegative
-
-# Initial random guess
-Y0_toy <- matrix(runif(12, 0, 1), 4, 3)
-
-# Apply NSA-Flow with balanced weights
-# X0_toy=X0_toy/norm(X0_toy, "F")*0.1  # Normalize
-omega_default = 0.05
-ini_default = 0.001
-nsa_flow = ANTsR::nsa_flow
-optype='bidirectional_armijo_gradient'
-optype='adam'
-optype='armijo_gradient'
-optype='riemannian_adam'
-optype='fast'
-def_ret = "soft_polar"
-simplified_param=FALSE
-nsa_default <- function(Y0, w = omega_default, o=optype, verbose = FALSE ) {
-  nsa_flow(
-    Y0 = Y0,
-    X0 = NULL,
-    w = w,
-    retraction = def_ret,
-    max_iter = 500,
-    verbose = verbose,
-    seed = 42,
-    apply_nonneg = TRUE,
-    tol = 1e-6,
-    window_size=10,
-    initial_learning_rate = ini_default, 
-    optimizer = o,
-    simplified=simplified_param,
-    plot = TRUE
-  )
-}
-
-
-res_toy <- nsa_flow(Y0 = X0_toy, X0 = true_Y,  
-    w = omega_default, retraction = def_ret,
-    simplified=simplified_param,
-    initial_learning_rate = ini_default, plot=TRUE, verbose =FALSE )
-
-# Visualize
-
-library(ggplot2)
-library(reshape2)
-library(patchwork)   # or cowplot
-
-# Helper: convert a matrix to a ggplot heatmap
-make_heatmap <- function(mat, title) {
-  df <- melt(mat)
-  ggplot(df, aes(Var2, Var1, fill = value)) +
-    geom_tile() +
-    scale_fill_viridis_c(option = "plasma") +
-    coord_equal() +
-    theme_minimal(base_size = 12) +
-    theme(
-      axis.title = element_blank(),
-      axis.text = element_blank(),
-      panel.grid = element_blank(),
-      plot.title = element_text(face = "bold", hjust = 0.5)
-    ) + theme(legend.position = "none") +
-    ggtitle(title)
-}
-
-# Create the four ggplots
-p1 <- make_heatmap(X0_toy,  "Noisy Target X0")
-p2 <- make_heatmap(Y0_toy,  "Initial Y0")
-p3 <- make_heatmap(res_toy$Y, "NSA-Flow Y (w=0.1)")
-p4 <- make_heatmap(true_Y,  "True Basis")
-
-# Arrange them in a 1x4 grid for better visibility
-(p1 | p2 | p3 | p4 ) 
-# Metrics
-toy_metrics <- data.frame(
-  Metric = c("Recon Error", "Orth Residual", "Neg Violation"),
-  Value = c(frob(res_toy$Y - X0_toy), orth_residual(res_toy$Y), neg_violation(res_toy$Y))
-)
-# kable(toy_metrics, digits = 4, caption = "Toy Example Metrics")
+```{r pollen3, echo = FALSE, fig.cap = "The impact of optimization method on convergence speed and final metrics.  We compare several optimizers (standard gradient descent, Adam, Armijo gradient descent, AdaGrad, etc.) on the same synthetic data setup, measuring energy vs iterations across different ($\\omega$) values.  Results indicate that AdaGrad and LARS perform well in terms of execution time and objective values."}
+knitr::include_graphics("figs/compare_opt.png")
 ```
-
-**Interpretation**: Starting from a random \( Y_0 \), NSA-Flow recovers a basis close to the true orthogonal nonnegative patterns in \( X_0 \), with low reconstruction error and near-zero orthogonality/nonnegativity residuals. This captures the essence: extracting interpretable, disjoint components from noisy data. The visualizations show progressive decorrelation and pattern sharpening.
-
-
-## Sparsity as a function of orthogonality via weight parameter \( w \)
 
 
 ## Sparsity as a Function of Orthogonality via Weight Parameter \( w \)
@@ -1515,7 +1477,6 @@ regions <- c(regions, paste0('left_', subcortical), paste0('right_', subcortical
 stopifnot(length(regions) == p)
 X <- as.data.frame(X_data)
 colnames(X) <- regions
-head(X[, 1:5], 3)
 
 
 library(readr)
@@ -1549,7 +1510,7 @@ if ( file.exists(adnifn) ) {
 
 # Center data (important for PCA)
 X_centered <- scale(X, center = TRUE, scale = FALSE)  # N x p
-netrank=5
+netrank=6
 # Perform PCA
 pca_res <- prcomp(X_centered, rank. = netrank)  # Keep k components
 
@@ -1831,159 +1792,6 @@ for (net in 1:netrank) {
 
 ```
 
-
-```{r radars, fig.height=5.6, fig.width=7,eval=TRUE}
-
-# --- Step 8: Connectome-like graph for each network ------------------------
-# Assign lobes (crude mapping)
-if ( ! use_adni ) {
-lobe_map <- sapply(rownames(Y_norm), function(r) {
-  reg <- sub("^(left_|right_)", "", r)
-  if (grepl("frontal|rostral|caudal|pars|frontalpole", reg)) "frontal" else
-  if (grepl("temporal|fusiform|entorhinal|parahippocampal|temporalpole|transverse", reg)) "temporal" else
-  if (grepl("parietal|precuneus|postcentral|supramarginal", reg)) "parietal" else
-  if (grepl("occipital|cuneus|lingual|lateraloccipital|pericalcarine", reg)) "occipital" else
-  if (grepl("cingulate|insula|isthmus", reg)) "limbic" else "subcortical"
-})
-lobe_colors <- c(frontal = "blue", temporal = "green", parietal = "red",
-                 occipital = "purple", limbic = "orange", subcortical = "grey")
-for (net in 1:netrank) {
-  threshold <- quantile(Y_norm[, net], 0.8, na.rm = TRUE)
-  active_idx <- which(Y_norm[, net] > threshold)
-  if (length(active_idx) < 2) next
-  active_regions <- rownames(Y_norm)[active_idx]
-  loadings_active <- Y_norm[active_idx, net]
-  lobes_active <- lobe_map[active_idx]
-  g <- graph.empty(n = length(active_regions), directed = FALSE)
-  V(g)$name <- active_regions
-  V(g)$loading <- loadings_active
-  V(g)$lobe <- lobes_active
-  V(g)$color <- unname(lobe_colors[V(g)$lobe])
-  V(g)$size <- pmax(5, V(g)$loading * 30)
-  # add edges among nodes in same lobe
-  lobe_groups <- split(seq_along(active_regions), lobes_active)
-  for (grp in lobe_groups) {
-    if (length(grp) > 1) {
-      comb_pairs <- t(combn(grp, 2))
-      # add_edges expects vector, create pairs
-      edge_vec <- as.vector(t(comb_pairs))
-      g <- add_edges(g, edge_vec)
-    }
-  }
-  layout <- layout_with_fr(g)
-  plot(g, layout = layout, vertex.label = V(g)$name, vertex.label.cex = 0.7,
-       vertex.label.color = "black", vertex.frame.color = NA,
-       vertex.color = V(g)$color, vertex.size = V(g)$size,
-       edge.color = "gray", edge.width = 1,
-       main = paste("Graph — Network", net))
-  legend("topright", legend = names(lobe_colors), fill = lobe_colors, title = "Lobes", cex = 0.8)
-  }
-} else {
-  lobe_map = map_region_to_lobe( regions )
-  library(igraph)
-  library(dplyr)
-  for (net in 1:netrank) {
-    netvec=Y_norm[, net]
-    netvec=netvec[netvec>0]
-    threshold <- quantile(netvec, 0.25, na.rm = TRUE)
-    active_idx <- which(Y_norm[, net] > threshold)
-    if (length(active_idx) < 2) next
-    
-    # Extract active region data
-    active_regions <- rownames(Y_norm)[active_idx]
-    loadings_active <- Y_norm[active_idx, net]
-    
-    # Map regions to lobes and colors using the new unified function
-    lobe_info <- map_region_to_lobe(active_regions)
-    lobes_active <- lobe_info$Lobe
-    colors_active <- lobe_info$Color
-    
-    # Create igraph object
-    g <- graph.empty(n = length(active_regions), directed = FALSE)
-    V(g)$name <- active_regions
-    V(g)$loading <- loadings_active
-    V(g)$lobe <- lobes_active
-    V(g)$color <- colors_active
-    V(g)$size <- pmax(5, V(g)$loading * 30)
-    
-    # Add edges among nodes in the same lobe
-    lobe_groups <- split(seq_along(active_regions), lobes_active)
-    for (grp in lobe_groups) {
-        if (length(grp) > 1) {
-        comb_pairs <- t(combn(grp, 2))
-        edge_vec <- as.vector(t(comb_pairs))
-        g <- add_edges(g, edge_vec)
-        }
-    }
-    
-    # Compute layout and plot
-    layout <- layout_with_fr(g)
-    plot(
-        g, layout = layout,
-        vertex.label = V(g)$name,
-        vertex.label.cex = 0.7,
-        vertex.label.color = "black",
-        vertex.frame.color = NA,
-        vertex.color = V(g)$color,
-        vertex.size = V(g)$size,
-        edge.color = "gray",
-        edge.width = 1,
-        main = paste("Graph — Network", net)
-    )
-    
-    # Build dynamic legend directly from map_region_to_lobe color map
-    color_key <- map_region_to_lobe(unique(lobes_active))
-    legend(
-        "topright",
-        legend = unique(color_key$Lobe),
-        fill = unique(color_key$Color),
-        title = "Lobes",
-        cex = 0.8,
-        bty = "n"
-    )
-
-  }
-
-}
-####
-
-
-library(fmsb)
-library(scales)
-
-# --- Step 7: Radar charts (top 10 regions per network) ----------------------
-for (net in 1:netrank) {
-  loadings <- Y_norm[, net]
-  if (all(is.na(loadings))) next
-  
-  # Top 10 regions
-  top_idx <- head(order(loadings, decreasing = TRUE), 10)
-  loadings_top <- loadings[top_idx]
-  regions_top <- names(loadings_top)
-  
-  # fmsb requires data.frame with max and min as first two rows
-  max_row <- rep(max(loadings_top, na.rm = TRUE) * 1.1, length(loadings_top))
-  min_row <- rep(0, length(loadings_top))
-  
-  radar_df <- rbind(max_row, min_row, loadings_top)
-  radar_df <- as.data.frame(radar_df)             
-  rownames(radar_df) <- c("max", "min", "loading")
-  colnames(radar_df) <- regions_top
-  
-  # Plot
-  par(mar = c(1,1,2,1))
-  radarchart(radar_df, axistype = 1,
-             pcol = "#008080", pfcol = alpha("#008080", 0.25), plwd = 2,
-             cglcol = "grey", cglty = 1, axislabcol = "grey",
-             cglwd = 0.8, vlcex = 0.8,
-             title = paste0("Network ", net))
-}
-
-
-```
-
-
-
 ## Enhanced Evaluation of NSA-Flow Performance
 
 To further rigorously assess NSA-Flow's advantages over PCA, we extend the evaluation with statistical inference on model improvements, cross-validated predictive performance, and sparsity metrics. We also incorporate a binary classification task for AD diagnosis (CN vs. AD/MCI, derived from ADNI labels in `ppmiadni$DX`), using logistic regression and ROC analysis. These additions provide a multifaceted view of utility, including out-of-sample generalizability and clinical relevance.
@@ -2025,8 +1833,10 @@ gt::gt(t_test_results)
 
 
 
-```{r enhanced-stats-dx,echo=FALSE}
-
+```{r enhanced-stats-dx,echo=FALSE,fig.width=7,fig.height=3}
+ppmiadni$diagnosis = as.character(ppmiadni$diagnosis)
+ppmiadni$diagnosis[ppmiadni$diagnosis %in% "SMC"]=NA
+ppmiadni$diagnosis = factor( ppmiadni$diagnosis, levels=c("CN","MCI","AD") )
 # Load required packages
 library(caret)    # For createFolds
 library(pROC)     # For multiclass.roc
@@ -2049,7 +1859,7 @@ roc_pca_list <- list()
 
 
 # Loop over weight values
-for (ww in seq(0.05, 0.95, by = 0.05)) {
+for (ww in seq(0.1, 0.9, by = 0.2 )) {
   # Run NSA (assumes nsa_default is a custom function)
   M_nsa <- tryCatch(
     nsa_default(Y0 = Y0_pca, w = ww),
@@ -2191,6 +2001,66 @@ log_summary <- log_results_df %>%
       error = function(e) NA
     )
   )
+
+
+
+Y0_pca <- pca_res$rotation  # columns = components, rows = regions (p x k)
+Y0_pca <- sweep(Y0_pca, 2, sqrt(colSums(Y0_pca^2)), FUN = "/")
+Y0_pca <- Y0_pca * 1.0
+M_nsa <- nsa_flow(
+      Y0 = Y0_pca,
+      X0 = NULL,
+      w = ww,
+      retraction = def_ret,
+      initial_learning_rate = 0.001,
+      plot = TRUE,
+      max_iter = 50,
+      verbose = FALSE,
+      simplified = simplified_param
+    )
+Ymat <- M_nsa$Y
+proj_nsa <- as.matrix(X) %*% as.matrix(Ymat)
+proj_pca <- as.matrix(X) %*% Y0_pca
+colnames(proj_nsa) <- paste0("nsa", 1:ncol(proj_nsa))
+colnames(proj_pca) <- paste0("pca", 1:ncol(proj_pca))
+response='diagnosis'
+temp = ppmiadni[, c(response, covars)]
+dx2 <- "AD"
+dx1 <- "MCI"
+dx0 <- "CN"
+temp$diagnosis <- factor(temp$diagnosis, levels = c(dx0, dx1, dx2))
+full_data <- data.frame( cbind(temp, proj_nsa) )
+formula_str <- paste(response, "~", covarsbin, "+", paste(colnames(proj_nsa), collapse = "+"))
+model <- multinom(as.formula(formula_str), data = full_data, trace = FALSE)
+model_summary <- summary(model)
+coefs <- model_summary$coefficients
+std_errs <- model_summary$standard.errors
+z_scores <- coefs / std_errs
+p_values <- 2 * (1 - pnorm(abs(z_scores)))
+results <- tibble(
+    ResponseLevel = rep(rownames(coefs), times = ncol(coefs)),
+    Predictor = rep(colnames(coefs), each = nrow(coefs)),
+    Coefficient = as.vector(coefs),
+    StdError = as.vector(std_errs),
+    Z = as.vector(z_scores),
+    P = as.vector(p_values)
+  )
+  
+nsa_names <- colnames(proj_nsa)
+nsa_results <- data.frame( results[ results$Predictor %in% nsa_names, ] )
+psel = unique( nsa_results$Predictor[  nsa_results$P < 0.05 ] )
+gglist = list()
+for (comp in psel ) {
+    p <- ggplot(full_data, aes_string(x = comp, fill = response)) +
+        geom_density(alpha = 0.6) +
+        labs(title = paste("NSA Component:", comp),
+             x = "Component Value", y = "Density") +
+        theme_minimal()
+      gglist[[comp]] <- p
+    }
+  
+grid.arrange( grobs = gglist, ncol = 2 , top="Distributions of Significant NSA Components by Diagnosis" )
+
 # gt::gt(log_results_df,caption='Cross-Validated AUC Summary for Diagnosis Prediction: Full results.')
 
 gt::gt(log_summary,caption='Cross-Validated AUC Summary for Diagnosis Prediction: Statistical Summary.')
@@ -2234,7 +2104,165 @@ p2 <- ggplot(log_results_df, aes(x = w, y = auc_diff)) +
 
 print(p2)
 
+
 ```
+
+
+
+
+```{r radars, fig.height=5.6, fig.width=7,eval=TRUE}
+
+net2display = as.integer( gsub("nsa", "", psel))
+
+# --- Step 8: Connectome-like graph for each network ------------------------
+# Assign lobes (crude mapping)
+if ( ! use_adni ) {
+lobe_map <- sapply(rownames(Y_norm), function(r) {
+  reg <- sub("^(left_|right_)", "", r)
+  if (grepl("frontal|rostral|caudal|pars|frontalpole", reg)) "frontal" else
+  if (grepl("temporal|fusiform|entorhinal|parahippocampal|temporalpole|transverse", reg)) "temporal" else
+  if (grepl("parietal|precuneus|postcentral|supramarginal", reg)) "parietal" else
+  if (grepl("occipital|cuneus|lingual|lateraloccipital|pericalcarine", reg)) "occipital" else
+  if (grepl("cingulate|insula|isthmus", reg)) "limbic" else "subcortical"
+})
+lobe_colors <- c(frontal = "blue", temporal = "green", parietal = "red",
+                 occipital = "purple", limbic = "orange", subcortical = "grey")
+for (net in net2display) {
+  threshold <- quantile(Y_norm[, net], 0.8, na.rm = TRUE)
+  active_idx <- which(Y_norm[, net] > threshold)
+  if (length(active_idx) < 2) next
+  active_regions <- rownames(Y_norm)[active_idx]
+  loadings_active <- Y_norm[active_idx, net]
+  lobes_active <- lobe_map[active_idx]
+  g <- graph.empty(n = length(active_regions), directed = FALSE)
+  V(g)$name <- active_regions
+  V(g)$loading <- loadings_active
+  V(g)$lobe <- lobes_active
+  V(g)$color <- unname(lobe_colors[V(g)$lobe])
+  V(g)$size <- pmax(5, V(g)$loading * 30)
+  # add edges among nodes in same lobe
+  lobe_groups <- split(seq_along(active_regions), lobes_active)
+  for (grp in lobe_groups) {
+    if (length(grp) > 1) {
+      comb_pairs <- t(combn(grp, 2))
+      # add_edges expects vector, create pairs
+      edge_vec <- as.vector(t(comb_pairs))
+      g <- add_edges(g, edge_vec)
+    }
+  }
+  layout <- layout_with_fr(g)
+  plot(g, layout = layout, vertex.label = V(g)$name, vertex.label.cex = 0.7,
+       vertex.label.color = "black", vertex.frame.color = NA,
+       vertex.color = V(g)$color, vertex.size = V(g)$size,
+       edge.color = "gray", edge.width = 1,
+       main = paste("Graph — Network", net))
+  legend("topright", legend = names(lobe_colors), fill = lobe_colors, title = "Lobes", cex = 0.8)
+  }
+} else {
+  lobe_map = map_region_to_lobe( regions )
+  library(igraph)
+  library(dplyr)
+  for (net in net2display ) {
+    netvec=Y_norm[, net]
+    netvec=netvec[netvec>0]
+    threshold <- quantile(netvec, 0.25, na.rm = TRUE)
+    active_idx <- which(Y_norm[, net] > threshold)
+    if (length(active_idx) < 2) next
+    
+    # Extract active region data
+    active_regions <- rownames(Y_norm)[active_idx]
+    loadings_active <- Y_norm[active_idx, net]
+    
+    # Map regions to lobes and colors using the new unified function
+    lobe_info <- map_region_to_lobe(active_regions)
+    lobes_active <- lobe_info$Lobe
+    colors_active <- lobe_info$Color
+    
+    # Create igraph object
+    g <- graph.empty(n = length(active_regions), directed = FALSE)
+    V(g)$name <- active_regions
+    V(g)$loading <- loadings_active
+    V(g)$lobe <- lobes_active
+    V(g)$color <- colors_active
+    V(g)$size <- pmax(5, V(g)$loading * 30)
+    
+    # Add edges among nodes in the same lobe
+    lobe_groups <- split(seq_along(active_regions), lobes_active)
+    for (grp in lobe_groups) {
+        if (length(grp) > 1) {
+        comb_pairs <- t(combn(grp, 2))
+        edge_vec <- as.vector(t(comb_pairs))
+        g <- add_edges(g, edge_vec)
+        }
+    }
+    
+    # Compute layout and plot
+    layout <- layout_with_fr(g)
+    plot(
+        g, layout = layout,
+        vertex.label = V(g)$name,
+        vertex.label.cex = 0.7,
+        vertex.label.color = "black",
+        vertex.frame.color = NA,
+        vertex.color = V(g)$color,
+        vertex.size = V(g)$size,
+        edge.color = "gray",
+        edge.width = 1,
+        main = paste("Graph — Network", net)
+    )
+    
+    # Build dynamic legend directly from map_region_to_lobe color map
+    color_key <- map_region_to_lobe(unique(lobes_active))
+    legend(
+        "topright",
+        legend = unique(color_key$Lobe),
+        fill = unique(color_key$Color),
+        title = "Lobes",
+        cex = 0.8,
+        bty = "n"
+    )
+
+  }
+
+}
+####
+
+
+library(fmsb)
+library(scales)
+
+# --- Step 7: Radar charts (top 10 regions per network) ----------------------
+for (net in net2display ) {
+  loadings <- Y_norm[, net]
+  if (all(is.na(loadings))) next
+  
+  # Top 10 regions
+  top_idx <- head(order(loadings, decreasing = TRUE), 10)
+  loadings_top <- loadings[top_idx]
+  regions_top <- names(loadings_top)
+  
+  # fmsb requires data.frame with max and min as first two rows
+  max_row <- rep(max(loadings_top, na.rm = TRUE) * 1.1, length(loadings_top))
+  min_row <- rep(0, length(loadings_top))
+  
+  radar_df <- rbind(max_row, min_row, loadings_top)
+  radar_df <- as.data.frame(radar_df)             
+  rownames(radar_df) <- c("max", "min", "loading")
+  colnames(radar_df) <- regions_top
+  
+  # Plot
+  par(mar = c(1,1,2,1))
+  radarchart(radar_df, axistype = 1,
+             pcol = "#008080", pfcol = alpha("#008080", 0.25), plwd = 2,
+             cglcol = "grey", cglty = 1, axislabcol = "grey",
+             cglwd = 0.8, vlcex = 0.8,
+             title = paste0("Network ", net))
+}
+
+
+```
+
+
 
 These enhancements reveal significant differences (e.g., average t-statistic < -2 across cognitives, p < 0.05), with moderate effect sizes (Cohen's d $\approx$ 0.3-0.5). For diagnosis, NSA-Flow's CV-AUC (mean 0.81) exceeds PCA's (0.76), with paired t-test confirming superiority (p < 0.01).
 
@@ -2285,8 +2313,11 @@ The Non-negative Stiefel Approximating Flow (NSA-Flow) provides a robust and fle
 The objective function \( E(Y) = (1 - w) \cdot \frac{\|Y - X_0\|_F^2}{2 p k} + w \cdot \delta(Y) \) is nonconvex due to the quadratic-over-quadratic form of the orthogonality defect and the Stiefel manifold constraints [@edelman1998geometry], precluding global optimality guarantees in general. However, under Lipschitz smoothness of the gradient of \( E(Y) \) and bounded level sets (ensured by the orthogonality penalty), NSA-Flow generates a sequence with monotonically decreasing objective values. The proximal projection \( P_+(Y) = \max(Y, 0) \) is nonexpansive, preserving descent properties [@parikh2014proximal].
 
 Convergence to stationary points is supported by the Kurdyka-Łojasiewicz (KL) inequality, which holds for semi-algebraic functions like polynomials and thus applies to \( E(Y) \) [@bolte2014proximal]. Under the KL property, proximal-gradient methods in nonconvex settings converge to critical points where \( 0 \in \partial E(Y) \), with finite-length trajectories [@bolte2014proximal]. For Riemannian extensions, global convergence is guaranteed when retractions approximate geodesics effectively [@boumal2019global;@absil2008optimization]. Empirically, NSA-Flow exhibits rapid residual reduction, typically converging within 100 iterations for \( p \leq 5000, k \leq 50 \). Key failure modes include:
+
 - **Saddle points**: Momentum in the Adam optimizer helps escape flat regions, as observed in synthetic experiments with low \( w \).
+
 - **Numerical instability**: Eigenvalue clipping in the inverse square root computation mitigates ill-conditioned matrices, ensuring stability for high \( w \) [@absil2008optimization].
+
 - **Constraint conflicts**: Strong orthogonality pressure (\( w \approx 1 \)) may induce negative entries before projection; soft retraction mitigates this by interpolating toward orthonormality [@edelman1998geometry].
 
 Future work could derive explicit convergence rates, such as \( O(1/T) \) sublinear rates for the squared gradient norm under strong KL exponents [@bolte2014proximal], or explore trust-region methods for faster convergence near critical points [@boumal2019global;@boumal2011rtrmc].
@@ -2324,6 +2355,73 @@ Future extensions include:
 - **Domain-Specific Adaptations**: Tailoring NSA-Flow for multi-modal data fusion or graph-structured inputs, building on [@Chen2024,henaff2011deep].
 
 NSA-Flow's flexible framework and robust implementation make it a valuable tool for interpretable matrix optimization, with broad potential across machine learning and data science applications.
+
+
+# Mathematical Analysis: descent and stationarity of soft-RF
+
+**Setup and notation.**  
+Let $Y\in\mathbb{R}^{p\times k}$. Define the energy
+\[
+E(Y) = (1-w)F(Y) + w\,R(Y),
+\]
+with $F(Y)=\tfrac12\|Y-X_0\|_F^2$ and $R$ an orthogonality penalty (for example $\tfrac12\|Y^\top Y - I_k\|_F^2$ or its scale-invariant variant). Denote $S(Y)=Y^\top Y$ and let $T(Y)$ be a (regularized) inverse square root approximation of $S(Y)$, i.e.\ $T(Y)\approx (S(Y)+\varepsilon I)^{-1/2}$. Define the soft-RF operator with strength $\alpha\in[0,1]$
+\[
+\mathcal{M}_\alpha(Y) = Y\bigl((1-\alpha)I_k + \alpha\,T(Y)\bigr) =: Y\,T_\alpha(Y).
+\]
+
+We consider the iterative update
+\[
+Y_{n+1} = \mathcal{M}_\alpha\bigl(Y_n - \eta\,\operatorname{Proj}_{T_{Y_n}}(\nabla E(Y_n))\bigr),
+\]
+where $\operatorname{Proj}_{T_Y}$ is the projection to the Stiefel tangent $G\mapsto G - Y\operatorname{sym}(Y^\top G)$, $\eta>0$ is a step size, and $\alpha\in[0,1]$ the retraction strength.
+
+### Assumptions
+
+1. **Smoothness.** $E$ is $L$-smooth: $\|\nabla E(U) - \nabla E(V)\|_F \le L \|U-V\|_F$ for all $U,V$.
+
+2. **Bounded iterates.** Iterates remain in a compact set $\mathcal{D}$ where $S(Y)+\varepsilon I$ has eigenvalues bounded away from zero.
+
+3. **T approximation quality.** There exist constants $C_T$ and $q\ge1$ such that
+   \[
+   \|T(Y) - (S(Y)+\varepsilon I)^{-1/2}\|_2 \le C_T \,\|S(Y)-I\|_F^q,\qquad \forall Y\in\mathcal{D}.
+   \]
+
+4. **Local Lipschitz of $T_\alpha$.** On $\mathcal{D}$ the map $Y\mapsto T_\alpha(Y)$ is Lipschitz.
+
+### Theorem (Descent and stationarity of soft-RF)
+
+Under Assumptions 1–4, pick $0<\eta<2/L$ and any $\alpha\in(0,1]$. Then:
+
+1. (Sufficient descent) There exists $\delta>0$ (depending on $L$, the Lipschitz constants, and $C_T$) such that whenever $\|\operatorname{Proj}_{T_Y}\nabla E(Y)\|_F\ge\delta$ the iteration yields strict decrease:
+   \[
+   E\bigl(\mathcal{M}_\alpha(Y - \eta\,\operatorname{Proj}_{T_Y}\nabla E(Y))\bigr) < E(Y).
+   \]
+
+2. (Subsequential stationarity) The energy $E(Y_n)$ is nonincreasing after finitely many steps and bounded below, hence convergent. Any cluster point $\bar Y$ of $\{Y_n\}$ satisfies
+   \[
+   \operatorname{Proj}_{T_{\bar Y}}(\nabla E(\bar Y)) = 0,
+   \]
+   i.e.\ $\bar Y$ is a constrained critical point on the Stiefel manifold (provided the approximation error of $T$ vanishes as $\|S(Y)-I\|\to 0$).
+
+### Proof sketch
+
+- *Projected gradient descent:* by $L$-smoothness, the projected gradient step $Z=Y-\eta\operatorname{Proj}_{T_Y}\nabla E(Y)$ satisfies
+  \[
+  E(Z) \le E(Y) - \eta\Big(1-\tfrac{L\eta}{2}\Big)\|\operatorname{Proj}_{T_Y}\nabla E(Y)\|_F^2,
+  \]
+  hence strict decrease for $0<\eta<2/L$ when the projected gradient is nonzero.
+
+- *Effect of soft retraction:* using smoothness again,
+  \[
+  E(\mathcal{M}_\alpha(Z)) \le E(Z) + \|\nabla E(Z)\|_F\|\mathcal{M}_\alpha(Z)-Z\|_F + \tfrac{L}{2}\|\mathcal{M}_\alpha(Z)-Z\|_F^2.
+  \]
+  The perturbation $\|\mathcal{M}_\alpha(Z)-Z\|_F = \|Z(T_\alpha(Z)-I)\|_F$ can be bounded, under Assumption 3, by a constant times $\alpha\|\operatorname{Proj}_{T_Y}\nabla E(Y)\|_F$ (plus higher-order terms). Thus the positive terms introduced by the retraction are lower order relative to the negative leading term produced by the projected gradient, and for sufficiently small step size $\eta$ (and/or small $\alpha$) the net effect is a decrease in $E$.
+
+- *Subsequential stationarity:* repeated descent in a bounded domain implies that the projected gradient norm must tend to zero along subsequences; local continuity of the operators and vanishing approximation error imply the projection of the Euclidean gradient vanishes at any cluster point.
+
+> **Remarks.** This proof is local: it shows soft-RF behaves like a descent method under standard smoothness conditions and sufficiently accurate inverse-sqrt approximations. It does not claim global linear convergence without further curvature assumptions.
+
+
 
 # Session Information
 

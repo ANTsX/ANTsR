@@ -10176,6 +10176,23 @@ neg_violation <- function(Y) {
   frob(pmin(Y, 0))
 }
 
+
+inv_sqrt_newton <- function(A, max_iter = 1, tol = 1e-6) {
+  I <- diag(nrow(A))
+  # scaling to improve convergence
+  alpha <- sqrt(sum(A * A) / nrow(A))
+  Y <- A / alpha
+  Z <- I
+  for (i in seq_len(max_iter)) {
+    Yn <- 0.5 * Y %*% (3*I - Z %*% Y)
+    Zn <- 0.5 * (3*I - Z %*% Y) %*% Z
+    if (norm(Yn - Y, "F") < tol) break
+    Y <- Yn
+    Z <- Zn
+  }
+  return(Z / sqrt(alpha))
+}
+
 #' Inverse Square Root of a Symmetric Matrix
 #'
 #' Computes the inverse square root of a symmetric positive semi-definite matrix using eigen-decomposition.
@@ -10212,41 +10229,36 @@ inv_sqrt_sym <- function(M, epsilon = 1e-10) {
 #' Retraction onto the Stiefel Manifold
 #' @export
 nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
-  should_retract <- function(Y, retraction_type = "soft", tol = 1e-6, verbose = FALSE) {
-    # Return FALSE immediately if no retraction is specified
-    if (is.null(retraction_type) || retraction_type == "none") {
-      if (verbose) message("Skipping retraction (type='none').")
-      return(FALSE)
+  soft_retract_wide <- function(Y, w_retract = 1.0, eps = 1e-8) {
+    p <- nrow(Y)
+    k <- ncol(Y)
+    
+    # Step 1: A = Y Y^T
+    A <- tcrossprod(Y)   # p x p
+    
+    # Step 2: Eigendecomposition of A
+    eigA <- eigen(A, symmetric = TRUE)
+    U <- eigA$vectors
+    svals <- pmax(eigA$values, eps)
+    
+    # Step 3: Sigma^{-1/2}
+    Sinvhalf <- diag(1 / sqrt(svals))
+    
+    # Step 4: V^T = Sinvhalf %*% U^T %*% Y
+    Vt <- Sinvhalf %*% t(U) %*% Y
+    
+    # Step 5: polar factor = U %*% V^T
+    Q <- U %*% Vt
+    
+    # Step 6: soft blend if needed
+    if (w_retract < 1.0) {
+      Y <- (1 - w_retract) * Y + w_retract * Q
+    } else {
+      Y <- Q
     }
     
-    # Handle degenerate input
-    if (is.null(Y) || any(!is.finite(Y))) {
-      warning("Matrix Y is NULL or contains non-finite values — forcing retraction.")
-      return(TRUE)
-    }
-    
-    # Compute orthogonality defect ‖YᵀY − I‖_F
-    defect <- invariant_orthogonality_defect(Y)
-    
-    # Adaptive tolerance: scale by matrix norm
-    normY <- norm(Y, "F")
-    thresh <- tol * max(1, normY)
-    
-    # Decision
-    do_retract <- defect > thresh
-    
-    if (verbose) {
-      msg <- sprintf(
-        "Retract? %s | defect = %.3e, threshold = %.3e, type = '%s'",
-        ifelse(do_retract, "YES", "NO"), defect, thresh, retraction_type
-      )
-      message(msg)
-    }
-    
-    return(do_retract)
+    Y
   }
-  # handle trivial case
-#  if (is.null(retraction_type) || retraction_type == "none" || !should_retract(Y_cand, retraction_type) ) return(Y_cand)
   if (is.null(retraction_type) || retraction_type == "none"  ) return(Y_cand)
   if (!is.matrix(Y_cand)) stop("Y_cand must be a matrix")
   p <- nrow(Y_cand); k <- ncol(Y_cand)
@@ -10260,17 +10272,25 @@ nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
     s <- svd(Y_cand, nu = min(p,k), nv = min(p,k))
     Ytilde <- s$u %*% t(s$v)
   } else if (retraction_type %in% srtypes) {
-    # Compute full polar T; use SVD if wide for speed
-    if (p < k) {
+
+    if ( p < k && k <= 512) {
       s <- svd(Y_cand, nu = min(p,k), nv = min(p,k))
       Q <- s$u %*% t(s$v)
       Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q  # Fallback to soft SVD style for wide
-    } else {
+    } else if (p < k && k > 512) {
+      Ytilde <- soft_retract_wide(Y_cand, w_retract)
+    } else if (k > 512) {
+      # tall but big k: Newton–Schulz
       YtY <- crossprod(Y_cand)
-      T <- inv_sqrt_sym(YtY)
-      T_w <- (1 - w_retract) * diag(k) + w_retract * T
-      Ytilde <- Y_cand %*% T_w
+      T <- inv_sqrt_newton(YtY)
+      Ytilde <- Y_cand %*% T
+    } else {
+      # tall or square: eigendecomposition
+      YtY <- crossprod(Y_cand)
+      T <- inv_sqrt_newton(YtY)
+      Ytilde <- Y_cand %*% T
     }
+
   } else {
     outmessage <- sprintf("Unknown retraction_type: %s. Supported: none and %s.", retraction_type, paste(c(rtypes, srtypes), collapse = ", "))
     stop(outmessage)
@@ -10282,6 +10302,185 @@ nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
     if (current_norm > 0) Ytilde <- Ytilde / current_norm * normY
   }
   Ytilde
+}
+
+
+
+# -------------------------------------------------------------------------
+# Scaled Newton–Schulz iteration for A^{-1/2} with convergence check
+# -------------------------------------------------------------------------
+inv_sqrt_sym_newton <- function(A, epsilon = 1e-10, max_iter = 10L, tol = 1e-6, verbose = FALSE) {
+  k <- nrow(A)
+  A <- (A + t(A)) / 2
+  A <- A + epsilon * diag(k)
+
+  # scaling: use 1/||A||_inf as in Higham & Awad
+  alpha <- max(rowSums(abs(A)))
+  if (!is.finite(alpha) || alpha <= 0) alpha <- 1
+  A_scaled <- A / alpha
+
+  # initialization
+  Y <- A_scaled
+  Z <- diag(k)
+
+  for (iter in seq_len(max_iter)) {
+    # Core Newton–Schulz step
+    M <- 0.5 * (3 * diag(k) - Z %*% Y)
+    Y_new <- Y %*% M
+    Z_new <- M %*% Z
+
+    # Convergence check on residual: I - YZ should → 0
+    res <- norm(diag(k) - Y_new %*% Z_new, "F") / sqrt(k)
+    if (verbose) message("  NS iter ", iter, " residual: ", signif(res, 4))
+    Y <- Y_new
+    Z <- Z_new
+    if (res < tol) break
+  }
+
+  T <- Z / sqrt(alpha)
+  return((T + t(T)) / 2)  # symmetrize
+}
+
+# -------------------------------------------------------------------------
+# Adaptive inverse-square-root for symmetric PSD matrices
+# -------------------------------------------------------------------------
+inv_sqrt_sym_adaptive <- function(A, epsilon = 1e-4, method = c( "diag", "auto", "eig", "newton"),
+                                  ns_iter = 1L, eig_thresh = 128L, verbose = FALSE) {
+  # A: symmetric (k x k) matrix (expected PSD or near PSD)
+  # epsilon: regularizer added to diagonal
+  # method: "auto" chooses based on size/shape
+  # ns_iter: Newton-Schulz iterations when used
+  # eig_thresh: cutoff on k for using eig (k <= eig_thresh -> eig by default)
+  method <- match.arg(method)
+  if (!is.matrix(A) || nrow(A) != ncol(A)) stop("A must be square matrix")
+  k <- nrow(A)
+  # Ensure symmetry and regularize
+  A <- (A + t(A)) / 2
+  A <- A + epsilon * diag(k)
+
+  # Auto selection
+  if (method == "auto") {
+    if (k <= eig_thresh) {
+      method_use <- "eig"
+    } else if (k <= 1024) {
+      method_use <- "newton"
+    } else {
+      method_use <- "diag"
+    }
+  } else {
+    method_use <- method
+  }
+
+  if (verbose) message("inv_sqrt_sym_adaptive: using method = ", method_use, " (k=", k, ")")
+
+  if (method_use == "eig") {
+    # exact eigendecomposition; stable for small-to-moderate k
+    ev <- eigen(A, symmetric = TRUE)
+    vals <- ev$values
+    vecs <- ev$vectors
+    # clip eigenvalues
+    vals_clipped <- pmax(vals, epsilon)
+    inv_sqrt_vals <- 1 / sqrt(vals_clipped)
+    return(vecs %*% diag(inv_sqrt_vals, nrow = k) %*% t(vecs))
+  }
+
+  if (method_use == "newton") {
+    return(inv_sqrt_sym_newton(A, epsilon = epsilon,
+                             max_iter = ns_iter,
+                             tol = 1e-6,
+                             verbose = verbose))
+    }
+
+  # diag fallback: use only diagonal inverse-square-roots (very cheap)
+  if (method_use == "diag") {
+    d <- diag(A)
+    # Clip
+    d_clipped <- pmax(d, epsilon)
+    inv_sqrt_diag <- 1 / sqrt(d_clipped)
+    return(diag(inv_sqrt_diag, nrow = k))
+  }
+
+  stop("unhandled method in inv_sqrt_sym_adaptive")
+}
+
+
+#' Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)
+#' @export
+nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("polar", "soft_polar", "none"),
+                             eps_rf = 1e-8, inv_method = "diag", ns_iter = 1L,
+                             eig_thresh = 128L, diag_thresh = 8192L, verbose = FALSE) {
+  retraction_type <- match.arg(retraction_type)
+
+  # trivial
+  if (is.null(retraction_type) || retraction_type == "none") return(Y_cand)
+  if (!is.matrix(Y_cand)) stop("Y_cand must be a matrix")
+
+  p <- nrow(Y_cand); k <- ncol(Y_cand)
+  normY <- sqrt(sum(Y_cand^2))
+
+  # Prepare Gram matrix (k x k)
+  # We add eps_rf to the diagonal inside the inv_sqrt routine for stability
+
+  # --- polar exact (full) ---
+  if (retraction_type == "polar") {
+    # economy SVD for efficiency on wide/tall shapes
+    s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
+    Ytilde <- s$u %*% t(s$v)
+    # enforce exact orthonormal columns (polar)
+    if (!is.null(normY) && normY > 1e-12) {
+      # optional: preserve Frobenius norm of input as historically done
+      cur_norm <- sqrt(sum(Ytilde^2))
+      if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
+    }
+    return(Ytilde)
+  }
+
+  # --- soft_polar (multiplicative) ---
+  if (retraction_type == "soft_polar") {
+    # We use the multiplicative soft-polar operator:
+    #   Ytilde = Y_cand %*% ( (1-w) I + w * (YtY + eps_rf I)^{-1/2} )
+    # Choose an efficient way to compute the inverse sqrt of the small k x k Gram matrix.
+    # For moderate k we use eigendecomposition; for larger k we use Newton-Schulz or diag fallback.
+    # If k is extremely large relative to p, computing T on k x k may be worse than SVD on (p x p) route.
+    use_additive_svd_fallback <- FALSE
+
+    # Heuristic: if k is very large compared to p and k is huge, prefer SVD-based soft additive fallback
+    if (k > diag_thresh && p < k) {
+      use_additive_svd_fallback <- TRUE
+    }
+    use_additive_svd_fallback <- TRUE
+    if (!use_additive_svd_fallback) {
+      # compute T = (YtY + eps_rf I)^{-1/2} using adaptive routine
+      YtY <- crossprod(Y_cand)
+      T <- inv_sqrt_sym_adaptive(YtY, epsilon = eps_rf, method = inv_method,
+                                 ns_iter = ns_iter, eig_thresh = eig_thresh, verbose = verbose)
+      # multiplicative soft polar
+      T_w <- (1 - w_retract) * diag(k) + w_retract * T
+      Ytilde <- Y_cand %*% T_w
+
+      # Optional: preserve Frobenius norm (matches previous code / practical desire)
+      if (!is.null(normY) && normY > 1e-12) {
+        cur_norm <- sqrt(sum(Ytilde^2))
+        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
+      }
+
+      # Ensure numeric symmetry / cleanup
+      return(as.matrix(Ytilde))
+    } else {
+      # Fallback: for extremely wide problems compute economy SVD and perform additive soft-SVD blend
+      # (this avoids expensive k x k inv-sqrt when k >> p)
+      s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
+      Q <- s$u %*% t(s$v)
+      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
+      if (!is.null(normY) && normY > 1e-12) {
+        cur_norm <- sqrt(sum(Ytilde^2))
+        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
+      }
+      return(as.matrix(Ytilde))
+    }
+  }
+
+  stop("unsupported retraction_type in nsa_flow_retract_auto()")
 }
 
 #' @title NSA-Flow Optimization
@@ -10388,7 +10587,7 @@ nsa_flow <- function(
     if ( simplified ) {
       optimizer <- "lars"
     } else {
-      optimizer <- "adagrad"
+      optimizer <- "lars"
     }
     if ( verbose ) cat("Selected optimizer:", optimizer, "\n")
   }
@@ -10448,12 +10647,7 @@ nsa_flow <- function(
     if (nrow(X0) != p || ncol(X0) != k) stop("X0 must have same dimensions as Y0")
   }
   retraction <- match.arg(retraction)
-  if ( retraction %in% c("polar","soft_polar") ) {
-#    Y0 <- nsa_flow_retract(Y0, w_retract = 1.0, retraction = 'polar')
-  } else {
-#      Y <- Y0
-  }
-  Y <- Y0# <- nsa_flow_retract(Y0, w_retract = 1.0, retraction = 'polar')  
+  Y <- Y0
   # --- Compute initial scales ---
   g0 <- 0.5 * sum((Y0 - X0)^2) / (p * k)
   if (g0 < 1e-8) g0 <- 1e-8
@@ -10488,7 +10682,7 @@ nsa_flow <- function(
   # --- Full energy function ---
   nsa_energy <- function(Vp) {
     # --- Retraction ---
-    Vp <- nsa_flow_retract(Vp, w, retraction)
+    Vp <- nsa_flow_retract_auto(Vp, w, retraction)
     # --- Optional non-negativity ---
     Vp <- if (apply_nonneg) pmax(Vp, 0) else Vp
     e <- 0.5 * fid_eta * sum((Vp - X0)^2)
@@ -10549,7 +10743,7 @@ nsa_flow <- function(
       Y <- best_Y + alpha * (step_result$updated_V - best_Y)
       current_energy <- nsa_energy(Y)
       if (current_energy < best_total_energy) {
-        Y <- nsa_flow_retract(Y, w, retraction)
+        Y <- nsa_flow_retract_auto(Y, w, retraction)
         retracted_in_loop <- TRUE
         break
       }
@@ -10575,7 +10769,7 @@ nsa_flow <- function(
 
     # --- Retraction safeguard ---
     if (!retracted_in_loop) {
-      Y <- nsa_flow_retract(Y, w, retraction)
+      Y <- nsa_flow_retract_auto(Y, w, retraction)
     }
 
     # --- Optional nonnegativity constraint ---
