@@ -10404,85 +10404,6 @@ inv_sqrt_sym_adaptive <- function(A, epsilon = 1e-4, method = c( "diag", "auto",
 }
 
 
-#' Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)
-#' @export
-nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("polar", "soft_polar", "none"),
-                             eps_rf = 1e-8, inv_method = "diag", ns_iter = 1L,
-                             eig_thresh = 128L, diag_thresh = 8192L, verbose = FALSE) {
-  retraction_type <- match.arg(retraction_type)
-
-  # trivial
-  if (is.null(retraction_type) || retraction_type == "none") return(Y_cand)
-  if (!is.matrix(Y_cand)) stop("Y_cand must be a matrix")
-
-  p <- nrow(Y_cand); k <- ncol(Y_cand)
-  normY <- sqrt(sum(Y_cand^2))
-
-  # Prepare Gram matrix (k x k)
-  # We add eps_rf to the diagonal inside the inv_sqrt routine for stability
-
-  # --- polar exact (full) ---
-  if (retraction_type == "polar") {
-    # economy SVD for efficiency on wide/tall shapes
-    s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
-    Ytilde <- s$u %*% t(s$v)
-    # enforce exact orthonormal columns (polar)
-    if (!is.null(normY) && normY > 1e-12) {
-      # optional: preserve Frobenius norm of input as historically done
-      cur_norm <- sqrt(sum(Ytilde^2))
-      if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
-    }
-    return(Ytilde)
-  }
-
-  # --- soft_polar (multiplicative) ---
-  if (retraction_type == "soft_polar") {
-    # We use the multiplicative soft-polar operator:
-    #   Ytilde = Y_cand %*% ( (1-w) I + w * (YtY + eps_rf I)^{-1/2} )
-    # Choose an efficient way to compute the inverse sqrt of the small k x k Gram matrix.
-    # For moderate k we use eigendecomposition; for larger k we use Newton-Schulz or diag fallback.
-    # If k is extremely large relative to p, computing T on k x k may be worse than SVD on (p x p) route.
-    use_additive_svd_fallback <- FALSE
-
-    # Heuristic: if k is very large compared to p and k is huge, prefer SVD-based soft additive fallback
-    if (k > diag_thresh && p < k) {
-      use_additive_svd_fallback <- TRUE
-    }
-    use_additive_svd_fallback <- TRUE
-    if (!use_additive_svd_fallback) {
-      # compute T = (YtY + eps_rf I)^{-1/2} using adaptive routine
-      YtY <- crossprod(Y_cand)
-      T <- inv_sqrt_sym_adaptive(YtY, epsilon = eps_rf, method = inv_method,
-                                 ns_iter = ns_iter, eig_thresh = eig_thresh, verbose = verbose)
-      # multiplicative soft polar
-      T_w <- (1 - w_retract) * diag(k) + w_retract * T
-      Ytilde <- Y_cand %*% T_w
-
-      # Optional: preserve Frobenius norm (matches previous code / practical desire)
-      if (!is.null(normY) && normY > 1e-12) {
-        cur_norm <- sqrt(sum(Ytilde^2))
-        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
-      }
-
-      # Ensure numeric symmetry / cleanup
-      return(as.matrix(Ytilde))
-    } else {
-      # Fallback: for extremely wide problems compute economy SVD and perform additive soft-SVD blend
-      # (this avoids expensive k x k inv-sqrt when k >> p)
-      s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
-      Q <- s$u %*% t(s$v)
-      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
-      if (!is.null(normY) && normY > 1e-12) {
-        cur_norm <- sqrt(sum(Ytilde^2))
-        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
-      }
-      return(as.matrix(Ytilde))
-    }
-  }
-
-  stop("unsupported retraction_type in nsa_flow_retract_auto()")
-}
-
 
 #' Transform a matrix by standard preprocessing
 #'
@@ -10707,6 +10628,8 @@ apply_transform_matrix <- function(Xnew, params) {
 #' @param apply_nonneg Logical; if TRUE, applies nonnegativity.
 #' @param method Character; learning rate estimation method:
 #'   one of c("brent", "grid", "armijo", "golden", "adaptive").
+#'   "default" returns fixed values (0.001 if nonneg, else 1.0).
+#' @param search_range Numeric vector of length 2; log10(alpha) search range
 #' @param verbose Logical; if TRUE, prints diagnostics.
 #' @param plot Logical; if TRUE, plots energy vs learning rate (if applicable).
 #'
@@ -10724,6 +10647,7 @@ estimate_learning_rate_nsa <- function(
   nsa_energy = NULL,
   apply_nonneg = TRUE,
   method = c("brent", "grid", "armijo", "golden", "adaptive", "default" ),
+  search_range = c(-8.0,2.0),
   verbose = TRUE,
   plot = TRUE
 ) {
@@ -10772,8 +10696,8 @@ estimate_learning_rate_nsa <- function(
     Y_trial <- Y0 + alpha * grad_dir
     nsa_energy(Y_trial)
   }
-  lowr=-8.
-  upr=2.0
+  lowr=search_range[1]
+  upr=search_range[2]
   # --- Method 1: Brent (original) ---
   if (method == "brent") {
     opt_result <- optim(par = 0, fn = function(log_alpha) line_obj(10^log_alpha),
@@ -10856,6 +10780,87 @@ estimate_learning_rate_nsa <- function(
     plot = lr_plot
   )
 }
+
+
+#' Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)
+#' @export
+nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("polar", "soft_polar", "none"),
+                             eps_rf = 1e-8, inv_method = "diag", ns_iter = 1L,
+                             eig_thresh = 128L, diag_thresh = 8192L, verbose = FALSE) {
+  retraction_type <- match.arg(retraction_type)
+
+  # trivial
+  if (is.null(retraction_type) || retraction_type == "none") return(Y_cand)
+  if (!is.matrix(Y_cand)) stop("Y_cand must be a matrix")
+
+  p <- nrow(Y_cand); k <- ncol(Y_cand)
+  normY <- sqrt(sum(Y_cand^2))
+
+  # Prepare Gram matrix (k x k)
+  # We add eps_rf to the diagonal inside the inv_sqrt routine for stability
+
+  # --- polar exact (full) ---
+  if (retraction_type == "polar") {
+    # economy SVD for efficiency on wide/tall shapes
+    s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
+    Ytilde <- s$u %*% t(s$v)
+    # enforce exact orthonormal columns (polar)
+    if (!is.null(normY) && normY > 1e-12) {
+      # optional: preserve Frobenius norm of input as historically done
+      cur_norm <- sqrt(sum(Ytilde^2))
+      if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
+    }
+    return(Ytilde)
+  }
+
+  # --- soft_polar (multiplicative) ---
+  if (retraction_type == "soft_polar") {
+    # We use the multiplicative soft-polar operator:
+    #   Ytilde = Y_cand %*% ( (1-w) I + w * (YtY + eps_rf I)^{-1/2} )
+    # Choose an efficient way to compute the inverse sqrt of the small k x k Gram matrix.
+    # For moderate k we use eigendecomposition; for larger k we use Newton-Schulz or diag fallback.
+    # If k is extremely large relative to p, computing T on k x k may be worse than SVD on (p x p) route.
+    use_additive_svd_fallback <- FALSE
+
+    # Heuristic: if k is very large compared to p and k is huge, prefer SVD-based soft additive fallback
+    if (k > diag_thresh && p < k) {
+      use_additive_svd_fallback <- TRUE
+    }
+    use_additive_svd_fallback <- TRUE
+    if (!use_additive_svd_fallback) {
+      # compute T = (YtY + eps_rf I)^{-1/2} using adaptive routine
+      YtY <- crossprod(Y_cand)
+      T <- inv_sqrt_sym_adaptive(YtY, epsilon = eps_rf, method = inv_method,
+                                 ns_iter = ns_iter, eig_thresh = eig_thresh, verbose = verbose)
+      # multiplicative soft polar
+      T_w <- (1 - w_retract) * diag(k) + w_retract * T
+      Ytilde <- Y_cand %*% T_w
+
+      # Optional: preserve Frobenius norm (matches previous code / practical desire)
+      if (!is.null(normY) && normY > 1e-12) {
+        cur_norm <- sqrt(sum(Ytilde^2))
+        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
+      }
+
+      # Ensure numeric symmetry / cleanup
+      return(as.matrix(Ytilde))
+    } else {
+      # Fallback: for extremely wide problems compute economy SVD and perform additive soft-SVD blend
+      # (this avoids expensive k x k inv-sqrt when k >> p)
+      s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
+      Q <- s$u %*% t(s$v)
+      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
+      if (!is.null(normY) && normY > 1e-12) {
+        cur_norm <- sqrt(sum(Ytilde^2))
+        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
+      }
+      return(as.matrix(Ytilde))
+    }
+  }
+
+  stop("unsupported retraction_type in nsa_flow_retract_auto()")
+}
+
 
 
 #' @title NSA-Flow Optimization
@@ -11374,4 +11379,629 @@ digraph nsa_flow_algorithm {
   
   # Create and return the DiagrammeR graph
   grViz(graph_spec)
+}
+
+
+
+
+#' NSA-Flow Regularized Factor Analysis
+#'
+#' Factor Analysis (FA) with NSA-Flow regularization.
+#' It uses power iteration to estimate initial loadings, then applies NSA-Flow for regularization (e.g., sparsity via soft-thresholding).
+#' Assumes nsa_flow is an external function that performs non-smooth optimization flow with soft_polar retraction for L1-like regularization.
+#' Includes incremental updating of loadings via warm-start Y0 and optional annealing of w (regularization strength).
+#'
+#' @param data Optional raw data matrix. If provided, correlation matrix R is computed from it.
+#' @param R Optional correlation matrix. If not provided, it is computed from data.
+#' @param nfactors Number of factors to extract.
+#' @param rotate Rotation method: "none", "varimax", "promax", or "oblimin".
+#' @param nsa_w Target regularization strength (w); annealed if anneal_w=TRUE.
+#' @param anneal_w Logical; whether to anneal w from 0 to nsa_w over iterations.
+#' @param nsa_max_iter Maximum iterations for NSA-flow.
+#' @param max_iter Maximum outer iterations.
+#' @param power_iter Number of power iterations for initial basis estimation.
+#' @param tol Convergence tolerance for energy change and delta h2.
+#' @param eta_h Damping factor for communality updates (default 0.1 for slower updates).
+#' @param verbose Logical; print progress messages.
+#' @param energy_tol Absolute energy tolerance for convergence.
+#' @param seed Random seed for reproducibility.
+#' @param scores Method for factor scores: "regression", "none", or "Bartlett".
+#' @param ... Additional arguments passed to nsa_flow.
+#'
+#' @return A list of class "nsa_flow_fa" containing:
+#'   \item{loadings}{Final factor loadings matrix.}
+#'   \item{communalities}{Communality estimates (h2).}
+#'   \item{uniqueness}{Uniqueness estimates (1 - h2).}
+#'   \item{converged}{Logical; whether convergence was achieved.}
+#'   \item{iterations}{Number of iterations performed.}
+#'   \item{energy_trace}{Vector of energy values over iterations.}
+#'   \item{factor_scores}{Optional factor scores matrix.}
+#'   \item{nsa_result}{Final NSA-flow result (if successful).}
+#'   \item{best_energy}{Best (lowest) energy achieved.}
+#'   \item{rotation}{Rotation method used.}
+#'   \item{Phi}{Factor correlation matrix (for oblique rotations).}
+#'
+#' @examples
+#' \dontrun{
+#' data(bfi)
+#' bfi_data <- bfi[, 1:25] %>% na.omit()
+#' result <- nsa_flow_fa(data = bfi_data, nfactors = 5, rotate = "varimax")
+#' print(result$loadings)
+#' }
+#'
+#' @export
+nsa_flow_fa <- function(
+  data = NULL,
+  R = NULL,
+  nfactors,
+  rotate = c("varimax", "none", "promax", "oblimin"),  # New: rotation option
+  nsa_w = 0.5,  # Target regularization strength (w); annealed if anneal_w=TRUE
+  anneal_w = FALSE,  # Whether to anneal w from 0 to nsa_w over iterations
+  nsa_max_iter = 1000,
+  max_iter = 100,
+  power_iter = 100,
+  tol = 1e-5,
+  eta_h = 0.1,  # Damping for communality updates
+  verbose = TRUE,
+  energy_tol = 1e-4,
+  seed = 123,
+  scores = c("regression", "none", "Bartlett"),
+  ...
+) {
+  if (!requireNamespace("psych", quietly = TRUE))
+    stop("Package 'psych' is required for scoring if used.")
+
+  set.seed(seed)
+  scores <- match.arg(scores)
+  rotate <- match.arg(rotate)  # New: match rotate
+
+  # Prepare correlation matrix R
+  if (is.null(R)) {
+    if (is.null(data)) stop("Either 'R' or 'data' must be provided.")
+    R <- stats::cor(data, use = "pairwise.complete.obs")
+  }
+  if (!is.matrix(R)) R <- as.matrix(R)
+  p <- nrow(R)
+  if (p != ncol(R)) stop("R must be square.")
+  if (nfactors >= p) {
+    warning("nfactors >= p; setting nfactors = p-1")
+    nfactors <- p - 1
+  }
+
+  var_names <- rownames(R)
+  if (is.null(var_names)) var_names <- colnames(R)
+
+  # Regularize R for positive definiteness
+  eig <- eigen(R, symmetric = TRUE)
+  eps_eig <- 1e-6
+  eig$values[eig$values < eps_eig] <- eps_eig
+  R_reg <- eig$vectors %*% diag(eig$values) %*% t(eig$vectors)
+  dimnames(R_reg) <- list(var_names, var_names)
+
+  # Initial communalities (SMC approximation)
+  small_diag <- 1e-3
+  invRR <- tryCatch(solve(R_reg + diag(small_diag, p)), error = function(e) NULL)
+  if (is.null(invRR)) {
+    h2 <- rep(0.5, p)
+  } else {
+    h2 <- pmin(pmax(1 - 1 / diag(invRR), 0.1), 0.9)
+  }
+
+  # Bookkeeping
+  converged <- FALSE
+  energy_trace <- numeric(0)
+  last_loadings <- NULL
+  best_loadings <- NULL
+  best_energy <- Inf
+  final_nsa_result <- NULL
+  Phi <- NULL  # New: for oblique factor correlations if applicable
+
+  if (verbose) message("Starting NSA-Flow Regularized FA ...")
+
+  for (iter in seq_len(max_iter)) {
+    # Build modified R with communalities on diagonal
+    R_mod <- R_reg
+    diag(R_mod) <- h2
+
+    # Power iteration for initial orthonormal basis and loadings
+    if (!is.null(last_loadings) && all(dim(last_loadings) == c(p, nfactors))) {
+      L <- last_loadings / sqrt(rowSums(last_loadings^2) + 1e-10)  # Normalize previous as warm start
+    } else {
+      L <- matrix(rnorm(p * nfactors, sd = 0.1), nrow = p, ncol = nfactors)
+    }
+
+    for (k in seq_len(power_iter)) {
+      L <- R_mod %*% L
+      # Orthonormalize via QR
+      qrL <- qr(L)
+      L <- qr.Q(qrL)
+      if (ncol(L) < nfactors) {
+        # Pad if rank deficient
+        more <- matrix(rnorm(p * (nfactors - ncol(L)), sd = 1e-3), nrow = p)
+        L <- cbind(L, qr.Q(qr(more - L %*% (t(L) %*% more)))[, seq_len(nfactors - ncol(L))])
+      }
+      L[!is.finite(L)] <- 0
+    }
+
+    # Compute Rayleigh quotients for scaling
+    vals_vec <- diag(t(L) %*% R_mod %*% L)
+    vals_vec[vals_vec < 0] <- 0
+    loadings_power <- L %*% diag(sqrt(vals_vec))
+    loadings_power[!is.finite(loadings_power)] <- 0
+    if (!is.null(var_names)) rownames(loadings_power) <- var_names
+    colnames(loadings_power) <- paste0("PA", seq_len(nfactors))
+
+    # Anneal w if enabled (start from 0, linear to nsa_w)
+    w_iter <- if (anneal_w) nsa_w * (iter / max_iter) else nsa_w
+
+    # Apply NSA-Flow regularization with incremental update (Y0 from power loadings)
+    nsa_result <- tryCatch({
+      nsa_flow(
+        Y0 = as.matrix(loadings_power),
+        w = w_iter,
+        max_iter = nsa_max_iter,
+        retraction = "soft_polar",
+        plot = TRUE,
+        ...
+      )
+    }, error = function(e) {
+      warning("nsa_flow failed at iteration ", iter, ": ", conditionMessage(e))
+      NULL
+    })
+
+    if (!is.null(nsa_result) && is.matrix(nsa_result$Y)) {
+      loadings_post <- nsa_result$Y
+      final_nsa_result <- nsa_result
+    } else {
+      # Fallback to power loadings if NSA fails
+      loadings_post <- loadings_power
+    }
+    loadings_post[!is.finite(loadings_post)] <- 0
+
+    if (!is.null(Phi)) {
+      recon_R <- loadings_post %*% Phi %*% t(loadings_post)
+    } else {
+      recon_R <- loadings_post %*% t(loadings_post)
+    }
+    energy_pre <- norm(R_reg - recon_R, "F") / norm(R_reg, "F")
+
+    # --- Rotation (new: applied after NSA-flow, before energy) ---
+    if (rotate != "none") {
+      rot_fun <- switch(rotate,
+                        varimax = stats::varimax,
+                        promax  = psych::promax,
+                        oblimin = psych::oblimin)
+      rot_res <- tryCatch({
+        rot_fun(loadings_post, normalize = FALSE)
+      }, error = function(e) {
+        warning("Rotation failed; using unrotated loadings.")
+        list(loadings = loadings_post)
+      })
+      loadings_post <- as.matrix(rot_res$loadings)
+      if ("Phi" %in% names(rot_res)) Phi <- rot_res$Phi  # Capture Phi for oblique
+      loadings_post[!is.finite(loadings_post)] <- 0
+      if (!is.null(var_names)) rownames(loadings_post) <- var_names
+    }
+    colnames(loadings_post) <- paste0("PA", seq_len(nfactors))
+
+    # Energy: relative Frobenius reconstruction error (handle oblique with Phi if available)
+    if (!is.null(Phi)) {
+      recon_R <- loadings_post %*% Phi %*% t(loadings_post)
+    } else {
+      recon_R <- loadings_post %*% t(loadings_post)
+    }
+    energy <- norm(R_reg - recon_R, "F") / norm(R_reg, "F")
+
+    # Update best if improved
+    if (energy < best_energy) {
+      best_energy <- energy
+      best_loadings <- loadings_post
+    }
+
+    # Communality update with damping
+    new_h2 <- pmin(rowSums(loadings_post^2), 1)
+    delta_h2 <- new_h2 - h2
+    h2 <- (1 - eta_h) * h2 + eta_h * new_h2
+    max_delta_h2 <- max(abs(delta_h2))
+
+    # Record
+    energy_trace <- c(energy_trace, energy)
+    last_loadings <- loadings_post
+
+    if (verbose) {
+      message(sprintf("Iter %03d: max|Δh2|=%.6g | Energy (pre)=%.6g | Energy (post)=%.6g | bestEnergy=%.6g | w=%.3g",
+                      iter, iter, max_delta_h2, energy_pre, energy, best_energy, w_iter))
+    }
+
+    # Convergence check (energy change and delta h2)
+    if (iter > 5) {
+      echange <- abs(diff(tail(energy_trace, 2)))
+      if (echange < tol && max_delta_h2 < tol) {
+        converged <- TRUE
+        if (verbose) message("Converged.")
+        break
+      }
+      if (energy < energy_tol) {
+        converged <- TRUE
+        if (verbose) message("Converged (energy < tol).")
+        break
+      }
+    }
+  }
+
+  if (!converged && verbose) warning("Did not converge within max_iter.")
+
+  final_loadings <- best_loadings %||% loadings_post
+
+  # Optional factor scores
+  factor_scores <- NULL
+  if (!is.null(data) && scores != "none") {
+    data_mat <- as.matrix(data)
+    S <- stats::cov(data_mat, use = "pairwise.complete.obs")
+    invS <- tryCatch(solve(S), error = function(e) ginverse(S))  # Pseudoinverse fallback
+    Lf <- final_loadings
+    if (scores == "regression") {
+      B <- invS %*% Lf %*% solve(t(Lf) %*% invS %*% Lf)
+      factor_scores <- scale(data_mat) %*% B
+    } else if (scores == "Bartlett") {
+      Psi <- diag(1 - h2 + 1e-12)
+      inner <- solve(t(Lf) %*% solve(Psi) %*% Lf)
+      B <- inner %*% t(Lf) %*% solve(Psi)
+      factor_scores <- scale(data_mat) %*% t(B)
+    }
+    colnames(factor_scores) <- paste0("PA", seq_len(nfactors))
+  }
+
+  out <- list(
+    loadings = final_loadings,
+    communalities = h2,
+    uniqueness = 1 - h2,
+    converged = converged,
+    iterations = iter,
+    energy_trace = energy_trace,
+    factor_scores = factor_scores,
+    nsa_result = final_nsa_result,
+    best_energy = best_energy,
+    rotation = rotate,  # New: add rotation to output
+    Phi = Phi  # New: add Phi if applicable
+  )
+  class(out) <- "nsa_flow_fa"
+
+  if (verbose && length(energy_trace) > 1) {
+    plot(energy_trace, type = "b", main = "Energy Trace", ylab = "Energy", xlab = "Iteration")
+  }
+
+  invisible(out)
+}
+
+
+#' Generate NSA-Flow FA Flowchart Diagram
+#'
+#' This function creates a flowchart diagram representing the NSA-Flow FA process
+#' using the DiagrammeR package. The diagram illustrates the steps involved in the algorithm, including
+#' data input, regularization, iteration, convergence checks, and output.
+#'
+#' @details
+#' The diagram is generated using Graphviz syntax via \code{DiagrammeR::grViz}. It visualizes the flow
+#' from input data through various processing steps to the final output. Ensure the DiagrammeR package
+#' is installed to use this function.
+#'
+#' @return A DiagrammeR graph object representing the flowchart.
+#'
+#' @examples
+#' \dontrun{
+#' library(DiagrammeR)
+#' nsa_flow_fa_diagram()
+#' }
+#'
+#' @export
+nsa_flow_fa_diagram <- function() {
+  DiagrammeR::grViz("
+digraph NSA_Flow_FA {
+  graph [rankdir=TB, fontsize=12, nodesep=0.3, ranksep=0.4]
+
+  # Nodes
+  Data [label='Input Data (X) or R', shape=box]
+  RegR [label='Regularize R', shape=box]
+  InitComm [label='Initialize Communalities (h²)', shape=box]
+  BuildRmod [label='Build R_mod with h² on Diagonal', shape=box]
+  PowerIter [label='Power Iteration: Orthonormal Basis & Loadings', shape=box]
+  NSAFlow [label='NSA-Flow Regularization (w)', shape=box]
+  EnergyPre [label='Compute Energy Pre-Rotation', shape=box]
+  Rotate [label='Optional Rotation (varimax/promax/oblimin)', shape=box]
+  EnergyPost [label='Compute Energy Post-Rotation', shape=box]
+  UpdateBest [label='Update Best Loadings if Improved', shape=box]
+  UpdateH2 [label='Damped Update of h²', shape=box]
+  ConvergeCheck [label='Convergence Check (Δenergy & Δh²)', shape=diamond]
+  FactorScores [label='Compute Factor Scores (optional)', shape=box]
+  Output [label='Output: Best Loadings, h², Energy Trace, etc.', shape=box]
+
+  # Edges
+  Data -> RegR -> InitComm -> BuildRmod -> PowerIter -> NSAFlow -> EnergyPre -> Rotate -> EnergyPost -> UpdateBest -> UpdateH2 -> ConvergeCheck
+  ConvergeCheck -> BuildRmod [label='No']
+  ConvergeCheck -> FactorScores [label='Yes']
+  FactorScores -> Output
+}
+")
+}
+
+
+#' NSA-Flow Sparse PCA (stable + efficient)
+#'
+#' Performs sparse PCA using a proximal-gradient scheme with optional NSA-flow
+#' proximal regularization. This implementation preserves the stable behavior
+#' of the original `sparse_pca_imp()` while improving efficiency by:
+#'  - precomputing X'X, using it for gradient/energy,
+#'  - in-place trial updates to reduce allocations,
+#'  - lazy orthogonalization (every `orth_every` iterations),
+#'  - retaining Armijo backtracking and adaptive LR scheduling.
+#'
+#' @param X numeric matrix (n x p), rows = observations, cols = variables
+#' @param k integer > 0 and <= min(n,p), number of components
+#' @param lambda non-negative numeric, L1 proximal weight
+#' @param alpha positive numeric, initial step size
+#' @param max_iter integer, maximum iterations
+#' @param proximal_type character, "basic" or "nsa_flow"
+#' @param w_pca positive numeric, weight for PCA fidelity
+#' @param nsa_w numeric in [0,1], weight parameter passed to nsa_flow
+#' @param apply_soft_thresh_in_nns logical (passed through if used)
+#' @param tol numeric, tolerance for relative parameter change convergence
+#' @param retraction retraction function or identifier (passed to nsa_flow)
+#' @param grad_tol numeric, gradient-norm tolerance for convergence
+#' @param R optional, passed-through (not used here)
+#' @param verbose logical, print iteration diagnostics
+#' @param orth_every integer >=1, perform orthogonalization every this many iterations (default 5)
+#'
+#' @return list with components:
+#'   \item{Y}{best p x k loading matrix found}
+#'   \item{energy_trace}{vector of per-iteration energy/explained-variance records}
+#'   \item{final_iter}{last iteration index}
+#'   \item{best_energy}{best energy attained}
+#'   \item{converged}{logical}
+#'   \item{no_improve_count}{internal counter at exit}
+#'   \item{lr_reductions}{number of LR reductions performed}
+#'   \item{expl_var_ratio}{explained variance ratio for best_Y}
+#'
+#' @export
+nsa_flow_pca <- function(X, k,
+                         lambda = 0.1,
+                         alpha = 0.0001,
+                         max_iter = 100,
+                         proximal_type = c("basic", "nsa_flow"),
+                         w_pca = 1.0, nsa_w = 0.5,
+                         apply_soft_thresh_in_nns = FALSE,
+                         tol = 1e-6, retraction = def_ret,
+                         grad_tol = 1e-4, R = NULL, verbose = FALSE,
+                         orth_every = 5) {
+  # --- argument checks ---
+  if (!is.matrix(X) || any(!is.finite(X))) stop("X must be a finite numeric matrix")
+  n <- nrow(X); p <- ncol(X)
+  if (k <= 0 || k > min(n, p)) stop("k must be positive and not exceed min(n, p)")
+  if (lambda < 0) stop("lambda must be non-negative")
+  if (alpha <= 0) stop("alpha must be positive")
+  if (w_pca <= 0) stop("w_pca must be positive")
+  if (nsa_w < 0 || nsa_w > 1) stop("nsa_w must be in [0,1]")
+  proximal_type <- match.arg(proximal_type)
+  if (!is.integer(orth_every) && orth_every != as.integer(orth_every)) orth_every <- as.integer(orth_every)
+  if (orth_every < 1) orth_every <- 1
+
+  # Preserve previous behavior: when using nsa_flow proximal with nonzero nsa_w,
+  # disable the L1 lambda to avoid double regularization (as in your original impl).
+  if (nsa_w > 0 && proximal_type == "nsa_flow") {
+    lambda <- 0.0
+    if (verbose) cat("nsa_w > 0 and proximal_type == 'nsa_flow' -> setting lambda = 0\n")
+  }
+
+  # --- center (no scaling) ---
+  Xc <- scale(X, center = TRUE, scale = FALSE)
+  # precompute XtX and total_var
+  XtX <- crossprod(Xc)           # p x p
+  total_var <- sum(diag(XtX / n))
+  if (!is.finite(total_var) || total_var <= 0) stop("Input matrix X has zero or non-finite variance")
+
+  # --- SVD init: Y is p x k ---
+  sv <- svd(Xc, nu = 0, nv = k)
+  Y <- sv$v
+  if (ncol(Y) != k) stop("SVD initialization did not produce k columns")
+
+  # bookkeeping
+  energy_trace <- numeric(max_iter)
+  best_Y <- Y
+  best_energy <- Inf
+  alpha_init <- alpha
+  max_grad_norm <- 100.0
+  bt_max <- 20
+  bt_shrink <- 0.5
+  armijo_c <- 1e-4
+
+  # adaptive scheduler params
+  patience <- 10
+  min_delta <- 1e-8
+  lr_reduction_factor <- 0.5
+  max_lr_reductions <- 3
+  min_iters_before_stop <- 10
+
+  no_improve_count <- 0
+  lr_reductions <- 0
+  converged <- FALSE
+
+  # Helper: Frobenius norm (if frob() not available)
+  .frob <- function(A) sqrt(sum(A * A))
+
+  # energy function using precomputed XtX (numerically stable)
+  energy_of <- function(M) {
+    # tr(M' XtX M) / n  == sum(diag(t(M) %*% XtX %*% M)) / n
+    tr_val <- sum(diag(t(M) %*% XtX %*% M)) / n
+    fid_term <- w_pca * (-0.5 * tr_val)
+    prox_term <- lambda * sum(abs(M))
+    fid_term + prox_term
+  }
+
+  for (iter in seq_len(max_iter)) {
+    t_start <- Sys.time()
+
+    # Euclidean gradient: - (XtX %*% Y) / n scaled by w_pca
+    grad_p <- - (XtX %*% Y) / n   # p x k
+    eu_grad <- w_pca * grad_p
+
+    if (any(!is.finite(eu_grad))) stop("Non-finite Euclidean gradient at iteration ", iter)
+
+    # gradient clipping
+    gnorm <- .frob(eu_grad)
+    if (gnorm > max_grad_norm) eu_grad <- eu_grad * (max_grad_norm / gnorm)
+
+    # Riemannian projection (none here, we keep euclidean descent direction)
+    rgrad <- eu_grad
+    rgrad_norm <- .frob(rgrad)
+
+    # Backtracking line search (Armijo)
+    alpha <- alpha_init
+
+    # In-place trial update: Z starts as copy of Y, but we replace contents (minimize allocs)
+    Z <- Y
+    Z[] <- Z - alpha * rgrad
+    energy_old <- energy_of(Y)
+    energy_new <- energy_of(Z)
+    dir_deriv <- sum(eu_grad * (-rgrad))
+
+    bt <- 0
+    while ((!is.finite(energy_new) || energy_new > energy_old + armijo_c * alpha * dir_deriv) && bt < bt_max) {
+      alpha <- alpha * bt_shrink
+      Z[] <- Y - alpha * rgrad
+      energy_new <- energy_of(Z)
+      bt <- bt + 1
+    }
+    if (!is.finite(energy_new)) stop("Non-finite energy after backtracking at iteration ", iter)
+
+    Y_ret <- Z
+
+    # Proximal step
+    thresh <- alpha * lambda
+    if (proximal_type == "basic") {
+      # keep your simlr_sparseness call (assumed defined elsewhere)
+      Y_new <- simlr_sparseness(Y_ret, 'none', positivity = 'positive', sparseness_quantile = 0.8)
+    } else if (proximal_type == "nsa_flow") {
+      # call nsa_flow; we assume it takes arguments (Y0, X0=NULL, w=..., retraction=...)
+      # use X0 = NULL to indicate proximal-only processing of Y_ret
+      prox_res <- nsa_flow(Y_ret, X0 = NULL, w = nsa_w, retraction = retraction)
+      if (!is.list(prox_res) || is.null(prox_res$Y)) stop("nsa_flow returned unexpected result")
+      Y_new <- prox_res$Y
+    } else {
+      stop("unknown proximal_type")
+    }
+    if (any(!is.finite(Y_new))) stop("Non-finite proximal step at iteration ", iter)
+
+    # compute energy and stats
+    energy <- energy_of(Y_new)
+
+    # lazy orthonormalize (to compute true explained variance and to keep iterates stable)
+    if (k == 1) {
+      Q <- Y_new / sqrt(sum(Y_new^2))
+    } else {
+      if ((iter %% orth_every) == 0 || iter == max_iter) {
+        qr_decomp <- qr(Y_new)
+        Q <- qr.Q(qr_decomp)
+        # optionally replace Y_new with Q so iterate stays more orthonormal
+        Y_new <- Q
+      } else {
+        # use Q only for explained variance computation (do not change Y_new)
+        qr_decomp_tmp <- qr(Y_new)
+        Q <- qr.Q(qr_decomp_tmp)
+      }
+    }
+
+    # explained variance ratio
+    tr_val <- sum(diag(t(Q) %*% XtX %*% Q)) / n
+    expl_var_ratio <- tr_val / total_var
+
+    # record energy trace (negative explained var like original)
+    energy_trace[iter] <- -expl_var_ratio
+
+    # check for improvement
+    improved <- FALSE
+    if (energy < best_energy - min_delta) {
+      best_energy <- energy
+      best_Y <- Y_new
+      improved <- TRUE
+    }
+
+    if (improved) {
+      no_improve_count <- 0
+    } else {
+      no_improve_count <- no_improve_count + 1
+    }
+
+    # Adaptive scheduler: reduce LR when plateaued for `patience` iters
+    if (no_improve_count >= patience && lr_reductions < max_lr_reductions) {
+      alpha_init <- max(alpha_init * lr_reduction_factor, 1e-12)
+      lr_reductions <- lr_reductions + 1
+      if (verbose) {
+        cat(sprintf("No improvement for %d iters → reducing alpha_init by factor %.3f to %.3e (lr_reductions=%d)\n",
+                    patience, lr_reduction_factor, alpha_init, lr_reductions))
+      }
+      no_improve_count <- 0  # reset after reducing LR
+    }
+
+    # Early stop if plateaued after exhausting LR reductions
+    stop_due_to_plateau <- (no_improve_count >= patience && lr_reductions >= max_lr_reductions)
+
+    if (verbose) {
+      sp_lvl <- if (exists("sparsity_level")) tryCatch(sparsity_level(Y_new), error = function(e) NA) else NA
+      cat(sprintf("Iter %3d | Energy: %12.6e | Sparsity: %s | ExplVar: %.4f | rgrad_norm: %.4e | bt: %2d | alpha: %.3e | t: %.2fs\n",
+                  iter, energy, format(sp_lvl), expl_var_ratio, rgrad_norm, bt, alpha, as.numeric(Sys.time() - t_start, units = "secs")))
+      if (!improved) cat(sprintf("  (no_improve_count=%d, lr_reductions=%d)\n", no_improve_count, lr_reductions))
+    }
+
+    # Convergence diagnostics
+    if (iter > 1) {
+      rel_energy_change <- abs(energy_trace[iter] - energy_trace[iter - 1]) / (abs(energy_trace[iter - 1]) + 1e-12)
+      grad_ok <- (rgrad_norm < grad_tol)
+      delta_Y <- .frob(Y_new - Y) / (.frob(Y) + 1e-12)
+      delta_ok <- (delta_Y < tol)
+
+      converged_condition <- (iter > min_iters_before_stop) && (rel_energy_change < tol) && (grad_ok || delta_ok)
+
+      if (verbose) {
+        cat(sprintf("  ΔEnergy: %.2e | GradNorm: %.2e | ΔY: %.2e | ConvergedCond: %s\n",
+                    rel_energy_change, rgrad_norm, delta_Y, ifelse(converged_condition, "✓", "×")))
+      }
+
+      if (converged_condition) {
+        converged <- TRUE
+        if (verbose) cat("Convergence achieved at iteration", iter, "\n")
+        break
+      }
+    }
+
+    if (stop_due_to_plateau) {
+      if (verbose) cat("Stopping early due to plateau (no improvement after LR reductions)\n")
+      break
+    }
+
+    # set iterate for next step
+    Y <- Y_new
+  } # end iter loop
+
+  energy_trace <- energy_trace[seq_len(iter)]
+
+  # Final orthogonalization for returned best_Y
+  if (k == 1) {
+    Q <- best_Y / sqrt(sum(best_Y^2))
+  } else {
+    qr_decomp <- qr(best_Y)
+    Q <- qr.Q(qr_decomp)
+  }
+  tr_val <- sum(diag(t(Q) %*% XtX %*% Q)) / n
+  expl_var_ratio <- tr_val / total_var
+
+  list(
+    Y = best_Y,
+    energy_trace = energy_trace,
+    final_iter = iter,
+    best_energy = best_energy,
+    converged = converged,
+    no_improve_count = no_improve_count,
+    lr_reductions = lr_reductions,
+    expl_var_ratio = expl_var_ratio
+  )
 }

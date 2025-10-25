@@ -827,206 +827,6 @@ DEFAULT_W <- 0.5
 DEFAULT_MAX_ITS <- 200
 DEFAULT_TOL <- 1e-5
 
-sparse_pca_imp <- function(X, k, lambda = 0.1, alpha = 0.0001, 
-                           max_iter = 100, 
-                           proximal_type = "basic", 
-                           w_pca = 1.0, w = 0.5, 
-                           apply_soft_thresh_in_nns = FALSE, tol = 1e-6, 
-                           retraction=def_ret,
-                           grad_tol = 1e-4, verbose = FALSE) {
-  # (assumes helper functions: grad_orth, orth_residual, inv_sqrt_sym,
-  #  soft_threshold, nsa_flow, frob, sym, sparsity_level are defined elsewhere)
-  if (!is.matrix(X) || any(!is.finite(X))) stop("X must be a finite numeric matrix")
-  n <- nrow(X); p <- ncol(X)
-  if (k <= 0 || k > min(n, p)) stop("k must be positive and not exceed min(n, p)")
-  if (lambda < 0) stop("lambda must be non-negative")
-  if (alpha <= 0) stop("alpha must be positive")
-  if (w_pca <= 0) stop("w_pca must be positive")
-  if (w < 0 || w > 1) stop("w must be in [0,1]")
-  if (!(proximal_type %in% c("basic", "nsa_flow"))) stop("proximal_type must be 'basic' or 'nsa_flow'")
-
-  # center (no scaling)
-  Xc <- scale(X, center = TRUE, scale = FALSE)
-  total_var <- sum(diag(t(Xc) %*% Xc / n))
-  if (!is.finite(total_var) || total_var <= 0) stop("Input matrix X has zero or non-finite variance")
-
-  # SVD init: V is p x k
-  sv <- svd(Xc, nu = 0, nv = k)
-  Y <- sv$v
-  if (ncol(Y) != k) stop("SVD initialization did not produce k columns")
-
-  # bookkeeping
-  energy_trace <- numeric(max_iter)
-  best_Y <- Y
-  best_energy <- Inf
-  alpha_init <- alpha
-  max_grad_norm <- 100.0
-  bt_max <- 20
-  bt_shrink <- 0.5
-  armijo_c <- 1e-4
-
-  # --- Adaptive early stopping scheduler parameters (internal/tunable) ---
-  patience <- 10                # iterations to wait for improvement before reducing lr
-  min_delta <- 1e-8             # minimum absolute improvement in energy to count as 'improvement'
-  lr_reduction_factor <- 0.5    # multiply alpha_init by this when plateauing
-  max_lr_reductions <- 3        # after this many reductions, stop early if no improvement
-  min_iters_before_stop <- 10   # require at least this many iterations before stopping
-
-  no_improve_count <- 0
-  lr_reductions <- 0
-  converged <- FALSE
-
-  for (iter in seq_len(max_iter)) {
-    t_start <- Sys.time()
-
-    # Euclidean gradients
-    grad_p <- - (t(Xc) %*% (Xc %*% Y)) / n          # p x k
-    grad_o <- 0#grad_orth(Y)
-    eu_grad <-  w_pca * grad_p
-
-    if (any(!is.finite(eu_grad))) stop("Non-finite Euclidean gradient at iteration ", iter)
-
-    # gradient clipping
-    gnorm <- frob(eu_grad)
-    if (gnorm > max_grad_norm) eu_grad <- eu_grad * (max_grad_norm / gnorm)
-
-    # Riemannian projection only if orth term involved (otherwise keep euclidean)
-    rgrad <- eu_grad
-    rgrad_norm <- frob(rgrad)
-
-    # Backtracking line search (Armijo)
-    alpha <- alpha_init
-    Z <- Y - alpha * rgrad
-
-    energy_of <- function(M) {
-      tr_val <- sum(diag(t(M) %*% t(Xc) %*% (Xc %*% M))) / n
-      fid_term <- w_pca * (-0.5 * tr_val)
-      orth_term <- 0
-      prox_term <- lambda * sum(abs(M))
-      fid_term + orth_term + prox_term
-    }
-
-    energy_old <- energy_of(Y)
-    energy_new <- energy_of(Z)
-    dir_deriv <- sum(eu_grad * (-rgrad))
-
-    bt <- 0
-    while ((!is.finite(energy_new) || energy_new > energy_old + armijo_c * alpha * dir_deriv) && bt < bt_max) {
-      alpha <- alpha * bt_shrink
-      Z <- Y - alpha * rgrad
-      energy_new <- energy_of(Z)
-      bt <- bt + 1
-    }
-    if (!is.finite(energy_new)) stop("Non-finite energy after backtracking at iteration ", iter)
-
-    Y_ret <- Z
-    # Proximal step
-    thresh <- alpha * lambda
-    if (proximal_type == "basic") {
-      Y_new <- simlr_sparseness(Y_ret, 'none', positivity='positive', sparseness_quantile=0.8 )
-    } else if (proximal_type == "nsa_flow") {
-      prox_res <- nsa_flow(Y_ret, w = w, retraction=def_ret, optimizer=optype,     simplified=simplified_param )
-      Y_new <- prox_res$Y
-    }
-    if (any(!is.finite(Y_new))) stop("Non-finite proximal step at iteration ", iter)
-
-    # compute energy and stats
-    energy <- energy_of(Y_new)
-    # Orthonormalize to compute true explained variance
-    if (k == 1) {
-      Q <- Y_new / sqrt(sum(Y_new^2))
-    } else {
-      qr_decomp <- qr(Y_new)
-      Q <- qr.Q(qr_decomp)
-    }
-    tr_val <- sum(diag(t(Q) %*% t(Xc) %*% (Xc %*% Q))) / n
-    expl_var_ratio <- tr_val / total_var
-
-    energy_trace[iter] <- expl_var_ratio * -1.0
-    # check for improvement (absolute)
-    improved <- FALSE
-    if (energy < best_energy - min_delta) {
-      best_energy <- energy
-      best_Y <- Y_new
-      improved <- TRUE
-    }
-
-    if (improved) {
-      no_improve_count <- 0
-    } else {
-      no_improve_count <- no_improve_count + 1
-    }
-
-    # Adaptive scheduler: reduce LR when plateaued for `patience` iters
-    if (no_improve_count >= patience && lr_reductions < max_lr_reductions) {
-      alpha_init <- max(alpha_init * lr_reduction_factor, 1e-12)
-      lr_reductions <- lr_reductions + 1
-      if (verbose) {
-        cat(sprintf("No improvement for %d iters → reducing alpha_init by factor %.3f to %.3e (lr_reductions=%d)\n",
-                    patience, lr_reduction_factor, alpha_init, lr_reductions))
-      }
-      no_improve_count <- 0  # reset after reducing LR
-    }
-
-    # If we've already reduced LR max times and still no improvement for `patience`, stop early
-    stop_due_to_plateau <- (no_improve_count >= patience && lr_reductions >= max_lr_reductions)
-
-    if (verbose) {
-      cat(sprintf("Iter %3d | Energy: %12.6e | Sparsity: %.4e | ExplVar: %.4f | rgrad_norm: %.4e | bt: %2d | alpha: %.3e | t: %.2fs\n",
-                  iter, energy, sparsity_level(Y_new), expl_var_ratio, rgrad_norm, bt, alpha, as.numeric(Sys.time() - t_start, units="secs")))
-      if (!improved) cat(sprintf("  (no_improve_count=%d, lr_reductions=%d)\n", no_improve_count, lr_reductions))
-    }
-
-    # Convergence diagnostics (existing checks)
-    if (iter > 1) {
-      rel_energy_change <- abs(energy_trace[iter] - energy_trace[iter - 1]) / (abs(energy_trace[iter - 1]) + 1e-12)
-      grad_ok <- (rgrad_norm < grad_tol)
-      delta_Y <- frob(Y_new - Y) / (frob(Y) + 1e-12)
-      delta_ok <- (delta_Y < tol)
-
-      converged_condition <- (iter > min_iters_before_stop) && (rel_energy_change < tol) && (grad_ok || delta_ok)
-
-      if (verbose) {
-        cat(sprintf("  ΔEnergy: %.2e | GradNorm: %.2e | ΔY: %.2e | ConvergedCond: %s\n",
-                    rel_energy_change, rgrad_norm, delta_Y, ifelse(converged_condition, "✓", "×")))
-      }
-
-      if (converged_condition) {
-        converged <- TRUE
-        if (verbose) cat("Convergence achieved at iteration", iter, "\n")
-        break
-      }
-    }
-
-    if (stop_due_to_plateau) {
-      if (verbose) cat("Stopping early due to plateau (no improvement after LR reductions)\n")
-      break
-    }
-
-    Y <- Y_new
-  } # end iter loop
-
-  energy_trace <- energy_trace[seq_len(iter)]
-  # Compute final expl_var_ratio for best_Y
-  if (k == 1) {
-    Q <- best_Y / sqrt(sum(best_Y^2))
-  } else {
-    qr_decomp <- qr(best_Y)
-    Q <- qr.Q(qr_decomp)
-  }
-  tr_val <- sum(diag(t(Q) %*% t(Xc) %*% (Xc %*% Q))) / n
-  expl_var_ratio <- tr_val / total_var
-  list(
-    Y = best_Y,
-    energy_trace = energy_trace,
-    final_iter = iter,
-    best_energy = best_energy,
-    converged = converged,
-    no_improve_count = no_improve_count,
-    lr_reductions = lr_reductions,
-    expl_var_ratio = expl_var_ratio
-  )
-}
 
 ```
 
@@ -1110,16 +910,8 @@ explained_variance_ratio_by_orthonormalizing <- function(X = NULL, Y, use = c("q
 X=generate_synth_data( p=100, k=20, corrval=0.35)$Y0
 nembed = 4
 # --- Compute results for both methods ---
-res_soft <- sparse_pca_imp(
-  X, k = nembed, lambda = 0.05, alpha = 0.1, max_iter = 20,
-  tol = 1e-5, verbose = FALSE
-)
-#
-res_nns <- sparse_pca_imp(
-  X, k = nembed, lambda = 0.05, alpha = 0.1, max_iter = 20,
-  proximal_type = "nsa_flow", w = 0.5, 
-  tol = 1e-5, verbose = FALSE
-)
+res_soft <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, nsa_w = 0.5, tol = 1e-5,proximal_type='basic', verbose = FALSE )
+res_nns <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, nsa_w = 0.5, tol = 1e-5,proximal_type='nsa_flow', verbose = FALSE )
 
 
 
@@ -1127,7 +919,6 @@ res_nns <- sparse_pca_imp(
 n <- nrow(X)
 A <- t(X) %*% X / n
 total_var <- sum(diag(A))
-
 m_soft <- compute_core_metrics(res_soft$Y, A )
 m_nns  <- compute_core_metrics(res_nns$Y, A )
 
@@ -1159,6 +950,8 @@ ggplot(core_long, aes(x = Variant, y = value, fill = Variant)) +
     axis.title = element_blank(),
     axis.text.x = element_text(angle = 15, hjust = 1)
   )
+
+
 
 ```
 
@@ -1258,12 +1051,12 @@ golub_scaled_ss <- golub_scaled[, ss]
 pca_std <- prcomp(golub_scaled_ss, rank. = myk)
 proj_std <- pca_std$x
 
-res_basic <- sparse_pca_imp(golub_scaled_ss, k = myk, lambda = 0.1, alpha = 0.001,
+res_basic <- nsa_flow_pca(golub_scaled_ss, myk,lambda = 0.1, alpha = 0.001,
                             max_iter = mxit, proximal_type = "basic", tol = 1e-5,
-                            w = 0.5, verbose = FALSE)
-res_nns <- sparse_pca_imp(golub_scaled_ss, k = myk, lambda = 0.1, alpha = 0.001,
+                            nsa_w = 0.5, verbose = F)
+res_nns <- nsa_flow_pca(golub_scaled_ss, myk, lambda = 0.1, alpha = 0.001,
                           max_iter = mxit, proximal_type = "nsa_flow", tol = 1e-5,
-                          w = 0.5, verbose = FALSE)
+                          nsa_w = 0.5, verbose = F)
 
 ## --- Core Metrics ------------------------------------------------------------
 metrics_pca_g   <- compute_core_metrics(pca_std$rotation, golub_scaled_ss)
@@ -1398,10 +1191,10 @@ Xc <- scale(X, center = TRUE, scale = FALSE)
 total_var <- sum( svd(proj_std/norm(proj_std,"F"))$d )
 if ( ! exists("sens_metrics")) {
     sens_results <- lapply(omega_vals, function(omega) {
-    res <- sparse_pca_imp(golub_scaled_ss, k = myk,
+    res <- nsa_flow_pca(golub_scaled_ss, myk,
         lambda = 0.1, alpha = 0.001, max_iter = mxit,
         proximal_type = "nsa_flow", retraction=def_ret,
-        tol = 1e-5, w = omega, verbose = FALSE)
+        tol = 1e-5, nsa_w = omega, verbose = FALSE)
     proj <- golub_scaled_ss %*% res$Y
     acc_res <- cv_acc(proj, labels)
     loc_var <- sum( svd(proj/norm(proj,"F"))$d )
@@ -1470,25 +1263,7 @@ NSA-Flow initializes with \( Y_0 \) and directly optimizes for a refined loading
 
 To rigorously compare NSA-Flow with PCA, we projected the data onto both sets of loadings: \( \text{proj}_{\text{PCA}} = X Y_0 \) and \( \text{proj}_{\text{NSA}} = X Y \), yielding subject-specific network scores (\( N \times k \)). We evaluated their incremental predictive value for ADNI clinical outcomes beyond baseline covariates (age, gender, education, APOE4 status) using linear models for continuous cognitive variables and extended this to a binary classification task for diagnosis.
 
-### Prediction of Cognitive Outcomes
-For each of 9 cognitive variables (e.g., MMSE, CDR-SB, ADAS-13, FAQ, ECog totals), we fitted baseline models: \( \text{cog} \sim \text{age} + \text{gender} + \text{education} + \text{APOE4} \). Full models added network scores: \( \text{cog} \sim \text{covariates} + \sum_{j=1}^k \text{proj}_j \). Model comparison used ANOVA, with significance quantified as \( \log(p) \) (lower values indicate stronger improvement; negative infinity for \( p = 0 \)).
 
-Across \( w \) values, NSA-Flow yielded lower \( \log(p) \) than PCA in approximately half of brain structure-cognitive pairs (based on the comparison table where `nsa < pca`), suggesting competitive explanatory power. For instance, in MMSE prediction, NSA-Flow's median \( \log(p) = -4.2 \) outperformed PCA's -3.1, with differences most pronounced at moderate \( w \approx 0.5 \) (where sparsity balances interpretability and variance capture). Summary statistics revealed NSA-Flow's mean \( \log(p) = -3.8 \) (SD = 1.2) vs. PCA's -3.2 (SD = 1.0), with a paired t-test confirming significance (\( t(899) = -2.45 \), \( p < 0.05 \)). To extend rigor, we computed adjusted \( R^2 \) deltas: NSA-Flow increased \( R^2 \) by 0.08 on average (vs. PCA's 0.05), and variance inflation factors (VIF < 3) indicated low multicollinearity due to tuned orthogonality. FIXME
-
-### Extension to Diagnosis Prediction
-Building on the cognitive analysis, we incorporated a prediction task for diagnostic status (e.g., cognitively normal [CN] vs. AD, inferred from ADNI labels in the dataset). Using logistic regression (binomial family), baseline models predicted diagnosis from covariates alone. Full models included network scores. Likelihood ratio tests (LRT) assessed improvement, with deviance reductions converted to \( \log(p) \).
-
-FIXME THIS SECTION NSA-Flow again outperformed, with lower \( \log(p) \) in 72% of runs and average AUC = 0.82 (5-fold CV) vs. PCA's 0.77. For example, at optimal \( w = 0.45 \), NSA-Flow's projections captured AD-specific atrophy patterns (e.g., temporal lobe emphasis), boosting sensitivity from 0.68 (PCA) to 0.74. We further added LASSO regularization to full models for feature selection, confirming NSA-Flow networks as more salient (average coefficient magnitude 1.5x higher than PCA). Cross-validation mitigated overfitting, with out-of-sample log-loss 0.41 for NSA-Flow vs. 0.45 for PCA. These extensions highlight NSA-Flow's robustness in classification, extending beyond regression to clinically relevant binary outcomes.
-
-Performance metrics further supported NSA-Flow: Pearson correlation between flattened data and loadings was 0.62 (noting potential reconstruction via \( X \hat{Y} \hat{Y}^T \)); MSE = 0.18; orthogonality defect (measuring deviation from \( Y^T Y = I \)) = 0.09, improved from PCA's 0.00 (perfect but dense orthogonality).
-
-Visualizations reinforced these findings. Heatmaps of normalized loadings (\( Y / \sum Y[:, j] \)) showed sparse, region-focused networks (e.g., Network 1 emphasizing temporal lobes). Radar charts illustrated top-10 loadings per network, highlighting dominance in limbic and frontal areas. Connectome-like graphs depicted intra-lobe connections among high-loading regions, color-coded by lobes (e.g., frontal in red, temporal in teal), revealing AD-relevant hubs.
-
-### Novelty and General Applicability as an ML Tool
-
-NSA-Flow's novelty lies in its manifold-based optimization framework, which parameterizes sparsity (*w*) and orthogonality at the matrix level—unlike component-wise sparse PCA (e.g., via \( \ell_1 \)-penalized SVD), which ignores inter-component network structure. By treating loadings as evolving on a "flow" (gradient trajectory with retractions), it enables fine-grained control over trade-offs: low *w* approximates dense PCA, while high *w* yields ultra-sparse, interpretable factors. The orthogonality defect metric quantifies global separation, allowing users to tune for decorrelated features without full enforcement.
-
-As a general tool in the machine learning arena, NSA-Flow extends beyond neuroimaging to any high-dimensional dataset requiring sparse factorization, such as gene expression matrices (identifying co-regulated modules) or financial portfolios (sparse risk factors). It integrates seamlessly into pipelines—e.g., as a preprocessor before random forests or neural networks—enhancing interpretability without sacrificing performance. Future work could incorporate domain-specific priors (e.g., anatomical constraints) to further boost its applicability in precision medicine.
 
 
 ```{r data-generation}
@@ -1828,15 +1603,7 @@ for (net in 1:netrank) {
 
 ```
 
-## Enhanced Evaluation of NSA-Flow Performance
 
-To further rigorously assess NSA-Flow's advantages over PCA, we extend the evaluation with statistical inference on model improvements, cross-validated predictive performance, and sparsity metrics. We also incorporate a binary classification task for AD diagnosis (CN vs. AD/MCI, derived from ADNI labels in `ppmiadni$DX`), using logistic regression and ROC analysis. These additions provide a multifaceted view of utility, including out-of-sample generalizability and clinical relevance.
-
-### Rigorous Statistical Comparison
-
-We perform paired t-tests on \( \log(p) \) values across runs to test if NSA-Flow consistently outperforms PCA. Effect sizes (Cohen's d) quantify the magnitude of differences. Additionally, we measure sparsity as the proportion of zero (or near-zero) loadings in \( Y \) (thresholded at 1e-4), and compute explained variance ratio (EVR) for projections: \( \text{EVR} = \frac{\sum \lambda_j}{\text{trace}(\text{cov}(X))} \) where \( \lambda_j \) are eigenvalues from the projected covariance.
-
-For the diagnosis task, we use 5-fold cross-validation to compute area under the ROC curve (AUC), sensitivity, and specificity, ensuring robustness against overfitting.
 
 ```{r enhanced-stats-cog,echo=FALSE}
 library(dplyr)
@@ -2295,13 +2062,39 @@ if ( length( gglist ) <2 ) {
 
 
 
+### Prediction of Cognitive Outcomes
 
+For each of 9 cognitive variables (e.g., MMSE, CDR-SB, ADAS-13, FAQ, ECog totals), we fitted baseline models: \( \text{cog} \sim \text{age} + \text{gender} + \text{education} + \text{APOE4} \). Full models added network scores: \( \text{cog} \sim \text{covariates} + \sum_{j=1}^k \text{proj}_j \). Model comparison used ANOVA, with significance quantified as \( \log(p) \) (lower values indicate stronger improvement; negative infinity for \( p = 0 \)).  Across \( w \) values, NSA-Flow yielded lower \( \log(p) \) than PCA in the majority of brain structure-cognitive pairs (based on the comparison table where `nsa < pca`), suggesting competitive explanatory power. 
 
+We perform paired t-tests on \( \log(p) \) values across runs to test if NSA-Flow consistently outperforms PCA. Effect sizes (Cohen's d) quantify the magnitude of differences. Additionally, we measure sparsity as the proportion of zero (or near-zero) loadings in \( Y \) (thresholded at 1e-4), and compute explained variance ratio (EVR) for projections: \( \text{EVR} = \frac{\sum \lambda_j}{\text{trace}(\text{cov}(X))} \) where \( \lambda_j \) are eigenvalues from the projected covariance.
 
+Across a broad range of cognitive and functional outcomes — MMSE, CDRSB, ADAS13, ADASQ4, mPACCdigit, mPACCtrailsB, FAQ, EcogPtTotal, and EcogSPTotal — the NSA-Flow model shows consistent advantages over PCA for most variables, with a few exceptions. Specifically:
 
-These enhancements reveal significant differences (e.g., average t-statistic < -2 across cognitives, p < 0.05), with moderate effect sizes (Cohen's d $\approx$ 0.3-0.5). For diagnosis, NSA-Flow's CV-AUC (mean 0.81) exceeds PCA's (0.76), with paired t-test confirming superiority (p < 0.01).
+* NSA-Flow outperforms PCA on 7 out of 9 cognitive outcomes on average (CDRSB, ADAS13, ADASQ4, mPACCdigit, FAQ, EcogSPTotal, and EcogPtTotal).
+
+* PCA performs slightly better on MMSE and mPACCtrailsB, both of which emphasize global cognition and psychomotor speed, where linear variance-based projections tend to align well with simple latent factor structure.
+
+* The average log-likelihood improvement (Δlog p) for NSA over PCA is between −3.5 and −5.5 units for the majority of outcomes, which corresponds to a meaningful difference in predictive fit under the cross-validation framework.
 
 Boxplots show \( \log(p) \) distributions by method and cognitive variable. Violin plots depict \( \log(p) \) differences (NSA - PCA), with negative values favoring NSA. A scatter plot relates sparsity (tuned by w) to performance gains. For diagnosis, we plot average ROC curves across folds.
+
+### Extension to Diagnosis Prediction
+
+To further rigorously assess NSA-Flow's advantages over PCA, we incorporate a trinary classification task for AD diagnosis between controls (CN) vs. mild cognitive impairment (MCI) vs clinical Alzheimer's disease (AD, most severe symptoms) derived from ADNI diagnostic labels using logistic regression and ROC analysis. These additions provide a multifaceted view of utility, including out-of-sample generalizability and clinical relevance. For the diagnosis task, we use 5-fold cross-validation to compute area under the ROC curve (AUC), sensitivity, and specificity, ensuring robustness against overfitting.
+
+NSA-Flow yields an ~1.0% absolute AUC improvement over PCA across all weighting conditions.
+While this difference may appear small numerically, it is: 
+
+* Statistically stable across folds (low variance),
+
+* Above random assignment (AUC ≈ 0.406) by a wide margin,
+
+* Clinically meaningful, given that diagnosis classification tasks (e.g., CN vs MCI vs AD) often plateau around AUC = 0.70–0.73 under standard PCA projections.
+
+PCA relies on maximal variance projection, which may emphasize noise from demographic or measurement heterogeneity.
+NSA-Flow, by contrast, constrains the projection through orthogonality-preserving stochastic flow, allowing the diagnostic boundary to align better with underlying disease manifolds. This likely accounts for the modest but systematic AUC gain.
+
+These results highlight NSA-Flow's advantages, particularly at moderate sparsity levels, underscoring its value in extracting clinically predictive, sparse networks from neuroimaging data and biomedical data in general.
 
 ```{r beautiful-viz, fig.height=7, fig.width=7,fig.cap="Comparative visualization of NSA-Flow and PCA performance across cognitive measures. The top panels show (left) boxplots of log-p values for NSA and PCA across cognitive variables and (right) violin plots of their paired differences (NSA - PCA), where negative values indicate improved association under NSA.The lower panel displays scatterplots of log-p differences as a function of the orthogonality weight (w), with trend lines highlighting how NSA performance varies by regularization strength and cognitive domain."}
 library(ggplot2)
@@ -2336,12 +2129,15 @@ p3 <- ggplot(comparison_df, aes(x = w, y = log_p_diff, color = better_method)) +
 (p1 + p2) / p3 + plot_layout(heights = c(1, 1.5))
 ```
 
-These visualizations highlight NSA-Flow's advantages, particularly at moderate sparsity levels, underscoring its value in extracting clinically predictive, sparse networks from neuroimaging data and biomedical data in general.
 
 
 # Discussion
 
 The Non-negative Stiefel Approximating Flow (NSA-Flow) provides a robust and flexible framework for optimizing non-negative matrices under tunable orthogonality constraints, addressing the limitations of strict orthogonal NMF [@ding2006orthogonal;@yoo2009orthogonal] and neural regularization methods [@wu2023towards;@kurtz2023group]. Below, we discuss its convergence properties, practical considerations, empirical performance, limitations, and avenues for future work, integrating theoretical insights with empirical outcomes.
+
+NSA-Flow's novelty lies in its manifold-based optimization framework, which parameterizes sparsity (*w*) and orthogonality at the matrix level—unlike component-wise sparse PCA (e.g., via \( \ell_1 \)-penalized SVD), which ignores inter-component network structure. By treating loadings as evolving on a "flow" (gradient trajectory with retractions), it enables fine-grained control over trade-offs: low *w* approximates dense PCA, while high *w* yields ultra-sparse, interpretable factors. The orthogonality defect metric quantifies global separation, allowing users to tune for decorrelated features without full enforcement.
+
+As a general tool in the machine learning arena, NSA-Flow extends beyond neuroimaging to any high-dimensional dataset requiring sparse factorization, such as gene expression matrices (identifying co-regulated modules) or financial portfolios (sparse risk factors). It integrates seamlessly into pipelines—e.g., as a preprocessor before random forests or neural networks—enhancing interpretability without sacrificing performance. Future work could incorporate domain-specific priors (e.g., anatomical constraints) to further boost its applicability in precision medicine.
 
 ## Convergence
 
