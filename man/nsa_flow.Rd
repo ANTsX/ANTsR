@@ -8,14 +8,14 @@ nsa_flow(
   Y0,
   X0 = NULL,
   w = 0.5,
-  retraction = c("polar", "soft_polar", "none"),
+  retraction = c("soft_polar", "polar", "none"),
   max_iter = 500,
   tol = 1e-05,
   verbose = FALSE,
   seed = 42,
   apply_nonneg = TRUE,
   optimizer = "fast",
-  initial_learning_rate = 0.001,
+  initial_learning_rate = "default",
   record_every = 1,
   window_size = 5,
   c1_armijo = 1e-06,
@@ -54,7 +54,8 @@ otherwise, pass the names of optimizers supported by \code{create_optimizer()}
 as seen in \code{list_simlr_optimizers()}. Default is "fast".}
 
 \item{initial_learning_rate}{Numeric, initial learning rate for the optimizer.
-Default is 1e-3.}
+  Default is 1e-3 for non-neg and 1 for unconstrained.  Otherwise, you can use \code{estimate_learning_rate_nsa()} to find a robust value.
+.  pass a string one of c("brent", "grid", "armijo", "golden", "adaptive") to engage this method.}
 
 \item{record_every}{Integer, frequency of recording iteration metrics.
 Default is 1 (record every iteration).}

@@ -10483,6 +10483,381 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
   stop("unsupported retraction_type in nsa_flow_retract_auto()")
 }
 
+
+#' Transform a matrix by standard preprocessing
+#'
+#' Applies centering, scaling, and/or normalization transforms
+#' to prepare data for optimization or learning-rate estimation.
+#'
+#' @param X Numeric matrix.
+#' @param method Character string specifying the transformation:
+#'   \itemize{
+#'     \item `"none"`: no transformation
+#'     \item `"center"`: subtract column means
+#'     \item `"zscore"`: center and scale columns by their standard deviations
+#'     \item `"minmax"`: rescale columns to [0, 1]
+#'     \item `"l2"`: normalize each column to unit L2 norm, then multiply by √(p·k)
+#'     \item `"frob"`: normalize entire matrix to unit Frobenius norm, then multiply by √(p·k)
+#'     \item `"frob_zscore"`: z-score columns, then normalize Frobenius norm,
+#'           then multiply by √(p·k)
+#'   }
+#'
+#' @return A list with:
+#'   \itemize{
+#'     \item \code{Xs}: transformed matrix
+#'     \item \code{params}: list of learned transform parameters
+#'   }
+#' @export
+transform_matrix <- function(X, method = c("none", "center", "zscore", "minmax", "l2", "frob", "frob_zscore")) {
+  method <- match.arg(method)
+  stopifnot(is.matrix(X))
+
+  params <- list(method = method)
+  Xs <- X
+  scale_factor <- sqrt(prod(dim(X)))  # dimension-based scaling factor
+
+  if (method == "none") {
+    return(list(Xs = X, params = params))
+  }
+
+  if (method == "center") {
+    mu <- colMeans(X)
+    Xs <- sweep(X, 2, mu, "-")
+    params$mu <- mu
+  }
+
+  if (method == "zscore") {
+    mu <- colMeans(X)
+    sdv <- apply(X, 2, sd)
+    sdv[sdv == 0] <- 1
+    Xs <- sweep(X, 2, mu, "-")
+    Xs <- sweep(Xs, 2, sdv, "/")
+    params$mu <- mu
+    params$sdv <- sdv
+  }
+
+  if (method == "minmax") {
+    minv <- apply(X, 2, min)
+    maxv <- apply(X, 2, max)
+    rng <- maxv - minv
+    rng[rng == 0] <- 1
+    Xs <- sweep(X, 2, minv, "-")
+    Xs <- sweep(Xs, 2, rng, "/")
+    params$minv <- minv
+    params$maxv <- maxv
+  }
+
+  if (method == "l2") {
+    l2 <- sqrt(colSums(X^2))
+    l2[l2 == 0] <- 1
+    Xs <- sweep(X, 2, l2, "/")
+    Xs <- Xs * scale_factor
+    params$l2 <- l2
+    params$scale_factor <- scale_factor
+  }
+
+  if (method == "frob") {
+    frob_norm <- sqrt(sum(X^2))
+    if (frob_norm < 1e-12) frob_norm <- 1
+    Xs <- X / frob_norm * scale_factor
+    params$frob_norm <- frob_norm
+    params$scale_factor <- scale_factor
+  }
+
+  if (method == "frob_zscore") {
+    mu <- colMeans(X)
+    sdv <- apply(X, 2, sd)
+    sdv[sdv == 0] <- 1
+    Xs <- sweep(X, 2, mu, "-")
+    Xs <- sweep(Xs, 2, sdv, "/")
+    frob_norm <- sqrt(sum(Xs^2))
+    if (frob_norm < 1e-12) frob_norm <- 1
+    Xs <- Xs / frob_norm * scale_factor
+    params$mu <- mu
+    params$sdv <- sdv
+    params$frob_norm <- frob_norm
+    params$scale_factor <- scale_factor
+  }
+
+  colnames(Xs) <- colnames(X)
+  rownames(Xs) <- rownames(X)
+
+  list(Xs = Xs, params = params)
+}
+
+
+#' Undo a previously applied matrix transform
+#'
+#' @param Xs Transformed matrix.
+#' @param params List of parameters returned by \code{transform_matrix()}.
+#'
+#' @return The untransformed (original scale) matrix.
+#' @export
+undo_transform_matrix <- function(Xs, params) {
+  stopifnot(is.matrix(Xs), is.list(params))
+  method <- params$method
+  Xrec <- Xs
+
+  if (method == "none") return(Xrec)
+
+  if (method == "center") {
+    Xrec <- sweep(Xs, 2, params$mu, "+")
+  }
+
+  if (method == "zscore") {
+    Xrec <- sweep(Xs, 2, params$sdv, "*")
+    Xrec <- sweep(Xrec, 2, params$mu, "+")
+  }
+
+  if (method == "minmax") {
+    rng <- params$maxv - params$minv
+    rng[rng == 0] <- 1
+    Xrec <- sweep(Xs, 2, rng, "*")
+    Xrec <- sweep(Xrec, 2, params$minv, "+")
+  }
+
+  if (method == "l2") {
+    Xrec <- Xs / params$scale_factor
+    Xrec <- sweep(Xrec, 2, params$l2, "*")
+  }
+
+  if (method == "frob") {
+    Xrec <- Xs / params$scale_factor * params$frob_norm
+  }
+
+  if (method == "frob_zscore") {
+    Xrec <- Xs / params$scale_factor * params$frob_norm
+    Xrec <- sweep(Xrec, 2, params$sdv, "*")
+    Xrec <- sweep(Xrec, 2, params$mu, "+")
+  }
+
+  colnames(Xrec) <- colnames(Xs)
+  rownames(Xrec) <- rownames(Xs)
+
+  Xrec
+}
+
+
+#' Apply a learned transform to a new matrix
+#'
+#' Applies the same centering, scaling, and normalization learned from a training matrix.
+#'
+#' @param Xnew New data matrix to transform.
+#' @param params Parameters returned by \code{transform_matrix()}.
+#'
+#' @return Transformed matrix using the learned parameters.
+#' @export
+apply_transform_matrix <- function(Xnew, params) {
+  stopifnot(is.matrix(Xnew), is.list(params))
+  method <- params$method
+  Xs <- Xnew
+
+  if (method == "none") return(Xs)
+
+  if (method == "center") {
+    Xs <- sweep(Xs, 2, params$mu, "-")
+  }
+
+  if (method == "zscore") {
+    Xs <- sweep(Xs, 2, params$mu, "-")
+    Xs <- sweep(Xs, 2, params$sdv, "/")
+  }
+
+  if (method == "minmax") {
+    rng <- params$maxv - params$minv
+    rng[rng == 0] <- 1
+    Xs <- sweep(Xs, 2, params$minv, "-")
+    Xs <- sweep(Xs, 2, rng, "/")
+  }
+
+  if (method == "l2") {
+    Xs <- sweep(Xs, 2, params$l2, "/")
+    Xs <- Xs * (params$scale_factor + 1e-12)
+  }
+
+  if (method == "frob") {
+    Xs <- Xs / (params$frob_norm + 1e-12) * (params$scale_factor + 1e-12)
+  }
+
+  if (method == "frob_zscore") {
+    Xs <- sweep(Xs, 2, params$mu, "-")
+    Xs <- sweep(Xs, 2, params$sdv, "/")
+    Xs <- Xs / (params$frob_norm + 1e-12) * (params$scale_factor + 1e-12)
+  }
+
+  colnames(Xs) <- colnames(Xnew)
+  rownames(Xs) <- rownames(Xnew)
+
+  Xs
+}
+
+
+
+#' Estimate Robust Learning Rate for NSA-Flow
+#'
+#' @description
+#' General-purpose estimator for an initial learning rate in \code{nsa_flow()},
+#' supporting multiple automatic strategies including the original Brent line search.
+#'
+#' @param Y0 Numeric matrix, initial point.
+#' @param X0 Numeric matrix, target matrix.
+#' @param w Weighting parameter between fidelity and orthogonality.
+#' @param retraction Retraction method used by nsa_flow.
+#' @param nsa_energy Optional function(Y) to compute NSA energy; if NULL, uses default.
+#' @param apply_nonneg Logical; if TRUE, applies nonnegativity.
+#' @param method Character; learning rate estimation method:
+#'   one of c("brent", "grid", "armijo", "golden", "adaptive").
+#' @param verbose Logical; if TRUE, prints diagnostics.
+#' @param plot Logical; if TRUE, plots energy vs learning rate (if applicable).
+#'
+#' @return A list with:
+#'   \itemize{
+#'     \item \code{estimated_learning_rate}: numeric, chosen value.
+#'     \item \code{search_df}: data frame with log10(alpha), alpha, and energy (if available).
+#'     \item \code{plot}: ggplot object (if \code{plot=TRUE}), otherwise NULL.
+#'   }
+#' @export
+estimate_learning_rate_nsa <- function(
+  Y0, X0,
+  w = 0.5,
+  retraction = "soft_polar",
+  nsa_energy = NULL,
+  apply_nonneg = TRUE,
+  method = c("brent", "grid", "armijo", "golden", "adaptive", "default" ),
+  verbose = TRUE,
+  plot = TRUE
+) {
+  method <- match.arg(method)
+  stopifnot(is.matrix(Y0), is.matrix(X0))
+  if (method == "default" & apply_nonneg) {
+    return(list(
+      estimated_learning_rate = 0.001,
+      search_df = NULL,
+      plot = NULL
+    ))
+  } else if (method == "default" & !apply_nonneg) {
+    return(list(
+      estimated_learning_rate = 1.0,
+      search_df = NULL,
+      plot = NULL
+    ))
+  }
+
+  # --- Local helper (defect penalty) ---
+  defect_fast <- function(V) {
+    norm2 <- sum(V^2)
+    if (norm2 <= 1e-12) return(0)
+    S <- crossprod(V)
+    diagS <- diag(S)
+    off_f2 <- sum(S * S) - sum(diagS^2)
+    off_f2 / norm2^2
+  }
+
+  # --- Default energy function if not provided ---
+  if (is.null(nsa_energy)) {
+    nsa_energy <- function(V) {
+      Vp <- nsa_flow_retract_auto(V, w, retraction)
+      if (apply_nonneg) Vp <- pmax(Vp, 0)
+      0.5 * sum((Vp - X0)^2) + 0.1 * defect_fast(Vp)
+    }
+  }
+
+  # --- Gradient direction ---
+  grad <- Y0 - X0
+  grad_norm <- sqrt(sum(grad^2)) + 1e-12
+  grad_dir <- grad # / grad_norm
+
+  # --- Energy along line ---
+  line_obj <- function(alpha) {
+    Y_trial <- Y0 + alpha * grad_dir
+    nsa_energy(Y_trial)
+  }
+  lowr=-8.
+  upr=2.0
+  # --- Method 1: Brent (original) ---
+  if (method == "brent") {
+    opt_result <- optim(par = 0, fn = function(log_alpha) line_obj(10^log_alpha),
+                        method = "Brent", lower = lowr, upper = upr)
+    best_log_alpha <- opt_result$par
+    best_alpha <- 10^best_log_alpha
+  }
+
+  # --- Method 2: Grid search ---
+  if (method == "grid") {
+    trial_logs <- seq(lowr, upr, length.out = 100)
+    trial_alphas <- 10^trial_logs
+    energies <- sapply(trial_alphas, line_obj)
+    best_idx <- which.min(energies)
+    best_alpha <- trial_alphas[best_idx]
+  }
+
+  # --- Method 3: Armijo backtracking line search ---
+  if (method == "armijo") {
+    alpha <- 1.0
+    c <- 1e-4
+    rho <- 0.5
+    E0 <- line_obj(0)
+    grad_dot <- sum(grad_dir * grad)
+    while (line_obj(alpha) > E0 - c * alpha * grad_dot) {
+      alpha <- alpha * rho
+      if (alpha < 1e-5) break
+    }
+    best_alpha <- alpha
+  }
+
+  # --- Method 4: Golden-section search ---
+  if (method == "golden") {
+    phi <- (1 + sqrt(5)) / 2
+    a <- 10^lowr; b <- 10^upr
+    tol <- 1e-5
+    while ((b - a) > tol) {
+      c1 <- b - (b - a) / phi
+      c2 <- a + (b - a) / phi
+      if (line_obj(c1) < line_obj(c2)) b <- c2 else a <- c1
+    }
+    best_alpha <- (a + b) / 2
+  }
+
+  # --- Method 5: Adaptive curvature-based rule ---
+  if (method == "adaptive") {
+    f0 <- line_obj(0)
+    f1 <- line_obj(1e-2)
+    curvature <- abs(f1 - f0) / 1e-2
+    best_alpha <- 1 / (1 + curvature)
+    best_alpha <- max(min(best_alpha, 10), 1e-5)
+  }
+
+  # --- Diagnostics ---
+  if (verbose)
+    cat(sprintf("[%s] Estimated learning rate: %.3e\n", method, best_alpha))
+
+  # --- Optional diagnostic curve ---
+  lr_plot <- NULL
+  search_df <- NULL
+  if (plot && method %in% c("brent", "grid", "golden", "adaptive")) {
+    trial_logs <- seq(-5, 2, length.out = 60)
+    trial_alphas <- 10^trial_logs
+    trial_energies <- sapply(trial_alphas, line_obj)
+    search_df <- data.frame(log10_lr = trial_logs, learning_rate = trial_alphas,
+                            energy = trial_energies)
+    lr_plot <- ggplot2::ggplot(search_df, ggplot2::aes(x = learning_rate, y = energy)) +
+      ggplot2::geom_line(color = "#0072B2", size = 1.2) +
+      ggplot2::geom_vline(xintercept = best_alpha, color = "red", linetype = "dashed") +
+      ggplot2::scale_x_log10() +
+      ggplot2::labs(title = paste("Learning Rate Estimation (", method, ")", sep = ""),
+                    subtitle = sprintf("Estimated α = %.3e", best_alpha),
+                    x = "Learning Rate (α, log scale)", y = "Energy") +
+      ggplot2::theme_minimal(base_size = 14)
+  }
+
+  list(
+    estimated_learning_rate = best_alpha,
+    search_df = search_df,
+    plot = lr_plot
+  )
+}
+
+
 #' @title NSA-Flow Optimization
 #'
 #' @description
@@ -10509,7 +10884,8 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
 #'   otherwise, pass the names of optimizers supported by \code{create_optimizer()} 
 #'   as seen in \code{list_simlr_optimizers()}. Default is "fast".
 #' @param initial_learning_rate Numeric, initial learning rate for the optimizer.
-#'   Default is 1e-3.
+#'   Default is 1e-3 for non-neg and 1 for unconstrained.  Otherwise, you can use \code{estimate_learning_rate_nsa()} to find a robust value.
+#'.  pass a string one of c("brent", "grid", "armijo", "golden", "adaptive") to engage this method.  
 #' @param record_every Integer, frequency of recording iteration metrics.
 #'   Default is 1 (record every iteration).
 #' @param window_size Integer, size of the window for energy stability convergence check.
@@ -10559,10 +10935,10 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
 #' @export
 nsa_flow <- function(
   Y0, X0 = NULL, w = 0.5,
-  retraction = c( "polar",  "soft_polar",  "none" ),
+  retraction = c(  "soft_polar", "polar",   "none" ),
   max_iter = 500, tol = 1e-5, verbose = FALSE, seed = 42,
   apply_nonneg = TRUE, optimizer = "fast",
-  initial_learning_rate = 1e-3,
+  initial_learning_rate = 'default',
   record_every = 1, window_size = 5, c1_armijo=1e-6,
   simplified = FALSE,
   plot = FALSE
@@ -10577,7 +10953,6 @@ nsa_flow <- function(
   stopifnot(is.null(seed) || is.numeric(seed))
   stopifnot(is.logical(apply_nonneg))
   stopifnot(is.character(optimizer))
-  stopifnot(is.numeric(initial_learning_rate), initial_learning_rate > 0)
   stopifnot(is.integer(record_every) || record_every == as.integer(record_every), record_every > 0)
   stopifnot(is.integer(window_size) || window_size == as.integer(window_size), window_size > 0)
   stopifnot(is.logical(plot))
@@ -10646,6 +11021,8 @@ nsa_flow <- function(
     if ( apply_nonneg ) X0 <- pmax(X0, 0)
     if (nrow(X0) != p || ncol(X0) != k) stop("X0 must have same dimensions as Y0")
   }
+#  X0=transform_matrix(X0, method = "frob")$Xs
+#  Y0=transform_matrix(Y0, method = "frob")$Xs
   retraction <- match.arg(retraction)
   Y <- Y0
   # --- Compute initial scales ---
@@ -10656,9 +11033,8 @@ nsa_flow <- function(
   # --- Weighting terms ---
   fid_eta <- (1 - w) / (g0 * p * k)
   c_orth <- 4 * w / d0
-  # --- Optimizer initialization ---
-  # This assumes create_optimizer and step are defined in the global environment
-  opt <- create_optimizer( optimizer, vmats = list(Y), learning_rate = initial_learning_rate )
+  fid_eta_pt5 <- (1 - 0.5) / (g0 * p * k)
+  c_orth_pt5 <- 4 * 0.5 / d0
   trace <- list()
   recent_energies <- numeric(0)
   t0 <- Sys.time()
@@ -10695,6 +11071,40 @@ nsa_flow <- function(
     }
     e
   }
+
+  nsa_energy_pt5 <- function(Vp) {
+    # --- Retraction ---
+    Vp <- nsa_flow_retract_auto(Vp, 0.5, retraction)
+    # --- Optional non-negativity ---
+    Vp <- if (apply_nonneg) pmax(Vp, 0) else Vp
+    e <- 0.5 * fid_eta_pt5 * sum((Vp - X0)^2)
+    if (c_orth_pt5 > 0) {
+      norm2_V <- sum(Vp^2)
+      if (norm2_V > 0) {
+        defect <- defect_fast(Vp)  # Fast!
+        e <- e + 0.25 * c_orth_pt5 * defect
+        }
+      }
+    e
+  }
+
+  # --- Optimizer initialization ---
+    if (is.null(initial_learning_rate) || is.na(initial_learning_rate)) {
+        initial_learning_rate <- "brent"
+    }
+    if (is.character(initial_learning_rate)) {
+        if (verbose) 
+            cat("Estimating robust initial learning rate using optim()...\n")
+        lr_res <- estimate_learning_rate_nsa(Y0, X0, w = w, 
+            retraction = retraction, nsa_energy = nsa_energy_pt5, 
+            apply_nonneg = apply_nonneg, method = initial_learning_rate, 
+            verbose = verbose, plot = FALSE)
+        initial_learning_rate <- lr_res$estimated_learning_rate
+        lr <- initial_learning_rate
+        if (verbose) 
+            cat(paste("Estimated initial learning rate:", initial_learning_rate, "\n"))
+    }
+  opt <- create_optimizer( optimizer, vmats = list(Y), learning_rate = lr )
   for (it in seq_len(max_iter)) {
     # --- Fidelity descent dir ---
     grad_fid <- fid_eta * (Y - X0) * (-1.0)
@@ -10880,7 +11290,6 @@ nsa_flow <- function(
     target = X0
   )
 }
-
 
 
 #' NSA-Flow Algorithm Flowchart

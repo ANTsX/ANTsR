@@ -358,9 +358,9 @@ configs <- filter_config_space( expand.grid(
 ) )
 
 configs <- filter_config_space( expand.grid(
-  w = c(  0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99 ), 
-  retraction = rtypes, 
-  apply_nonneg = c( TRUE ),
+  w = c(  0.1, 0.25, 0.5, 0.75, 0.9 ), 
+  retraction = c( "soft_polar", "polar", "none"), 
+  apply_nonneg = c( TRUE, FALSE ),
   dataset = datasets, # , "sparse_neg"
   x0_null = c( TRUE ),
   max_iter = c( 200 ),
@@ -380,7 +380,7 @@ if ( ! exists("results") ) {
       mb <- microbenchmark(
         res <- nsa_flow( data$Y0, X0=X0_use, w=cfg$w, 
           retraction=cfg$retraction,  max_iter=cfg$max_iter, optimizer='fast',
-          initial_learning_rate=0.01,
+          initial_learning_rate='armijo',
           apply_nonneg=cfg$apply_nonneg, seed=42+rep, verbose=v, plot=TRUE, simplified=FALSE),
         times=1
       )
@@ -777,7 +777,7 @@ Together, these tests validate both the correctness and numerical resilience of 
 # Discussion
 
 ## Raw and Relative Fidelity 
-```{r relfid}
+```{r relfid,echo=FALSE}
 
 
 
@@ -856,7 +856,7 @@ ggplot(summary_df, aes(x = factor(w), y = mean_fid / mean_fid_0,
 ```
 
 ## Orthogonality Defect
-```{r ordef}
+```{r ordef,echo=FALSE}
 
 if ( nrow(tradeoff_df_signed > 0)) 
 ggplot(tradeoff_df_signed, aes(x = w, y = orth, color = dataset, group = dataset)) +
@@ -897,7 +897,7 @@ ggplot(summary_df, aes(x = factor(w), y = mean_orth / mean_orth_0,
 
 
 ## Relative Orthogonality 
-```{r rel_orth}
+```{r rel_orth,echo=FALSE}
 if ( nrow(tradeoff_df_signed > 0)) 
 ggplot(tradeoff_df_signed, aes(x = w, y = rel_orth, color = dataset, group = dataset)) +
   geom_line(linewidth = 1.1) +

@@ -39,7 +39,7 @@ if (!exists("raw_results")) {
       start_time <- Sys.time()
       res <- tryCatch({
         nsa_flow(mat1, w = w, verbose = F, retraction = def_ret, simplified = FALSE,
-                 optimizer = o, tol = tol, max_iter = max_iter, initial_learning_rate=0.01 )
+                 optimizer = o, tol = tol, max_iter = max_iter )
       }, error = function(e) NULL)
 
       end_time <- Sys.time()
@@ -66,7 +66,7 @@ if (!exists("raw_results")) {
 
 ## Static Visualizations
 
-```{r ws_trends, fig.width=10, fig.height=12,echo=FALSE}
+```{r ws_trends, fig.width=12, fig.height=12, echo=FALSE}
 raw_results$Optimizer <- factor(raw_results$Optimizer, levels = unique(raw_results$Optimizer))
 
 p1 <- ggplot(raw_results, aes(x = w, y = Orthogonality, color = Optimizer)) +
@@ -76,7 +76,7 @@ p1 <- ggplot(raw_results, aes(x = w, y = Orthogonality, color = Optimizer)) +
   labs(title = "Orthogonality Defect vs Retraction Weight (w)",
        y = "Orthogonality Defect (↓)", x = "w") +
   theme_minimal(base_size = 14) +
-#  ylim(0, 0.05) +
+  ylim(0, 0.05) +
   theme(strip.text = element_text(face = "bold"), legend.position = "none")
 
 p2 <- ggplot(raw_results, aes(x = w, y = Fidelity, color = Optimizer)) +
@@ -86,7 +86,7 @@ p2 <- ggplot(raw_results, aes(x = w, y = Fidelity, color = Optimizer)) +
   labs(title = "Fidelity vs Retraction Weight (w)",
        y = "Fidelity (↓)", x = "w") +
   theme_minimal(base_size = 14) +
-#  ylim(0.1, 2.0) +
+  ylim(0.1, 1.1) +
   theme(strip.text = element_text(face = "bold"), legend.position = "none")
 
 combined <- p1 / p2
@@ -131,7 +131,7 @@ cat(sprintf("**Best Optimizer (Including Runtime):** %s\n", best_with_time))
 
 ## Pareto Frontier
 
-```{r pareto_plot, fig.width=10, fig.height=8,echo=FALSE}
+```{r pareto_plot, fig.width=5.5, echo=FALSE}
 if (!"Optimizer" %in% names(summary_df)) {
   summary_df$Optimizer <- factor(seq_len(nrow(summary_df)))
   warning("Column 'Optimizer' not found — assigning placeholder labels.")
