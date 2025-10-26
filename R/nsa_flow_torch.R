@@ -34,6 +34,8 @@
 #' @param simplified Logical, if \code{TRUE}, uses the simplified objective
 #'   \deqn{\min_U (1 - w) \frac{1}{2} ||U - Z||_F^2 + w \frac{1}{2} ||U^\top U - I_k||_F^2}.
 #'   If \code{FALSE}, uses the invariant defect objective. Default is \code{FALSE}.
+#' @param project_full_gradient Logical, if \code{TRUE}, projects the full gradient instead 
+#' of just the orthogonal component. Default is \code{FALSE}.
 #' @param plot Logical, if \code{TRUE}, generates a ggplot of fidelity and orthogonality
 #'   traces with dual axes. Default is \code{FALSE}.
 #'
@@ -81,10 +83,21 @@ nsa_flow_torch <- function(
   initial_learning_rate = 'default',
   record_every = 1, window_size = 5, c1_armijo=1e-6,
   simplified = FALSE,
+  project_full_gradient = FALSE,
   plot = FALSE
 ) {
   if (!is.matrix(Y0)) {
     stop("Y0 must be a numeric matrix.")
+  }
+
+  if (is.null(X0)) {
+    if ( apply_nonneg ) X0 <- pmax(Y0, 0) else X0 = Y0
+    perturb_scale <- sqrt(sum(Y0^2)) / sqrt(length(Y0)) * 0.05
+    Y0 <- Y0 + matrix(rnorm(nrow(Y0) * ncol(Y0), sd = perturb_scale), nrow(Y0), ncol(Y0))
+    if (verbose) cat("Added perturbation to Y0\n")
+  } else {
+    if ( apply_nonneg ) X0 <- pmax(X0, 0)
+    if (nrow(X0) != nrow(Y0) || ncol(X0) != ncol(Y0)) stop("X0 must have same dimensions as Y0")
   }
 
   retraction_type <- match.arg(retraction)
@@ -115,14 +128,66 @@ nsa_flow_torch <- function(
     record_every = as.integer(record_every),
     window_size = as.integer(window_size),
     simplified = simplified,
+    project_full_gradient = project_full_gradient
     #
 #    armijo_beta = armijo_beta,
 #    armijo_c = armijo_c,
   )
 
+
+  df = as.data.frame(reticulate::py_to_r(res$traces))
+  # Suppose your data frame is named df
+  cols <- c("iter", "time", "fidelity", "orthogonality", "total_energy")
+  # Find all iteration suffixes
+  suffixes <- unique(gsub(".*\\.", "", grep("\\.", names(df), value = TRUE)))
+  suffixes <- c("", sort(unique(suffixes)))  # include first iteration (no suffix)
+
+  # Build rows for each suffix
+  rows <- lapply(suffixes, function(suf) {
+    postfix <- if (suf == "") "" else paste0(".", suf)
+    subset <- df[ , paste0(cols, postfix), drop = FALSE]
+    names(subset) <- cols
+    subset
+  })
+
+  # Bind all iterations together
+  trace_df <- do.call(rbind, rows)
+  rownames(trace_df) <- NULL
+
+  if (plot && !is.null(trace_df) && nrow(trace_df) > 0) {
+    max_fid <- max(trace_df$fidelity, na.rm = TRUE)
+    max_orth <- max(trace_df$orthogonality, na.rm = TRUE)
+    ratio <- if (max_orth > 0) max_fid / max_orth else 1
+    energy_plot <- ggplot2::ggplot(trace_df, ggplot2::aes(x = iter)) +
+      ggplot2::geom_line(ggplot2::aes(y = fidelity, color = "Fidelity"), size = 1.2) +
+      ggplot2::geom_point(ggplot2::aes(y = fidelity, color = "Fidelity"), size = 1.5, alpha = 0.7) +
+      ggplot2::geom_line(ggplot2::aes(y = orthogonality * ratio, color = "Orthogonality"), size = 1.2) +
+      ggplot2::geom_point(ggplot2::aes(y = orthogonality * ratio, color = "Orthogonality"), size = 1.5, alpha = 0.7) +
+      ggplot2::scale_y_continuous(name = "Fidelity Energy",
+                                  sec.axis = ggplot2::sec_axis(~ . / ratio, name = "Orthogonality Defect")) +
+      ggplot2::scale_color_manual(values = c("Fidelity" = "#1f78b4", "Orthogonality" = "#33a02c")) +
+      ggplot2::labs(title = paste("NSA-Flow Optimization Trace: ", retraction),
+                    subtitle = "Fidelity and Orthogonality Terms (Dual Scales)",
+                    x = "Iteration", color = "Term") +
+      ggplot2::theme_minimal(base_size = 14) +
+      ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
+                     plot.subtitle = ggplot2::element_text(hjust = 0.5),
+                     legend.position = "top",
+                     panel.grid.major = ggplot2::element_line(color = "gray80"),
+                     panel.grid.minor = ggplot2::element_line(color = "gray90"),
+                     axis.title.y.left = ggplot2::element_text(color = "#1f78b4"),
+                     axis.text.y.left = ggplot2::element_text(color = "#1f78b4"),
+                     axis.title.y.right = ggplot2::element_text(color = "#33a02c"),
+                     axis.text.y.right = ggplot2::element_text(color = "#33a02c"))
+  }
+  Y = as.matrix(res$Y$detach()$numpy())
+  rownames(Y) <- rownames(Y0)
+  colnames(Y) <- colnames(Y0)
   list(
-    Y = as.matrix(res$Y$detach()$numpy()),
+    Y=Y,
     energy = reticulate::py_to_r(res$best_total_energy),
-    iter = reticulate::py_to_r(res$final_iter)
+    traces = trace_df,
+    iter = reticulate::py_to_r(res$final_iter),
+    plot = if (plot) energy_plot else NULL
   )
 }
