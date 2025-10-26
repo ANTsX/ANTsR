@@ -38,6 +38,7 @@
 #' of just the orthogonal component. Default is \code{FALSE}.
 #' @param plot Logical, if \code{TRUE}, generates a ggplot of fidelity and orthogonality
 #'   traces with dual axes. Default is \code{FALSE}.
+#' @param precision Character string, either 'float32' or 'float64' to set the precision
 #'
 #' @return A list containing:
 #'   \itemize{
@@ -84,11 +85,14 @@ nsa_flow_torch <- function(
   record_every = 1, window_size = 5, c1_armijo=1e-6,
   simplified = FALSE,
   project_full_gradient = FALSE,
-  plot = FALSE
+  plot = FALSE,
+  precision = 'float64'
 ) {
   if (!is.matrix(Y0)) {
     stop("Y0 must be a numeric matrix.")
   }
+  p <- nrow(Y0)
+  k <- ncol(Y0)
 
   if (is.null(X0)) {
     if ( apply_nonneg ) X0 <- pmax(Y0, 0) else X0 = Y0
@@ -101,6 +105,92 @@ nsa_flow_torch <- function(
   }
 
   retraction_type <- match.arg(retraction)
+
+  # Fast ortho terms (used in gradients; optional c_orth scaling)
+  compute_ortho_terms <- function(Y, c_orth = 1, simplified = FALSE ) {
+    norm2 <- sum(Y^2)
+    if (norm2 <= 1e-12 || c_orth <= 0) {
+      return(list(grad_orth = matrix(0, nrow(Y), ncol(Y)), defect = 0, norm2 = norm2))
+    }
+    S <- crossprod(Y)  # Once!
+    diagS <- diag(S)
+    off_f2 <- sum(S * S) - sum(diagS^2)
+    defect <- off_f2 / norm2^2
+    Y_S <- Y %*% S
+    Y_diag_scale <- sweep(Y, 2, diagS, "*")  # Columns of Y scaled by diagS
+    term1 <- (Y_S - Y_diag_scale) / norm2^2
+    term2 <- (defect / norm2) * Y
+    if ( simplified ) {
+      grad_orth <- - c_orth * 2 * Y %*% (S - diag(ncol(Y)))
+      } else {
+      grad_orth <- c_orth * (term1 - term2)
+      }
+    list(grad_orth = grad_orth, defect = defect, norm2 = norm2)
+  }
+
+  Y <- Y0
+  # --- Compute initial scales ---
+  g0 <- 0.5 * sum((Y0 - X0)^2) / (p * k)
+  if (g0 < 1e-8) g0 <- 1e-8
+  d0 <- invariant_orthogonality_defect(Y0)  # Fast!
+  if (d0 < 1e-8) d0 <- 1e-8
+  # --- Weighting terms ---
+  fid_eta <- (1 - w) / (g0 * p * k)
+  c_orth <- 4 * w / d0
+  fid_eta_pt5 <- (1 - 0.5) / (g0 * p * k)
+  c_orth_pt5 <- 4 * 0.5 / d0
+  trace <- list()
+  recent_energies <- numeric(0)
+  t0 <- Sys.time()
+  # --- Track best solution ---
+  best_Y <- Y
+  best_total_energy <- Inf
+  # --- Compute initial gradient for relative norm tolerance ---
+  grad_fid_init <- fid_eta * (Y - X0) * (-1.0)
+  ortho_init <- compute_ortho_terms(Y, c_orth, simplified=simplified)
+  grad_orth_init <- ortho_init$grad_orth
+  if (c_orth > 0) {
+    sym_term_orth_init <- symm(crossprod(Y, grad_orth_init))  # t(Y) %*% = crossprod(Y, .)
+    rgrad_orth_init <- grad_orth_init - Y %*% sym_term_orth_init
+  } else {
+    rgrad_orth_init <- grad_orth_init
+  }
+  rgrad_init <- grad_fid_init + rgrad_orth_init
+  init_grad_norm <- sqrt(sum(rgrad_init^2)) + 1e-8
+  nsa_energy_pt5 <- function(Vp) {
+    # --- Retraction ---
+    Vp <- nsa_flow_retract_auto(Vp, 0.5, retraction)
+    # --- Optional non-negativity ---
+    Vp <- if (apply_nonneg) pmax(Vp, 0) else Vp
+    e <- 0.5 * fid_eta_pt5 * sum((Vp - X0)^2)
+    if (c_orth_pt5 > 0) {
+      norm2_V <- sum(Vp^2)
+      if (norm2_V > 0) {
+        defect <- invariant_orthogonality_defect(Vp)  # Fast!
+        e <- e + 0.25 * c_orth_pt5 * defect
+        }
+      }
+    e
+  }
+
+  # --- Optimizer initialization ---
+    if (is.null(initial_learning_rate) || is.na(initial_learning_rate)) {
+        initial_learning_rate <- "brent"
+    }
+    if (is.character(initial_learning_rate)) {
+        if (verbose) 
+            cat("Estimating robust initial learning rate using optim()...\n")
+        lr_res <- estimate_learning_rate_nsa(Y0, X0, w = w, 
+            retraction = retraction, nsa_energy = nsa_energy_pt5, 
+            apply_nonneg = apply_nonneg, method = initial_learning_rate, 
+            verbose = verbose, plot = FALSE)$estimated_learning_rate
+          
+    } else {
+        lr_res <- initial_learning_rate
+    }
+
+  print(lr_res)
+
 
   torch <- reticulate::import("torch", convert = FALSE)
   pynsa <- reticulate::import("nsa_flow", convert=FALSE )
@@ -124,11 +214,12 @@ nsa_flow_torch <- function(
     seed = as.integer(seed),
     apply_nonneg = apply_nonneg,
     optimizer = optimizer,
-    initial_learning_rate = initial_learning_rate,
+    initial_learning_rate = lr_res,
     record_every = as.integer(record_every),
     window_size = as.integer(window_size),
     simplified = simplified,
-    project_full_gradient = project_full_gradient
+    project_full_gradient = project_full_gradient,
+    precision=precision
     #
 #    armijo_beta = armijo_beta,
 #    armijo_c = armijo_c,

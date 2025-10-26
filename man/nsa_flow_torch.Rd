@@ -21,7 +21,8 @@ nsa_flow_torch(
   c1_armijo = 1e-06,
   simplified = FALSE,
   project_full_gradient = FALSE,
-  plot = FALSE
+  plot = FALSE,
+  precision = "float64"
 )
 }
 \arguments{
@@ -75,6 +76,8 @@ of just the orthogonal component. Default is \code{FALSE}.}
 
 \item{plot}{Logical, if \code{TRUE}, generates a ggplot of fidelity and orthogonality
 traces with dual axes. Default is \code{FALSE}.}
+
+\item{precision}{Character string, either 'float32' or 'float64' to set the precision}
 }
 \value{
 A list containing:
