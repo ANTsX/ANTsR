@@ -193,12 +193,8 @@ nsa_flow_torch <- function(
         lr_res <- initial_learning_rate
     }
 
-  print(lr_res)
-
-
   torch <- reticulate::import("torch", convert = FALSE)
   pynsa <- reticulate::import("nsa_flow", convert=FALSE )
-
 
   if (is.null(pynsa) ) {
     stop("Could not find Python package `nsa_flow` -- please install it first.")
@@ -371,7 +367,6 @@ nsa_flow_torch_ag <- function(
   if ( optimizer == "fast" ) {
     optimizer <- "lars"
   }
-
   if (is.null(X0)) {
     if ( apply_nonneg ) X0 <- pmax(Y0, 0) else X0 = Y0
     perturb_scale <- sqrt(sum(Y0^2)) / sqrt(length(Y0)) * 0.05
@@ -381,8 +376,8 @@ nsa_flow_torch_ag <- function(
     if ( apply_nonneg ) X0 <- pmax(X0, 0)
     if (nrow(X0) != nrow(Y0) || ncol(X0) != ncol(Y0)) stop("X0 must have same dimensions as Y0")
   }
-
   retraction_type <- match.arg(retraction)
+
 
   # Fast ortho terms (used in gradients; optional c_orth scaling)
   compute_ortho_terms <- function(Y, c_orth = 1, simplified = FALSE ) {
@@ -451,10 +446,10 @@ nsa_flow_torch_ag <- function(
     e
   }
 
-  # --- Optimizer initialization ---
-    if (is.null(initial_learning_rate) || is.na(initial_learning_rate)) {
-        initial_learning_rate <- "brent"
-    }
+  if ( is.na(initial_learning_rate) | is.null(initial_learning_rate) ) {
+    initopy = reticulate::r_to_py(NULL)
+  } else {
+    # --- Optimizer initialization ---
     if (is.character(initial_learning_rate)) {
         if (verbose) 
             cat("Estimating robust initial learning rate using optim()...\n")
@@ -466,9 +461,9 @@ nsa_flow_torch_ag <- function(
     } else {
         lr_res <- initial_learning_rate
     }
-
-  print(lr_res)
-
+    initopy = reticulate::r_to_py(lr_res * 1.0 )
+  }
+#  print( paste("Using initial learning rate:", reticulate::py_to_r(initopy) ) )
 
   torch <- reticulate::import("torch", convert = FALSE)
   pynsa <- reticulate::import("nsa_flow", convert=FALSE )
@@ -480,7 +475,6 @@ nsa_flow_torch_ag <- function(
 
   Y_torch <- torch$tensor(Y0, dtype = torch$float64)
   Xc_torch <- torch$tensor(X0, dtype = torch$float64)
-
   res <- pynsa$nsa_flow_autograd(
     Y_torch, 
     Xc_torch,
@@ -492,7 +486,8 @@ nsa_flow_torch_ag <- function(
     seed = as.integer(seed),
     apply_nonneg = apply_nonneg,
     optimizer = optimizer,
-    initial_learning_rate = lr_res,
+    initial_learning_rate = initopy,
+    lr_strategy="auto",
     record_every = as.integer(record_every),
     window_size = as.integer(window_size),
     precision=precision
@@ -527,7 +522,7 @@ nsa_flow_torch_ag <- function(
                      axis.title.y.right = ggplot2::element_text(color = "#33a02c"),
                      axis.text.y.right = ggplot2::element_text(color = "#33a02c"))
   }
-  Y = as.matrix(res$Y$detach()$numpy())
+  Y = as.matrix(res$Y$detach()$numpy()) 
   rownames(Y) <- rownames(Y0)
   colnames(Y) <- colnames(Y0)
   list(
