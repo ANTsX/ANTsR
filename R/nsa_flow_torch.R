@@ -93,6 +93,10 @@ nsa_flow_torch <- function(
   }
   p <- nrow(Y0)
   k <- ncol(Y0)
+  if ( optimizer == "fast" ) {
+    optimizer <- "lars"
+  }
+
 
   if (is.null(X0)) {
     if ( apply_nonneg ) X0 <- pmax(Y0, 0) else X0 = Y0
@@ -364,6 +368,9 @@ nsa_flow_torch_ag <- function(
   }
   p <- nrow(Y0)
   k <- ncol(Y0)
+  if ( optimizer == "fast" ) {
+    optimizer <- "lars"
+  }
 
   if (is.null(X0)) {
     if ( apply_nonneg ) X0 <- pmax(Y0, 0) else X0 = Y0
