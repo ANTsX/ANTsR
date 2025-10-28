@@ -4,7 +4,10 @@
 \alias{list_simlr_optimizers}
 \title{List Available SIMLR Optimizers}
 \usage{
-list_simlr_optimizers()
+list_simlr_optimizers(torch = FALSE)
+}
+\arguments{
+\item{torch}{Logical; if TRUE, returns a predefined list of optimizers compatible with torch.}
 }
 \value{
 A character vector of optimizer names (e.g., "adam", "nadam", etc.)
