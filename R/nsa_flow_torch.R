@@ -555,6 +555,7 @@ nsa_flow_torch_ag <- function(
 #' @param optimizer character optimizer name (e.g. 'Adam','lars','sgdp')
 #' @param initial_learning_rate NULL (auto), numeric, or character strategy string
 #' @param lr_strategy character passed to Python if initial_learning_rate is NULL/'auto'
+#' @param aggression numeric controls aggressiveness of learning rate adaptation
 #' @param fidelity_type character ('basic','scale_invariant','symmetric','normalized')
 #' @param orth_type character ('basic','scale_invariant')
 #' @param record_every integer frequency of recording traces
@@ -576,6 +577,7 @@ nsa_flow_autograd <- function(
   optimizer = "Adam",
   initial_learning_rate = NULL,
   lr_strategy = "auto",
+  aggression = 0.5,
   fidelity_type = "scale_invariant",
   orth_type = "scale_invariant",
   record_every = 1L,

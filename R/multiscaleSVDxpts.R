@@ -11748,7 +11748,7 @@ digraph NSA_Flow_FA {
 #' @param tol numeric, tolerance for relative parameter change convergence
 #' @param retraction retraction function or identifier (passed to nsa_flow)
 #' @param grad_tol numeric, gradient-norm tolerance for convergence
-#' @param R optional, passed-through (not used here)
+#' @param nsa_flow_fn optional, nsa_flow function to use (default: nsa_flow)
 #' @param verbose logical, print iteration diagnostics
 #' @param orth_every integer >=1, perform orthogonalization every this many iterations (default 5)
 #'
@@ -11771,7 +11771,7 @@ nsa_flow_pca <- function(X, k,
                          w_pca = 1.0, nsa_w = 0.5,
                          apply_soft_thresh_in_nns = FALSE,
                          tol = 1e-6, retraction = def_ret,
-                         grad_tol = 1e-4, R = NULL, verbose = FALSE,
+                         grad_tol = 1e-4, nsa_flow_fn = nsa_flow_autograd, verbose = FALSE,
                          orth_every = 5) {
   # --- argument checks ---
   if (!is.matrix(X) || any(!is.finite(X))) stop("X must be a finite numeric matrix")
@@ -11883,7 +11883,7 @@ nsa_flow_pca <- function(X, k,
     } else if (proximal_type == "nsa_flow") {
       # call nsa_flow; we assume it takes arguments (Y0, X0=NULL, w=..., retraction=...)
       # use X0 = NULL to indicate proximal-only processing of Y_ret
-      prox_res <- nsa_flow(Y_ret, X0 = NULL, w = nsa_w, retraction = retraction)
+      prox_res <- nsa_flow_fn( Y_ret, nsa_w )
       if (!is.list(prox_res) || is.null(prox_res$Y)) stop("nsa_flow returned unexpected result")
       Y_new <- prox_res$Y
     } else {

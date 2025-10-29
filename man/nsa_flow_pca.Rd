@@ -17,7 +17,7 @@ nsa_flow_pca(
   tol = 1e-06,
   retraction = def_ret,
   grad_tol = 1e-04,
-  R = NULL,
+  nsa_flow_fn = nsa_flow_autograd,
   verbose = FALSE,
   orth_every = 5
 )
@@ -47,7 +47,7 @@ nsa_flow_pca(
 
 \item{grad_tol}{numeric, gradient-norm tolerance for convergence}
 
-\item{R}{optional, passed-through (not used here)}
+\item{nsa_flow_fn}{optional, nsa_flow function to use (default: nsa_flow)}
 
 \item{verbose}{logical, print iteration diagnostics}
 

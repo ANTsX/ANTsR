@@ -327,12 +327,14 @@ Y0_toy <- matrix(runif(12, 0, 1), 4, 3)
 
 # Apply NSA-Flow with balanced weights
 # X0_toy=X0_toy/norm(X0_toy, "F")*0.1  # Normalize
-omega_default = 0.01
+omega_default = 0.05
 # if ( ! exists("ini_default") ) 
-ini_default = 'armijo_aggressive' # 
-optype='asgd' # for torch backend
+lropts=c('armijo', 'armijo_aggressive', 'exponential', 'linear', 'random', 'adaptive', 'momentum_boost', 'entropy', 'poly_decay', 'bayes')
+ini_default = 'armijo' # 
+optype='lars' # for torch backend
 def_ret = "soft_polar"
-nsa_default <- function(Y0, w = omega_default, X0 = NULL, o=optype, init=ini_default,verbose = FALSE ) {
+nsa_default <- function(Y0, w = omega_default, 
+  X0 = NULL, init=ini_default, agg=0.8, verbose = FALSE ) {
   nsa_flow_autograd(
     Y0 = Y0,
     X0 = X0,
@@ -343,17 +345,35 @@ nsa_default <- function(Y0, w = omega_default, X0 = NULL, o=optype, init=ini_def
     seed = 42,
     apply_nonneg = TRUE,
     tol = 1e-6,
-    window_size=5,
-    fidelity_type = "scale_invariant",
+    window_size=10,
+    fidelity_type = "symmetric",
     orth_type = "scale_invariant",
     lr_strategy = init, 
-    optimizer = o,
+    aggression = agg,
+    optimizer = optype,
     plot = TRUE
   )
 }
-
-
-res_toy <- nsa_default(Y0 = X0_toy, X0 = true_Y, w = omega_default )
+#
+# res_toy <- nsa_default(Y0 = X0_toy, X0 = true_Y, w = omega_default )
+#
+res_toy = nsa_flow_autograd(
+    Y0 = X0_toy,
+    X0 = true_Y,
+    w = omega_default,
+    retraction = def_ret,
+    max_iter = 500,
+    verbose = FALSE,
+    seed = 42,
+    apply_nonneg = TRUE,
+    tol = 1e-6,
+    window_size=5,
+    fidelity_type = "scale_invariant",
+    orth_type = "scale_invariant",
+    lr_strategy = 'armijo', 
+    optimizer = optype,
+    plot = TRUE
+  )
 
 # Visualize
 
@@ -572,12 +592,13 @@ X0 = generate_synth_data( p, k, corrval=0.35, noise=0.05, sparse_prob=0.0, inclu
 ###
 w_seq <- c( 0.005,  0.05, 0.1, 0.2, 0.5 )
 w_seq <- c( 0.001,  0.005, 0.01, 0.05, 0.25 )
+w_seq <- c( 0.1,  0.25, 0.5, 0.75, 0.9 )
 mytit = paste0("w = ", round(w_seq,3))
 mats <- list()
 convergeplots <- list()
 for(i in seq_along(w_seq)) {
   w_val <- w_seq[i]
-  res_soft_w <- nsa_default( X0, w = w_val, o=optype, verbose = FALSE )
+  res_soft_w <- nsa_default( X0, w = w_val,  verbose = FALSE )
   mytit[i] <- paste0("w = ", round(w_val, 3), ', orth = ', 
     round(invariant_orthogonality_defect(res_soft_w$Y),4), ', w.spar = ',
     1.0-round(sum(res_soft_w$Y/max(res_soft_w$Y) > quantile(res_soft_w$Y,0.1))/length(res_soft_w$Y),3))
@@ -604,7 +625,7 @@ if ( length(convergeplots) >=4  ) {
   grid.arrange(grobs=convergeplots[c(1,2,3,5)], top='Convergence Plots for Different w Values', ncol=2 )
 }
 
-#----------# darkk #
+# darkk #
 ####################
 ```
 
@@ -912,7 +933,7 @@ X=generate_synth_data( p=100, k=20, corrval=0.35)$Y0
 nembed = 4
 # --- Compute results for both methods ---
 res_soft <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, nsa_w = 0.5, tol = 1e-5,proximal_type='basic', verbose = FALSE )
-res_nns <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, nsa_w = 0.5, tol = 1e-5,proximal_type='nsa_flow', verbose = FALSE )
+res_nns <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, nsa_w = 0.5, tol = 1e-5, proximal_type='nsa_flow', nsa_flow_fn = nsa_default, verbose = FALSE )
 
 
 
@@ -1054,10 +1075,10 @@ proj_std <- pca_std$x
 
 res_basic <- nsa_flow_pca(golub_scaled_ss, myk,lambda = 0.1, alpha = 0.001,
                             max_iter = mxit, proximal_type = "basic", tol = 1e-5,
-                            nsa_w = 0.5, verbose = F)
+                            nsa_w = omega_default, verbose = F)
 res_nns <- nsa_flow_pca(golub_scaled_ss, myk, lambda = 0.1, alpha = 0.001,
                           max_iter = mxit, proximal_type = "nsa_flow", tol = 1e-5,
-                          nsa_w = 0.5, verbose = F)
+                          nsa_w = omega_default, nsa_flow_fn = nsa_default, verbose = FALSE)
 
 ## --- Core Metrics ------------------------------------------------------------
 metrics_pca_g   <- compute_core_metrics(pca_std$rotation, golub_scaled_ss)
@@ -1088,6 +1109,7 @@ golub_metrics <- tibble(
   CV_Accuracy         = c(acc_std$Accuracy, acc_basic$Accuracy, acc_nns$Accuracy),
   CV_Accuracy_SD      = c(acc_std$AccuracySD, acc_basic$AccuracySD, acc_nns$AccuracySD)
 )
+#####
 ```
 
 
@@ -1361,7 +1383,7 @@ results_df <- data.frame(
 for (ww in wws) {
 #    cat(paste0("Running NSA-Flow with optimizer = ", oo, " and w = ", ww, "\n"))
     
-    M_nsa <- nsa_default( Y0_pca, w = ww, o=optype, verbose = FALSE )
+    M_nsa <- nsa_default( Y0_pca, w = ww,  verbose = FALSE )
 
     if ( any( apply( M_nsa$Y, FUN=var, MARGIN=2) == 0 ) ) {
         cat("Warning: zero-variance component detected, skipping this run.\n")
