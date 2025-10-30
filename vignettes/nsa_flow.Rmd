@@ -327,14 +327,14 @@ Y0_toy <- matrix(runif(12, 0, 1), 4, 3)
 
 # Apply NSA-Flow with balanced weights
 # X0_toy=X0_toy/norm(X0_toy, "F")*0.1  # Normalize
-omega_default = 0.05
+omega_default = 0.5
 # if ( ! exists("ini_default") ) 
 lropts=c('armijo', 'armijo_aggressive', 'exponential', 'linear', 'random', 'adaptive', 'momentum_boost', 'entropy', 'poly_decay', 'bayes')
-ini_default = 'armijo' # 
-optype='lars' # for torch backend
+ini_default = 'bayes' # 
+optype='asgd' # for torch backend
 def_ret = "soft_polar"
-nsa_default <- function(Y0, w = omega_default, 
-  X0 = NULL, init=ini_default, agg=0.8, verbose = FALSE ) {
+nsa_default <- function(Y0, w = omega_default,
+  X0 = NULL, init=ini_default, agg=0.5, verbose = FALSE ) {
   nsa_flow_autograd(
     Y0 = Y0,
     X0 = X0,
@@ -346,7 +346,7 @@ nsa_default <- function(Y0, w = omega_default,
     apply_nonneg = TRUE,
     tol = 1e-6,
     window_size=10,
-    fidelity_type = "symmetric",
+    fidelity_type = "scale_invariant", #"symmetric",
     orth_type = "scale_invariant",
     lr_strategy = init, 
     aggression = agg,
@@ -355,26 +355,7 @@ nsa_default <- function(Y0, w = omega_default,
   )
 }
 #
-# res_toy <- nsa_default(Y0 = X0_toy, X0 = true_Y, w = omega_default )
-#
-res_toy = nsa_flow_autograd(
-    Y0 = X0_toy,
-    X0 = true_Y,
-    w = omega_default,
-    retraction = def_ret,
-    max_iter = 500,
-    verbose = FALSE,
-    seed = 42,
-    apply_nonneg = TRUE,
-    tol = 1e-6,
-    window_size=5,
-    fidelity_type = "scale_invariant",
-    orth_type = "scale_invariant",
-    lr_strategy = 'armijo', 
-    optimizer = optype,
-    plot = TRUE
-  )
-
+res_toy <- nsa_default(Y0 = X0_toy, X0 = true_Y, w = omega_default )
 # Visualize
 
 library(ggplot2)
@@ -592,13 +573,13 @@ X0 = generate_synth_data( p, k, corrval=0.35, noise=0.05, sparse_prob=0.0, inclu
 ###
 w_seq <- c( 0.005,  0.05, 0.1, 0.2, 0.5 )
 w_seq <- c( 0.001,  0.005, 0.01, 0.05, 0.25 )
-w_seq <- c( 0.1,  0.25, 0.5, 0.75, 0.9 )
+w_seq <- c( 0.001,  0.25, 0.5, 0.75, 0.9 )
 mytit = paste0("w = ", round(w_seq,3))
 mats <- list()
 convergeplots <- list()
 for(i in seq_along(w_seq)) {
   w_val <- w_seq[i]
-  res_soft_w <- nsa_default( X0, w = w_val,  verbose = FALSE )
+  res_soft_w <- nsa_default( X0, w = w_val,  agg=0.95, verbose = FALSE )
   mytit[i] <- paste0("w = ", round(w_val, 3), ', orth = ', 
     round(invariant_orthogonality_defect(res_soft_w$Y),4), ', w.spar = ',
     1.0-round(sum(res_soft_w$Y/max(res_soft_w$Y) > quantile(res_soft_w$Y,0.1))/length(res_soft_w$Y),3))
@@ -622,7 +603,8 @@ for(i in seq_along(mats)) {
 }
 grid.arrange(grobs = lapply(swplots, function(x) x$gtable), ncol = 3)
 if ( length(convergeplots) >=4  ) {
-  grid.arrange(grobs=convergeplots[c(1,2,3,5)], top='Convergence Plots for Different w Values', ncol=2 )
+  grid.arrange(grobs=convergeplots[c(1,2,3,5)], 
+  top='Convergence Plots for Different w Values', ncol=2 )
 }
 
 # darkk #
@@ -932,8 +914,11 @@ explained_variance_ratio_by_orthonormalizing <- function(X = NULL, Y, use = c("q
 X=generate_synth_data( p=100, k=20, corrval=0.35)$Y0
 nembed = 4
 # --- Compute results for both methods ---
-res_soft <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, nsa_w = 0.5, tol = 1e-5,proximal_type='basic', verbose = FALSE )
-res_nns <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, nsa_w = 0.5, tol = 1e-5, proximal_type='nsa_flow', nsa_flow_fn = nsa_default, verbose = FALSE )
+res_soft <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, 
+  nsa_w = omega_default, tol = 1e-5, proximal_type='basic', verbose = FALSE )
+res_nns <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, 
+  nsa_w = omega_default, tol = 1e-5, proximal_type='nsa_flow', 
+  nsa_flow_fn = nsa_default, verbose = FALSE )
 
 
 
@@ -1073,13 +1058,12 @@ golub_scaled_ss <- golub_scaled[, ss]
 pca_std <- prcomp(golub_scaled_ss, rank. = myk)
 proj_std <- pca_std$x
 
-res_basic <- nsa_flow_pca(golub_scaled_ss, myk,lambda = 0.1, alpha = 0.001,
+res_basic <- nsa_flow_pca(golub_scaled_ss, myk,lambda = 0.1, alpha = 0.01,
                             max_iter = mxit, proximal_type = "basic", tol = 1e-5,
                             nsa_w = omega_default, verbose = F)
-res_nns <- nsa_flow_pca(golub_scaled_ss, myk, lambda = 0.1, alpha = 0.001,
+res_nns <- nsa_flow_pca(golub_scaled_ss, myk, lambda = 0.1, alpha = 0.01,
                           max_iter = mxit, proximal_type = "nsa_flow", tol = 1e-5,
                           nsa_w = omega_default, nsa_flow_fn = nsa_default, verbose = FALSE)
-
 ## --- Core Metrics ------------------------------------------------------------
 metrics_pca_g   <- compute_core_metrics(pca_std$rotation, golub_scaled_ss)
 metrics_basic_g <- compute_core_metrics(res_basic$Y, golub_scaled_ss)
@@ -1313,7 +1297,7 @@ regions <- c(regions, paste0('left_', subcortical), paste0('right_', subcortical
 stopifnot(length(regions) == p)
 X <- as.data.frame(X_data)
 colnames(X) <- regions
-
+#############################
 
 library(readr)
 adnifn="../../multidisorder/data/ppmiadni_filtered.csv"
@@ -1647,7 +1631,8 @@ for (net in 1:netrank) {
 
 
 
-```{r enhanced-stats-dx,echo=FALSE,fig.width=7,fig.cap="Population-level distribution of NSA-based embeddings for different diagnostic groups.  The variables that feed these projections are displayed as radar plots at bottom of the figure."}
+```{r enhanced-stats-dx-0,echo=FALSE,fig.width=7,fig.cap="Multi-class random forest classification results: NSA vs PCA. Two runs of 4-fold cross-validation with results measured by AUC."}
+library( randomForest )
 ppmiadni$diagnosis = as.character(ppmiadni$diagnosis)
 ppmiadni$diagnosis[ppmiadni$diagnosis %in% "SMC"]=NA
 ppmiadni$diagnosis = factor( ppmiadni$diagnosis, levels=c("CN","MCI","AD") )
@@ -1666,26 +1651,17 @@ if (!all(c("diagnosis", covars) %in% names(ppmiadni))) {
   stop("ppmiadni must contain 'diagnosis' and all variables in covars.")
 }
 
+set.seed(1)  # For reproducibility
 # Initialize data frame for logistic results and ROC lists
 log_results_df <- data.frame()
 roc_nsa_list <- list()
 roc_pca_list <- list()
-
-
+mywws = seq(0.0, 0.5, by = 0.05 )
 # Loop over weight values
-for (ww in seq(0.1, 0.9, by = 0.2 )) {
+for ( run in 1:2 )
+for (ww in mywws ) {
   # Run NSA (assumes nsa_default is a custom function)
-  M_nsa <- tryCatch(
-    nsa_default(Y0 = Y0_pca, w = ww),
-    error = function(e) {
-      cat("Error in nsa_default for weight", ww, ":", e$message, "\n")
-      return(NULL)
-    }
-  )
-  if (is.null(M_nsa)) {
-    cat("Skipping weight", ww, "due to NSA failure.\n")
-    next
-  }
+  M_nsa <- nsa_default(Y0 = Y0_pca, w = ww)
   Ymat <- M_nsa$Y
   proj_nsa <- as.matrix(X) %*% Ymat
   proj_pca <- as.matrix(X) %*% Y0_pca
@@ -1693,7 +1669,8 @@ for (ww in seq(0.1, 0.9, by = 0.2 )) {
   colnames(proj_pca) <- paste0("pca", 1:ncol(proj_pca))
   
   # Combine data with covariates and projections
-  temp <- cbind(ppmiadni[, c("diagnosis", covars)], proj_nsa, proj_pca)
+  temp <- cbind(ppmiadni[, c("diagnosis", "AGE", "PTGENDER")], proj_nsa, proj_pca)
+  temp$AGE = antsrimpute( temp$AGE )
   dx2 <- "AD"
   dx1 <- "MCI"
   dx0 <- "CN"
@@ -1704,7 +1681,6 @@ for (ww in seq(0.1, 0.9, by = 0.2 )) {
  
   # 4-fold cross-validation
   nfold <- 4
-  set.seed(123)  # For reproducibility
   folds <- createFolds(temp$diagnosis, k = nfold, list = TRUE, returnTrain = FALSE)
   auc_nsa <- auc_pca <- auc_random <- numeric(nfold)
   
@@ -1725,10 +1701,12 @@ for (ww in seq(0.1, 0.9, by = 0.2 )) {
       auc_pca[f] <- NA
       next
     }
-    
+    mlfun = multinom; ptype="probs"
+    mlfun = randomForest; ptype='prob'
+#    mlfun = imbalanced
     # Base model (AGE and PTGENDER)
     base_mod <- tryCatch(
-      multinom(as.formula("diagnosis ~ AGE + PTGENDER"), data = train, trace = FALSE),
+      mlfun(as.formula("diagnosis ~ AGE + PTGENDER"), data = train, trace = FALSE),
       error = function(e) {
         cat("Error in base model for fold", f, "weight", ww, ":", e$message, "\n")
         return(NULL)
@@ -1739,14 +1717,14 @@ for (ww in seq(0.1, 0.9, by = 0.2 )) {
     # NSA full model
     full_nsa_form <- paste("diagnosis ~", covarsbin, "+", paste(colnames(proj_nsa), collapse = "+"))
     full_nsa <- tryCatch(
-      multinom(as.formula(full_nsa_form), data = train, trace = FALSE),
+      mlfun(as.formula(full_nsa_form), data = train, trace = FALSE),
       error = function(e) {
         cat("Error in NSA model for fold", f, "weight", ww, ":", e$message, "\n")
         return(NULL)
       }
     )
     if (!is.null(full_nsa)) {
-      preds_nsa <- predict(full_nsa, test, type = "probs")
+      preds_nsa <- predict(full_nsa, test, type = ptype )
       roc_nsa <- tryCatch(
         multiclass.roc(test$diagnosis, preds_nsa, levels = levels(test$diagnosis), quiet = TRUE),
         error = function(e) {
@@ -1762,14 +1740,14 @@ for (ww in seq(0.1, 0.9, by = 0.2 )) {
     # PCA full model
     full_pca_form <- paste("diagnosis ~", covarsbin, "+", paste(colnames(proj_pca), collapse = "+"))
     full_pca <- tryCatch(
-      multinom(as.formula(full_pca_form), data = train, trace = FALSE),
+      mlfun(as.formula(full_pca_form), data = train, trace = FALSE),
       error = function(e) {
         cat("Error in PCA model for fold", f, "weight", ww, ":", e$message, "\n")
         return(NULL)
       }
     )
     if (!is.null(full_pca)) {
-      preds_pca <- predict(full_pca, test, type = "probs")
+      preds_pca <- predict(full_pca, test, type = ptype )
       roc_pca <- tryCatch(
         multiclass.roc(test$diagnosis, preds_pca, levels = levels(test$diagnosis), quiet = TRUE),
         error = function(e) {
@@ -1799,6 +1777,81 @@ for (ww in seq(0.1, 0.9, by = 0.2 )) {
     random_accuracy = random_accuracy
   ))
 }
+
+
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(gridExtra)
+library(scales)
+# Add experiment label (two runs)
+log_results_df$experiment <- rep(c("Run 1", "Run 2"), each = length(mywws))
+
+# === Long format for AUC lines ===
+auc_long <- log_results_df %>%
+  dplyr::select(w, experiment, auc_nsa, auc_pca) %>%
+  pivot_longer(cols = c(auc_nsa, auc_pca), names_to = "method", values_to = "auc") %>%
+  mutate(method = ifelse(method == "auc_nsa", "NSA-ICA", "PCA"))
+
+# === Plot 1: AUC vs w (NSA-ICA vs PCA) ===
+p1 <- ggplot(auc_long, aes(x = w, y = auc, color = method, linetype = experiment)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2.5, shape = 21, fill = "white", stroke = 1.2) +
+  scale_color_manual(values = c("NSA-ICA" = "#D55E00", "PCA" = "#0072B2")) +
+  scale_linetype_manual(values = c("Run 1" = "solid", "Run 2" = "dashed")) +
+  geom_hline(yintercept = mean(data$random_accuracy), linetype = "dotted", color = "gray40", size = 1) +
+  annotate("text", x = 0.45, y = mean(data$random_accuracy) + 0.005, 
+           label = "Random Chance (~0.406)", color = "gray40", size = 3.5, hjust = 0) +
+  labs(
+    title = "Cross-Validated AUC for Diagnosis Prediction",
+    subtitle = "NSA-ICA vs PCA across regularization strength (w)",
+    x = "NSA Regularization Weight (w)",
+    y = "Mean AUC (Cross-Validation)",
+    color = "Method",
+    linetype = "Experiment"
+  ) +
+  theme_minimal(base_size = 8) +
+  theme(
+    plot.title = element_text(face = "bold", size = 8),
+    plot.subtitle = element_text(color = "gray50"),
+    legend.position = "top",
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "gray70"),
+    axis.ticks = element_line(color = "gray70")
+  ) +
+  scale_y_continuous(limits = c(0.68, 0.79), breaks = seq(0.68, 0.79, 0.02))
+
+# === Plot 2: AUC Difference (NSA - PCA) ===
+p2 <- ggplot(log_results_df, aes(x = w, y = auc_diff, color = experiment)) +
+  geom_hline(yintercept = 0, linetype = "solid", color = "gray50") +
+  geom_line(size = 1.3) +
+  geom_point(size = 3, shape = 18) +
+  scale_color_manual(values = c("Run 1" = "#D55E00", "Run 2" = "#CC79A7")) +
+  labs(
+    title = "Performance Gain: NSA-ICA − PCA",
+    x = "NSA Regularization Weight (w)",
+    y = "ΔAUC (NSA-ICA − PCA)",
+    color = "Experiment"
+  ) +
+  theme_minimal(base_size = 8) +
+  theme(
+    plot.title = element_text(face = "bold", size = 8),
+    legend.position = "none",
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "gray70"),
+    axis.ticks = element_line(color = "gray70")
+  ) +
+  scale_y_continuous(labels = percent_format(accuracy = 0.1)) +
+  annotate("rect", xmin = -Inf, xmax = Inf, ymin = 0, ymax = Inf, fill = "green", alpha = 0.05)
+
+# === Combine Plots ===
+final_plot <- gridExtra::grid.arrange(p1, p2, ncol = 1, heights = c(1.8, 1))
+print(final_plot)
+```
+
+
+```{r enhanced-stats-dx,echo=FALSE,fig.width=7,fig.cap="Population-level distribution of NSA-based embeddings for different diagnostic groups.  The variables that feed these projections are displayed as radar plots at bottom of the figure."}
 
 # Summary for logistic regression
 log_summary <- log_results_df %>%
@@ -1871,7 +1924,6 @@ for (comp in psel ) {
 # grid.arrange( grobs = gglist, ncol = 2 , top="Distributions of Significant NSA Components by Diagnosis" )
 
 # gt::gt(log_results_df,caption='Cross-Validated AUC Summary for Diagnosis Prediction: Full results.')
-
 gt::gt(log_summary,caption='Cross-Validated AUC Summary for Diagnosis Prediction: Statistical Summary.')
 
 # Plot results
