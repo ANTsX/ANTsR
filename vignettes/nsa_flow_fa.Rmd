@@ -24,7 +24,9 @@ library(corrplot)
 library(ggplot2)
 library(patchwork)
 library(reshape2)
+library(ANTsR)
 set.seed(1234)
+
 ```
 
 # Introduction
@@ -244,8 +246,6 @@ NSA-Flow-FA combines traditional statistical factor modeling with modern geometr
 For predictive comparisons, the dataset is split into 80% training and 20% testing sets. Models are fitted on the training set, and evaluations are performed on the test set.
 
 ```{r methods,echo=FALSE}
-
-library(ANTsR)
 paf_standalone <- function(data = NULL, R = NULL, nfactors, rotate = "none", max_iter = 100, tol = 1e-5) {
   if (!is.null(data)) R <- cor(data)
   fit <- psych::fa(R, nfactors = nfactors, rotate = rotate, fm = "pa", max.iter = max_iter)
@@ -433,8 +433,7 @@ nsa_fa_flow <- function(
     w_iter <- if (anneal_w) nsa_w * (iter / max_iter) else nsa_w
 
     # Apply NSA-Flow regularization with incremental update (Y0 from power loadings)
-    nsa_result <- tryCatch({
-      nsa_flow(
+    nsa_result <- nsa_flow(
         Y0 = as.matrix(loadings_power),
         w = w_iter,
         max_iter = nsa_max_iter,
@@ -442,10 +441,6 @@ nsa_fa_flow <- function(
         plot = TRUE,
         ...
       )
-    }, error = function(e) {
-      warning("nsa_flow failed at iteration ", iter, ": ", conditionMessage(e))
-      NULL
-    })
 
     if (!is.null(nsa_result) && is.matrix(nsa_result$Y)) {
       loadings_post <- nsa_result$Y
@@ -680,21 +675,21 @@ nrow(bfi_data)
 
 ```{r real-data-fit}
 # dook
-nsaval=0.50
-# c("brent", "grid", "armijo", "golden", "adaptive", "default")
-lrval='adaptive'
+nsaval=0.80
+lrval='bayes'
+myo='asgd'
 myo='lars'
-nsa_max_iter=500
+nsa_max_iter=50
 if ( ! exists("nn") ) nn=TRUE
 rot='varimax'
+agg=0.1
 # bfi_data_tx=transform_matrix(data.matrix(bfi_data),'frob')$Xs*sqrt(prod(dim(bfi_data)))
 bfi_data_tx=transform_matrix(data.matrix(bfi_data),'minmax')$Xs
 #############################################################################    
 if ( ! exists("real_A") | ! exists("real_B") | TRUE ) {
     real_A <- paf_standalone(bfi_data_tx, nfactors = 5, rotate = rot)
-    real_B <- nsa_fa_flow( data = bfi_data_tx, nfactors = 5, max_iter = 50,
-        rotate = rot, nsa_w = nsaval, initial_learning_rate = lrval,
-        optimizer = myo, nsa_max_iter = nsa_max_iter, apply_nonneg = nn )
+    real_B <- nsa_fa_flow( data = bfi_data_tx, nfactors = 5, max_iter = 50, rotate = rot, nsa_w = nsaval, optimizer = myo, nsa_max_iter = nsa_max_iter, apply_nonneg = nn)
+    #, aggression=agg, lr_strategy = lrval )
     }
 ############################################################################# 
 ```
@@ -948,8 +943,9 @@ L_A <- real_A_train$loadings
 
 # ---- Method B: NSA.FA ----
 real_B_train <-nsa_fa_flow( data = train_data, nfactors = 5, max_iter = 50,
-    rotate = rot, nsa_w = nsaval, initial_learning_rate = lrval, 
+    rotate = rot, nsa_w = nsaval,
     optimizer = myo, nsa_max_iter = nsa_max_iter, apply_nonneg = nn )
+#    lr_strategy = lrval, aggression=agg )
 
 L_B <- real_B_train$loadings
 

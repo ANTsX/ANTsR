@@ -11533,22 +11533,19 @@ nsa_flow_fa <- function(
 
     # Anneal w if enabled (start from 0, linear to nsa_w)
     w_iter <- if (anneal_w) nsa_w * (iter / max_iter) else nsa_w
-
     # Apply NSA-Flow regularization with incremental update (Y0 from power loadings)
-    nsa_result <- tryCatch({
-      nsa_flow(
+    nsa_result = nsa_flow(
         Y0 = as.matrix(loadings_power),
         w = w_iter,
         max_iter = nsa_max_iter,
         retraction = "soft_polar",
+        seed = 42,
+        tol = 1e-6,
+        window_size=10,
         plot = TRUE,
+        verbose=FALSE,
         ...
       )
-    }, error = function(e) {
-      warning("nsa_flow failed at iteration ", iter, ": ", conditionMessage(e))
-      NULL
-    })
-
     if (!is.null(nsa_result) && is.matrix(nsa_result$Y)) {
       loadings_post <- nsa_result$Y
       final_nsa_result <- nsa_result
@@ -11800,9 +11797,11 @@ nsa_flow_pca <- function(X, k,
   if (!is.finite(total_var) || total_var <= 0) stop("Input matrix X has zero or non-finite variance")
 
   # --- SVD init: Y is p x k ---
-  sv <- svd(Xc, nu = 0, nv = k)
-  Y <- sv$v
-  if (ncol(Y) != k) stop("SVD initialization did not produce k columns")
+  set.seed(1234)
+  Y = matrix(rnorm(p * k), nrow = p, ncol = k)
+#  sv <- svd(Xc, nu = 0, nv = k)
+#  Y <- sv$v
+#  if (ncol(Y) != k) stop("SVD initialization did not produce k columns")
 
   # bookkeeping
   energy_trace <- numeric(max_iter)
@@ -11919,7 +11918,7 @@ nsa_flow_pca <- function(X, k,
 
     # check for improvement
     improved <- FALSE
-    if (energy < best_energy - min_delta) {
+    if (energy < best_energy ) {
       best_energy <- energy
       best_Y <- Y_new
       improved <- TRUE
