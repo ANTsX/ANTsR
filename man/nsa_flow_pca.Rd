@@ -18,8 +18,7 @@ nsa_flow_pca(
   retraction = def_ret,
   grad_tol = 1e-04,
   nsa_flow_fn = nsa_flow_autograd,
-  verbose = FALSE,
-  orth_every = 5
+  verbose = FALSE
 )
 }
 \arguments{
@@ -50,8 +49,6 @@ nsa_flow_pca(
 \item{nsa_flow_fn}{optional, nsa_flow function to use (default: nsa_flow)}
 
 \item{verbose}{logical, print iteration diagnostics}
-
-\item{orth_every}{integer >=1, perform orthogonalization every this many iterations (default 5)}
 }
 \value{
 list with components:
@@ -70,6 +67,5 @@ proximal regularization. This implementation preserves the stable behavior
 of the original `sparse_pca_imp()` while improving efficiency by:
  - precomputing X'X, using it for gradient/energy,
  - in-place trial updates to reduce allocations,
- - lazy orthogonalization (every `orth_every` iterations),
  - retaining Armijo backtracking and adaptive LR scheduling.
 }

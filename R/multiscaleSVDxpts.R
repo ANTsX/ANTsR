@@ -11730,7 +11730,6 @@ digraph NSA_Flow_FA {
 #' of the original `sparse_pca_imp()` while improving efficiency by:
 #'  - precomputing X'X, using it for gradient/energy,
 #'  - in-place trial updates to reduce allocations,
-#'  - lazy orthogonalization (every `orth_every` iterations),
 #'  - retaining Armijo backtracking and adaptive LR scheduling.
 #'
 #' @param X numeric matrix (n x p), rows = observations, cols = variables
@@ -11747,7 +11746,6 @@ digraph NSA_Flow_FA {
 #' @param grad_tol numeric, gradient-norm tolerance for convergence
 #' @param nsa_flow_fn optional, nsa_flow function to use (default: nsa_flow)
 #' @param verbose logical, print iteration diagnostics
-#' @param orth_every integer >=1, perform orthogonalization every this many iterations (default 5)
 #'
 #' @return list with components:
 #'   \item{Y}{best p x k loading matrix found}
@@ -11768,8 +11766,7 @@ nsa_flow_pca <- function(X, k,
                          w_pca = 1.0, nsa_w = 0.5,
                          apply_soft_thresh_in_nns = FALSE,
                          tol = 1e-6, retraction = def_ret,
-                         grad_tol = 1e-4, nsa_flow_fn = nsa_flow_autograd, verbose = FALSE,
-                         orth_every = 5) {
+                         grad_tol = 1e-4, nsa_flow_fn = nsa_flow_autograd, verbose = FALSE) {
   # --- argument checks ---
   if (!is.matrix(X) || any(!is.finite(X))) stop("X must be a finite numeric matrix")
   n <- nrow(X); p <- ncol(X)
@@ -11779,8 +11776,6 @@ nsa_flow_pca <- function(X, k,
   if (w_pca <= 0) stop("w_pca must be positive")
   if (nsa_w < 0 || nsa_w > 1) stop("nsa_w must be in [0,1]")
   proximal_type <- match.arg(proximal_type)
-  if (!is.integer(orth_every) && orth_every != as.integer(orth_every)) orth_every <- as.integer(orth_every)
-  if (orth_every < 1) orth_every <- 1
 
   # Preserve previous behavior: when using nsa_flow proximal with nonzero nsa_w,
   # disable the L1 lambda to avoid double regularization (as in your original impl).
@@ -11838,7 +11833,7 @@ nsa_flow_pca <- function(X, k,
 
   for (iter in seq_len(max_iter)) {
     t_start <- Sys.time()
-
+    if (proximal_type != "nsa_flow") Y <- qr.Q(qr(Y))
     # Euclidean gradient: - (XtX %*% Y) / n scaled by w_pca
     grad_p <- - (XtX %*% Y) / n   # p x k
     eu_grad <- w_pca * grad_p
@@ -11882,9 +11877,9 @@ nsa_flow_pca <- function(X, k,
     } else if (proximal_type == "nsa_flow") {
       # call nsa_flow; we assume it takes arguments (Y0, X0=NULL, w=..., retraction=...)
       # use X0 = NULL to indicate proximal-only processing of Y_ret
-      prox_res <- nsa_flow_fn( Y_ret, nsa_w )
+      prox_res <- nsa_flow_fn( Y_ret, w=nsa_w )
       if (!is.list(prox_res) || is.null(prox_res$Y)) stop("nsa_flow returned unexpected result")
-      Y_new <- prox_res$Y
+      Y_new <- prox_res$Y %>% apply( 2, function(x) (x - min(x)) / (max(x) - min(x)))
     } else {
       stop("unknown proximal_type")
     }
@@ -11897,16 +11892,8 @@ nsa_flow_pca <- function(X, k,
     if (k == 1) {
       Q <- Y_new / sqrt(sum(Y_new^2))
     } else {
-      if ((iter %% orth_every) == 0 || iter == max_iter) {
-        qr_decomp <- qr(Y_new)
-        Q <- qr.Q(qr_decomp)
-        # optionally replace Y_new with Q so iterate stays more orthonormal
-        Y_new <- Q
-      } else {
-        # use Q only for explained variance computation (do not change Y_new)
-        qr_decomp_tmp <- qr(Y_new)
-        Q <- qr.Q(qr_decomp_tmp)
-      }
+      qr_decomp <- qr(Y_new)
+      Q <- qr.Q(qr_decomp)
     }
 
     # explained variance ratio

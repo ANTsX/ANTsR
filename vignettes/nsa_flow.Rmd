@@ -330,7 +330,7 @@ Y0_toy <- matrix(runif(12, 0, 1), 4, 3)
 omega_default = 0.5
 # if ( ! exists("ini_default") ) 
 lropts=c('armijo', 'armijo_aggressive', 'exponential', 'linear', 'random', 'adaptive', 'momentum_boost', 'entropy', 'poly_decay', 'bayes')
-ini_default = 'bayes' # 
+ini_default = 'armijo' # 
 optype='asgd' # for torch backend
 def_ret = "soft_polar"
 nsa_default <- function(Y0, w = omega_default,
@@ -344,7 +344,7 @@ nsa_default <- function(Y0, w = omega_default,
     verbose = verbose,
     seed = 42,
     apply_nonneg = TRUE,
-    tol = 1e-6,
+    tol = 1e-8,
     window_size=10,
     fidelity_type = "scale_invariant", #"symmetric",
     orth_type = "scale_invariant",
@@ -573,7 +573,7 @@ X0 = generate_synth_data( p, k, corrval=0.35, noise=0.05, sparse_prob=0.0, inclu
 ###
 w_seq <- c( 0.005,  0.05, 0.1, 0.2, 0.5 )
 w_seq <- c( 0.001,  0.005, 0.01, 0.05, 0.25 )
-w_seq <- c( 0.001,  0.25, 0.5, 0.75, 0.9 )
+w_seq <- c( 0.1,  0.25, 0.5, 0.75, 0.9 )
 mytit = paste0("w = ", round(w_seq,3))
 mats <- list()
 convergeplots <- list()
@@ -603,10 +603,9 @@ for(i in seq_along(mats)) {
 }
 grid.arrange(grobs = lapply(swplots, function(x) x$gtable), ncol = 3)
 if ( length(convergeplots) >=4  ) {
-  grid.arrange(grobs=convergeplots[c(1,2,3,5)], 
-  top='Convergence Plots for Different w Values', ncol=2 )
+  grid.arrange(grobs=convergeplots[c(1,2,3,5)], top='Convergence Plots for Different w Values', ncol=2 )
 }
-
+#########
 # darkk #
 ####################
 ```
@@ -1048,6 +1047,7 @@ golub_scaled <- scale(data.matrix(golub_df))
 
 ```{r golub_sparse_pca_analysis, echo=FALSE, fig.width=5,  message=FALSE, warning=FALSE,cache=FALSE}
 
+
 set.seed(1)
 myk  <- 3
 mxit <- 100
@@ -1057,32 +1057,35 @@ golub_scaled_ss <- golub_scaled[, ss]
 ## --- PCA Variants ------------------------------------------------------------
 pca_std <- prcomp(golub_scaled_ss, rank. = myk)
 proj_std <- pca_std$x
-
-res_basic <- nsa_flow_pca(golub_scaled_ss, myk,lambda = 0.1, alpha = 0.01,
+myalph=0.1
+res_basic <- nsa_flow_pca(golub_scaled_ss, myk, lambda = 0.1, alpha = myalph,
                             max_iter = mxit, proximal_type = "basic", tol = 1e-5,
-                            nsa_w = omega_default, verbose = F)
-res_nns <- nsa_flow_pca(golub_scaled_ss, myk, lambda = 0.1, alpha = 0.01,
+                            nsa_w = omega_default, verbose = TRUE )
+res_nns <- nsa_flow_pca(golub_scaled_ss, myk, lambda = 0.1, alpha = myalph,
                           max_iter = mxit, proximal_type = "nsa_flow", tol = 1e-5,
-                          nsa_w = omega_default, nsa_flow_fn = nsa_default, verbose = FALSE)
+                          nsa_w = omega_default, nsa_flow_fn = nsa_default, verbose = TRUE)
 ## --- Core Metrics ------------------------------------------------------------
 metrics_pca_g   <- compute_core_metrics(pca_std$rotation, golub_scaled_ss)
 metrics_basic_g <- compute_core_metrics(res_basic$Y, golub_scaled_ss)
 metrics_nns_g   <- compute_core_metrics(res_nns$Y, golub_scaled_ss)
+proj_basic <- golub_scaled_ss %*% res_basic$Y
+proj_nns   <- golub_scaled_ss %*% res_nns$Y
 
 ## --- Classification Performance ---------------------------------------------
 cv_acc <- function(proj, labels) {
   colnames(proj) <- paste0("V", seq_len(ncol(proj)))
   ctrl <- trainControl(method = "repeatedcv", number = 5, repeats = 50)
-  model <- train(proj, labels, method = "knn",
-                 trControl = ctrl, tuneGrid = data.frame(k = 3))
+  tune_grid <- expand.grid(mtry = seq(1, ncol(proj), length.out = 5))  # Example: tune mtry over 5 values
+  model <- train(proj, labels, method = "rf",
+                 trControl = ctrl, tuneGrid = tune_grid)
   tibble(Accuracy = model$results$Accuracy, AccuracySD = model$results$AccuracySD)
 }
-
-proj_basic <- golub_scaled_ss %*% res_basic$Y
-proj_nns   <- golub_scaled_ss %*% res_nns$Y
 acc_std   <- cv_acc(proj_std, labels)
 acc_basic <- cv_acc(proj_basic, labels)
 acc_nns   <- cv_acc(proj_nns, labels)
+# acc_std
+# acc_basic
+# acc_nns
 
 ## --- Integrated Results Table -----------------------------------------------
 golub_metrics <- tibble(
@@ -1093,6 +1096,7 @@ golub_metrics <- tibble(
   CV_Accuracy         = c(acc_std$Accuracy, acc_basic$Accuracy, acc_nns$Accuracy),
   CV_Accuracy_SD      = c(acc_std$AccuracySD, acc_basic$AccuracySD, acc_nns$AccuracySD)
 )
+
 #####
 ```
 

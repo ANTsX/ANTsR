@@ -653,10 +653,10 @@ nsa_flow_autograd <- function(
   # Try to call python function and handle errors clearly
   res_py <- tryCatch(
     {
-      do.call(pynsa$nsa_flow_autograd, py_args)
+      do.call(pynsa$nsa_flow_orth, py_args)
     },
     error = function(e) {
-      stop("Error calling Python nsa_flow_autograd():\n", e$message)
+      stop("Error calling Python nsa_flow_orth():\n", e$message)
     }
   )
 
