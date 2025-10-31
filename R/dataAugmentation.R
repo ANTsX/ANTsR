@@ -252,9 +252,8 @@ dataAugmentation <- function( inputImageList,
         if( j == 1 )
           {    
           logField <- simulateBiasField( image, numberOfPoints = 10,
-            sdBiasField = sdSimulatedBiasField, numberOfFittingLevels = 2, meshSize = 10 ) %>%
-            iMath( "Normalize" )
-          biasField <- ( exp( logField ) )^sample( c( 2, 3, 4 ), 1 )
+            sdBiasField = sdSimulatedBiasField, numberOfFittingLevels = 2, meshSize = 10 )
+          biasField <- exp( logField )
           }
         image <- image * biasField
         }
