@@ -344,11 +344,11 @@ nsa_default <- function(Y0, w = omega_default,
     verbose = verbose,
     seed = 42,
     apply_nonneg = TRUE,
-    tol = 1e-8,
+    tol = 1e-6,
     window_size=10,
     fidelity_type = "scale_invariant", #"symmetric",
     orth_type = "scale_invariant",
-    lr_strategy = init, 
+    lr_strategy = init,
     aggression = agg,
     optimizer = optype,
     plot = TRUE
@@ -913,9 +913,9 @@ explained_variance_ratio_by_orthonormalizing <- function(X = NULL, Y, use = c("q
 X=generate_synth_data( p=100, k=20, corrval=0.35)$Y0
 nembed = 4
 # --- Compute results for both methods ---
-res_soft <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, 
+res_soft <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.05, max_iter = 40, 
   nsa_w = omega_default, tol = 1e-5, proximal_type='basic', verbose = FALSE )
-res_nns <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.1, max_iter = 200, 
+res_nns <- nsa_flow_pca( X, nembed, lambda = 0.05,  alpha = 0.05, max_iter = 40, 
   nsa_w = omega_default, tol = 1e-5, proximal_type='nsa_flow', 
   nsa_flow_fn = nsa_default, verbose = FALSE )
 
@@ -1045,7 +1045,7 @@ golub_scaled <- scale(data.matrix(golub_df))
 
 
 
-```{r golub_sparse_pca_analysis, echo=FALSE, fig.width=5,  message=FALSE, warning=FALSE,cache=FALSE}
+```{r golub_sparse_pca_analysis, echo=FALSE, fig.width=5,  message=FALSE, warning=FALSE,cache=FALSE,eval=!exists("golub_metrics")}
 
 
 set.seed(1)
@@ -1060,10 +1060,10 @@ proj_std <- pca_std$x
 myalph=0.1
 res_basic <- nsa_flow_pca(golub_scaled_ss, myk, lambda = 0.1, alpha = myalph,
                             max_iter = mxit, proximal_type = "basic", tol = 1e-5,
-                            nsa_w = omega_default, verbose = TRUE )
+                            nsa_w = omega_default, verbose = FALSE )
 res_nns <- nsa_flow_pca(golub_scaled_ss, myk, lambda = 0.1, alpha = myalph,
                           max_iter = mxit, proximal_type = "nsa_flow", tol = 1e-5,
-                          nsa_w = omega_default, nsa_flow_fn = nsa_default, verbose = TRUE)
+                          nsa_w = omega_default, nsa_flow_fn = nsa_default, verbose = FALSE)
 ## --- Core Metrics ------------------------------------------------------------
 metrics_pca_g   <- compute_core_metrics(pca_std$rotation, golub_scaled_ss)
 metrics_basic_g <- compute_core_metrics(res_basic$Y, golub_scaled_ss)
@@ -1093,8 +1093,9 @@ golub_metrics <- tibble(
   Explained_Var_Ratio = c(metrics_pca_g$Expl_Var, metrics_basic_g$Expl_Var, metrics_nns_g$Expl_Var),
   Sparsity            = c(metrics_pca_g$Sparsity,  metrics_basic_g$Sparsity,  metrics_nns_g$Sparsity),
   Orth_Residual       = c(metrics_pca_g$Orth_Residual, metrics_basic_g$Orth_Residual, metrics_nns_g$Orth_Residual),
-  CV_Accuracy         = c(acc_std$Accuracy, acc_basic$Accuracy, acc_nns$Accuracy),
-  CV_Accuracy_SD      = c(acc_std$AccuracySD, acc_basic$AccuracySD, acc_nns$AccuracySD)
+  CV_Accuracy         = c( mean(acc_std$Accuracy), mean(acc_basic$Accuracy), 
+    mean(acc_nns$Accuracy)),
+  CV_Accuracy_SD      = c( mean(acc_std$AccuracySD), mean(acc_basic$AccuracySD), mean(acc_nns$AccuracySD))
 )
 
 #####
@@ -1102,7 +1103,7 @@ golub_metrics <- tibble(
 
 
 ```{r golub_sparse_pca_analysis_tbl, echo=FALSE, fig.width=5,  message=FALSE, warning=FALSE,cache=FALSE}
-gt::gt(golub_metrics[,(1:ncol(golub_metrics)-1)], caption = "Core and Classification Metrics for PCA Variants (Golub Dataset)") %>%
+gt::gt(golub_metrics[,(1:ncol(golub_metrics)-1)], caption = "Core and Random Forest Classification Metrics for PCA Variants (Golub Dataset)") %>%
   gt::fmt_number(columns = where(is.numeric), decimals = 3) %>%
   gt::cols_label(
     Explained_Var_Ratio = "Expl. Var.",
@@ -1151,7 +1152,7 @@ p_acc <- ggplot(golub_metrics, aes(x = Method, y = CV_Accuracy, fill = Method)) 
             vjust = 0, size = 3, fontface = "bold") +
   scale_fill_manual(values = c("#1f78b4", "#33a02c", "#e31a1c")) +
   coord_cartesian(ylim = c(0, 1.05)) +
-  labs(title = "Cross-Validation Accuracy (kNN, 5-Fold x50)",
+  labs(title = "Cross-Validation Accuracy (random forest, 5-Fold x50)",
        x = NULL, y = "CV Accuracy") +
   theme_minimal(base_size = 7) +
   theme(legend.position = "none",
