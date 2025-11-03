@@ -581,7 +581,8 @@ nsa_flow_autograd <- function(
   fidelity_type = "scale_invariant",
   orth_type = "scale_invariant",
   record_every = 1L,
-  window_size = 5L,
+  window_size = 10L,
+  warmup_iters = 0L,
   plot = FALSE,
   precision = "float64"
 ) {
@@ -647,6 +648,7 @@ nsa_flow_autograd <- function(
     orth_type = orth_type,
     record_every = as.integer(record_every),
     window_size = as.integer(window_size),
+    warmup_iters = as.integer(warmup_iters),
     precision = precision
   )
 

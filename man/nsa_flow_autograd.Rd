@@ -21,7 +21,8 @@ nsa_flow_autograd(
   fidelity_type = "scale_invariant",
   orth_type = "scale_invariant",
   record_every = 1L,
-  window_size = 5L,
+  window_size = 10L,
+  warmup_iters = 0L,
   plot = FALSE,
   precision = "float64"
 )

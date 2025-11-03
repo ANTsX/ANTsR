@@ -688,7 +688,7 @@ bfi_data_tx=transform_matrix(data.matrix(bfi_data),'minmax')$Xs
 #############################################################################    
 if ( ! exists("real_A") | ! exists("real_B") | TRUE ) {
     real_A <- paf_standalone(bfi_data_tx, nfactors = 5, rotate = rot)
-    real_B <- nsa_fa_flow( data = bfi_data_tx, nfactors = 5, max_iter = 50, rotate = rot, nsa_w = nsaval, optimizer = myo, nsa_max_iter = nsa_max_iter, apply_nonneg = nn)
+    real_B <- nsa_flow_fa( data = bfi_data_tx, nfactors = 5, max_iter = 50, rotate = rot, nsa_w = nsaval, optimizer = myo, nsa_max_iter = nsa_max_iter, apply_nonneg = nn)
     #, aggression=agg, lr_strategy = lrval )
     }
 ############################################################################# 
@@ -942,7 +942,7 @@ real_A_train <- paf_standalone(train_data, nfactors = 5, rotate = rot)
 L_A <- real_A_train$loadings
 
 # ---- Method B: NSA.FA ----
-real_B_train <-nsa_fa_flow( data = train_data, nfactors = 5, max_iter = 50,
+real_B_train <-nsa_flow_fa( data = train_data, nfactors = 5, max_iter = 50,
     rotate = rot, nsa_w = nsaval,
     optimizer = myo, nsa_max_iter = nsa_max_iter, apply_nonneg = nn )
 #    lr_strategy = lrval, aggression=agg )
