@@ -330,6 +330,7 @@ omega_default = 0.5
 # if ( ! exists("ini_default") ) 
 lropts=c('armijo', 'armijo_aggressive', 'exponential', 'linear', 'random', 'adaptive', 'momentum_boost', 'entropy', 'poly_decay', 'bayes')
 ini_default = 'armijo' # 
+optype='lars'
 optype='asgd'
 def_ret = "soft_polar"
 nsa_default <- function(Y0, w = omega_default,
@@ -419,8 +420,8 @@ We systematically vary \( \omega \) from 0 to 1 and compare how these retraction
 Note that the orthogonality defect is scale-invariant, while fidelity depends on the input scale. Here, we normalize inputs to unit Frobenius norm for consistency.  Furthermore, wide data cannot achieve perfect orthogonality due to rank limitations, so defect values will be higher.  Relatedly, the non-negativity constraint may also limit achievable orthogonality in practice but serves as a reference to illustrate the value of the soft retraction approach.
 
 
-```{r pollen2, echo = FALSE, fig.cap = "The impact of regularization on measures of both orthogonality and fidelity error relative to the original matrix.  For both metrics, lower values are better. We vary ($\\omega$) from 0 (no orthogonality enforcement) to 1 (full enforcement) and compare three retraction methods: polar, soft retraction, and none (purely driven by objective functions).  Results are shown for four matrix shapes: a small and large tall matrix and a small and large wide matrix.",fig.width=5}
-knitr::include_graphics("figs/data_by_orth_and_fid.pdf")
+```{r pollen2, echo = FALSE, out.width='90%', fig.cap = "The impact of regularization on measures of both orthogonality and fidelity error across different optimizers.  For both metrics, lower values are better. We vary ($\\omega$) from 0.01 (minor orthogonality enforcement) to 0.99 (near full enforcement) and compare standard torch optimizers.  Smoothly reducing curves for orthogonality and increasing curves for fidelity are expected and indicate better performance.  This evaluation as well as comparisons in sparse PCA and factor analysis suggest that LARS and ASGD are most reliable in conjunction with the NSA flow implementation."}
+knitr::include_graphics("figs/nsa_flow_optimizer_comparison_wide_p100_k140.png")
 ```
 
 
@@ -524,10 +525,10 @@ p2 <- ggplot(subset(df_melt, grepl("fid_", variable)),
 
 ## Comparing Optimization Methods
 
-A second key choice in NSA-Flow is the optimization algorithm used for the descent step. We compare several optimizers: standard gradient descent, Adam, Armijo gradient descent, AdaGrad and others. Each has different convergence properties and sensitivities to hyperparameters and we evaluate them with standard defaults and a common learning rate (0.001). We evaluate them on the same synthetic data setup as above, measuring convergence speed (energy vs iterations) and final orthogonality/fidelity metrics.  Performance across $\omega$ values are shown in Figure X.  A data-driven ranking of the methods based on execution time and objective values shows that AdaGrad [@duchi2011adaptive] and Layer-wise Adaptive Rate Scaling (LARS) [@you2017large] perform well. `ANTsR` includes implementations of these optimizers for easy experimentation as well as this full comparison of methods.
+A second key choice in NSA-Flow is the optimization algorithm used for the descent step. We compare several optimizers: standard gradient descent, Adam, Armijo gradient descent, AdaGrad and others. Each has different convergence properties and sensitivities to hyperparameters and we evaluate them with standard defaults and an automatically estimated learning rate via Armijo condition [@armijo1966minimization]. We evaluate them on the same synthetic data setup as above, measuring convergence speed (energy vs iterations) and final orthogonality/fidelity metrics.  Performance across $\omega$ values are shown in Figure X.  A data-driven ranking of the methods based on execution time and objective values shows that `pytorch` averaged stochastic gradient descent [@polyak1992acceleration] and Layer-wise Adaptive Rate Scaling (LARS) [@you2017large] perform well.
 
-```{r pollen3, echo = FALSE, fig.width=5, fig.cap = "The impact of optimization method on convergence speed and final metrics.  We compare several optimizers (standard gradient descent, Adam, Armijo gradient descent, AdaGrad, etc.) on the same synthetic data setup, measuring energy vs iterations across different ($\\omega$) values.  Results indicate that AdaGrad and LARS perform well in terms of execution time and objective values."}
-knitr::include_graphics("figs/nsa_flow_optimizer_analysis_2.pdf")
+```{r pollen3, echo = FALSE, out.width='90%', fig.cap = "The default optimizer peformance across different values of orthogonality weight indicates that the single parameter provides predictable control of the orthogonality in the outcome.  Higher values lead predictably to more decorrelation at the expense of fidelity."}
+knitr::include_graphics("figs/nsa_flow_optimization_paths_by_w.png")
 ```
 
 

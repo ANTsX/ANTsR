@@ -8524,13 +8524,11 @@ simlr_sparseness <- function(v,
   } else {
     if ( constraint_type == "ortho" & constraint_weight >= 0 ){
       if ( constraint_weight == 1 ) {
-        v = nsa_flow( v, w = constraint_weight, retraction='soft_polar', 
-          optimizer='adagrad', max_iter=constraint_iterations, verbose=FALSE)$Y
+        v = nsa_flow_autograd( v, w = constraint_weight, max_iter=500L, verbose=FALSE)$Y
 #      v = project_to_orthonormal_nonnegative( v, 
 #        max_iter=constraint_iterations, constraint=positivity)
       } else {
-        v = nsa_flow( v, w = constraint_weight, retraction='soft_polar', 
-          max_iter=constraint_iterations, optimizer='adagrad', verbose=F )$Y
+        v = nsa_flow_autograd( v, w = constraint_weight, max_iter=500L, verbose=F )$Y
 #      v = project_to_partially_orthonormal_nonnegative( v, 
 #        max_iter=constraint_iterations, constraint=positivity, ortho_strength=constraint_weight )
       }
@@ -11384,294 +11382,6 @@ digraph nsa_flow_algorithm {
 
 
 
-#' NSA-Flow Regularized Factor Analysis
-#'
-#' Factor Analysis (FA) with NSA-Flow regularization.
-#' It uses power iteration to estimate initial loadings, then applies NSA-Flow for regularization (e.g., sparsity via soft-thresholding).
-#' Assumes nsa_flow is an external function that performs non-smooth optimization flow with soft_polar retraction for L1-like regularization.
-#' Includes incremental updating of loadings via warm-start Y0 and optional annealing of w (regularization strength).
-#'
-#' @param data Optional raw data matrix. If provided, correlation matrix R is computed from it.
-#' @param R Optional correlation matrix. If not provided, it is computed from data.
-#' @param nfactors Number of factors to extract.
-#' @param rotate Rotation method: "none", "varimax", "promax", or "oblimin".
-#' @param nsa_w Target regularization strength (w); annealed if anneal_w=TRUE.
-#' @param anneal_w Logical; whether to anneal w from 0 to nsa_w over iterations.
-#' @param nsa_max_iter Maximum iterations for NSA-flow.
-#' @param max_iter Maximum outer iterations.
-#' @param power_iter Number of power iterations for initial basis estimation.
-#' @param tol Convergence tolerance for energy change and delta h2.
-#' @param eta_h Damping factor for communality updates (default 0.1 for slower updates).
-#' @param verbose Logical; print progress messages.
-#' @param energy_tol Absolute energy tolerance for convergence.
-#' @param seed Random seed for reproducibility.
-#' @param scores Method for factor scores: "regression", "none", or "Bartlett".
-#' @param ... Additional arguments passed to nsa_flow.
-#'
-#' @return A list of class "nsa_flow_fa" containing:
-#'   \item{loadings}{Final factor loadings matrix.}
-#'   \item{communalities}{Communality estimates (h2).}
-#'   \item{uniqueness}{Uniqueness estimates (1 - h2).}
-#'   \item{converged}{Logical; whether convergence was achieved.}
-#'   \item{iterations}{Number of iterations performed.}
-#'   \item{energy_trace}{Vector of energy values over iterations.}
-#'   \item{factor_scores}{Optional factor scores matrix.}
-#'   \item{nsa_result}{Final NSA-flow result (if successful).}
-#'   \item{best_energy}{Best (lowest) energy achieved.}
-#'   \item{rotation}{Rotation method used.}
-#'   \item{Phi}{Factor correlation matrix (for oblique rotations).}
-#'
-#' @examples
-#' \dontrun{
-#' data(bfi)
-#' bfi_data <- bfi[, 1:25] %>% na.omit()
-#' result <- nsa_flow_fa(data = bfi_data, nfactors = 5, rotate = "varimax")
-#' print(result$loadings)
-#' }
-#'
-#' @export
-nsa_flow_fa <- function(
-  data = NULL,
-  R = NULL,
-  nfactors,
-  rotate = c("varimax", "none", "promax", "oblimin"),  # New: rotation option
-  nsa_w = 0.5,  # Target regularization strength (w); annealed if anneal_w=TRUE
-  anneal_w = FALSE,  # Whether to anneal w from 0 to nsa_w over iterations
-  nsa_max_iter = 1000,
-  max_iter = 100,
-  power_iter = 100,
-  tol = 1e-5,
-  eta_h = 0.1,  # Damping for communality updates
-  verbose = TRUE,
-  energy_tol = 1e-4,
-  seed = 123,
-  scores = c("regression", "none", "Bartlett"),
-  ...
-) {
-  if (!requireNamespace("psych", quietly = TRUE))
-    stop("Package 'psych' is required for scoring if used.")
-
-  set.seed(seed)
-  scores <- match.arg(scores)
-  rotate <- match.arg(rotate)  # New: match rotate
-
-  # Prepare correlation matrix R
-  if (is.null(R)) {
-    if (is.null(data)) stop("Either 'R' or 'data' must be provided.")
-    R <- stats::cor(data, use = "pairwise.complete.obs")
-  }
-  if (!is.matrix(R)) R <- as.matrix(R)
-  p <- nrow(R)
-  if (p != ncol(R)) stop("R must be square.")
-  if (nfactors >= p) {
-    warning("nfactors >= p; setting nfactors = p-1")
-    nfactors <- p - 1
-  }
-
-  var_names <- rownames(R)
-  if (is.null(var_names)) var_names <- colnames(R)
-
-  # Regularize R for positive definiteness
-  eig <- eigen(R, symmetric = TRUE)
-  eps_eig <- 1e-6
-  eig$values[eig$values < eps_eig] <- eps_eig
-  R_reg <- eig$vectors %*% diag(eig$values) %*% t(eig$vectors)
-  dimnames(R_reg) <- list(var_names, var_names)
-
-  # Initial communalities (SMC approximation)
-  small_diag <- 1e-3
-  invRR <- tryCatch(solve(R_reg + diag(small_diag, p)), error = function(e) NULL)
-  if (is.null(invRR)) {
-    h2 <- rep(0.5, p)
-  } else {
-    h2 <- pmin(pmax(1 - 1 / diag(invRR), 0.1), 0.9)
-  }
-
-  # Bookkeeping
-  converged <- FALSE
-  energy_trace <- numeric(0)
-  last_loadings <- NULL
-  best_loadings <- NULL
-  best_energy <- Inf
-  final_nsa_result <- NULL
-  Phi <- NULL  # New: for oblique factor correlations if applicable
-
-  if (verbose) message("Starting NSA-Flow Regularized FA ...")
-
-  for (iter in seq_len(max_iter)) {
-    # Build modified R with communalities on diagonal
-    R_mod <- R_reg
-    diag(R_mod) <- h2
-
-    # Power iteration for initial orthonormal basis and loadings
-    if (!is.null(last_loadings) && all(dim(last_loadings) == c(p, nfactors))) {
-      L <- last_loadings / sqrt(rowSums(last_loadings^2) + 1e-10)  # Normalize previous as warm start
-    } else {
-      L <- matrix(rnorm(p * nfactors, sd = 0.1), nrow = p, ncol = nfactors)
-    }
-
-    for (k in seq_len(power_iter)) {
-      L <- R_mod %*% L
-      # Orthonormalize via QR
-      qrL <- qr(L)
-      L <- qr.Q(qrL)
-      if (ncol(L) < nfactors) {
-        # Pad if rank deficient
-        more <- matrix(rnorm(p * (nfactors - ncol(L)), sd = 1e-3), nrow = p)
-        L <- cbind(L, qr.Q(qr(more - L %*% (t(L) %*% more)))[, seq_len(nfactors - ncol(L))])
-      }
-      L[!is.finite(L)] <- 0
-    }
-
-    # Compute Rayleigh quotients for scaling
-    vals_vec <- diag(t(L) %*% R_mod %*% L)
-    vals_vec[vals_vec < 0] <- 0
-    loadings_power <- L %*% diag(sqrt(vals_vec))
-    loadings_power[!is.finite(loadings_power)] <- 0
-    if (!is.null(var_names)) rownames(loadings_power) <- var_names
-    colnames(loadings_power) <- paste0("PA", seq_len(nfactors))
-
-    # Anneal w if enabled (start from 0, linear to nsa_w)
-    w_iter <- if (anneal_w) nsa_w * (iter / max_iter) else nsa_w
-    # Apply NSA-Flow regularization with incremental update (Y0 from power loadings)
-    nsa_result = nsa_flow(
-        Y0 = as.matrix(loadings_power),
-        w = w_iter,
-        max_iter = nsa_max_iter,
-        retraction = "soft_polar",
-        seed = 42,
-        tol = 1e-6,
-        window_size=10,
-        plot = TRUE,
-        verbose=FALSE,
-        ...
-      )
-    if (!is.null(nsa_result) && is.matrix(nsa_result$Y)) {
-      loadings_post <- nsa_result$Y
-      final_nsa_result <- nsa_result
-    } else {
-      # Fallback to power loadings if NSA fails
-      loadings_post <- loadings_power
-    }
-    loadings_post[!is.finite(loadings_post)] <- 0
-
-    if (!is.null(Phi)) {
-      recon_R <- loadings_post %*% Phi %*% t(loadings_post)
-    } else {
-      recon_R <- loadings_post %*% t(loadings_post)
-    }
-    energy_pre <- norm(R_reg - recon_R, "F") / norm(R_reg, "F")
-
-    # --- Rotation (new: applied after NSA-flow, before energy) ---
-    if (rotate != "none") {
-      rot_fun <- switch(rotate,
-                        varimax = stats::varimax,
-                        promax  = psych::promax,
-                        oblimin = psych::oblimin)
-      rot_res <- tryCatch({
-        rot_fun(loadings_post, normalize = FALSE)
-      }, error = function(e) {
-        warning("Rotation failed; using unrotated loadings.")
-        list(loadings = loadings_post)
-      })
-      loadings_post <- as.matrix(rot_res$loadings)
-      if ("Phi" %in% names(rot_res)) Phi <- rot_res$Phi  # Capture Phi for oblique
-      loadings_post[!is.finite(loadings_post)] <- 0
-      if (!is.null(var_names)) rownames(loadings_post) <- var_names
-    }
-    colnames(loadings_post) <- paste0("PA", seq_len(nfactors))
-
-    # Energy: relative Frobenius reconstruction error (handle oblique with Phi if available)
-    if (!is.null(Phi)) {
-      recon_R <- loadings_post %*% Phi %*% t(loadings_post)
-    } else {
-      recon_R <- loadings_post %*% t(loadings_post)
-    }
-    energy <- norm(R_reg - recon_R, "F") / norm(R_reg, "F")
-
-    # Update best if improved
-    if (energy < best_energy) {
-      best_energy <- energy
-      best_loadings <- loadings_post
-    }
-
-    # Communality update with damping
-    new_h2 <- pmin(rowSums(loadings_post^2), 1)
-    delta_h2 <- new_h2 - h2
-    h2 <- (1 - eta_h) * h2 + eta_h * new_h2
-    max_delta_h2 <- max(abs(delta_h2))
-
-    # Record
-    energy_trace <- c(energy_trace, energy)
-    last_loadings <- loadings_post
-
-    if (verbose) {
-      message(sprintf("Iter %03d: max|Δh2|=%.6g | Energy (pre)=%.6g | Energy (post)=%.6g | bestEnergy=%.6g | w=%.3g",
-                      iter, iter, max_delta_h2, energy_pre, energy, best_energy, w_iter))
-    }
-
-    # Convergence check (energy change and delta h2)
-    if (iter > 5) {
-      echange <- abs(diff(tail(energy_trace, 2)))
-      if (echange < tol && max_delta_h2 < tol) {
-        converged <- TRUE
-        if (verbose) message("Converged.")
-        break
-      }
-      if (energy < energy_tol) {
-        converged <- TRUE
-        if (verbose) message("Converged (energy < tol).")
-        break
-      }
-    }
-  }
-
-  if (!converged && verbose) warning("Did not converge within max_iter.")
-
-  final_loadings <- best_loadings %||% loadings_post
-
-  # Optional factor scores
-  factor_scores <- NULL
-  if (!is.null(data) && scores != "none") {
-    data_mat <- as.matrix(data)
-    S <- stats::cov(data_mat, use = "pairwise.complete.obs")
-    invS <- tryCatch(solve(S), error = function(e) ginverse(S))  # Pseudoinverse fallback
-    Lf <- final_loadings
-    if (scores == "regression") {
-      B <- invS %*% Lf %*% solve(t(Lf) %*% invS %*% Lf)
-      factor_scores <- scale(data_mat) %*% B
-    } else if (scores == "Bartlett") {
-      Psi <- diag(1 - h2 + 1e-12)
-      inner <- solve(t(Lf) %*% solve(Psi) %*% Lf)
-      B <- inner %*% t(Lf) %*% solve(Psi)
-      factor_scores <- scale(data_mat) %*% t(B)
-    }
-    colnames(factor_scores) <- paste0("PA", seq_len(nfactors))
-  }
-
-  out <- list(
-    loadings = final_loadings,
-    communalities = h2,
-    uniqueness = 1 - h2,
-    converged = converged,
-    iterations = iter,
-    energy_trace = energy_trace,
-    factor_scores = factor_scores,
-    nsa_result = final_nsa_result,
-    best_energy = best_energy,
-    rotation = rotate,  # New: add rotation to output
-    Phi = Phi  # New: add Phi if applicable
-  )
-  class(out) <- "nsa_flow_fa"
-
-  if (verbose && length(energy_trace) > 1) {
-    plot(energy_trace, type = "b", main = "Energy Trace", ylab = "Energy", xlab = "Iteration")
-  }
-
-  invisible(out)
-}
-
-
 #' Generate NSA-Flow FA Flowchart Diagram
 #'
 #' This function creates a flowchart diagram representing the NSA-Flow FA process
@@ -11982,6 +11692,335 @@ nsa_flow_pca <- function(X, k,
 
   list(
     Y = best_Y,
+    energy_trace = energy_trace,
+    final_iter = iter,
+    best_energy = best_energy,
+    converged = converged,
+    no_improve_count = no_improve_count,
+    lr_reductions = lr_reductions,
+    expl_var_ratio = expl_var_ratio
+  )
+}
+
+
+
+#' NSA-Flow Sparse PCA or FA
+#'
+#' Optimize either a PCA objective (default) or a Factor Analysis (FA) objective
+#' in a single call.  Armijo backtracking, optional NSA-flow proximal,
+#' adaptive LR scheduling, and optional rotation every iteration.
+#'
+#' @inheritParams nsa_flow_pca
+#' @param objective character, either "pca" (default) or "fa".
+#'        If "fa", the function optimizes a FA-like loss: reconstructing the
+#'        sample covariance R with Y Y^T + diag(psi) where psi >= 0 is set
+#'        to the diagonal of R - Y Y^T (clipped to a small positive eps).
+#' @param rotate character; one of "none","varimax","promax","oblimin".
+#'        If not "none", the loadings are rotated every iteration (keeps shapes).
+#' @param nsa_flow_args list, optional additional args forwarded to nsa_flow_fn()
+#'
+#' @return list with components:
+#'   Y, energy_trace, final_iter, best_energy, converged,
+#'   no_improve_count, lr_reductions, expl_var_ratio
+#'
+#' @export
+#' 
+nsa_flow_pca_fa <- function(
+  X, k,
+  lambda = 0.1,
+  alpha = 0.0001,
+  max_iter = 100,
+  proximal_type = c("basic", "nsa_flow"),
+  w_pca = 1.0, nsa_w = 0.5,
+  apply_soft_thresh_in_nns = FALSE,
+  tol = 1e-6, retraction = NULL,
+  grad_tol = 1e-4, nsa_flow_fn = NULL, verbose = FALSE,
+  objective = c("pca","fa"),
+  rotate = c("none","varimax","promax","oblimin"),
+  nsa_flow_args = list()
+) {
+  # --- arg checks & defaults -------------------------------------------------
+  proximal_type <- match.arg(proximal_type)
+  objective <- match.arg(objective)
+  rotate <- match.arg(rotate)
+  if (!is.matrix(X) || any(!is.finite(X))) stop("X must be a finite numeric matrix")
+  n <- nrow(X); p <- ncol(X)
+  if (k <= 0 || k > min(n, p)) stop("k must be positive and not exceed min(n, p)")
+  if (lambda < 0) stop("lambda must be non-negative")
+  if (alpha <= 0) stop("alpha must be positive")
+  if (w_pca <= 0) stop("w_pca must be positive")
+  if (nsa_w < 0 || nsa_w > 1) stop("nsa_w must be in [0,1]")
+  if (is.null(nsa_flow_fn) && proximal_type == "nsa_flow") {
+    # lazy require: user must have provided nsa_flow_fn (e.g., nsa_flow_autograd)
+    stop("nsa_flow_fn must be provided when proximal_type == 'nsa_flow'")
+  }
+  # If NSA proximal used, we follow previous convention: disable L1 lambda to avoid double regularization
+  if (nsa_w > 0 && proximal_type == "nsa_flow") {
+    lambda <- 0.0
+    if (verbose) message("nsa_w > 0 and proximal_type == 'nsa_flow' -> lambda set to 0")
+  }
+  # --- center X (no scaling) and precompute XtX / R ---------------------------
+  Xc <- scale(X, center = TRUE, scale = FALSE)
+  XtX <- crossprod(Xc) # p x p
+  total_var <- sum(diag(XtX / n))
+  if (!is.finite(total_var) || total_var <= 0) stop("Input X has zero or non-finite variance")
+  # sample covariance/correlation matrix used for FA objective
+  Rmat <- XtX / n
+  # --- initialization -------------------------------------------------------
+  set.seed(1234)
+  Y <- matrix(rnorm(p * k, sd = 0.1), nrow = p, ncol = k)
+  energy_trace <- numeric(max_iter)
+  best_Y <- Y
+  best_energy <- Inf
+  alpha_init <- alpha
+  max_grad_norm <- 100.0
+  bt_max <- 20
+  bt_shrink <- 0.5
+  armijo_c <- 1e-4
+  # adaptive scheduler
+  patience <- 10
+  lr_reduction_factor <- 0.5
+  max_lr_reductions <- 3
+  min_iters_before_stop <- 10
+  no_improve_count <- 0
+  lr_reductions <- 0
+  converged <- FALSE
+  .frob <- function(A) sqrt(sum(A * A))
+  # Small numeric eps
+  eps_diag <- 1e-8
+  # energy_of depending on objective ------------------------------------------
+  energy_of <- function(M) {
+    # M is p x k (loadings)
+    if (objective == "pca") {
+      # use negative explained variance (consistent with your original) as "energy"
+      # tr(M' XtX M)/n gives explained variance by columns in M
+      tr_val <- sum(diag(t(M) %*% XtX %*% M)) / n
+      fid_term <- w_pca * (-0.5 * tr_val)
+      prox_term <- lambda * sum(abs(M))
+      fid_term + prox_term
+    } else { # "fa"
+      # FA objective: || R - (M M^T + diag(psi)) ||_F^2
+      # choose psi = diag(R - M M^T) clipped to >= eps_diag
+      recon_cross <- M %*% t(M)
+      diag_err <- diag(Rmat - recon_cross)
+      psi <- pmax(as.numeric(diag_err), eps_diag)
+      # build recon matrix
+      recon <- recon_cross + diag(psi, nrow = p, ncol = p)
+      # squared Frobenius error (normalized)
+      diff_mat <- Rmat - recon
+      loss <- sum(diff_mat * diff_mat)
+      prox_term <- lambda * sum(abs(M))
+      loss + prox_term
+    }
+  }
+  # helper: explained variance ratio for reporting (PCA style)
+  explained_ratio_of <- function(M) {
+    # orthonormalize columns (lazy) and compute explained variance fraction
+    if (k == 1) {
+      Q <- M / sqrt(sum(M^2) + 1e-12)
+    } else {
+      qr_decomp <- qr(M)
+      Q <- qr.Q(qr_decomp)
+    }
+    tr_val <- sum(diag(t(Q) %*% XtX %*% Q)) / n
+    tr_val / total_var
+  }
+  # --- main optimization loop -----------------------------------------------
+  for (iter in seq_len(max_iter)) {
+    t_start <- Sys.time()
+    # optional normalization for stability (when not using NSA proximal)
+    if (proximal_type != "nsa_flow") {
+      if (k == 1) {
+        Y <- Y / sqrt(sum(Y^2) + 1e-12)
+      } else {
+        qr_decomp <- qr(Y)
+        Q <- qr.Q(qr_decomp)
+        # keep first k columns (qr.Q may return >k columns)
+        if (ncol(Q) >= k) Y <- Q[, seq_len(k), drop = FALSE]
+      }
+    }
+    # Euclidean gradient for PCA objective: - (XtX %*% Y) / n * w_pca
+    # For FA objective, gradient is more complex; approximate by differentiating
+    # the FA loss w.r.t. M: grad = -4 * (R - M M^T - diag(psi)) %*% M
+    if (objective == "pca") {
+      grad_p <- - (XtX %*% Y) / n
+      eu_grad <- w_pca * grad_p
+    } else {
+      # FA gradient (exact for full Frobenius): grad = -4 * (R - recon) %*% M
+      recon_cross <- Y %*% t(Y)
+      diag_err <- diag(Rmat - recon_cross)
+      psi <- pmax(as.numeric(diag_err), eps_diag)
+      recon <- recon_cross + diag(psi, nrow = p, ncol = p)
+      diff_mat <- Rmat - recon
+      eu_grad <- -4 * (diff_mat %*% Y)
+      # note: no separate w_pca multiplicative factor for FA branch (could be added)
+    }
+    if (any(!is.finite(eu_grad))) stop("Non-finite Euclidean gradient at iteration ", iter)
+    # gradient clipping
+    gnorm <- .frob(eu_grad)
+    if (gnorm > max_grad_norm) eu_grad <- eu_grad * (max_grad_norm / gnorm)
+    rgrad <- eu_grad
+    rgrad_norm <- .frob(rgrad)
+    # Backtracking Armijo line search (in-place)
+    alpha <- alpha_init
+    Z <- Y
+    Z[] <- Z - alpha * rgrad
+    energy_old <- energy_of(Y)
+    energy_new <- energy_of(Z)
+    dir_deriv <- sum(eu_grad * (-rgrad)) # directional derivative proxy
+    bt <- 0
+    while ((!is.finite(energy_new) || energy_new > energy_old + armijo_c * alpha * dir_deriv) && bt < bt_max) {
+      alpha <- alpha * bt_shrink
+      Z[] <- Y - alpha * rgrad
+      energy_new <- energy_of(Z)
+      bt <- bt + 1
+    }
+    if (!is.finite(energy_new)) stop("Non-finite energy after backtracking at iteration ", iter)
+    Y_ret <- Z
+    # Proximal step: either simple sparsity prox or call nsa_flow_fn
+    if (proximal_type == "basic") {
+      # simple soft-threshold (L1 prox). preserve positive scale if requested
+      thresh <- alpha * lambda
+      if (thresh > 0) {
+        Y_new <- sign(Y_ret) * pmax(abs(Y_ret) - thresh, 0)
+      } else {
+        Y_new <- Y_ret
+      }
+      if (apply_soft_thresh_in_nns) {
+        # optional non-negative re-scaling per column (user requested)
+        for (j in seq_len(ncol(Y_new))) {
+          col <- Y_new[, j]
+          if (max(col) > 0) Y_new[, j] <- pmax(col, 0)
+        }
+      }
+    } else {
+      # nsa_flow proximal: we call the provided function with Y_ret as Y0
+      # allow forwarding extra args via nsa_flow_args list
+      prox_call_args <- c(list(Y0 = Y_ret, w = nsa_w), nsa_flow_args)
+      prox_res <- tryCatch(do.call(nsa_flow_fn, prox_call_args), error = function(e) {
+        stop("nsa_flow_fn failed: ", conditionMessage(e))
+      })
+      if (!is.list(prox_res) || is.null(prox_res$Y)) stop("nsa_flow_fn returned unexpected result")
+      Y_new <- prox_res$Y
+      # optional scaling of columns into [0,1] if original code did that
+      # but preserve sign/structure; keep as-is to avoid destroying FA structure
+    }
+    if (any(!is.finite(Y_new))) stop("Non-finite proximal step at iteration ", iter)
+    # optional rotation every iteration
+    if (rotate != "none") {
+      if (!requireNamespace("psych", quietly = TRUE)) {
+        warning("psych package required for rotation; skipping rotation")
+      } else {
+        # call chosen rotation (varimax/promax/oblimin). psych::promax returns list with loadings
+        if (rotate == "varimax") {
+          rot_res <- tryCatch(stats::varimax(Y_new, normalize = FALSE), error = function(e) NULL)
+        } else if (rotate == "promax") {
+          rot_res <- tryCatch(psych::promax(Y_new, normalize = FALSE), error = function(e) NULL)
+        } else if (rotate == "oblimin") {
+          rot_res <- tryCatch(psych::oblimin(Y_new, normalize = FALSE), error = function(e) NULL)
+        } else rot_res <- NULL
+        if (!is.null(rot_res) && !is.null(rot_res$loadings)) {
+          # psych rotations may return a "loadings" object; coerce to matrix
+          Y_new <- as.matrix(rot_res$loadings)
+          # ensure correct dims
+          if (ncol(Y_new) < k) {
+            # pad with small noise columns
+            need <- k - ncol(Y_new)
+            Y_new <- cbind(Y_new, matrix(rnorm(p * need, sd = 1e-6), nrow = p, ncol = need))
+          } else if (ncol(Y_new) > k) {
+            Y_new <- Y_new[, seq_len(k), drop = FALSE]
+          }
+        }
+      }
+    }
+    # compute energy and stats
+    energy <- energy_of(Y_new)
+    expl_var_ratio <- explained_ratio_of(Y_new)
+    # record energy trace (PCA branch: negative explained variance; FA branch: FA loss)
+    energy_trace[iter] <- energy
+    # check improvement and bookkeeping
+    improved <- FALSE
+    if (energy < best_energy) {
+      best_energy <- energy
+      best_Y <- Y_new
+      improved <- TRUE
+    }
+    if (improved) {
+      no_improve_count <- 0
+    } else {
+      no_improve_count <- no_improve_count + 1
+    }
+    # Adaptive scheduler: reduce LR when plateaued
+    if (no_improve_count >= patience && lr_reductions < max_lr_reductions) {
+      alpha_init <- max(alpha_init * lr_reduction_factor, 1e-12)
+      lr_reductions <- lr_reductions + 1
+      if (verbose) message(sprintf("No improvement for %d iters -> alpha_init -> %.3e (lr_reductions=%d)",
+                                   patience, alpha_init, lr_reductions))
+      no_improve_count <- 0
+    }
+    stop_due_to_plateau <- (no_improve_count >= patience && lr_reductions >= max_lr_reductions)
+    if (verbose) {
+      cat(sprintf("Iter %3d | Energy: %12.6e | ExplVar: %.4f | GradNorm: %.4e | bt: %2d | alpha: %.3e | t: %.2fs\n",
+                  iter, energy, expl_var_ratio, rgrad_norm, bt, alpha, as.numeric(difftime(Sys.time(), t_start, units = "secs"))))
+      if (!improved) cat(sprintf(" (no_improve_count=%d, lr_reductions=%d)\n", no_improve_count, lr_reductions))
+    }
+    # convergence checks
+    if (iter > 1) {
+      rel_energy_change <- abs(energy_trace[iter] - energy_trace[iter - 1]) / (abs(energy_trace[iter - 1]) + 1e-12)
+      grad_ok <- (rgrad_norm < grad_tol)
+      delta_Y <- .frob(Y_new - Y) / (.frob(Y) + 1e-12)
+      delta_ok <- (delta_Y < tol)
+      converged_condition <- (iter > min_iters_before_stop) && (rel_energy_change < tol) && (grad_ok || delta_ok)
+      if (verbose) {
+        cat(sprintf(" ΔEnergy: %.2e | ΔY: %.2e | ConvergedCond: %s\n",
+                    rel_energy_change, delta_Y, ifelse(converged_condition, "✓", "×")))
+      }
+      if (converged_condition) {
+        converged <- TRUE
+        if (verbose) message("Convergence achieved at iteration ", iter)
+        break
+      }
+    }
+    if (stop_due_to_plateau) {
+      if (verbose) message("Stopping early due to plateau")
+      break
+    }
+    # next iterate
+    Y <- Y_new
+  } # end iter
+  energy_trace <- energy_trace[seq_len(iter)]
+  # Final orthonormalization for reported best_Y (for explained variance calc)
+  if (k == 1) {
+    Q <- best_Y / sqrt(sum(best_Y^2) + 1e-12)
+  } else {
+    qr_decomp <- qr(best_Y)
+    Q <- qr.Q(qr_decomp)
+    if (ncol(Q) >= k) Q <- Q[, seq_len(k), drop = FALSE]
+  }
+  tr_val <- sum(diag(t(Q) %*% XtX %*% Q)) / n
+  expl_var_ratio <- tr_val / total_var
+  # --- construct "loadings" with rotation and names ---------------------
+  loadings <- best_Y
+  if (rotate != "none" && requireNamespace("psych", quietly = TRUE)) {
+    rot_fun <- switch(rotate,
+                      varimax = stats::varimax,
+                      promax = psych::promax,
+                      oblimin = psych::oblimin,
+                      NULL)
+    if (!is.null(rot_fun)) {
+      rot_res <- tryCatch(rot_fun(loadings, normalize = FALSE), error = function(e) NULL)
+      if (!is.null(rot_res$loadings)) loadings <- as.matrix(rot_res$loadings)
+    }
+  }
+  if (!is.null(colnames(X))) rownames(loadings) <- colnames(X)
+  colnames(loadings) <- paste0("PA", seq_len(k))
+  # --- compute communalities --------------------------------------------
+  communalities <- diag(loadings %*% t(loadings))
+  if (!is.null(rownames(loadings))) names(communalities) <- rownames(loadings)
+  list(
+    Y = best_Y,
+    loadings = loadings,
+    communalities = communalities,
     energy_trace = energy_trace,
     final_iter = iter,
     best_energy = best_energy,
