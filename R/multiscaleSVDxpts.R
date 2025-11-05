@@ -11731,7 +11731,7 @@ nsa_flow_pca_fa <- function(
   alpha = 0.0001,
   max_iter = 100,
   proximal_type = c("basic", "nsa_flow"),
-  w_pca = 1.0, nsa_w = 0.5,
+  w_pca = 1.0,
   apply_soft_thresh_in_nns = FALSE,
   tol = 1e-6, retraction = NULL,
   grad_tol = 1e-4, nsa_flow_fn = NULL, verbose = FALSE,
@@ -11749,15 +11749,14 @@ nsa_flow_pca_fa <- function(
   if (lambda < 0) stop("lambda must be non-negative")
   if (alpha <= 0) stop("alpha must be positive")
   if (w_pca <= 0) stop("w_pca must be positive")
-  if (nsa_w < 0 || nsa_w > 1) stop("nsa_w must be in [0,1]")
   if (is.null(nsa_flow_fn) && proximal_type == "nsa_flow") {
     # lazy require: user must have provided nsa_flow_fn (e.g., nsa_flow_autograd)
     stop("nsa_flow_fn must be provided when proximal_type == 'nsa_flow'")
   }
   # If NSA proximal used, we follow previous convention: disable L1 lambda to avoid double regularization
-  if (nsa_w > 0 && proximal_type == "nsa_flow") {
+  if (proximal_type == "nsa_flow") {
     lambda <- 0.0
-    if (verbose) message("nsa_w > 0 and proximal_type == 'nsa_flow' -> lambda set to 0")
+    if (verbose) message("proximal_type == 'nsa_flow' -> lambda set to 0")
   }
   # --- center X (no scaling) and precompute XtX / R ---------------------------
   Xc <- scale(X, center = TRUE, scale = FALSE)
@@ -11896,7 +11895,7 @@ nsa_flow_pca_fa <- function(
     } else {
       # nsa_flow proximal: we call the provided function with Y_ret as Y0
       # allow forwarding extra args via nsa_flow_args list
-      prox_call_args <- c(list(Y0 = Y_ret, w = nsa_w), nsa_flow_args)
+      prox_call_args <- c(list(Y0 = Y_ret ), nsa_flow_args)
       prox_res <- tryCatch(do.call(nsa_flow_fn, prox_call_args), error = function(e) {
         stop("nsa_flow_fn failed: ", conditionMessage(e))
       })
@@ -11915,7 +11914,7 @@ nsa_flow_pca_fa <- function(
         if (rotate == "varimax") {
           rot_res <- tryCatch(stats::varimax(Y_new, normalize = FALSE), error = function(e) NULL)
         } else if (rotate == "promax") {
-          rot_res <- tryCatch(psych::promax(Y_new, normalize = FALSE), error = function(e) NULL)
+          rot_res <- tryCatch(stats::promax(Y_new, normalize = FALSE), error = function(e) NULL)
         } else if (rotate == "oblimin") {
           rot_res <- tryCatch(psych::oblimin(Y_new, normalize = FALSE), error = function(e) NULL)
         } else rot_res <- NULL
@@ -11944,6 +11943,9 @@ nsa_flow_pca_fa <- function(
       best_energy <- energy
       best_Y <- Y_new
       improved <- TRUE
+    } else { # reset
+    #  energy = best_energy
+    #  Y_new = best_Y
     }
     if (improved) {
       no_improve_count <- 0
@@ -12004,7 +12006,7 @@ nsa_flow_pca_fa <- function(
   if (rotate != "none" && requireNamespace("psych", quietly = TRUE)) {
     rot_fun <- switch(rotate,
                       varimax = stats::varimax,
-                      promax = psych::promax,
+                      promax = stats::promax,
                       oblimin = psych::oblimin,
                       NULL)
     if (!is.null(rot_fun)) {
