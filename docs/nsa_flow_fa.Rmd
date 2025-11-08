@@ -3,17 +3,18 @@ title: "Comparison of NSA-Flow Regularized Factor Analysis and Standard Principa
 author: "Brian B. Avants"
 date: "2025-10-25"
 output:
-  html_document:
-    toc: true
-    toc_depth: 3
-    number_sections: true
-    df_print: paged
+html_document:
+toc: true
+toc_depth: 3
+number_sections: true
+df_print: paged
 header-includes:
   - \usepackage{algorithm}
   - \usepackage{algpseudocode}
   - \usepackage{amsmath}
   - \usepackage{amssymb}
 ---
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(psych)
@@ -25,154 +26,140 @@ library(patchwork)
 library(reshape2)
 library(ANTsR)
 set.seed(1234)
-if ( ! exists("mxit") ) mxit=5
 if ( ! exists("nn") ) nn=TRUE
-if (nn) alpha=1.0 else alpha=5.0
-mxit=100
-myalpha=1.0
 nsa_default <- function(Y0, w=0.5, apply_nonneg=nn ) {
   nsa_flow_autograd(
     Y0 = Y0,
     w = w,
     retraction = "soft_polar",
-    lr_strategy = "armijo",
+    lr_strategy = "bayes",
     optimizer='asgd',
     max_iter=1000L,
     warmup_iters=10L,
     apply_nonneg = apply_nonneg, verbose=FALSE
-  )
+    )
 }
 ```
-
 # Introduction
-
 Factor analysis identifies latent factors explaining correlations among observed variables. This document compares standard Principal Axis Factoring (PAF) from the `psych` package with NSA-Flow Factor Analysis (NSA.FA), which incorporates Non-negative Stiefel Approximating Flow regularization for improved sparsity and interpretability.
-
-PAF iteratively estimates communalities to focus on common variance. NSA.FA adds geometric regularization during iteration, promoting sparser loadings as an alternative to rotation, enhancing stability and fit.
-
-Using the Big Five Inventory (BFI) dataset (25 items, >1000 participants), we compare loadings, explained variance, fit, communalities, interpretability, orthogonality, predictive validity, and reproduced correlations.
-
+PAF iteratively estimates communalities to focus on common variance. NSA.FA adds geometric regularization during iteration, promoting sparser loadings.  Using the Big Five Inventory (BFI) dataset (25 items, >1000 participants), we compare loadings, explained variance, fit, communalities, interpretability, orthogonality, predictive validity, and reproduced correlations.
 ```{r expectedcorrs, echo=FALSE}
 big5_corr <- tribble(
-  ~Trait1, ~Trait2, ~Correlation,
-  "Openness (O)", "Conscientiousness (C)", -0.10,
-  "Openness (O)", "Extraversion (E)", 0.15,
-  "Openness (O)", "Agreeableness (A)", 0.10,
-  "Openness (O)", "Neuroticism (N)", 0.05,
-  "Conscientiousness (C)", "Extraversion (E)", 0.15,
-  "Conscientiousness (C)", "Agreeableness (A)", 0.25,
-  "Conscientiousness (C)", "Neuroticism (N)", -0.30,
-  "Extraversion (E)", "Agreeableness (A)", 0.25,
-  "Extraversion (E)", "Neuroticism (N)", -0.30,
-  "Agreeableness (A)", "Neuroticism (N)", -0.30
+~Trait1, ~Trait2, ~Correlation,
+"Openness (O)", "Conscientiousness (C)", -0.10,
+"Openness (O)", "Extraversion (E)", 0.15,
+"Openness (O)", "Agreeableness (A)", 0.10,
+"Openness (O)", "Neuroticism (N)", 0.05,
+"Conscientiousness (C)", "Extraversion (E)", 0.15,
+"Conscientiousness (C)", "Agreeableness (A)", 0.25,
+"Conscientiousness (C)", "Neuroticism (N)", -0.30,
+"Extraversion (E)", "Agreeableness (A)", 0.25,
+"Extraversion (E)", "Neuroticism (N)", -0.30,
+"Agreeableness (A)", "Neuroticism (N)", -0.30
 )
 big5_corr %>%
-  gt() %>%
-  tab_header(
-    title = "Expected Correlations Between Big Five Traits",
-    subtitle = "Based on empirical meta-analyses"
-  ) %>%
-  fmt_number(columns = Correlation, decimals = 2) %>%
-  cols_label(
-    Trait1 = "Trait 1",
-    Trait2 = "Trait 2",
-    Correlation = "r"
-  )
+gt() %>%
+tab_header(
+title = "Expected Correlations Between Big Five Traits",
+subtitle = "Based on empirical meta-analyses"
+) %>%
+fmt_number(columns = Correlation, decimals = 2) %>%
+cols_label(
+Trait1 = "Trait 1",
+Trait2 = "Trait 2",
+Correlation = "r"
+)
 ```
-
 **Interpretation**: These typical inter-trait correlations serve as a benchmark for recovery of personality structure.
 
 # Methods
 
-## Overview
+## Factor Analysis Basics
 
-NSA.FA extends factor analysis by integrating NSA-Flow regularization to decorrelate the loadings matrix while promoting sparsity. This is achieved by defining a continuous-time flow toward the Stiefel manifold, balancing reconstruction error and soft orthogonality constraints.
+Factor Analysis (FA) is a multivariate statistical technique aimed at uncovering the underlying structure in a set of observed variables by modeling them as linear combinations of a smaller number of latent factors plus unique error terms. The primary goal is to explain the correlations among the observed variables through these common factors, thereby reducing dimensionality while preserving the essential information.
+
+In the standard factor model, each observed variable \( x_i \) is expressed as:
+\[
+x_i = \sum_{j=1}^k \lambda_{ij} f_j + \epsilon_i,
+\]
+where \( \lambda_{ij} \) are the factor loadings (coefficients indicating the relationship between variable \( i \) and factor \( j \)), \( f_j \) are the latent factors (assumed to have mean 0 and variance 1), and \( \epsilon_i \) is the unique error term for variable \( i \), uncorrelated with the factors and other errors.
+
+The model implies that the covariance matrix \( \Sigma \) of the observed variables can be decomposed as:
+\[
+\Sigma = \Lambda \Lambda^\top + \Psi,
+\]
+where \( \Lambda \) is the \( p \times k \) loadings matrix (with \( p \) variables and \( k \) factors), and \( \Psi \) is a diagonal matrix of unique variances (specific plus error variance for each variable).
+
+Principal Axis Factoring (PAF), the standard method compared here, estimates the loadings by iteratively refining initial communality estimates (the proportion of variance in each variable explained by the common factors) and solving an eigenvalue problem on the reduced correlation matrix (correlation matrix with communalities on the diagonal). This focuses on explaining the shared variance, ignoring unique variance during estimation.
+
+## Relation to Principal Component Analysis (PCA)
+While both FA and Principal Component Analysis (PCA) are dimensionality reduction techniques, they differ in purpose and assumptions. PCA derives principal components as linear combinations of the observed variables that maximize the explained total variance, without distinguishing between common and unique variance. The components are orthogonal and ordered by the amount of variance they capture, and the model is exact: the data can be perfectly reconstructed from all components.
+
+In mathematical terms, PCA decomposes the covariance matrix \( \Sigma \) as:
+\[
+\Sigma = V D V^\top,
+\]
+where \( V \) is the matrix of eigenvectors (component loadings), and \( D \) is the diagonal matrix of eigenvalues (variance explained by each component). The top \( k \) components provide the best low-rank approximation in terms of total variance.
+
+In contrast, FA explicitly models unique variance \( \Psi \), focusing on the covariance structure rather than total variance. Factors are latent constructs, not direct combinations of variables, and the model is approximate, as unique variance is not explained by the factors. PAF can be seen as a variant of PCA applied to the reduced correlation matrix, but with iterative refinement to estimate communalities. NSA.FA further extends this by incorporating regularization to enforce sparsity and near-orthogonality, bridging aspects of PCA's orthogonal components with FA's latent factor interpretation.
+
+## Overview of NSA.FA
+NSA.FA extends traditional factor analysis by integrating NSA-Flow regularization, which decorrelates the loadings matrix while promoting sparsity. This is achieved by defining a continuous-time flow toward the Stiefel manifold (the set of orthogonal matrices with unit columns), balancing the reconstruction error with soft orthogonality constraints and sparsity penalties. The result is more interpretable factors with reduced cross-loadings and improved stability, particularly in high-dimensional or noisy data.
 
 ## Factor Model
-
 For data \( X \):
-
 \[
 X = \Lambda F + E,
 \]
-
 implying covariance:
-
 \[
 \Sigma \approx \Lambda \Lambda^\top + \Psi.
 \]
 
 ## NSA-Flow Regularization
-
-Flow dynamics balance reconstruction, sparsity, and orthogonality:
-
+The NSA-Flow integrates geometric constraints into the factor analysis objective. The flow dynamics are designed to balance two key terms: reconstruction of the covariance matrix and orthogonality of the factors.  The simplified flow equation for the loadings \( \Lambda \) is given by:
 \[
-\frac{d\Lambda_t}{dt} = -\nabla_\Lambda \left( \frac{1}{2} \|\Sigma - \Lambda \Lambda^\top\|_F^2 + \lambda \|\Lambda\|_1 - \frac{w}{2} \|\Lambda^\top \Lambda - I_k\|_F^2 \right).
+\frac{d\Lambda_t}{dt} = -\nabla_\Lambda \left( \frac{1}{2} \|\Sigma - \Lambda \Lambda^\top\|_F^2  - \frac{w}{2} \|\Lambda^\top \Lambda - I_k\|_F^2 \right),
 \]
+where, in practice, we use scale invariant formulations.  Here, the first term minimizes the Frobenius norm discrepancy between the observed covariance \( \Sigma \) and the model's implied common covariance \( \Lambda \Lambda^\top \). The orthogonality term \( -\frac{w}{2} \|\Lambda^\top \Lambda - I_k\|_F^2 \) (note the negative sign to maximize orthogonality) softly constrains the loadings to approach the Stiefel manifold, reducing factor correlations without strict enforcement.  Updates are performed via discretization of this flow, with retractions (e.g., soft-polar decomposition) to maintain numerical stability and ensure the loadings remain near-orthogonal.  
 
-Updates retract via soft-polar for stability.
+The method employs a proximal gradient framework to perform factor analysis (FA) by minimizing a least-squares reconstruction error on the sample covariance matrix. In each iteration, it computes an approximate gradient of the smooth fidelity term—measuring how well the loadings matrix reproduces the covariances via a low-rank plus diagonal structure—then takes a step with adaptive line search, applies proximal operators, and optionally rotates the loadings for interpretability.
 
-## Algorithm
+# Results
 
-Iterative loop: power iteration initialization, scaling, NSA-Flow regularization, damped communality updates, optional rotation (e.g., promax).
-
-Annealing \( w \) aids convergence, monitored by communality changes and reconstruction error.
-
-## Assumptions
-
-Approximate low-rank model, near-Stiefel loadings, local convexity.
-
-## Relation to PAF
-
-Generalizes eigenvalue solving with dynamic regularization, yielding sparse, orthogonal factors.
-
-## Implementation
-
-R with PyTorch backend via `reticulate`.
-
-## Metrics
-
-- Fit: CFA indices (RMSEA, CFI, TLI, SRMR, BIC).
-
-- Interpretability: Hofmann complexity, cross-loadings.
-
-- Orthogonality Defect: Deviation from orthogonality.
-
-- Predictive Validity: Factor-trait correlations in test set.
-
-- Reproduced Correlations: Observed vs. implied.
-
-80/20 train/test split.
 
 ```{r methods, echo=FALSE}
+
 paf_standalone <- function(data = NULL, R = NULL, nfactors, rotate = "none", max_iter = 100, tol = 1e-5) {
-  if (!is.null(data)) R <- cor(data)
+if (!is.null(data)) R <- cor(data)
   fit <- psych::fa(R, nfactors = nfactors, rotate = rotate, fm = "pa", max.iter = max_iter)
+  posthoc <- posthoc_fa_summary(data, loadings = as.matrix(fit$loadings), method = "PAF")
+  # Return full results
   list(
     loadings = fit$loadings,
-    communalities = fit$communality,
-    uniqueness = 1 - fit$communality,
+    scores = posthoc$scores,
+    communalities = posthoc$communalities,
+    uniquenesses = posthoc$uniquenesses,
+    variance_per_factor = posthoc$variance_per_factor,
+    variance_explained = posthoc$total_variance_explained,
+    reconstructed = posthoc$reconstructed,
+    residuals = posthoc$residuals,
     iterations = fit$iter,
-    converged = TRUE
+    converged = TRUE,
+    fit = fit
   )
 }
-same_size_noise_matrix <- function(X) {
-  set.seed(42)
-  noise_matrix <- matrix(rnorm(nrow(X) * ncol(X)), nrow = nrow(X), ncol = ncol(X))
-  colnames(noise_matrix) <- colnames(X)
-  rownames(noise_matrix) <- rownames(X)
-  return(noise_matrix)
-}
+
 ```
+
+
 
 ```{r alg, echo=FALSE,fig.height=10}
 library(DiagrammeR)
-
 grViz("
 digraph nsa_flow_fa {
   graph [layout = dot, rankdir = TB]
   node [shape = box, style = rounded, fontsize = 11, fontname = Helvetica]
-
   subgraph cluster_inputs {
     label = 'Input & Initialization'
     style = 'filled'; color = lightgrey; fillcolor = '#F5F5F5'
@@ -181,7 +168,6 @@ digraph nsa_flow_fa {
     Rmat [label = 'Rmat = XtX / n (covariance)']
     Y_init [label = 'Y₀: random loadings (p × k)']
   }
-
   subgraph cluster_energy {
     label = 'FA Energy Function'
     style = 'filled'; color = lightblue; fillcolor = '#E6F3FF'
@@ -192,14 +178,12 @@ digraph nsa_flow_fa {
     diff [label = 'diff = Rmat - recon']
     loss [label = 'Loss = ||diff||²_F + λ‖Y‖₁']
   }
-
   subgraph cluster_grad {
     label = 'Gradient Computation'
     style = 'filled'; color = lightyellow; fillcolor = '#FFFFE0'
     grad [label = '∇E(Y) = -4 (Rmat - recon) Y']
     clip [label = 'Gradient clipping (‖∇E‖ ≤ max_grad_norm)']
   }
-
   subgraph cluster_opt {
     label = 'Optimization Loop'
     style = 'filled'; color = lightcyan; fillcolor = '#E0FFFF'
@@ -209,7 +193,6 @@ digraph nsa_flow_fa {
     rotate [label = 'Optional rotation (varimax/promax/oblimin)']
     check [label = 'Check ΔEnergy, ΔY, convergence']
   }
-
   subgraph cluster_output {
     label = 'Outputs'
     style = 'filled'; color = lightgreen; fillcolor = '#E8FEE8'
@@ -218,7 +201,6 @@ digraph nsa_flow_fa {
     energy [label = 'Energy trace']
     summary [label = 'Return list: {loadings, communalities, energy, ...}']
   }
-
   # Connections
   X -> Rmat
   k -> Y_init
@@ -231,7 +213,17 @@ digraph nsa_flow_fa {
 ")
 ```
 
-# Comparison on BFI Dataset
+## NSA-FA vs PAF on BFI Dataset
+
+We employ psychological survey data with expected factors in order to compare the performance of these methods on easy to access public data. We run both methods on the full BFI dataset to aggregate and compare standard quantitative metrics used in factor analysis.  The models are trained on the larger of an 80/20 train/test split; we then compare:
+
+- Model Fit: CFA indices (RMSEA, CFI, TLI, SRMR, BIC);
+
+- Interpretability: Hofmann complexity, cross-loadings;
+
+- Orthogonality Defect: Deviation from orthogonality;
+
+- Predictive Validity: Factor-trait correlations in test set.
 
 ```{r real-data}
 data(bfi)
@@ -239,53 +231,63 @@ bfi_data <- bfi %>% select(A1:A5, C1:C5, E1:E5, N1:N5, O1:O5) %>% na.omit()
 ```
 
 ```{r real-data-fit,echo=FALSE}
-rot <- "none"
-bfi_data_tx <- transform_matrix(data.matrix(bfi_data), 'none')$Xs
-real_A <- paf_standalone(bfi_data_tx, nfactors = 5, rotate = rot)
-real_B <- nsa_flow_pca_fa(bfi_data_tx, 5, max_iter = mxit, rotate = rot, verbose = FALSE, proximal_type = 'nsa_flow', alpha = myalpha, nsa_flow_fn = nsa_default, objective = "fa")
-loadA <- as.data.frame(real_A$loadings[, ])
-loadB <- as.data.frame(real_B$loadings[, ])
-h2_A <- rowSums(loadA^2)
-h2_B <- rowSums(loadB^2)
-```
 
-## Model Fit Indices
+
+v=FALSE
+mxit=100
+myalpha=100.0
+rot <- c("none","varimax","promax")[2]
+print(paste("ROTATION:",rot))
+n <- nrow(bfi_data)
+bfi_data_tx=data.matrix(na.omit(bfi_data))
+train_idx <- sample(seq_len(n), size = floor(0.8 * n))
+train_data <- bfi_data_tx[train_idx, ]
+test_data <- bfi_data_tx[-train_idx, ]
+real_A_train <- paf_standalone(train_data, nfactors = 5, rotate = rot)
+real_B_train <- nsa_flow_pca_fa(train_data, 5, max_iter = mxit, rotate = rot, 
+  verbose = v, proximal_type = 'nsa_flow', alpha = myalpha, 
+  nsa_flow_fn = nsa_default, objective = "fa" )
+L_A <- real_A_train$loadings
+L_B <- real_B_train$loadings
+h2_A_train <- real_A_train$communalities
+h2_B_train <- real_B_train$communalities
+real_A_test = posthoc_fa_summary(test_data, loadings = L_A, method = "PAF")
+real_B_test = posthoc_fa_summary(test_data, loadings = L_B, method = "NSA.FA")
+
+```
 
 ```{r varx0, echo=FALSE}
 library(lavaan)
 set.seed(123)
-L_A <- as.matrix(real_A$loadings[])
-L_B <- as.matrix(real_B$loadings[])
-bfi_clean <- na.omit(bfi_data_tx)
-S <- cov(bfi_clean)
-n <- nrow(bfi_clean)
+S <- cov(train_data)
+n <- nrow(train_data)
 build_simple_model <- function(L_matrix, prefix = "F") {
-  if (is.null(rownames(L_matrix))) rownames(L_matrix) <- paste0("V", seq_len(nrow(L_matrix)))
+if (is.null(rownames(L_matrix))) rownames(L_matrix) <- paste0("V", seq_len(nrow(L_matrix)))
   assignments <- apply(abs(L_matrix), 1, which.max)
   lines <- sapply(seq_len(ncol(L_matrix)), function(f) {
     items <- rownames(L_matrix)[assignments == f]
-    if (length(items) == 0) return(paste0(prefix, f, " =~ 0*dummy"))
+if (length(items) == 0) return(paste0(prefix, f, " =~ 0*dummy"))
     paste0(prefix, f, " =~ ", paste(items, collapse = " + "))
-  })
-  paste(lines, collapse = "\n")
+})
+paste(lines, collapse = "\n")
 }
 model_A_str <- build_simple_model(L_A)
 model_B_str <- build_simple_model(L_B)
 fit_A <- try(cfa(model_A_str, sample.cov = S, sample.nobs = n, fixed.x = FALSE, estimator = "ML"), silent = TRUE)
 fit_B <- try(cfa(model_B_str, sample.cov = S, sample.nobs = n, fixed.x = FALSE, estimator = "ML"), silent = TRUE)
 extract_indices <- function(fit) {
-  if (inherits(fit, "try-error")) {
-    return(tibble(RMSEA = NA, CFI = NA, TLI = NA, SRMR = NA, BIC = NA, converged = FALSE))
+if (inherits(fit, "try-error")) {
+return(tibble(RMSEA = NA, CFI = NA, TLI = NA, SRMR = NA, BIC = NA, converged = FALSE))
   }
   fm <- fitMeasures(fit, c("rmsea","cfi","tli","srmr","bic"))
-  tibble(
-    RMSEA = round(fm["rmsea"], 3),
-    CFI = round(fm["cfi"], 3),
-    TLI = round(fm["tli"], 3),
-    SRMR = round(fm["srmr"], 3),
-    BIC = round(fm["bic"], 1),
-    converged = inspect(fit, "converged")
-  )
+tibble(
+RMSEA = round(fm["rmsea"], 3),
+CFI = round(fm["cfi"], 3),
+TLI = round(fm["tli"], 3),
+SRMR = round(fm["srmr"], 3),
+BIC = round(fm["bic"], 1),
+converged = inspect(fit, "converged")
+)
 }
 fit_A_idx <- extract_indices(fit_A)
 fit_B_idx <- extract_indices(fit_B)
@@ -294,117 +296,101 @@ fit_comp <- bind_rows(
   tibble(Method = "NSA.FA") %>% bind_cols(fit_B_idx)
 )
 fit_comp %>%
-  gt() %>%
-  tab_header(
-    title = "CFA Fit Indices — PAF vs NSA.FA"
-  ) %>%
-  tab_spanner(
-    label = "Fit Statistics",
-    columns = c(RMSEA, CFI, TLI, SRMR, BIC)
-  ) %>%
-  cols_align(
-    align = "center",
-    columns = everything()
-  ) %>%
-  tab_options(
-    table.font.size = 13,
-    table.width = pct(60)
-  )
+gt() %>%
+tab_header(
+title = "CFA Fit Indices — PAF vs NSA.FA"
+) %>%
+tab_spanner(
+label = "Fit Statistics",
+columns = c(RMSEA, CFI, TLI, SRMR, BIC)
+) %>%
+cols_align(
+align = "center",
+columns = everything()
+) %>%
+tab_options(
+table.font.size = 13,
+table.width = pct(60)
+)
 ```
 
-**Interpretation**: NSA.FA similar fit metrics with some lossed due to non-negative regularization.
 
-
-## Train-Test Split Comparisons
-
-```{r compare_loadings_at_last, echo=FALSE, fig.width=10, fig.height=4}
-n <- nrow(bfi_data_tx)
-train_idx <- sample(seq_len(n), size = floor(0.8 * n))
-train_data <- bfi_data_tx[train_idx, ]
-test_data <- bfi_data_tx[-train_idx, ]
-real_A_train <- paf_standalone(train_data, nfactors = 5, rotate = rot)
-L_A <- real_A_train$loadings
-real_B_train <- nsa_flow_pca_fa(train_data, 5, max_iter = mxit, rotate = rot, verbose = FALSE, proximal_type = 'nsa_flow', alpha = myalpha, nsa_flow_fn = nsa_default, objective = "fa")
-L_B <- real_B_train$loadings
-h2_A_train <- rowSums(L_A^2)
-h2_B_train <- rowSums(L_B^2)
-h2_A_train_norm <- rowSums(L_A^2)/sum(rowSums(L_A^2))
-h2_B_train_norm <- rowSums(L_B^2)/sum(rowSums(L_B^2))
+```{r moreeval,echo=FALSE}
 iod_A <- ANTsR::invariant_orthogonality_defect(L_A)
 iod_B <- ANTsR::invariant_orthogonality_defect(L_B)
 comm_df <- tibble(
-  Variable = rownames(L_A),
-  PAF = h2_A_train_norm,
-  `NSA.FA` = h2_B_train_norm
+Variable = rownames(L_A),
+PAF = h2_A_train,
+`NSA.FA` = h2_B_train
 ) %>%
-  pivot_longer(cols = c(PAF, `NSA.FA`), names_to = "Method", values_to = "Communality")
+pivot_longer(cols = c(PAF, `NSA.FA`), names_to = "Method", values_to = "Communality")
 ggplot(comm_df, aes(x = reorder(Variable, Communality), y = Communality, fill = Method)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
-  coord_flip() +
-  scale_fill_manual(values = c("PAF" = "#0073C2", "NSA.FA" = "#EFC000")) +
-  labs(title = "Communalities (Train Set, normalized)", y = "Proportion Explained", x = "Variable") +
-  theme_minimal(base_size = 14)
+geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+coord_flip() +
+scale_fill_manual(values = c("PAF" = "#0073C2", "NSA.FA" = "#EFC000")) +
+labs(title = "Communalities (Train Set)", y = "Proportion Explained", x = "Variable") +
+theme_minimal(base_size = 14)
 ```
 
 ## Predictive Validity (Test Set)
 
 ```{r predictive_validity, echo=FALSE, fig.width=10, fig.height=5}
-scores_test_A <- as.matrix(test_data) %*% as.matrix(L_A)
-scores_test_B <- as.matrix(test_data) %*% as.matrix(L_B)
+scores_test_A <- real_A_test$scores
+scores_test_B <- real_B_test$scores
 traits <- list(
-  Agreeableness = "^A",
-  Conscientiousness = "^C",
-  Extraversion = "^E",
-  Neuroticism = "^N",
-  Openness = "^O"
+Agreeableness = "^A",
+Conscientiousness = "^C",
+Extraversion = "^E",
+Neuroticism = "^N",
+Openness = "^O"
 )
 outcomes <- lapply(traits, function(pat) rowSums(test_data[, grep(pat, colnames(test_data))]))
 cor_matrix_A <- sapply(1:5, function(f) sapply(outcomes, function(out) cor(scores_test_A[,f], out, use = "pairwise.complete.obs")))
 cor_matrix_B <- sapply(1:5, function(f) sapply(outcomes, function(out) cor(scores_test_B[,f], out, use = "pairwise.complete.obs")))
 cor_df_all <- data.frame(
-  Factor = rep(paste0("F", 1:5), length(traits)),
-  Trait = rep(names(traits), each = 5),
-  PAF = abs(as.vector(cor_matrix_A)),
-  `NSA.FA` = abs(as.vector(cor_matrix_B))
+Factor = rep(paste0("F", 1:5), length(traits)),
+Trait = rep(names(traits), each = 5),
+PAF = abs(as.vector(cor_matrix_A)),
+`NSA.FA` = abs(as.vector(cor_matrix_B))
 ) %>%
-  pivot_longer(cols = c(PAF, `NSA.FA`), names_to = "Method", values_to = "Correlation")
+pivot_longer(cols = c(PAF, `NSA.FA`), names_to = "Method", values_to = "Correlation")
 ggplot(cor_df_all, aes(x = Factor, y = Trait, fill = Correlation)) +
-  geom_tile(color = "white", linewidth = 0.1) +
-  geom_text(aes(label = round(Correlation, 2)), color = "black", size = 3) +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0, name = "Correlation") +
-  facet_wrap(~Method) +
-  theme_minimal(base_size = 14) +
-  theme(axis.text.x = element_text(angle = 0),
-        panel.grid = element_blank()) +
-  labs(title = "Factor-Trait Correlations (Test Set)", x = "Factor", y = "Trait")
+geom_tile(color = "white", linewidth = 0.1) +
+geom_text(aes(label = round(Correlation, 2)), color = "black", size = 3) +
+scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0, name = "Correlation") +
+facet_wrap(~Method) +
+theme_minimal(base_size = 14) +
+theme(axis.text.x = element_text(angle = 0),
+panel.grid = element_blank()) +
+labs(title = "Factor-Trait Correlations (Test Set)", x = "Factor", y = "Trait")
 ```
 
-**Interpretation**: NSA.FA shows stronger, more specific correlations, indicating better structure recovery.
-
+**Interpretation**: NSA.FA shows stronger, more specific correlations, potentially indicating better structure recovery.
+ 
 ## Reproduced Correlations (Test Set)
 
 ```{r compare_loadings_at_last_cont2, echo=FALSE, fig.width=10, fig.height=4}
-uniqueness_A <- 1 - h2_A_train
-uniqueness_B <- 1 - h2_B_train
-R_hat_A <- L_A %*% t(L_A) + diag(uniqueness_A)
-R_hat_B <- L_B %*% t(L_B) + diag(uniqueness_B)
+uniqueness_A <- real_A_test$uniquenesses
+uniqueness_B <- real_B_test$uniquenesses
+R_hat_A <- real_A_test$R_hat
+R_hat_B <- real_B_test$R_hat
 R_test <- cor(test_data, use = "pairwise.complete.obs")
 melt_R_test <- melt(R_test); melt_R_test$Method <- "Observed"
 melt_R_A <- melt(R_hat_A); melt_R_A$Method <- "PAF"
 melt_R_B <- melt(R_hat_B); melt_R_B$Method <- "NSA.FA"
 all_corr <- bind_rows(melt_R_test, melt_R_A, melt_R_B)
 ggplot(all_corr, aes(x = Var1, y = Var2, fill = value)) +
-  geom_tile(color = "white", linewidth = 0.1) +
-  facet_wrap(~Method) +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0, name = "Correlation") +
-  theme_minimal(base_size = 14) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
-        axis.text.y = element_text(size = 8),
-        panel.grid = element_blank()) +
-  labs(title = "Observed vs Implied Correlations", fill = "Correlation")
+geom_tile(color = "white", linewidth = 0.1) +
+facet_wrap(~Method) +
+scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0, name = "Correlation") +
+theme_minimal(base_size = 14) +
+theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+axis.text.y = element_text(size = 8),
+panel.grid = element_blank()) +
+labs(title = "Observed vs Implied Correlations", fill = "Correlation")
 ```
 
-**Interpretation**: NSA.FA provides more unique mappings from the factors to the known traits.
+**Interpretation**: NSA.FA provides unsigned mappings from the factors to the known traits.
 
 ## Interpretability Metrics
 
@@ -422,18 +408,110 @@ cross_load_B <- sum(rowSums(abs(as.matrix(L_B)) > 0.3) > 1)
 sparsity_A <- mean(abs(L_A) < 0.1) * 100
 sparsity_B <- mean(abs(L_B) < 0.1) * 100
 interp_tbl <- tibble(
-  Method = c("PAF", "NSA.FA"),
-  `Mean Complexity` = c(mean_comp_A, mean_comp_B),
-  `Cross-Loadings` = c(cross_load_A, cross_load_B),
-  `Sparsity (%)` = c(sparsity_A, sparsity_B)
+Method = c("PAF", "NSA.FA"),
+`Mean Complexity` = c(mean_comp_A, mean_comp_B),
+`Cross-Loadings` = c(cross_load_A, cross_load_B),
+`Sparsity (%)` = c(sparsity_A, sparsity_B)
 )
 interp_tbl %>%
+gt() %>%
+tab_header(
+title = "Interpretability Metrics"
+) %>%
+fmt_number(
+columns = `Mean Complexity`,
+decimals = 3
+) %>%
+cols_align(
+align = "center",
+columns = everything()
+) %>%
+tab_options(
+table.font.size = 13,
+table.width = pct(50)
+)
+```
+**Interpretation**: Lower complexity/cross-loadings and higher sparsity in NSA.FA indicate superior interpretability.
+
+## Computing Communalities and Variance Explained
+
+Communalities, which represent the variance explained for each variable by the factors, are computed externally to the fitting functions using the factor loadings. For a loadings matrix \( \Lambda \) with dimensions \( p \times k \) (where \( p \) is the number of variables and \( k \) is the number of factors), the communality for each variable \( i \) is typically calculated as:
+
+\[
+h_i^2 = \sum_{j=1}^{k} \Lambda_{i,j}^2.
+\]
+
+The variance explained by each factor is then the proportion of total variance accounted for by that factor, given by the column sums of the squared loadings divided by the number of variables:
+
+\[
+v_j = \frac{\sum_{i=1}^{p} \Lambda_{i,j}^2}{p}
+\]
+
+The total variance explained by the model is the sum of \( v_j \) over all factors, or equivalently \( \frac{\sum h_i^2}{p} \).
+
+We compute communalities from scratch using linear regression on estimated factor scores. This approach verifies the loadings-based calculation and provides insight into the model's explanatory power. Factor scores are estimated using the regression method:
+
+\[
+\hat{F} = ( \Lambda^\top \Psi^{-1} \Lambda )^{-1} \Lambda^\top \Psi^{-1} X,
+\]
+
+where \( \Psi \) is the diagonal matrix of uniquenesses (1 - communalities). For each variable \( x_i \), we fit a linear model \( x_i \sim \hat{F} \) and extract the \( R^2 \).
+
+
+```{r variance_explained_regression0, echo=FALSE, fig.width=10, fig.height=5}
+# For PAF
+uniqueness_A_train <- real_A_train$uniquenesses
+scores_A <- real_A_train$scores
+r2_A_reg <- real_A_train$communalities
+var_exp_A = real_A_train$variance_per_factor
+
+# For NSA.FA
+uniqueness_B_train <- real_B_train$uniquenesses
+scores_B <- real_B_train$scores
+r2_B_reg <- real_B_train$communalities
+var_exp_B = real_B_train$variance_per_factor
+```
+
+```{r variance_explained_regression1, echo=FALSE, fig.width=10, fig.height=5}
+# Comparison
+comm_reg_df <- tibble(
+  Variable = rownames(L_A),
+  PAF_Loadings = h2_A_train,
+  PAF_Regression = r2_A_reg,
+  `NSA.FA_Loadings` = h2_B_train,
+  `NSA.FA_Regression` = r2_B_reg
+)
+
+
+ggpubr::ggscatter(comm_reg_df, x = "PAF_Regression", y = "NSA.FA_Regression",
+        color = "black", 
+        add = "reg.line",  # Add regressin line
+        add.params = list(color = "blue", fill = "lightgray")
+        )+ ggtitle("Variance explained by variable \n are not equivalent across methods")
+
+```
+
+```{r variance_explained_regression2, echo=FALSE, fig.width=10, fig.height=5}
+var_df <- rbind(var_exp_A,var_exp_B)
+ggplot(var_df, aes(x = Factor, y = Variance, fill = Method)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("PAF" = "#0073C2", "NSA" = "#EFC000")) +
+  labs(title = "Variance Explained per Factor", y = "Proportion of Variance", x = "Factor") +
+  theme_minimal(base_size = 14)
+
+total_var_A <- sum( real_A_test$variance_per_factor$Variance )
+total_var_B <- sum( real_B_test$variance_per_factor$Variance )
+total_df <- tibble(
+  Method = c("PAF", "NSA.FA"),
+  Total_Variance = c(total_var_A, total_var_B)
+)
+total_df %>%
   gt() %>%
   tab_header(
-    title = "Interpretability Metrics"
+    title = "Total Variance Explained (Test Set)"
   ) %>%
   fmt_number(
-    columns = `Mean Complexity`,
+    columns = Total_Variance,
     decimals = 3
   ) %>%
   cols_align(
@@ -442,81 +520,221 @@ interp_tbl %>%
   ) %>%
   tab_options(
     table.font.size = 13,
-    table.width = pct(50)
+    table.width = pct(40)
   )
+
 ```
 
-**Interpretation**: Lower complexity/cross-loadings and higher sparsity in NSA.FA indicate superior interpretability.
 
 ## Summary Tables
-
 ```{r compare_loadings_at_last_tables, echo=FALSE}
 comm_df_wide <- comm_df %>%
-  pivot_wider(names_from = Method, values_from = Communality) %>%
-  mutate(
-    Group = case_when(
+pivot_wider(names_from = Method, values_from = Communality) %>%
+mutate(
+Group = case_when(
       substr(Variable, 1, 1) == "A" ~ "Agreeableness",
       substr(Variable, 1, 1) == "C" ~ "Conscientiousness",
       substr(Variable, 1, 1) == "E" ~ "Extraversion",
       substr(Variable, 1, 1) == "N" ~ "Neuroticism",
       substr(Variable, 1, 1) == "O" ~ "Openness"
-    ),
-    Difference = `NSA.FA` - PAF
-  ) %>%
-  arrange(Group, Variable) %>%
-  select(Group, Variable, PAF, `NSA.FA`, Difference)
+),
+Difference = `NSA.FA` - PAF
+) %>%
+arrange(Group, Variable) %>%
+select(Group, Variable, PAF, `NSA.FA`, Difference)
 comm_df_wide %>%
-  group_by(Group) %>%
-  gt(rowname_col = "Variable") %>%
-  tab_header(
-    title = "Communalities by Method"
-  ) %>%
-  tab_spanner(
-    label = "Communalities",
-    columns = c(PAF, `NSA.FA`)
-  ) %>%
-  fmt_number(
-    columns = c(PAF, `NSA.FA`, Difference),
-    decimals = 3
-  ) %>%
-  data_color(
-    columns = Difference,
-    fn = scales::col_numeric(
-      palette = "RdBu",
-      domain = c(-1, 1)
-    )
-  ) %>%
-  cols_align(
-    align = "center",
-    columns = c(PAF, `NSA.FA`, Difference)
-  ) %>%
-  tab_options(
-    table.font.size = 13,
-    table.width = pct(60),
-    row_group.background.color = "lightgray",
-    row_group.font.weight = "bold"
-  )
+group_by(Group) %>%
+gt(rowname_col = "Variable") %>%
+tab_header(
+title = "Communalities by Method"
+) %>%
+tab_spanner(
+label = "Communalities",
+columns = c(PAF, `NSA.FA`)
+) %>%
+fmt_number(
+columns = c(PAF, `NSA.FA`, Difference),
+decimals = 3
+) %>%
+data_color(
+columns = Difference,
+fn = scales::col_numeric(
+palette = "RdBu",
+domain = c(-1, 1)
+)
+) %>%
+cols_align(
+align = "center",
+columns = c(PAF, `NSA.FA`, Difference)
+) %>%
+tab_options(
+table.font.size = 13,
+table.width = pct(60),
+row_group.background.color = "lightgray",
+row_group.font.weight = "bold"
+)
 iod_tbl <- tibble(
-  Method = c("PAF", "NSA.FA"),
-  OrthogonalityDefect = c(iod_A, iod_B)
+Method = c("PAF", "NSA.FA"),
+OrthogonalityDefect = c(iod_A, iod_B)
 )
 iod_tbl %>%
-  gt() %>%
-  tab_header(
-    title = "Orthogonality Defects"
-  ) %>%
-  cols_align(
-    align = "center",
-    columns = OrthogonalityDefect
-  ) %>%
-  tab_options(
-    table.font.size = 13,
-    table.width = pct(40)
-  )
+gt() %>%
+tab_header(
+title = "Orthogonality Defects"
+) %>%
+cols_align(
+align = "center",
+columns = OrthogonalityDefect
+) %>%
+tab_options(
+table.font.size = 13,
+table.width = pct(40)
+)
 ```
-
 **Interpretation**: NSA.FA often explains more variance (positive differences) and has lower orthogonality defect.
 
 # Conclusion
 
 NSA.FA outperforms PAF in interpretability, fit, and predictive validity by producing sparser, more stable factors through geometric regularization, making it a superior alternative for exploratory factor analysis.
+
+
+
+
+# Simulated Data Comparison
+
+To complement the real-world evaluation on the BFI dataset, we conduct a simulation study to assess how NSA.FA and standard PAF recover known factor structures under controlled conditions. Simulations allow us to quantify recovery accuracy (e.g., via RMSE on loadings) in scenarios with varying noise levels, sample sizes, or sparsity, where ground truth is available. This highlights NSA.FA's potential advantages in regularization, such as better handling of noise or promoting sparsity.
+
+We simulate data from a factor model with 25 variables (p=25) and 5 factors (k=5), mimicking the BFI structure. The true loadings matrix has a simple block-diagonal form: each factor loads strongly (0.6-0.8) on 5 unique items, with no cross-loadings. Factors are generated as standard normals, and noise is added with varying standard deviation (σ) to control signal-to-noise ratio. We standardize the data to focus on correlation structure.
+
+We fit both methods on 10 replications per condition, reporting averaged metrics like:
+
+- **Loadings RMSE**: Root mean squared error between estimated and true loadings (lower is better).
+
+- **Sparsity Recovery**: Proportion of correctly identified zero loadings (higher is better for sparse methods).
+
+- **Explained Variance Accuracy**: Difference from true total explained variance.
+
+## Simulation Setup
+```{r sim-setup, echo=FALSE, message=FALSE, warning=FALSE}
+library(psych)
+library(tidyverse)
+library(gt)
+
+# Simulation parameters
+set.seed(1234)
+p <- 25  # variables
+k <- 5   # factors
+n_samples <- c(40, 100, 200)  # sample sizes
+noise_levels <- c(0.5, 1.0, 1.5, 2.0, 4.0 )  # sigma for noise (low to high)
+n_reps <- 10  # replications per condition (increase for production)
+# Generate true sparse loadings (block-diagonal)
+true_L <- matrix(0, nrow = p, ncol = k)
+for (i in 1:k) {
+  start <- (i-1)*5 + 1
+  end <- start + 4
+  true_L[start:end, i] <- runif(5, 0.6, 0.8)
+}
+true_comm <- rowSums(true_L^2)
+true_expl_var <- sum(true_comm) / p
+# Function to simulate data (fixed: n x p orientation)
+sim_data <- function(n, sigma) {
+  F <- matrix(rnorm(n * k), nrow = n, ncol = k)  # n x k factors
+  E <- matrix(rnorm(n * p, sd = sigma), nrow = n, ncol = p)  # n x p noise
+  X <- F %*% t(true_L) + E  # n x p data
+  X <- scale(X)  # Standardize for correlation focus
+  colnames(X) <- paste0("V", 1:p)
+  X
+}
+#####################
+# Metrics function. #
+#####################
+compute_metrics <- function(fit, true_L, true_comm) {
+  L_est <- as.matrix(fit$loadings)
+  rmse_load <- sqrt(mean((L_est - true_L)^2))
+  corr_comm <- cor(as.numeric(fit$communalities), as.numeric(true_comm))
+  sparsity <- mean(abs(L_est[true_L == 0]) < 0.1)  # Proportion of true zeros estimated near-zero
+  expl_var_est <- sum(fit$communalities) / p
+  expl_var_diff <- abs(expl_var_est - true_expl_var)
+  list(rmse_load = rmse_load, corr_comm = corr_comm, sparsity = sparsity, expl_var_diff = expl_var_diff)
+}
+runsim=TRUE
+results <- expand.grid(n = n_samples, sigma = noise_levels, rep = 1:n_reps)
+```
+
+## Results Across Conditions
+We aggregate results over replications for each combination of sample size (n) and noise level (σ).
+
+```{r sim-run, echo=FALSE, message=FALSE, warning=FALSE, eval=runsim, results='hide'}
+# Run simulations
+results_list <- list()
+for (i in 1:nrow(results)) {
+  X <- sim_data(results$n[i], results$sigma[i])
+  
+  # Fit PAF
+  fit_A <- paf_standalone(X, nfactors = k, rotate = rot)
+  
+  # Fit NSA.FA (adjust params as needed)
+  fit_B <- nsa_flow_pca_fa(X, k, max_iter = mxit, rotate = rot, verbose = FALSE, 
+                           proximal_type = 'nsa_flow', alpha = myalpha, 
+                           nsa_flow_fn = nsa_default, objective = "fa")
+  
+  metrics_A <- compute_metrics(fit_A, true_L, true_comm)
+  metrics_B <- compute_metrics(fit_B, true_L, true_comm)
+  
+  results_list[[i]] <- bind_rows(
+    tibble(Method = "PAF", n = results$n[i], sigma = results$sigma[i], rep = results$rep[i], 
+           RMSE_Load = metrics_A$rmse_load, Corr_Comm = metrics_A$corr_comm, 
+           Sparsity = metrics_A$sparsity, Expl_Var_Diff = metrics_A$expl_var_diff),
+    tibble(Method = "NSA.FA", n = results$n[i], sigma = results$sigma[i], rep = results$rep[i], 
+           RMSE_Load = metrics_B$rmse_load, Corr_Comm = metrics_B$corr_comm, 
+           Sparsity = metrics_B$sparsity, Expl_Var_Diff = metrics_B$expl_var_diff)
+  )
+}
+
+sim_df <- bind_rows(results_list) %>%
+  group_by(Method, n, sigma) %>%
+  summarise(across(c(RMSE_Load, Corr_Comm, Sparsity, Expl_Var_Diff), mean, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+```{r sim-table, echo=FALSE,eval=FALSE}
+### Summary Table
+sim_df %>%
+  mutate(n = factor(n), sigma = factor(sigma)) %>%
+  pivot_longer(cols = c(RMSE_Load, Corr_Comm, Sparsity, Expl_Var_Diff), 
+               names_to = "Metric", values_to = "Value") %>%
+  pivot_wider(names_from = Method, values_from = Value) %>%
+  gt(rowname_col = "Metric") %>%
+  tab_header(title = "Averaged Metrics by Condition") %>%
+  tab_spanner(label = "Methods", columns = c(PAF, `NSA.FA`)) %>%
+  fmt_number(decimals = 3) %>%
+  tab_row_group(label = "Highest Noise (σ=4)", rows = sigma == 4.0) %>%
+  tab_row_group(label = "Highest Noise (σ=2)", rows = sigma == 2.0) %>%
+  tab_row_group(label = "High Noise (σ=1.5)", rows = sigma == 1.5) %>%
+  tab_row_group(label = "Medium Noise (σ=1.0)", rows = sigma == 1.0) %>%
+  tab_row_group(label = "Low Noise (σ=0.5)", rows = sigma == 0.5) %>%
+  cols_hide(columns = c(n, sigma)) %>%  # Grouped, so hide
+  tab_options(row_group.background.color = "lightgray")
+```
+
+
+### Visual Comparison
+```{r sim-plot, echo=FALSE, fig.width=10, fig.height=6,eval=runsim}
+sim_long <- sim_df %>%
+  pivot_longer(cols = c(RMSE_Load,  Sparsity, Expl_Var_Diff), 
+               names_to = "Metric", values_to = "Value")
+
+ggplot(sim_long, aes(x = sigma, y = Value, color = Method, group = Method)) +
+  geom_line() + geom_point() +
+  facet_grid(Metric ~ n, scales = "free_y", 
+             labeller = labeller(n = label_both, Metric = label_value)) +
+  scale_color_manual(values = c("PAF" = "#0072B2", "NSA.FA" = "#D55E00")) +
+  theme_minimal(base_size = 14) +
+  labs(title = "Performance Metrics by Noise Level and Sample Size", 
+       x = "Noise Level (σ)", y = "Metric Value")
+```
+
+**Interpretation**: Sparsity is consistently higher for NSA.FA, confirming its regularization promotes accurate zero-detection. Explained variance differences are minimal, indicating both capture total variance well, but NSA.FA does so with sparser solutions. Overall, NSA.FA excels in noisy or smaller-sample regimes, making it more preferable for real datasets with uncertainty.
+
+
+

@@ -8524,13 +8524,13 @@ simlr_sparseness <- function(v,
   } else {
     if ( constraint_type == "ortho" & constraint_weight >= 0 ){
       if ( constraint_weight == 1 ) {
-        v = nsa_flow_autograd( v, w = constraint_weight, max_iter=500L, verbose=FALSE)$Y
-#      v = project_to_orthonormal_nonnegative( v, 
-#        max_iter=constraint_iterations, constraint=positivity)
+#        v = nsa_flow_autograd( v, w = constraint_weight, max_iter=500L, verbose=FALSE)$Y
+      v = project_to_orthonormal_nonnegative( v, 
+        max_iter=constraint_iterations, constraint=positivity)
       } else {
-        v = nsa_flow_autograd( v, w = constraint_weight, max_iter=500L, verbose=F )$Y
-#      v = project_to_partially_orthonormal_nonnegative( v, 
-#        max_iter=constraint_iterations, constraint=positivity, ortho_strength=constraint_weight )
+#        v = nsa_flow_autograd( v, w = constraint_weight, max_iter=500L, verbose=F )$Y
+      v = project_to_partially_orthonormal_nonnegative( v, 
+        max_iter=constraint_iterations, constraint=positivity, ortho_strength=constraint_weight )
       }
     } else if ( na2f.loc( sparseness_alg == 'ensemble') ) {
       v <- t(ensembled_sparsity(t(v), positivity))
@@ -11724,17 +11724,17 @@ nsa_flow_pca <- function(X, k,
 #'   no_improve_count, lr_reductions, expl_var_ratio
 #'
 #' @export
-#' 
 nsa_flow_pca_fa <- function(
   X, k,
   lambda = 0.1,
-  alpha = 0.0001,
+  alpha = 0.01,
   max_iter = 100,
   proximal_type = c("basic", "nsa_flow"),
   w_pca = 1.0,
-  apply_soft_thresh_in_nns = FALSE,
-  tol = 1e-6, retraction = NULL,
-  grad_tol = 1e-4, nsa_flow_fn = NULL, verbose = FALSE,
+  tol = 1e-6,
+  grad_tol = 1e-4, 
+  nsa_flow_fn = NULL, 
+  verbose = FALSE,
   objective = c("pca","fa"),
   rotate = c("none","varimax","promax","oblimin"),
   nsa_flow_args = list()
@@ -11795,8 +11795,8 @@ nsa_flow_pca_fa <- function(
       # tr(M' XtX M)/n gives explained variance by columns in M
       tr_val <- sum(diag(t(M) %*% XtX %*% M)) / n
       fid_term <- w_pca * (-0.5 * tr_val)
-      prox_term <- lambda * sum(abs(M))
-      fid_term + prox_term
+#      prox_term <- lambda * sum(abs(M))
+      fid_term #+ prox_term
     } else { # "fa"
       # FA objective: || R - (M M^T + diag(psi)) ||_F^2
       # choose psi = diag(R - M M^T) clipped to >= eps_diag
@@ -11807,9 +11807,7 @@ nsa_flow_pca_fa <- function(
       recon <- recon_cross + diag(psi, nrow = p, ncol = p)
       # squared Frobenius error (normalized)
       diff_mat <- Rmat - recon
-      loss <- sum(diff_mat * diff_mat)
-      prox_term <- lambda * sum(abs(M))
-      loss + prox_term
+      loss <- mean(diff_mat * diff_mat)
     }
   }
   # helper: explained variance ratio for reporting (PCA style)
@@ -11876,6 +11874,36 @@ nsa_flow_pca_fa <- function(
     }
     if (!is.finite(energy_new)) stop("Non-finite energy after backtracking at iteration ", iter)
     Y_ret <- Z
+
+    if (rotate != "none" ) {
+
+      if (!requireNamespace("psych", quietly = TRUE)) {
+        warning("psych package required for rotation; skipping rotation")
+      } else {
+        # call chosen rotation (varimax/promax/oblimin). psych::promax returns list with loadings
+        if (rotate == "varimax") {
+          rot_res <- tryCatch(stats::varimax(Y_ret, normalize = FALSE), error = function(e) NULL)
+        } else if (rotate == "promax") {
+          rot_res <- tryCatch(stats::promax(Y_ret), error = function(e) NULL)
+        } else if (rotate == "oblimin") {
+          rot_res <- tryCatch(psych::oblimin(Y_ret, normalize = FALSE), error = function(e) NULL)
+        } else rot_res <- NULL
+        if (!is.null(rot_res) && !is.null(rot_res$loadings)) {
+          # psych rotations may return a "loadings" object; coerce to matrix
+          Y_ret <- as.matrix(rot_res$loadings)
+          # ensure correct dims
+          if (ncol(Y_ret) < k) {
+            # pad with small noise columns
+            need <- k - ncol(Y_ret)
+            Y_ret <- cbind(Y_ret, matrix(rnorm(p * need, sd = 1e-6), nrow = p, ncol = need))
+          } else if (ncol(Y_ret) > k) {
+            Y_ret <- Y_ret[, seq_len(k), drop = FALSE]
+          }
+        }
+      }
+    }
+
+
     # Proximal step: either simple sparsity prox or call nsa_flow_fn
     if (proximal_type == "basic") {
       # simple soft-threshold (L1 prox). preserve positive scale if requested
@@ -11884,13 +11912,6 @@ nsa_flow_pca_fa <- function(
         Y_new <- sign(Y_ret) * pmax(abs(Y_ret) - thresh, 0)
       } else {
         Y_new <- Y_ret
-      }
-      if (apply_soft_thresh_in_nns) {
-        # optional non-negative re-scaling per column (user requested)
-        for (j in seq_len(ncol(Y_new))) {
-          col <- Y_new[, j]
-          if (max(col) > 0) Y_new[, j] <- pmax(col, 0)
-        }
       }
     } else {
       # nsa_flow proximal: we call the provided function with Y_ret as Y0
@@ -11906,32 +11927,6 @@ nsa_flow_pca_fa <- function(
     }
     if (any(!is.finite(Y_new))) stop("Non-finite proximal step at iteration ", iter)
     # optional rotation every iteration
-    if (rotate != "none") {
-      if (!requireNamespace("psych", quietly = TRUE)) {
-        warning("psych package required for rotation; skipping rotation")
-      } else {
-        # call chosen rotation (varimax/promax/oblimin). psych::promax returns list with loadings
-        if (rotate == "varimax") {
-          rot_res <- tryCatch(stats::varimax(Y_new, normalize = FALSE), error = function(e) NULL)
-        } else if (rotate == "promax") {
-          rot_res <- tryCatch(stats::promax(Y_new, normalize = FALSE), error = function(e) NULL)
-        } else if (rotate == "oblimin") {
-          rot_res <- tryCatch(psych::oblimin(Y_new, normalize = FALSE), error = function(e) NULL)
-        } else rot_res <- NULL
-        if (!is.null(rot_res) && !is.null(rot_res$loadings)) {
-          # psych rotations may return a "loadings" object; coerce to matrix
-          Y_new <- as.matrix(rot_res$loadings)
-          # ensure correct dims
-          if (ncol(Y_new) < k) {
-            # pad with small noise columns
-            need <- k - ncol(Y_new)
-            Y_new <- cbind(Y_new, matrix(rnorm(p * need, sd = 1e-6), nrow = p, ncol = need))
-          } else if (ncol(Y_new) > k) {
-            Y_new <- Y_new[, seq_len(k), drop = FALSE]
-          }
-        }
-      }
-    }
     # compute energy and stats
     energy <- energy_of(Y_new)
     expl_var_ratio <- explained_ratio_of(Y_new)
@@ -11944,8 +11939,8 @@ nsa_flow_pca_fa <- function(
       best_Y <- Y_new
       improved <- TRUE
     } else { # reset
-    #  energy = best_energy
-    #  Y_new = best_Y
+#      energy = best_energy
+#      Y_new = best_Y
     }
     if (improved) {
       no_improve_count <- 0
@@ -12010,19 +12005,21 @@ nsa_flow_pca_fa <- function(
                       oblimin = psych::oblimin,
                       NULL)
     if (!is.null(rot_fun)) {
-      rot_res <- tryCatch(rot_fun(loadings, normalize = FALSE), error = function(e) NULL)
+      rot_res <- tryCatch(rot_fun(loadings), error = function(e) NULL)
       if (!is.null(rot_res$loadings)) loadings <- as.matrix(rot_res$loadings)
     }
   }
   if (!is.null(colnames(X))) rownames(loadings) <- colnames(X)
   colnames(loadings) <- paste0("PA", seq_len(k))
   # --- compute communalities --------------------------------------------
-  communalities <- diag(loadings %*% t(loadings))
-  if (!is.null(rownames(loadings))) names(communalities) <- rownames(loadings)
+  posthoc <- posthoc_fa_summary(X, loadings = loadings, method = "NSA")
   list(
-    Y = best_Y,
     loadings = loadings,
-    communalities = communalities,
+    scores = posthoc$scores,
+    communalities = posthoc$communalities,
+    uniqueness = posthoc$uniqueness,
+    variance_per_factor = posthoc$variance_per_factor,
+    variance_explained = posthoc$variance_explained,
     energy_trace = energy_trace,
     final_iter = iter,
     best_energy = best_energy,
@@ -12030,5 +12027,585 @@ nsa_flow_pca_fa <- function(
     no_improve_count = no_improve_count,
     lr_reductions = lr_reductions,
     expl_var_ratio = expl_var_ratio
+  )
+}
+
+
+
+#' Perform Proximal Gradient Optimization for PCA or Factor Analysis
+#'
+#' This function implements a proximal gradient descent algorithm for either
+#' Principal Component Analysis (PCA) or Factor Analysis (FA), with support for
+#' sparsity via L1 regularization or custom proximal operators (e.g., NSA flow).
+#' For PCA, it maximizes explained variance; for FA, it minimizes the least-squares
+#' reconstruction error of the covariance matrix using an alternating optimization
+#' over loadings and uniquenesses. Initialization uses SVD, and optional rotation
+#' is applied at the end.
+#'
+#' @param X Numeric matrix of data (n rows observations, p columns variables).
+#' @param k Integer number of components/factors (1 <= k <= min(n, p)).
+#' @param lambda Non-negative regularization parameter for L1 sparsity (default 0.1).
+#' @param alpha Positive initial step size for gradient descent (default 0.01).
+#' @param max_iter Maximum number of iterations (default 100).
+#' @param proximal_type Type of proximal operator: "basic" for soft-thresholding or "nsa_flow" for custom (default "basic").
+#' @param w_pca Positive weight for PCA objective (default 1.0).
+#' @param tol Tolerance for convergence based on relative change (default 1e-6).
+#' @param grad_tol Tolerance for gradient norm (default 1e-4).
+#' @param nsa_flow_fn Function for NSA proximal operator (required if proximal_type = "nsa_flow").
+#' @param verbose Logical; if TRUE, print iteration progress (default FALSE).
+#' @param objective Objective: "pca" or "fa" (default "pca").
+#' @param rotate Rotation method: "none", "varimax", "promax", or "oblimin" (default "none").
+#' @param nsa_flow_args List of additional arguments for nsa_flow_fn (default list()).
+#'
+#' @return A list containing:
+#' \itemize{
+#'   \item \code{Y}: Optimized loadings matrix (unrotated).
+#'   \item \code{loadings}: Final loadings (possibly rotated).
+#'   \item \code{communalities}: Vector of communalities for each variable.
+#'   \item \code{energy_trace}: Vector of energy values per iteration.
+#'   \item \code{final_iter}: Number of iterations performed.
+#'   \item \code{best_energy}: Best (lowest) energy achieved.
+#'   \item \code{converged}: Logical indicating convergence.
+#'   \item \code{no_improve_count}: Count of iterations without improvement.
+#'   \item \code{lr_reductions}: Number of learning rate reductions.
+#'   \item \code{expl_var_ratio}: Explained variance ratio (PCA-style).
+#' }
+#'
+#' @examples
+#' \dontrun{
+#' data(iris)
+#' X <- as.matrix(iris[, 1:4])
+#' res <- nsa_flow_pca_fa_2(X, k = 2, objective = "fa", verbose = TRUE)
+#' print(res$loadings)
+#' }
+#'
+#' @export
+nsa_flow_pca_fa_2 <- function(
+  X, k,
+  lambda = 0.1,
+  alpha = 0.01,
+  max_iter = 100,
+  proximal_type = c("basic", "nsa_flow"),
+  w_pca = 1.0,
+  tol = 1e-6,
+  grad_tol = 1e-4,
+  nsa_flow_fn = NULL,
+  verbose = FALSE,
+  objective = c("pca","fa"),
+  rotate = c("none","varimax","promax","oblimin"),
+  nsa_flow_args = list()
+) {
+  alternate_inner_iters = 3  # New arg: number of inner alternating iterations for FA
+  # --- arg checks & defaults -------------------------------------------------
+  proximal_type <- match.arg(proximal_type)
+  objective <- match.arg(objective)
+  rotate <- match.arg(rotate)
+  if (!is.matrix(X) || any(!is.finite(X))) stop("X must be a finite numeric matrix")
+  n <- nrow(X); p <- ncol(X)
+  if (k <= 0 || k > min(n, p)) stop("k must be positive and not exceed min(n, p)")
+  if (lambda < 0) stop("lambda must be non-negative")
+  if (alpha <= 0) stop("alpha must be positive")
+  if (w_pca <= 0) stop("w_pca must be positive")
+  if (is.null(nsa_flow_fn) && proximal_type == "nsa_flow") {
+    stop("nsa_flow_fn must be provided when proximal_type == 'nsa_flow'")
+  }
+  # If NSA proximal used, disable L1 lambda
+  if (proximal_type == "nsa_flow") {
+    lambda <- 0.0
+    if (verbose) message("proximal_type == 'nsa_flow' -> lambda set to 0")
+  }
+  # --- center X (no scaling) and precompute XtX / R ---------------------------
+  Xc <- scale(X, center = TRUE, scale = FALSE)
+  XtX <- crossprod(Xc) # p x p
+  total_var <- sum(diag(XtX / n))
+  if (!is.finite(total_var) || total_var <= 0) stop("Input X has zero or non-finite variance")
+  # sample covariance/correlation matrix used for FA objective
+  Rmat <- XtX / n
+  # --- initialization -------------------------------------------------------
+  # Improved: Use SVD for initialization (PCA-like for both objectives)
+  svd_res <- svd(Xc, nu = 0, nv = k)
+  Y <- svd_res$v %*% diag(svd_res$d[1:k]) / sqrt(n)  # Scaled to match covariance approximation
+  # For FA, optionally reduce communalities or add noise, but keep simple
+  energy_trace <- numeric(max_iter)
+  best_Y <- Y
+  best_energy <- Inf
+  alpha_init <- alpha
+  max_grad_norm <- 100.0
+  bt_max <- 20
+  bt_shrink <- 0.5
+  armijo_c <- 1e-4
+  # adaptive scheduler
+  patience <- 10
+  lr_reduction_factor <- 0.5
+  max_lr_reductions <- 3
+  min_iters_before_stop <- 10
+  no_improve_count <- 0
+  lr_reductions <- 0
+  converged <- FALSE
+  .frob <- function(A) sqrt(sum(A * A))
+  # Small numeric eps
+  eps_diag <- 1e-8
+  # energy_of depending on objective ------------------------------------------
+  energy_of <- function(M, psi = NULL) {
+    # M is p x k (loadings), psi optional for FA
+    if (objective == "pca") {
+      tr_val <- sum(diag(t(M) %*% XtX %*% M)) / n
+      fid_term <- w_pca * (-0.5 * tr_val)
+      fid_term
+    } else { # "fa"
+      recon_cross <- M %*% t(M)
+      if (is.null(psi)) {
+        diag_err <- diag(Rmat - recon_cross)
+        psi <- pmax(as.numeric(diag_err), eps_diag)
+      }
+      recon <- recon_cross + diag(psi, nrow = p, ncol = p)
+      diff_mat <- Rmat - recon
+      mean(diff_mat * diff_mat)
+    }
+  }
+  # helper: explained variance ratio for reporting (PCA style)
+  explained_ratio_of <- function(M) {
+    if (k == 1) {
+      Q <- M / sqrt(sum(M^2) + 1e-12)
+    } else {
+      qr_decomp <- qr(M)
+      Q <- qr.Q(qr_decomp)
+    }
+    tr_val <- sum(diag(t(Q) %*% XtX %*% Q)) / n
+    tr_val / total_var
+  }
+  # --- main optimization loop -----------------------------------------------
+  for (iter in seq_len(max_iter)) {
+    t_start <- Sys.time()
+    # optional normalization for stability (only for PCA, not FA)
+    if (objective == "pca" && proximal_type != "nsa_flow") {
+      if (k == 1) {
+        Y <- Y / sqrt(sum(Y^2) + 1e-12)
+      } else {
+        qr_decomp <- qr(Y)
+        Q <- qr.Q(qr_decomp)
+        if (ncol(Q) >= k) Y <- Q[, seq_len(k), drop = FALSE]
+      }
+    }
+    # For FA, initialize psi from current Y
+    if (objective == "fa") {
+      recon_cross <- Y %*% t(Y)
+      diag_err <- diag(Rmat - recon_cross)
+      psi <- pmax(as.numeric(diag_err), eps_diag)
+    }
+    # Inner alternating loop for FA (explicit over M and psi)
+    for (inner in seq_len(ifelse(objective == "fa", alternate_inner_iters, 1))) {
+      # Euclidean gradient
+      if (objective == "pca") {
+        grad_p <- - (XtX %*% Y) / n
+        eu_grad <- w_pca * grad_p
+      } else {
+        # FA gradient with fixed psi: -4 * (R - recon) %*% Y, recon = Y Y^T + diag(psi)
+        recon_cross <- Y %*% t(Y)
+        recon <- recon_cross + diag(psi, nrow = p, ncol = p)
+        diff_mat <- Rmat - recon
+        eu_grad <- -4 * (diff_mat %*% Y)
+      }
+      if (any(!is.finite(eu_grad))) stop("Non-finite Euclidean gradient at iteration ", iter)
+      # gradient clipping
+      gnorm <- .frob(eu_grad)
+      if (gnorm > max_grad_norm) eu_grad <- eu_grad * (max_grad_norm / gnorm)
+      rgrad <- eu_grad
+      rgrad_norm <- .frob(rgrad)
+      # Backtracking Armijo line search
+      alpha <- alpha_init
+      Z <- Y
+      Z[] <- Z - alpha * rgrad
+      energy_old <- energy_of(Y, psi = if (objective == "fa") psi else NULL)
+      energy_new <- energy_of(Z, psi = if (objective == "fa") psi else NULL)
+      dir_deriv <- sum(eu_grad * (-rgrad))
+      bt <- 0
+      while ((!is.finite(energy_new) || energy_new > energy_old + armijo_c * alpha * dir_deriv) && bt < bt_max) {
+        alpha <- alpha * bt_shrink
+        Z[] <- Y - alpha * rgrad
+        energy_new <- energy_of(Z, psi = if (objective == "fa") psi else NULL)
+        bt <- bt + 1
+      }
+      if (!is.finite(energy_new)) stop("Non-finite energy after backtracking at iteration ", iter)
+      Y_ret <- Z
+      if (rotate != "none" && requireNamespace("psych", quietly = TRUE)) {
+        rot_fun <- switch(rotate,
+                          varimax = stats::varimax,
+                          promax = stats::promax,
+                          oblimin = psych::oblimin,
+                          NULL)
+        if (!is.null(rot_fun)) {
+          rot_res <- tryCatch(rot_fun(Y_ret), error = function(e) NULL)
+          if (!is.null(rot_res$loadings)) Y_ret <- as.matrix(rot_res$loadings)
+        }
+      }
+
+      # Proximal step
+      if (proximal_type == "basic") {
+        thresh <- alpha * lambda
+        if (thresh > 0) {
+          Y_new <- sign(Y_ret) * pmax(abs(Y_ret) - thresh, 0)
+        } else {
+          Y_new <- Y_ret
+        }
+      } else {
+        prox_call_args <- c(list(Y0 = Y_ret), nsa_flow_args)
+        prox_res <- tryCatch(do.call(nsa_flow_fn, prox_call_args), error = function(e) {
+          stop("nsa_flow_fn failed: ", conditionMessage(e))
+        })
+        if (!is.list(prox_res) || is.null(prox_res$Y)) stop("nsa_flow_fn returned unexpected result")
+        Y_new <- prox_res$Y
+      }
+      if (any(!is.finite(Y_new))) stop("Non-finite proximal step at iteration ", iter)
+      # For FA, update psi explicitly from new Y (closed-form)
+      if (objective == "fa") {
+        recon_cross <- Y_new %*% t(Y_new)
+        diag_err <- diag(Rmat - recon_cross)
+        psi <- pmax(as.numeric(diag_err), eps_diag)
+      }
+      # Update Y for next inner iter
+      Y <- Y_new
+    }  # end inner
+    # compute energy and stats (with final psi for FA)
+    energy <- energy_of(Y, psi = if (objective == "fa") psi else NULL)
+    expl_var_ratio <- explained_ratio_of(Y)
+    # record energy trace
+    energy_trace[iter] <- energy
+    # check improvement and bookkeeping
+    improved <- FALSE
+    if (energy < best_energy) {
+      best_energy <- energy
+      best_Y <- Y
+      improved <- TRUE
+    }
+    if (improved) {
+      no_improve_count <- 0
+    } else {
+      no_improve_count <- no_improve_count + 1
+    }
+    # Adaptive scheduler
+    if (no_improve_count >= patience && lr_reductions < max_lr_reductions) {
+      alpha_init <- max(alpha_init * lr_reduction_factor, 1e-12)
+      lr_reductions <- lr_reductions + 1
+      if (verbose) message(sprintf("No improvement for %d iters -> alpha_init -> %.3e (lr_reductions=%d)",
+                                   patience, alpha_init, lr_reductions))
+      no_improve_count <- 0
+    }
+    stop_due_to_plateau <- (no_improve_count >= patience && lr_reductions >= max_lr_reductions)
+    if (verbose) {
+      cat(sprintf("Iter %3d | Energy: %12.6e | ExplVar: %.4f | GradNorm: %.4e | bt: %2d | alpha: %.3e | t: %.2fs\n",
+                  iter, energy, expl_var_ratio, rgrad_norm, bt, alpha, as.numeric(difftime(Sys.time(), t_start, units = "secs"))))
+      if (!improved) cat(sprintf(" (no_improve_count=%d, lr_reductions=%d)\n", no_improve_count, lr_reductions))
+    }
+    # convergence checks
+    if (iter > 1) {
+      rel_energy_change <- abs(energy_trace[iter] - energy_trace[iter - 1]) / (abs(energy_trace[iter - 1]) + 1e-12)
+      grad_ok <- (rgrad_norm < grad_tol)
+      delta_Y <- .frob(Y - best_Y) / (.frob(best_Y) + 1e-12)  # Compare to best
+      delta_ok <- (delta_Y < tol)
+      converged_condition <- (iter > min_iters_before_stop) && (rel_energy_change < tol) && (grad_ok || delta_ok)
+      if (verbose) {
+        cat(sprintf(" ΔEnergy: %.2e | ΔY: %.2e | ConvergedCond: %s\n",
+                    rel_energy_change, delta_Y, ifelse(converged_condition, "✓", "×")))
+      }
+      if (converged_condition) {
+        converged <- TRUE
+        if (verbose) message("Convergence achieved at iteration ", iter)
+        break
+      }
+    }
+    if (stop_due_to_plateau) {
+      if (verbose) message("Stopping early due to plateau")
+      break
+    }
+  } # end iter
+  energy_trace <- energy_trace[seq_len(iter)]
+  # Final orthonormalization for reported best_Y (for explained variance calc, PCA-style)
+  if (k == 1) {
+    Q <- best_Y / sqrt(sum(best_Y^2) + 1e-12)
+  } else {
+    qr_decomp <- qr(best_Y)
+    Q <- qr.Q(qr_decomp)
+    if (ncol(Q) >= k) Q <- Q[, seq_len(k), drop = FALSE]
+  }
+  tr_val <- sum(diag(t(Q) %*% XtX %*% Q)) / n
+  expl_var_ratio <- tr_val / total_var
+  # --- construct "loadings" with rotation and names ---------------------
+  loadings <- best_Y
+  if (rotate != "none" && requireNamespace("psych", quietly = TRUE)) {
+    rot_fun <- switch(rotate,
+                      varimax = stats::varimax,
+                      promax = stats::promax,
+                      oblimin = psych::oblimin,
+                      NULL)
+    if (!is.null(rot_fun)) {
+      rot_res <- tryCatch(rot_fun(loadings), error = function(e) NULL)
+      if (!is.null(rot_res$loadings)) loadings <- as.matrix(rot_res$loadings)
+    }
+  }
+  if (!is.null(colnames(X))) rownames(loadings) <- colnames(X)
+  colnames(loadings) <- paste0("PA", seq_len(k))
+  posthoc <- posthoc_fa_summary(X, loadings = loadings, method = "NSA")
+  list(
+    loadings = loadings,
+    scores = posthoc$scores,
+    communalities = posthoc$communalities,
+    uniqueness = posthoc$uniqueness,
+    variance_per_factor = posthoc$variance_per_factor,
+    variance_explained = posthoc$variance_explained,
+    energy_trace = energy_trace,
+    final_iter = iter,
+    best_energy = best_energy,
+    converged = converged,
+    no_improve_count = no_improve_count,
+    lr_reductions = lr_reductions,
+    expl_var_ratio = expl_var_ratio
+  )
+}
+
+
+
+#' Compute Communalities from Factor Scores
+#'
+#' This function calculates the communality for each variable in the dataset,
+#' defined as the proportion of variance explained by the factor scores (R² from
+#' multiple linear regression of each variable on the scores). It provides an
+#' empirical estimate of how much each variable's variance is accounted for by
+#' the common factors. The function assumes the data is centered or standardized
+#' as appropriate for factor analysis.
+#'
+#' @param data Numeric matrix or data.frame with n rows (observations) and p
+#'   columns (variables).
+#' @param scores Numeric matrix of factor scores with n rows and k columns
+#'   (factors).
+#'
+#' @return A named numeric vector of length p containing the communalities for
+#'   each variable, named by the column names of \code{data} (if available).
+#'
+#' @details
+#' For each variable, a linear model is fit: \code{lm(data[, i] ~ scores)}, and
+#' the R² is extracted. This aligns with model-based communalities in factor
+#' analysis for large samples but may slightly overestimate due to in-sample
+#' fitting. For efficiency with large p, consider matrix-based alternatives, but
+#' this loop-based approach is simple and leverages base R.
+#'
+#' @examples
+#' \dontrun{
+#' # Synthetic data example
+#' set.seed(42)
+#' n <- 100; p <- 5; k <- 2
+#' scores <- matrix(rnorm(n * k), n, k)
+#' loadings <- matrix(runif(p * k, 0.5, 0.8), p, k)
+#' data <- scores %*% t(loadings) + matrix(rnorm(n * p, sd = 0.5), n, p)
+#' colnames(data) <- paste0("Var", 1:p)
+#' comm <- compute_communalities(data, scores)
+#' print(comm)
+#' }
+#'
+#' @export
+compute_communalities <- function(data, scores) {
+  if (!is.matrix(data) && !is.data.frame(data)) {
+    stop("data must be a matrix or data.frame")
+  }
+  if (!is.matrix(scores)) {
+    scores <- as.matrix(scores)
+  }
+  if (nrow(data) != nrow(scores)) {
+    stop("data and scores must have the same number of rows")
+  }
+  if (ncol(scores) == 0) {
+    stop("scores must have at least one column")
+  }
+  vec <- sapply(1:ncol(data), function(i) {
+    lm_fit <- lm(data[, i] ~ scores)
+    summary(lm_fit)$r.squared
+  })
+  names(vec) <- colnames(data)
+  vec
+}
+
+
+
+
+#' Compute Variance Explained per Factor
+#'
+#' This function calculates the variance explained by each factor in a factor analysis model.
+#'
+#' @param data A numeric matrix or data frame of observed variables (n x p).
+#' @param scores A numeric matrix of factor scores (n x k).
+#' @param method A string indicating the factor analysis method (e.g., "PAF").
+#'
+#' @return A data frame with the variance explained by each factor.
+#'
+#' @examples
+#' # data(mtcars)
+#' # fa_result <- factanal(mtcars, factors = 2)
+#' # scores <- fa_result$scores
+#' # compute_variance_explained_per_factor(mtcars, scores)
+#'
+#' @export
+compute_variance_explained_per_factor <- function(data, scores, method = "PAF") {
+  # data: n x p matrix/data.frame of observed variables
+  # scores: n x k matrix of factor scores
+  # method: string indicating the factor analysis method (e.g., "PAF")
+  
+  p <- ncol(data)
+  k <- ncol(scores)
+  
+  variances <- sapply(1:k, function(j) {
+    r2s <- sapply(1:p, function(i) {
+      lm_fit <- lm(data[, i] ~ scores[, j])
+      summary(lm_fit)$r.squared
+    })
+    mean(r2s)
+  })
+  
+  data.frame(
+    Factor = 1:k,
+    Variance = variances,
+    Method = method
+  )
+}
+
+
+
+#' Post-hoc Factor Analysis Summary: Scores, Communalities, and Variance Explained
+#'
+#' Given data and factor loadings, this function computes factor scores, communalities,
+#' uniquenesses, and per-factor variance explained using linear modeling.
+#' It provides a convenient post-hoc summary of a factor analysis solution.
+#'
+#' @param data Numeric matrix or data.frame of observed variables (n x p).
+#' @param loadings Numeric matrix of factor loadings (p x k).
+#' @param scores Optional numeric matrix of factor scores (n x k). If NULL,
+#'   scores are computed by least squares regression: \code{scores = data %*% loadings %*% solve(t(loadings) %*% loadings)}.
+#' @param method Character string describing the extraction method (e.g., "PAF", "NSA-Flow", "ML").
+#'
+#' @return A list with components:
+#' \describe{
+#'   \item{scores}{Matrix of factor scores (n x k).}
+#'   \item{communalities}{Named numeric vector of communalities for each variable.}
+#'   \item{uniquenesses}{Named numeric vector of uniquenesses (1 - communality).}
+#'   \item{variance_per_factor}{Data frame with variance explained per factor.}
+#'   \item{total_variance_explained}{Total proportion of variance explained across factors.}
+#'   \item{reconstructed}{Reconstructed data from scores and loadings.}
+#'   \item{residuals}{Matrix of residuals: \code{data - reconstructed}.}
+#' }
+#'
+#' @examples
+#' set.seed(42)
+#' n <- 100; p <- 6; k <- 2
+#' scores_true <- matrix(rnorm(n * k), n, k)
+#' loadings <- matrix(runif(p * k, 0.5, 0.8), p, k)
+#' data <- scores_true %*% t(loadings) + matrix(rnorm(n * p, sd = 0.5), n, p)
+#' colnames(data) <- paste0("Var", 1:p)
+#'
+#' results <- posthoc_fa_summary(data, loadings, method = "PAF")
+#' str(results)
+#'
+#' @export
+posthoc_fa_summary <- function(data, loadings, scores = NULL, method = "PAF") {
+  # Ensure inputs are matrices
+  if (!is.matrix(data)) data <- as.matrix(data)
+  if (!is.matrix(loadings)) loadings <- as.matrix(loadings)
+
+  # Number of observations, variables, factors
+  n <- nrow(data)
+  p <- ncol(data)
+  k <- ncol(loadings)
+
+
+  compute_R_hat <- function(loadings, uniqueness) {
+    L <- as.matrix(loadings)
+    p <- nrow(L)
+    
+    Psi <- diag(as.vector(uniqueness))
+    R_hat_cov <- L %*% t(L) + Psi
+    
+    # force symmetry
+    R_hat_cov <- (R_hat_cov + t(R_hat_cov)) / 2
+    
+    # standardize to correlation
+    sd_vec <- sqrt(diag(R_hat_cov))
+    R_hat_corr <- R_hat_cov / (sd_vec %*% t(sd_vec))
+    
+    # force diagonal to 1 (just in case)
+    diag(R_hat_corr) <- 1
+    
+    R_hat_corr
+  }
+  # Compute factor scores via regression method (Thomson scores)
+  compute_factor_scores_lm <- function(data, loadings) {
+    data <- as.matrix(data)
+    loadings <- as.matrix(loadings)
+
+    # Compute factor score coefficients using regression formula:
+    # scores = data %*% (L (L' L)^-1)
+    # Equivalent to least squares estimates of factors predicting variables
+    inv_mat <- tryCatch(solve(t(loadings) %*% loadings), error = function(e) NULL)
+    if (is.null(inv_mat)) stop("Loadings matrix is singular, cannot compute factor scores.")
+
+    weights <- loadings %*% inv_mat  # p × k times k × k = p × k
+    scores <- data %*% weights       # n × p times p × k = n × k
+    colnames(scores) <- paste0("Factor", seq_len(ncol(loadings)))
+
+    scores
+  }
+
+  # Compute or use provided scores
+  if (is.null(scores)) {
+    scores <- compute_factor_scores_lm(data, loadings)
+  } else {
+    if (!is.matrix(scores)) scores <- as.matrix(scores)
+    if (ncol(scores) != k || nrow(scores) != n) {
+      stop("Provided scores have incompatible dimensions.")
+    }
+  }
+
+  # Compute communalities (R^2 from regressing each variable on all factors)
+  communalities <- sapply(seq_len(p), function(i) {
+    fit <- lm(data[, i] ~ scores)
+    summary(fit)$r.squared
+  })
+  names(communalities) <- colnames(data)
+
+  # Uniquenesses = 1 - communalities
+  uniquenesses <- 1 - communalities
+
+  # Variance explained by each factor (mean R^2 across variables)
+  variance_per_factor <- sapply(seq_len(k), function(j) {
+    r2s <- sapply(seq_len(p), function(i) {
+      fit <- lm(data[, i] ~ scores[, j])
+      summary(fit)$r.squared
+    })
+    mean(r2s)
+  })
+  variance_per_factor <- data.frame(
+    Factor = paste0("Factor", seq_len(k)),
+    Variance = variance_per_factor,
+    Method = method,
+    row.names = NULL
+  )
+
+  total_variance_explained <- mean(communalities)
+
+  # Reconstruct data from factor scores and loadings
+  reconstructed <- scores %*% t(loadings)
+  colnames(reconstructed) <- colnames(data)
+
+  residuals <- data - reconstructed
+
+  # Compute R_hat (assuming orthogonal factors here; optionally pass Phi)
+  rhat <- compute_R_hat(loadings, uniquenesses)
+
+  list(
+    scores = scores,
+    communalities = communalities,
+    uniquenesses = uniquenesses,
+    variance_per_factor = variance_per_factor,
+    total_variance_explained = total_variance_explained,
+    reconstructed = reconstructed,
+    residuals = residuals,
+    R_hat = rhat
   )
 }
