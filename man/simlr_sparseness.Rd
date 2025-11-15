@@ -6,7 +6,7 @@
 \usage{
 simlr_sparseness(
   v,
-  constraint_type = c("Stiefel", "Grassmann", "none", "ortho"),
+  constraint_type = c("Stiefel", "Grassmann", "none", "ortho", "nsaflow"),
   smoothing_matrix = NULL,
   positivity = "positive",
   sparseness_quantile = 0.8,

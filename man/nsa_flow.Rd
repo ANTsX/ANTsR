@@ -15,7 +15,7 @@ nsa_flow(
   seed = 42,
   apply_nonneg = TRUE,
   optimizer = "fast",
-  initial_learning_rate = "default",
+  initial_learning_rate = "brent",
   record_every = 1,
   window_size = 5,
   c1_armijo = 1e-06,

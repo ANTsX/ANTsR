@@ -11,6 +11,8 @@ posthoc_fa_summary(data, loadings, scores = NULL, method = "PAF")
 
 \item{loadings}{Numeric matrix of factor loadings (p x k).}
 
+\item{scores}{Optional numeric matrix of factor scores (n x k). If NULL scores are computed by least squares regression.}
+
 \item{method}{Character string describing the extraction method (e.g., "PAF", "NSA-Flow", "ML").}
 }
 \value{

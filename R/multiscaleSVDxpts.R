@@ -4633,7 +4633,7 @@ simlr <- function(
     lineSearchRange = c(-5e2, 5e2),
     lineSearchTolerance = 1e-12,
     randomSeed=0,
-    constraint = c( "orthox0x1", "Grassmannx0", "Stiefelx0",  "none"),
+    constraint = c( "orthox0x1", "Grassmannx0", "Stiefelx0",  "none","nsaflow0.5x500"),
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc','dat', 'lrr', 'reconorm', 'logcosh', 'exp', 'kurtosis', 'gauss'),
     vmats,
     connectors = NULL,
@@ -8479,7 +8479,7 @@ orthogonalize_feature_space <- function(matrix_list,
 #' @return A numeric matrix of the same dimensions as \code{v}, with applied smoothing, sparsity, and optional normalization.
 #' @export
 simlr_sparseness <- function(v, 
-                             constraint_type = c("Stiefel", "Grassmann", "none", "ortho"),
+                             constraint_type = c("Stiefel", "Grassmann", "none", "ortho", "nsaflow"),
                              smoothing_matrix = NULL,
                              positivity = 'positive',
                              sparseness_quantile = 0.8,
@@ -8523,15 +8523,10 @@ simlr_sparseness <- function(v,
     }
   } else {
     if ( constraint_type == "ortho" & constraint_weight >= 0 ){
-      if ( constraint_weight == 1 ) {
-#        v = nsa_flow_autograd( v, w = constraint_weight, max_iter=500L, verbose=FALSE)$Y
-      v = project_to_orthonormal_nonnegative( v, 
-        max_iter=constraint_iterations, constraint=positivity)
-      } else {
-#        v = nsa_flow_autograd( v, w = constraint_weight, max_iter=500L, verbose=F )$Y
       v = project_to_partially_orthonormal_nonnegative( v, 
         max_iter=constraint_iterations, constraint=positivity, ortho_strength=constraint_weight )
-      }
+    } else if ( constraint_type == "nsaflow" & constraint_weight >= 0 ){
+      v = nsa_flow( v, w = constraint_weight, max_iter=constraint_iterations, verbose=FALSE )$Y
     } else if ( na2f.loc( sparseness_alg == 'ensemble') ) {
       v <- t(ensembled_sparsity(t(v), positivity))
     } else if (na2f.loc( sparseness_alg == 'nnorth') ) {
@@ -10941,7 +10936,7 @@ nsa_flow <- function(
   retraction = c(  "soft_polar", "polar",   "none" ),
   max_iter = 500, tol = 1e-5, verbose = FALSE, seed = 42,
   apply_nonneg = TRUE, optimizer = "fast",
-  initial_learning_rate = 'default',
+  initial_learning_rate = 'brent',
   record_every = 1, window_size = 5, c1_armijo=1e-6,
   simplified = FALSE,
   plot = FALSE
@@ -10960,7 +10955,14 @@ nsa_flow <- function(
   stopifnot(is.integer(window_size) || window_size == as.integer(window_size), window_size > 0)
   stopifnot(is.logical(plot))
   stopifnot(!all(Y0==0))
-
+  # Compute slope of recent energies via simple linear regression
+  compute_energy_slope <- function(energies) {
+    n <- length(energies)
+    if (n < 2) return(Inf)
+    t <- seq_len(n)
+    fit <- stats::lm(energies ~ t)
+    as.numeric(coef(fit)[2])  # slope
+  }
   if ( optimizer == "fast" ) {
     if ( simplified ) {
       optimizer <- "lars"
@@ -11230,23 +11232,26 @@ nsa_flow <- function(
 
     # --- Convergence checks ---
     if (it > 1) {
-      # Relative descent dir norm check
+
+      # (1) Relative gradient-norm convergence
       grad_norm <- sqrt(sum(rgrad^2))
       rel_grad_norm <- grad_norm / init_grad_norm
       if (rel_grad_norm < tol) {
         if (verbose)
-          cat(sprintf("Converged at iteration %d (relative descent dir norm < %.2e)\n", it, tol))
+          cat(sprintf("Converged at iteration %d (relative gradient norm < %.2e)\n", it, tol))
         break
       }
-      # Energy stability over window
+
+      # (2) Energy stability over window (slope-based)
       if (length(recent_energies) == window_size) {
-        max_e <- max(recent_energies)
-        min_e <- min(recent_energies)
+
+        slope <- compute_energy_slope(recent_energies)
         avg_e <- mean(recent_energies)
-        rel_var <- (max_e - min_e) / (abs(avg_e) + 1e-12)
-        if (rel_var < tol) {
+        rel_slope <- abs(slope) / (abs(avg_e) + 1e-12)
+
+        if (rel_slope < tol) {
           if (verbose)
-            cat(sprintf("Converged at iteration %d (energy variation over window < %.2e)\n", it, tol))
+            cat(sprintf("Converged at iteration %d (energy slope < %.2e)\n", it, tol))
           break
         }
       }
@@ -12477,8 +12482,7 @@ compute_variance_explained_per_factor <- function(data, scores, method = "PAF") 
 #'
 #' @param data Numeric matrix or data.frame of observed variables (n x p).
 #' @param loadings Numeric matrix of factor loadings (p x k).
-#' @param scores Optional numeric matrix of factor scores (n x k). If NULL,
-#'   scores are computed by least squares regression: \code{scores = data %*% loadings %*% solve(t(loadings) %*% loadings)}.
+#' @param scores Optional numeric matrix of factor scores (n x k). If NULL scores are computed by least squares regression.
 #' @param method Character string describing the extraction method (e.g., "PAF", "NSA-Flow", "ML").
 #'
 #' @return A list with components:
