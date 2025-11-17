@@ -5895,8 +5895,8 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
         V_j <- feat_list[[j]]
         
         # Compute low-rank projections
-        L_i <- X_i %*% V_i
-        L_j <- X_j %*% V_j
+        L_i <- data.matrix(X_i) %*% data.matrix(V_i)
+        L_j <- data.matrix(X_j) %*% data.matrix(V_j)
         
         # Compute RV coefficient
         rv <- FUN(L_i, L_j)
@@ -8502,6 +8502,7 @@ simlr_sparseness <- function(v,
   if ( is.na(constraint_weight)) {
     constraint_weight = 0.0
   }
+  if ( is.na(sparseness_quantile) ) sparseness_quantile=0.8
   if ( constraint_weight > 1 ) constraint_weight=1
   if ( constraint_weight < 0 ) constraint_weight=0
   # Apply sparsity
