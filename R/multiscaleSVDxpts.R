@@ -6410,93 +6410,70 @@ l1_normalize_features <- function(features) {
   return(normalized_matrix)
 }
 
-#' Apply simlr matrices to an existing data frame and combine the results
+#' Apply SIMLR matrices to an existing data frame and combine the results
 #'
-#' This function takes a list of matrices, applies each matrix via matrix multiplication
-#' to an existing data frame, and combines the resulting projections with the original data frame.
+#' This function takes a list of SIMLR matrices, applies each matrix via
+#' matrix multiplication to an existing data frame, and combines the resulting
+#' projections with the original data frame.
 #'
-#' @param existing_df An existing data frame to which the matrices will be applied.
-#' @param matrices_list A list of matrices read from CSV files.
-#' @param n_limit NULL or integer that can limit the number of projections
-#' @param robust boolean
-#' @param center boolean center the data before applying
-#' @param scale boolean scale the data before applying
-#' @param verbose boolean
+#' @param existing_df A data frame whose columns correspond to features.
+#' @param matrices_list A named list of matrices.
+#' @param n_limit Optional integer limiting the number of projected components.
+#' @param robust Logical, apply robustMatrixTransform if TRUE.
+#' @param center Logical, center data before projection.
+#' @param scale Logical, scale data before projection.
+#' @param verbose Logical, print diagnostic messages.
 #'
-#' @return A list including (entry one) data frame with the original data frame combined with the projections (entry two) the new column names
+#' @return A list with:
+#'   \item{extendeddf}{The augmented data frame}
+#'   \item{newcolnames}{The names of newly added projection columns}
 #' @export
-#' @examples
-#' matrices_list <- list(
-#'   matrix1 = matrix(rnorm(147 * 171), nrow = 147, ncol = 171),
-#'   matrix2 = matrix(rnorm(147 * 156), nrow = 147, ncol = 156)
-#' )
-#' existing_df <- data.frame(matrix(rnorm(147 * 5), nrow = 147, ncol = 5))
-#' # combined_df <- apply_simlr_matrices(existing_df, matrices_list)
-apply_simlr_matrices <- function(existing_df, matrices_list, n_limit=NULL, robust=FALSE, center=FALSE, scale=FALSE, verbose=FALSE ) {
-    
-  replbind <- function(df1, df2) {
-    # Find the common and unique columns
-    common_cols <- intersect(names(df1), names(df2))
-    unique_cols_df1 <- setdiff(names(df1), common_cols)
-    unique_cols_df2 <- setdiff(names(df2), common_cols)
-    
-    # Replace values in common columns with those from df2
-    if (length(common_cols) > 0) {
-      for (col in common_cols) {
-        df1[[col]] <- df2[[col]]
-      }
-    }
-    
-    # Bind the unique columns from both data frames
-    if (length(unique_cols_df2) > 0) {
-      result <- cbind(df1, df2[, unique_cols_df2, drop = FALSE])
-    } else {
-      result <- df1
-    }
-    
-    return(result)
-  }
-  newnames=c()
-  ct=0
-  for (name in names(matrices_list)) {
-    ct=ct+1
-    if ( verbose ) print(name)
-    # Ensure the matrix multiplication is valid
-    locnames = rownames( matrices_list[[name]] )
-    edfnames = colnames(existing_df) 
-    inames = intersect( locnames, edfnames )
-    if ( length(inames) > 0 ) {
-      # Perform matrix multiplication
-      imat = data.matrix(existing_df[,inames])
-      if ( robust ) imat = robustMatrixTransform( imat )
-      if ( center | scale ) imat=scale(imat,center=center,scale=scale)
-      features = data.matrix(matrices_list[[name]][inames,])
-      features = take_abs_unsigned( features )
-      features = l1_normalize_features(features)
-      projection <- as.data.frame( imat %*% features)
-      ##################################################
-      # Update column names to reflect the matrix name #
-      colnames(projection) = paste0( name, colnames( matrices_list[[name]] ) )
-      # Combine the projections with the existing data frame
-      if ( !is.null(n_limit )  ) {
-        projection=projection[,1:n_limit]
-      }
-      newnames=c(newnames,colnames(projection))
-      
-      existing_df <- replbind(existing_df, projection)
-      if ( verbose ) {
-        print( inames )
-        print( colnames(projection) )
-        print(tail(colnames(existing_df)))
-      }
-    } else {
-      warning(paste("Number of columns in existing data frame does not match number of rows in matrix", name))
-    }
-  }
-  
-  return( list(extendeddf=existing_df, newcolnames=newnames))
-}
+apply_simlr_matrices <- function(existing_df, simlr_v) {
 
+    if (!is.data.frame(existing_df)) {
+        stop("existing_df must be a data.frame.")
+    }
+
+    output_list <- list()
+    name_list <- c()
+
+    for (nm in names(simlr_v)) {
+
+        W <- simlr_v[[nm]]
+
+        # make new column names: t1_PC1, t1_PC2, ... etc
+        new_names <- paste0(nm,  colnames(W))
+
+        # find overlapping variables
+        overlap <- intersect(rownames(W), colnames(existing_df))
+
+        if (length(overlap) == 0) {
+            warning(paste("No overlapping features found for block:", nm))
+            next
+        }
+
+        # subset matching parts
+        W_sub <- W[overlap, , drop = FALSE]
+        X_sub <- as.matrix(existing_df[, overlap, drop = FALSE])
+
+        # compute projection
+        Y <- X_sub %*% W_sub
+
+        # assign new names
+        colnames(Y) <- new_names
+
+        output_list[[nm]] <- Y
+        name_list <- c(name_list, new_names)
+    }
+
+    # combine results
+    final_mat <- do.call(cbind, output_list)
+
+    list(
+        projections = cbind(  existing_df, final_mat ),
+        newnames = name_list
+    )
+}
 
 
 #' Apply simlr matrices to an existing data frame and combine the results with DTI naming fix.
@@ -6549,9 +6526,7 @@ apply_simlr_matrices_dtfix <- function(existing_df, matrices_list, n_limit = NUL
   }
   
   # Apply SIMLR matrices
-  dd = apply_simlr_matrices(existing_df = existing_df_fix, matrices_list = matrices_list_fix, 
-                            n_limit = n_limit, robust = robust, center = center, 
-                            scale = scale, verbose = verbose)
+  dd = apply_simlr_matrices( existing_df_fix, matrices_list_fix )
   
   # Restore the original column names (if they were changed)
   if (dt_correspondence || dta_correspondence) {
@@ -8527,7 +8502,7 @@ simlr_sparseness <- function(v,
       v = project_to_partially_orthonormal_nonnegative( v, 
         max_iter=constraint_iterations, constraint=positivity, ortho_strength=constraint_weight )
     } else if ( constraint_type == "nsaflow" & constraint_weight >= 0 ){
-      v = nsa_flow( v, w = constraint_weight, max_iter=constraint_iterations, verbose=FALSE )$Y
+      v = nsa_flow( take_abs_unsigned(v), w = constraint_weight, max_iter=constraint_iterations, verbose=FALSE )$Y
     } else if ( na2f.loc( sparseness_alg == 'ensemble') ) {
       v <- t(ensembled_sparsity(t(v), positivity))
     } else if (na2f.loc( sparseness_alg == 'nnorth') ) {

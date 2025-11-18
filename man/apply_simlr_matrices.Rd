@@ -2,45 +2,32 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{apply_simlr_matrices}
 \alias{apply_simlr_matrices}
-\title{Apply simlr matrices to an existing data frame and combine the results}
+\title{Apply SIMLR matrices to an existing data frame and combine the results}
 \usage{
-apply_simlr_matrices(
-  existing_df,
-  matrices_list,
-  n_limit = NULL,
-  robust = FALSE,
-  center = FALSE,
-  scale = FALSE,
-  verbose = FALSE
-)
+apply_simlr_matrices(existing_df, simlr_v)
 }
 \arguments{
-\item{existing_df}{An existing data frame to which the matrices will be applied.}
+\item{existing_df}{A data frame whose columns correspond to features.}
 
-\item{matrices_list}{A list of matrices read from CSV files.}
+\item{matrices_list}{A named list of matrices.}
 
-\item{n_limit}{NULL or integer that can limit the number of projections}
+\item{n_limit}{Optional integer limiting the number of projected components.}
 
-\item{robust}{boolean}
+\item{robust}{Logical, apply robustMatrixTransform if TRUE.}
 
-\item{center}{boolean center the data before applying}
+\item{center}{Logical, center data before projection.}
 
-\item{scale}{boolean scale the data before applying}
+\item{scale}{Logical, scale data before projection.}
 
-\item{verbose}{boolean}
+\item{verbose}{Logical, print diagnostic messages.}
 }
 \value{
-A list including (entry one) data frame with the original data frame combined with the projections (entry two) the new column names
+A list with:
+  \item{extendeddf}{The augmented data frame}
+  \item{newcolnames}{The names of newly added projection columns}
 }
 \description{
-This function takes a list of matrices, applies each matrix via matrix multiplication
-to an existing data frame, and combines the resulting projections with the original data frame.
-}
-\examples{
-matrices_list <- list(
-  matrix1 = matrix(rnorm(147 * 171), nrow = 147, ncol = 171),
-  matrix2 = matrix(rnorm(147 * 156), nrow = 147, ncol = 156)
-)
-existing_df <- data.frame(matrix(rnorm(147 * 5), nrow = 147, ncol = 5))
-# combined_df <- apply_simlr_matrices(existing_df, matrices_list)
+This function takes a list of SIMLR matrices, applies each matrix via
+matrix multiplication to an existing data frame, and combines the resulting
+projections with the original data frame.
 }
