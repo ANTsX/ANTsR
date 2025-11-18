@@ -2,32 +2,38 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{apply_simlr_matrices}
 \alias{apply_simlr_matrices}
-\title{Apply SIMLR matrices to an existing data frame and combine the results}
+\title{Apply SIMLR projection matrices to a data frame (no duplicate column names)}
 \usage{
-apply_simlr_matrices(existing_df, simlr_v)
+apply_simlr_matrices(
+  existing_df,
+  simlr_v,
+  n_limit = NULL,
+  overwrite = TRUE,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{existing_df}{A data frame whose columns correspond to features.}
+\item{existing_df}{Data frame with features as columns.}
 
-\item{matrices_list}{A named list of matrices.}
+\item{simlr_v}{Named list of SIMLR weight matrices (rows = features,
+columns = components).}
 
-\item{n_limit}{Optional integer limiting the number of projected components.}
+\item{n_limit}{Optional integer; keep only first n_limit components
+per block (default: all).}
 
-\item{robust}{Logical, apply robustMatrixTransform if TRUE.}
+\item{overwrite}{Logical; if TRUE (default) existing columns with the
+same name are replaced rather than duplicated.}
 
-\item{center}{Logical, center data before projection.}
-
-\item{scale}{Logical, scale data before projection.}
-
-\item{verbose}{Logical, print diagnostic messages.}
+\item{verbose}{Logical; print messages about name conflicts.}
 }
 \value{
-A list with:
-  \item{extendeddf}{The augmented data frame}
-  \item{newcolnames}{The names of newly added projection columns}
+A list with
+  \item{extended_df}{Data frame containing original + new projection columns}
+  \item{new_colnames}{Character vector of the column names that were added}
 }
 \description{
-This function takes a list of SIMLR matrices, applies each matrix via
-matrix multiplication to an existing data frame, and combines the resulting
-projections with the original data frame.
+Projects the input data using one or more SIMLR weight matrices and binds
+the resulting components to the original data frame. Duplicate column names
+are automatically resolved by appending "_1", "_2", etc., or by overwriting
+if `overwrite = TRUE` (default).
 }

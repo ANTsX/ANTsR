@@ -6410,71 +6410,110 @@ l1_normalize_features <- function(features) {
   return(normalized_matrix)
 }
 
-#' Apply SIMLR matrices to an existing data frame and combine the results
+#' Apply SIMLR projection matrices to a data frame (no duplicate column names)
 #'
-#' This function takes a list of SIMLR matrices, applies each matrix via
-#' matrix multiplication to an existing data frame, and combines the resulting
-#' projections with the original data frame.
+#' Projects the input data using one or more SIMLR weight matrices and binds
+#' the resulting components to the original data frame. Duplicate column names
+#' are automatically resolved by appending "_1", "_2", etc., or by overwriting
+#' if `overwrite = TRUE` (default).
 #'
-#' @param existing_df A data frame whose columns correspond to features.
-#' @param matrices_list A named list of matrices.
-#' @param n_limit Optional integer limiting the number of projected components.
-#' @param robust Logical, apply robustMatrixTransform if TRUE.
-#' @param center Logical, center data before projection.
-#' @param scale Logical, scale data before projection.
-#' @param verbose Logical, print diagnostic messages.
+#' @param existing_df   Data frame with features as columns.
+#' @param simlr_v       Named list of SIMLR weight matrices (rows = features,
+#'                      columns = components).
+#' @param n_limit       Optional integer; keep only first n_limit components
+#'                      per block (default: all).
+#' @param overwrite     Logical; if TRUE (default) existing columns with the
+#'                      same name are replaced rather than duplicated.
+#' @param verbose       Logical; print messages about name conflicts.
 #'
-#' @return A list with:
-#'   \item{extendeddf}{The augmented data frame}
-#'   \item{newcolnames}{The names of newly added projection columns}
+#' @return A list with
+#'   \item{extended_df}{Data frame containing original + new projection columns}
+#'   \item{new_colnames}{Character vector of the column names that were added}
+#'
 #' @export
-apply_simlr_matrices <- function(existing_df, simlr_v) {
+apply_simlr_matrices <- function(existing_df,
+                                 simlr_v,
+                                 n_limit = NULL,
+                                 overwrite = TRUE,
+                                 verbose = FALSE) {
+  if (!is.data.frame(existing_df)) {
+    stop("`existing_df` must be a data frame.")
+  }
+  if (!is.list(simlr_v) || length(simlr_v) == 0 || is.null(names(simlr_v))) {
+    stop("`simlr_v` must be a named list of matrices.")
+  }
 
-    if (!is.data.frame(existing_df)) {
-        stop("existing_df must be a data.frame.")
+  # Container for projected blocks
+  proj_blocks <- list()
+  added_names <- character()
+
+  for (block_name in names(simlr_v)) {
+    W <- simlr_v[[block_name]]
+
+    # Optional component limit
+    if (!is.null(n_limit) && ncol(W) > n_limit) {
+      W <- W[, seq_len(n_limit), drop = FALSE]
     }
 
-    output_list <- list()
-    name_list <- c()
+    # Proposed column names: e.g. "t1_PC1", "t1_PC2", ...
+    candidate_names <- paste0(block_name, colnames(W))
 
-    for (nm in names(simlr_v)) {
-
-        W <- simlr_v[[nm]]
-
-        # make new column names: t1_PC1, t1_PC2, ... etc
-        new_names <- paste0(nm,  colnames(W))
-
-        # find overlapping variables
-        overlap <- intersect(rownames(W), colnames(existing_df))
-
-        if (length(overlap) == 0) {
-            warning(paste("No overlapping features found for block:", nm))
-            next
+    # Resolve possible name collisions
+    final_names <- candidate_names
+    if (overwrite) {
+      # Simply overwrite any existing column with the same name
+      for (i in seq_along(candidate_names)) {
+        if (candidate_names[i] %in% names(existing_df)) {
+          if (verbose) {
+            message("Overwriting existing column: ", candidate_names[i])
+          }
+          # Remove the old column so we can insert the new one later
+          existing_df[[candidate_names[i]]] <- NULL
         }
-
-        # subset matching parts
-        W_sub <- W[overlap, , drop = FALSE]
-        X_sub <- as.matrix(existing_df[, overlap, drop = FALSE])
-
-        # compute projection
-        Y <- X_sub %*% W_sub
-
-        # assign new names
-        colnames(Y) <- new_names
-
-        output_list[[nm]] <- Y
-        name_list <- c(name_list, new_names)
+      }
+    } else {
+      # Safety-net: make names unique if overwrite = FALSE
+      final_names <- make.unique(c(names(existing_df), candidate_names),
+                                 sep = "_")[
+                                   (length(names(existing_df)) + 1):
+                                   length(candidate_names) + length(names(existing_df))
+                                 ]
     }
 
-    # combine results
-    final_mat <- do.call(cbind, output_list)
+    # Find overlapping features
+    overlap <- intersect(rownames(W), colnames(existing_df))
+    if (length(overlap) == 0) {
+      warning("No overlapping features for block '", block_name, "' – skipping.")
+      next
+    }
 
-    list(
-        projections = cbind(  existing_df, final_mat ),
-        newnames = name_list
-    )
+    X_sub <- as.matrix(existing_df[, overlap, drop = FALSE])
+    W_sub <- W[overlap, , drop = FALSE]
+
+    # Projection
+    Y <- X_sub %*% W_sub
+    colnames(Y) <- final_names
+
+    proj_blocks[[block_name]] <- Y
+    added_names <- c(added_names, final_names)
+  }
+
+  if (length(proj_blocks) == 0) {
+    warning("No projections were added.")
+    return(list(extended_df = existing_df, new_colnames = character(0)))
+  }
+
+  # Bind all new projections at once (more efficient & preserves order)
+  new_projections <- do.call(cbind, proj_blocks)
+
+  # Final data frame: original (possibly with overwritten columns) + new ones
+  result_df <- cbind(existing_df, new_projections)
+
+  list(
+    extended_df = result_df,
+    new_colnames = added_names
+  )
 }
-
 
 #' Apply simlr matrices to an existing data frame and combine the results with DTI naming fix.
 #'
