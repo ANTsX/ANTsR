@@ -2,38 +2,58 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{apply_simlr_matrices}
 \alias{apply_simlr_matrices}
-\title{Apply SIMLR projection matrices to a data frame (no duplicate column names)}
+\title{Apply SIMLR projection matrices with r01.1-style versioning}
 \usage{
 apply_simlr_matrices(
   existing_df,
   simlr_v,
   n_limit = NULL,
-  overwrite = TRUE,
+  version_prefix = "r",
   verbose = FALSE
 )
 }
 \arguments{
-\item{existing_df}{Data frame with features as columns.}
+\item{existing_df}{Data frame (samples in rows, features in columns)}
 
-\item{simlr_v}{Named list of SIMLR weight matrices (rows = features,
-columns = components).}
+\item{simlr_v}{Named list of weight matrices (rownames = original features)}
 
-\item{n_limit}{Optional integer; keep only first n_limit components
-per block (default: all).}
+\item{n_limit}{Optional: keep only first n_limit components per block}
 
-\item{overwrite}{Logical; if TRUE (default) existing columns with the
-same name are replaced rather than duplicated.}
+\item{version_prefix}{Prefix before version number (default: "r")}
 
-\item{verbose}{Logical; print messages about name conflicts.}
+\item{verbose}{Print messages when versioning occurs}
 }
 \value{
-A list with
-  \item{extended_df}{Data frame containing original + new projection columns}
-  \item{new_colnames}{Character vector of the column names that were added}
+List with \code{extended_df} and \code{new_colnames}
 }
 \description{
-Projects the input data using one or more SIMLR weight matrices and binds
-the resulting components to the original data frame. Duplicate column names
-are automatically resolved by appending "_1", "_2", etc., or by overwriting
-if `overwrite = TRUE` (default).
+Automatically handles name collisions by appending versioned suffixes:
+\itemize{
+  \item No collision → \code{petPC1}, \code{petPC2}, ...
+  \item Collision    → \code{petPCr01.1}, \code{petPCr01.2}, ...
+  \item Next round   → \code{petPCr02.1}, \code{petPCr02.2}, ...
+}
+}
+\examples{
+set.seed(123)
+df <- data.frame(petPC1 = rnorm(5), petPC2 = rnorm(5), age = 1:5)
+W <- matrix(rnorm(6), 2, 3,
+            dimnames = list(c("petPC1", "petPC2"), c("PC1", "PC2", "PC3")))
+weights <- list(pet = W)
+
+# First application
+res1 <- apply_simlr_matrices(df, weights, verbose = TRUE)
+res1$new_colnames
+# [1] "petPCr01.1" "petPCr01.2" "petPCr01.3"
+
+# Second application
+res2 <- apply_simlr_matrices(res1$extended_df, weights)
+res2$new_colnames
+# [1] "petPCr02.1" "petPCr02.2" "petPCr02.3"
+
+# No collision example
+clean <- df[, "age", drop = FALSE]
+apply_simlr_matrices(clean, weights)$new_colnames
+# [1] "petPC1" "petPC2" "petPC3"
+
 }

@@ -149,44 +149,92 @@ mapLRAverageVar <- function( mydataframe, leftvar, leftname='left',rightname='ri
 }
 
 
-
-#' No fail SVD function that switches to rsvd if svd fails
+#' Robust SVD with Automatic rsvd Fallback
 #'
-#' This function performs SVD on a matrix using the built-in svd function in R.
-#' The matrix will be divided by its maximum value before computing the SVD for 
-#' the purposes of numerical stability (optional).
-#' If svd fails, it automatically switches to random svd from the rsvd package.
-#' svd may fail to converge when the matrix condition number is high; this can 
-#' be checked with the kappa function.
+#' This function attempts a standard SVD using base R's \code{svd()}.
+#' If that fails (typically due to ill-conditioning or non-convergence),
+#' it automatically falls back to a randomized SVD via the \code{rsvd} package.
 #'
-#' @param x Matrix to perform SVD on
-#' @param nu Number of left singular vectors to return (default: min(nrow(x), ncol(x)))
-#' @param nv Number of right singular vectors to return (default: min(nrow(x), ncol(x)))
-#' @param dividebymax boolean
+#' Optionally, the matrix can be scaled by its maximum absolute value to
+#' improve numerical stability before decomposition.
 #'
-#' @return A list containing the SVD decomposition of x
+#' @param x A numeric matrix.
+#' @param nu Number of left singular vectors to compute.
+#'           Default: \code{min(nrow(x), ncol(x))}.
+#' @param nv Number of right singular vectors to compute.
+#'           Default: \code{min(nrow(x), ncol(x))}.
+#' @param dividebymax Logical. If TRUE, scale \code{x} by its max absolute value
+#'        before SVD. Default: FALSE.
+#' @param NA2Noise boolean replaces NA values with small noise values
+#'
+#' @return A list with components \code{u}, \code{d}, and \code{v}, matching
+#'         the structure of base R's \code{svd()} output.
 #'
 #' @examples
-#' avgU <- matrix(rnorm(100*50), nrow = 100, ncol = 50)
-#' nc <- 10
-#' u <- ba_svd( avgU, nu = nc, nv = 0)$u
+#' mat <- matrix(rnorm(100 * 50), 100, 50)
+#' sv <- ba_svd(mat, nu = 10, nv = 0)
 #' @export
-ba_svd <- function(x, nu = min(nrow(x), ncol(x)), nv = min(nrow(x), ncol(x)), dividebymax=FALSE ) {
-  tryCatch(
-    expr = {
-      if ( dividebymax) {
-        svd(x/max(x), nu = nu, nv = nv)
-      } else svd(x, nu = nu, nv = nv)
-    },
-    error = function(e) {
-      message("svd failed, using rsvd instead")
-      library(rsvd)
-      if ( dividebymax) {
-        rsvd(x/max(x), nu = nu, nv = nv)
-      } else rsvd(x, nu = nu, nv = nv)
+ba_svd <- function(x,
+                   nu = min(nrow(x), ncol(x)),
+                   nv = min(nrow(x), ncol(x)),
+                   dividebymax = FALSE, NA2Noise=TRUE ) {
+
+  if (!is.matrix(x))
+    stop("Input `x` must be a matrix.")
+
+  # ---------------------------------------------------------------
+  # Handle NA/Inf early to avoid immediate SVD failure
+  # ---------------------------------------------------------------
+  if ( NA2Noise ) {
+    if (anyNA(x) || any(is.infinite(x))) {
+      warning("Input matrix contains NA/Inf — replacing with small random noise.")
+      bad <- which(!is.finite(x))
+      x[bad] <- rnorm(length(bad), mean = 0, sd = 1e-6)
     }
+  }
+
+  # ---------------------------------------------------------------
+  # Optional stability scaling
+  # ---------------------------------------------------------------
+  if (dividebymax) {
+    mx <- max(abs(x))
+    if (mx > 0) {
+      x <- x / mx
+    } else {
+      warning("Matrix maximum is zero; skipping scaling.")
+    }
+  }
+
+  # ---------------------------------------------------------------
+  # Attempt base SVD first
+  # ---------------------------------------------------------------
+  svd_try <- try(svd(x, nu = nu, nv = nv), silent = TRUE)
+
+  if (!inherits(svd_try, "try-error")) {
+    return(svd_try)
+  }
+
+  # ---------------------------------------------------------------
+  # Fallback: rsvd
+  # ---------------------------------------------------------------
+  message("Base svd() failed; switching to randomized SVD (rsvd).")
+
+  if (!requireNamespace("rsvd", quietly = TRUE)) {
+    stop("Package 'rsvd' is required for fallback but not installed.")
+  }
+
+  r <- rsvd::rsvd(x, k = min(nu, nv))  # rsvd uses 'k' for rank
+
+  # rsvd returns U(k), V(k), s(k)
+  out <- list(
+    u = if (nu > 0) r$u[, seq_len(nu), drop = FALSE] else matrix(, nrow(x), 0),
+    d = r$d[seq_len(min(length(r$d), nu, nv))],
+    v = if (nv > 0) r$v[, seq_len(nv), drop = FALSE] else matrix(, ncol(x), 0)
   )
+
+  return(out)
 }
+
 
 
 #' Create sparse distance, covariance or correlation matrix
@@ -6410,110 +6458,135 @@ l1_normalize_features <- function(features) {
   return(normalized_matrix)
 }
 
-#' Apply SIMLR projection matrices to a data frame (no duplicate column names)
+
+#' Apply SIMLR projection matrices with r01.1-style versioning
 #'
-#' Projects the input data using one or more SIMLR weight matrices and binds
-#' the resulting components to the original data frame. Duplicate column names
-#' are automatically resolved by appending "_1", "_2", etc., or by overwriting
-#' if `overwrite = TRUE` (default).
+#' Automatically handles name collisions by appending versioned suffixes:
+#' \itemize{
+#'   \item No collision → \code{petPC1}, \code{petPC2}, ...
+#'   \item Collision    → \code{petPCr01.1}, \code{petPCr01.2}, ...
+#'   \item Next round   → \code{petPCr02.1}, \code{petPCr02.2}, ...
+#' }
 #'
-#' @param existing_df   Data frame with features as columns.
-#' @param simlr_v       Named list of SIMLR weight matrices (rows = features,
-#'                      columns = components).
-#' @param n_limit       Optional integer; keep only first n_limit components
-#'                      per block (default: all).
-#' @param overwrite     Logical; if TRUE (default) existing columns with the
-#'                      same name are replaced rather than duplicated.
-#' @param verbose       Logical; print messages about name conflicts.
+#' @param existing_df Data frame (samples in rows, features in columns)
+#' @param simlr_v Named list of weight matrices (rownames = original features)
+#' @param n_limit Optional: keep only first n_limit components per block
+#' @param version_prefix Prefix before version number (default: "r")
+#' @param verbose Print messages when versioning occurs
 #'
-#' @return A list with
-#'   \item{extended_df}{Data frame containing original + new projection columns}
-#'   \item{new_colnames}{Character vector of the column names that were added}
+#' @return List with \code{extended_df} and \code{new_colnames}
+#'
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(petPC1 = rnorm(5), petPC2 = rnorm(5), age = 1:5)
+#' W <- matrix(rnorm(6), 2, 3,
+#'             dimnames = list(c("petPC1", "petPC2"), c("PC1", "PC2", "PC3")))
+#' weights <- list(pet = W)
+#'
+#' # First application
+#' res1 <- apply_simlr_matrices(df, weights, verbose = TRUE)
+#' res1$new_colnames
+#' # [1] "petPCr01.1" "petPCr01.2" "petPCr01.3"
+#'
+#' # Second application
+#' res2 <- apply_simlr_matrices(res1$extended_df, weights)
+#' res2$new_colnames
+#' # [1] "petPCr02.1" "petPCr02.2" "petPCr02.3"
+#'
+#' # No collision example
+#' clean <- df[, "age", drop = FALSE]
+#' apply_simlr_matrices(clean, weights)$new_colnames
+#' # [1] "petPC1" "petPC2" "petPC3"
 #'
 #' @export
 apply_simlr_matrices <- function(existing_df,
                                  simlr_v,
                                  n_limit = NULL,
-                                 overwrite = TRUE,
+                                 version_prefix = "r",
                                  verbose = FALSE) {
-  if (!is.data.frame(existing_df)) {
-    stop("`existing_df` must be a data frame.")
-  }
+  
+  if (!is.data.frame(existing_df)) stop("existing_df must be a data frame")
   if (!is.list(simlr_v) || length(simlr_v) == 0 || is.null(names(simlr_v))) {
-    stop("`simlr_v` must be a named list of matrices.")
+    stop("simlr_v must be a named list of matrices")
   }
-
-  # Container for projected blocks
+  
   proj_blocks <- list()
   added_names <- character()
-
+  used_names  <- names(existing_df)
+  
   for (block_name in names(simlr_v)) {
     W <- simlr_v[[block_name]]
-
-    # Optional component limit
+    if (!is.matrix(W)) next
+    
     if (!is.null(n_limit) && ncol(W) > n_limit) {
       W <- W[, seq_len(n_limit), drop = FALSE]
     }
-
-    # Proposed column names: e.g. "t1_PC1", "t1_PC2", ...
-    candidate_names <- paste0(block_name, colnames(W))
-
-    # Resolve possible name collisions
-    final_names <- candidate_names
-    if (overwrite) {
-      # Simply overwrite any existing column with the same name
-      for (i in seq_along(candidate_names)) {
-        if (candidate_names[i] %in% names(existing_df)) {
-          if (verbose) {
-            message("Overwriting existing column: ", candidate_names[i])
-          }
-          # Remove the old column so we can insert the new one later
-          existing_df[[candidate_names[i]]] <- NULL
+    
+    if (is.null(rownames(W))) stop("Weight matrix '", block_name, "' has no rownames")
+    if (is.null(colnames(W))) colnames(W) <- paste0("C", seq_len(ncol(W)))
+    
+    # Base names: pet + PC1 → petPC1
+    base_names <- paste0(block_name, colnames(W))
+    
+    final_names <- character(length(base_names))
+    
+    for (i in seq_along(base_names)) {
+      original <- base_names[i]  # e.g. "petPC1"
+      candidate <- original
+      
+      # Find next free version: r01.1, r01.2, ..., r02.1, ...
+      major <- 0
+      minor <- 0
+      
+      while (candidate %in% used_names) {
+        minor <- minor + 1
+        if (minor > 9) {
+          minor <- 1
+          major <- major + 1
+        }
+        version_tag <- sprintf("%s%02d.", version_prefix, major)
+        
+        # Append the version tag right before the trailing number
+        candidate <- sub("([0-9]+)$", paste0(version_tag, "\\1"), original)
+        
+        # Fallback: if no number at end, just append
+        if (candidate == original) {
+          candidate <- paste0(original, version_tag)
         }
       }
-    } else {
-      # Safety-net: make names unique if overwrite = FALSE
-      final_names <- make.unique(c(names(existing_df), candidate_names),
-                                 sep = "_")[
-                                   (length(names(existing_df)) + 1):
-                                   length(candidate_names) + length(names(existing_df))
-                                 ]
+      
+      final_names[i] <- candidate
+      used_names <- c(used_names, candidate)
+      
+      if (verbose && (major > 0 || minor > 0)) {
+        message(original, " → ", candidate)
+      }
     }
-
-    # Find overlapping features
-    overlap <- intersect(rownames(W), colnames(existing_df))
+    
+    overlap <- intersect(rownames(W), names(existing_df))
     if (length(overlap) == 0) {
-      warning("No overlapping features for block '", block_name, "' – skipping.")
+      warning("No overlapping features for block '", block_name, "' – skipping")
       next
     }
-
-    X_sub <- as.matrix(existing_df[, overlap, drop = FALSE])
-    W_sub <- W[overlap, , drop = FALSE]
-
-    # Projection
-    Y <- X_sub %*% W_sub
+    
+    Y <- as.matrix(existing_df[, overlap, drop = FALSE]) %*% W[overlap, , drop = FALSE]
     colnames(Y) <- final_names
-
+    
     proj_blocks[[block_name]] <- Y
     added_names <- c(added_names, final_names)
   }
-
+  
   if (length(proj_blocks) == 0) {
-    warning("No projections were added.")
+    warning("No projections were added")
     return(list(extended_df = existing_df, new_colnames = character(0)))
   }
-
-  # Bind all new projections at once (more efficient & preserves order)
-  new_projections <- do.call(cbind, proj_blocks)
-
-  # Final data frame: original (possibly with overwritten columns) + new ones
-  result_df <- cbind(existing_df, new_projections)
-
-  list(
-    extended_df = result_df,
-    new_colnames = added_names
-  )
+  
+  new_df <- cbind(existing_df, do.call(cbind, proj_blocks))
+  
+  list(extended_df = new_df, new_colnames = added_names)
 }
+
+
 
 #' Apply simlr matrices to an existing data frame and combine the results with DTI naming fix.
 #'
@@ -12627,4 +12700,323 @@ posthoc_fa_summary <- function(data, loadings, scores = NULL, method = "PAF") {
     residuals = residuals,
     R_hat = rhat
   )
+}
+
+
+
+#' Extend an Existing SIMLR Model With Additional Modalities (validated + smart defaults)
+#'
+#' Improved version:
+#'  - validates block shapes (rows/cols)
+#'  - auto-detects prefixes from simlr names (if mode = "auto")
+#'  - computes per-modality recommended k_new using eigen-drop or cumulative variance
+#'  - computes RV-based block weights (normalized)
+#'  - supports multiple new modalities
+#'  - forwards ... to simlr.perm()
+#'
+#' @param pymm data.frame or matrix of subject-level variables (columns must include simlr projection names and new modality columns)
+#' @param simlr_result object returned by \code{read_simlr()} must contain v and learned projection names
+#' @param new_modalities named list of character vectors. Each element is a vector of column names in \code{pymm} for a new modality. Example: list(pet = pet_cols, eeg = eeg_cols)
+#' @param mode one of "concatenate", "split", or "auto". "auto" will detect prefixes from SIMLR names.
+#' @param split_prefixes if mode="split", user-provided prefixes (ignored if mode="auto")
+#' @param cor_threshold numeric in [0,1] threshold for adjacency sparsification
+#' @param k_new either: single integer (applied to all new modalities), named integer vector/list giving k per modality, or NULL to auto-determine per-modality
+#' @param k_method method to auto-select k when k_new is NULL: "elbow" (eigen-drop) or "cumulative" (variance threshold)
+#' @param cumvar_threshold numeric (0-1) used when k_method = "cumulative" (default 0.9)
+#' @param min_k minimal allowed k per modality (default 2)
+#' @param rv_weighting logical; if TRUE compute RV-based weights across blocks and return them
+#' @param verbose logical or integer verbosity
+#' @param ... additional parameters forwarded directly to \code{simlr.perm()}
+#'
+#' @return list with elements:
+#'   - simlr_result: original simlr_result updated with new v (if returned by simlr.perm)
+#'   - simlr_permutations: object returned by simlr.perm()
+#'   - blocks: named list of scaled blocks used for SIMLR
+#'   - adjacency: adjacency list (thresholded correlations)
+#'   - projected_data: the projection output from apply_simlr_matrices_dtfix()
+#'   - k_new_used: named integer vector of k used per new modality
+#'   - rv_weights: named numeric vector of RV-based weights (if rv_weighting=TRUE)
+#'
+#' @export
+extend_simlr <- function(
+  pymm,
+  simlr_result,
+  new_modalities,
+  mode = c("concatenate", "split", "auto"),
+  split_prefixes = c("t1","dt","rsf"),
+  cor_threshold = 0.8,
+  k_new = NULL,
+  k_method = c("elbow","cumulative"),
+  cumvar_threshold = 0.90,
+  min_k = 2,
+  rv_weighting = TRUE,
+  verbose = FALSE,
+  ...
+) {
+  mode <- match.arg(mode)
+  k_method <- match.arg(k_method)
+
+  if (!is.list(new_modalities) || is.null(names(new_modalities))) {
+    stop("`new_modalities` must be a named list, e.g. list(pet = pet_cols).")
+  }
+
+  # ---- helpers ----
+  safe_scale <- function(m, verbose = FALSE, jitter_sd = 1e-6) {
+    m <- as.matrix(m)
+
+    if (ncol(m) == 0L) {
+      return(matrix(nrow = nrow(m), ncol = 0L))
+    }
+
+    if (!is.numeric(m)) {
+      stop("safe_scale: input must be numeric.")
+    }
+
+    badcol <- vapply(
+      seq_len(ncol(m)),
+      function(j) {
+        x <- m[, j]
+        all_na <- all(is.na(x))
+        s <- stats::sd(x, na.rm = TRUE)
+        all_na || is.na(s) || s == 0
+      },
+      logical(1)
+    )
+
+    if (any(badcol)) {
+      if (verbose) {
+        message("Replacing constant/NA columns with small noise for scaling.")
+      }
+      m[, badcol] <- matrix(
+        stats::rnorm(nrow(m) * sum(badcol), sd = jitter_sd),
+        nrow = nrow(m),
+        ncol = sum(badcol)
+      )
+    }
+
+    out <- scale(m, center = TRUE, scale = TRUE)
+
+    # final guard against any residual non-finite values
+    out[!is.finite(out)] <- 0
+
+    out
+  }
+
+  # extract simlr projection names produced by apply_simlr_matrices_dtfix
+  if (!is.function(apply_simlr_matrices_dtfix)) {
+    stop("Your environment must provide apply_simlr_matrices_dtfix().")
+  }
+  proj <- apply_simlr_matrices_dtfix(pymm, simlr_result$v)
+  pymm_proj <- proj[[1]]
+  simnames   <- proj[[2]]
+
+  # ---- detect prefixes automatically if requested ----
+  detect_prefixes <- function(simnames) {
+    # attempt to strip trailing "PC\d+" or digits; produce prefix tokens
+    # works with "t1PC1", "neuroimaging_t1PC1", "petPC1", "rsfPC1"
+    token <- gsub("PC\\d+$", "", simnames, perl = TRUE)
+    token <- gsub("([a-zA-Z0-9]+)\\d+$", "\\1", token, perl = TRUE) # fallback
+    # collapse patterns like "neuroimaging_t1" -> keep as-is
+    unique(token)
+  }
+  if (mode == "auto") {
+    split_prefixes <- detect_prefixes(simnames)
+    if (verbose) message("Auto-detected split_prefixes: ", paste(split_prefixes, collapse = ", "))
+  }
+
+  # ---- build existing blocks ----
+  if (mode == "concatenate") {
+    blocks <- list(sim = safe_scale(pymm_proj[, simnames, drop = FALSE]))
+  } else {
+    blocks <- list()
+    for (pref in split_prefixes) {
+      keep_idx <- grepl(paste0("^", pref), simnames)
+      if (any(keep_idx)) {
+        blocks[[pref]] <- safe_scale(pymm_proj[, simnames[keep_idx], drop = FALSE])
+      } else {
+        if (verbose) message("Prefix '", pref, "' not found among simnames; skipping.")
+      }
+    }
+    if (length(blocks) == 0) {
+      stop("No blocks constructed from split_prefixes. Check simnames or set mode = 'concatenate'.")
+    }
+  }
+
+  # ---- validate projected data rows and block shapes ----
+  n_subj <- nrow(pymm_proj)
+  for (nm in names(blocks)) {
+    M <- blocks[[nm]]
+    if (nrow(M) != n_subj) stop("Block '", nm, "' has ", nrow(M), " rows but expected ", n_subj)
+    if (ncol(M) < 1) warning("Block '", nm, "' has zero columns.")
+  }
+
+  # ---- add new modalities: validate columns exist in pymm_proj ----
+  for (mod in names(new_modalities)) {
+    cols <- new_modalities[[mod]]
+    missing_cols <- setdiff(cols, colnames(pymm_proj))
+    if (length(missing_cols) > 0) {
+      stop("New modality '", mod, "' contains columns not found in pymm_proj: ",
+           paste(missing_cols, collapse = ", "))
+    }
+    blocks[[mod]] <- safe_scale(pymm_proj[, cols, drop = FALSE])
+  }
+
+  # ---- validate block sizes now that new blocks added ----
+  for (nm in names(blocks)) {
+    M <- blocks[[nm]]
+    if (ncol(M) < 1) {
+      warning("Block '", nm, "' has <1 column after processing; SIMLR may fail.")
+    }
+  }
+
+  # ---- adjacency: thresholded correlation matrices ----
+  adjacency <- lapply(blocks, function(M) {
+    if (ncol(M) < 2) {
+      # correlation undefined for 1 col => produce matrix 1x1 with 1
+      C <- matrix(1, nrow = ncol(M), ncol = ncol(M),
+                  dimnames = list(colnames(M), colnames(M)))
+    } else {
+      C <- cor(M)
+      C[is.na(C)] <- 0
+    }
+    C[C < cor_threshold] <- 0
+    C
+  })
+
+  # ---- RV coefficient helper (internal) ----
+  rvcoef_local <- function(X, Y) {
+    # RV(X,Y) = sum(S_xy^2) / sqrt(sum(S_xx^2) * sum(S_yy^2))
+    # where S_xy = t(X) %*% Y (or crossprod)
+    if (ncol(X) == 0 || ncol(Y) == 0) return(0)
+    Sxx <- crossprod(X)
+    Syy <- crossprod(Y)
+    Sxy <- crossprod(X, Y)
+    num <- sum(Sxy^2)
+    den <- sqrt(sum(Sxx^2) * sum(Syy^2))
+    if (den == 0) return(0)
+    as.numeric(num / den)
+  }
+
+  # ---- compute RV matrix and block weights (if requested) ----
+  rv_weights <- NULL
+  if (rv_weighting) {
+    nblk <- length(blocks)
+    blk_names <- names(blocks)
+    RVmat <- matrix(0, nblk, nblk, dimnames = list(blk_names, blk_names))
+    for (i in seq_len(nblk)) {
+      for (j in seq_len(nblk)) {
+        RVmat[i,j] <- rvcoef_local(blocks[[blk_names[i]]], blocks[[blk_names[j]]])
+      }
+    }
+    # compute per-block weight as mean RV with others (or self-weight included)
+    per_block_score <- rowMeans(RVmat, na.rm = TRUE)
+    # normalize to sum to 1
+    if (sum(per_block_score) == 0) {
+      rv_weights <- rep(1 / length(per_block_score), length(per_block_score))
+    } else {
+      rv_weights <- per_block_score / sum(per_block_score)
+    }
+    names(rv_weights) <- blk_names
+    if (verbose) {
+      message("RV weights computed: ", paste(sprintf("%s=%.3f", names(rv_weights), rv_weights), collapse = "; "))
+    }
+  }
+
+  # ---- determine k_new per new modality if k_new is NULL or partially provided ----
+  compute_recommended_k <- function(M, method = c("elbow","cumulative"), cumulative_thresh = 0.9, min_k = 2) {
+    method <- match.arg(method)
+    if (ncol(M) < 2) return(min_k)
+    pca <- try(prcomp(M, center = FALSE, scale. = FALSE), silent = TRUE)
+    if (inherits(pca, "try-error")) return(min_k)
+    sdsq <- pca$sdev^2
+    prop <- sdsq / sum(sdsq)
+    if (method == "cumulative") {
+      k <- which(cumsum(prop) >= cumulative_thresh)[1]
+      if (is.na(k)) k <- length(prop)
+    } else {
+      # elbow: find largest drop in successive eigenvalues (ratio heuristic)
+      ratios <- sdsq[-length(sdsq)] / sdsq[-1]
+      k <- which.max(ratios)  # index of largest ratio indicates elbow
+      if (length(k) == 0 || is.na(k) || k < 1) k <- min_k
+    }
+    max(k, min_k)
+  }
+
+  # unify k_new input into named vector
+  new_mod_names <- names(new_modalities)
+  k_new_used <- integer(length(new_mod_names))
+  names(k_new_used) <- new_mod_names
+
+  if (is.null(k_new)) {
+    # auto for each new modality
+    for (mod in new_mod_names) {
+      M <- blocks[[mod]]
+      k_new_used[mod] <- compute_recommended_k(M, method = k_method, cumulative_thresh = cumvar_threshold, min_k = min_k)
+    }
+  } else if (length(k_new) == 1 && is.numeric(k_new)) {
+    # same value for all new modalities
+    k_new_used[] <- as.integer(k_new)
+  } else {
+    # user passed named list/vector or integer vector
+    if (is.numeric(k_new) && !is.null(names(k_new))) {
+      for (mod in new_mod_names) {
+        if (!is.null(k_new[[mod]])) {
+          k_new_used[mod] <- as.integer(k_new[[mod]])
+        } else {
+          # fallback to auto if missing
+          M <- blocks[[mod]]
+          k_new_used[mod] <- compute_recommended_k(M, method = k_method, cumulative_thresh = cumvar_threshold, min_k = min_k)
+        }
+      }
+    } else {
+      stop("k_new must be NULL, a single integer, or a named numeric vector/list keyed by new modality names.")
+    }
+  }
+
+  if (verbose) {
+    message("k_new used per new modality: ", paste(names(k_new_used), k_new_used, sep = "=", collapse = "; "))
+  }
+
+  # For SIMLR we need a single k (joint latent dimension). Choose policy:
+  # - Use max of k_new_used to ensure capacity for largest new block
+  joint_k <- max(k_new_used, min_k)
+
+  # ---- initialize SIMLR U matrix ----
+  initU <- initializeSimlr(
+    blocks,
+    joint_k,
+    jointReduction = TRUE,
+    zeroUpper = FALSE,
+    uAlgorithm = "pca",
+    addNoise = 0
+  )
+
+  # ---- call simlr.perm forwarding all user params ----
+  simlr_fit <- simlr.perm(
+    blocks,
+    adjacency,
+    initialUMatrix = initU,
+    ...
+  )
+
+  # ---- update simlr_result$v with returned v matrices (if available) ----
+  if (!is.null(simlr_fit$simlr_result) && !is.null(simlr_fit$simlr_result$v)) {
+    for (nm in intersect(names(new_modalities), names(simlr_fit$simlr_result$v))) {
+      simlr_result$v[[nm]] <- simlr_fit$simlr_result$v[[nm]]
+    }
+  }
+
+  # ---- return ----
+  out <- list(
+    simlr_result = simlr_result,
+    simlr_permutations = simlr_fit,
+    blocks = blocks,
+    adjacency = adjacency,
+    projected_data = pymm_proj,
+    k_new_used = k_new_used
+  )
+
+  if (rv_weighting) out$rv_weights <- rv_weights
+
+  return(out)
 }

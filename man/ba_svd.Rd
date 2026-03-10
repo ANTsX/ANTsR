@@ -2,37 +2,44 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{ba_svd}
 \alias{ba_svd}
-\title{No fail SVD function that switches to rsvd if svd fails}
+\title{Robust SVD with Automatic rsvd Fallback}
 \usage{
 ba_svd(
   x,
   nu = min(nrow(x), ncol(x)),
   nv = min(nrow(x), ncol(x)),
-  dividebymax = FALSE
+  dividebymax = FALSE,
+  NA2Noise = TRUE
 )
 }
 \arguments{
-\item{x}{Matrix to perform SVD on}
+\item{x}{A numeric matrix.}
 
-\item{nu}{Number of left singular vectors to return (default: min(nrow(x), ncol(x)))}
+\item{nu}{Number of left singular vectors to compute.
+Default: \code{min(nrow(x), ncol(x))}.}
 
-\item{nv}{Number of right singular vectors to return (default: min(nrow(x), ncol(x)))}
+\item{nv}{Number of right singular vectors to compute.
+Default: \code{min(nrow(x), ncol(x))}.}
 
-\item{dividebymax}{boolean}
+\item{dividebymax}{Logical. If TRUE, scale \code{x} by its max absolute value
+before SVD. Default: FALSE.}
+
+\item{NA2Noise}{boolean replaces NA values with small noise values}
 }
 \value{
-A list containing the SVD decomposition of x
+A list with components \code{u}, \code{d}, and \code{v}, matching
+        the structure of base R's \code{svd()} output.
 }
 \description{
-This function performs SVD on a matrix using the built-in svd function in R.
-The matrix will be divided by its maximum value before computing the SVD for 
-the purposes of numerical stability (optional).
-If svd fails, it automatically switches to random svd from the rsvd package.
-svd may fail to converge when the matrix condition number is high; this can 
-be checked with the kappa function.
+This function attempts a standard SVD using base R's \code{svd()}.
+If that fails (typically due to ill-conditioning or non-convergence),
+it automatically falls back to a randomized SVD via the \code{rsvd} package.
+}
+\details{
+Optionally, the matrix can be scaled by its maximum absolute value to
+improve numerical stability before decomposition.
 }
 \examples{
-avgU <- matrix(rnorm(100*50), nrow = 100, ncol = 50)
-nc <- 10
-u <- ba_svd( avgU, nu = nc, nv = 0)$u
+mat <- matrix(rnorm(100 * 50), 100, 50)
+sv <- ba_svd(mat, nu = 10, nv = 0)
 }
