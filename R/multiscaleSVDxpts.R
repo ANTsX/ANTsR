@@ -12703,286 +12703,536 @@ posthoc_fa_summary <- function(data, loadings, scores = NULL, method = "PAF") {
 }
 
 
-
-#' Extend an Existing SIMLR Model With Additional Modalities (validated + smart defaults)
+#' Extend an existing SIMLR embedding with new modality blocks
 #'
-#' Improved version:
-#'  - validates block shapes (rows/cols)
-#'  - auto-detects prefixes from simlr names (if mode = "auto")
-#'  - computes per-modality recommended k_new using eigen-drop or cumulative variance
-#'  - computes RV-based block weights (normalized)
-#'  - supports multiple new modalities
-#'  - forwards ... to simlr.perm()
+#' Rebuilds the projected SIMLR feature space from an existing SIMLR result,
+#' adds one or more new modality blocks from the projected data, constructs
+#' block-specific adjacency structures, chooses a joint initialization rank,
+#' and runs \code{simlr.perm()} on the combined blocks.
 #'
-#' @param pymm data.frame or matrix of subject-level variables (columns must include simlr projection names and new modality columns)
-#' @param simlr_result object returned by \code{read_simlr()} must contain v and learned projection names
-#' @param new_modalities named list of character vectors. Each element is a vector of column names in \code{pymm} for a new modality. Example: list(pet = pet_cols, eeg = eeg_cols)
-#' @param mode one of "concatenate", "split", or "auto". "auto" will detect prefixes from SIMLR names.
-#' @param split_prefixes if mode="split", user-provided prefixes (ignored if mode="auto")
-#' @param cor_threshold numeric in [0,1] threshold for adjacency sparsification
-#' @param k_new either: single integer (applied to all new modalities), named integer vector/list giving k per modality, or NULL to auto-determine per-modality
-#' @param k_method method to auto-select k when k_new is NULL: "elbow" (eigen-drop) or "cumulative" (variance threshold)
-#' @param cumvar_threshold numeric (0-1) used when k_method = "cumulative" (default 0.9)
-#' @param min_k minimal allowed k per modality (default 2)
-#' @param rv_weighting logical; if TRUE compute RV-based weights across blocks and return them
-#' @param verbose logical or integer verbosity
-#' @param ... additional parameters forwarded directly to \code{simlr.perm()}
+#' This implementation is intentionally strict:
+#' - input validation is explicit
+#' - preprocessing is deterministic
+#' - constant / all-NA columns are dropped by default rather than jittered
+#' - the input \code{simlr_result} is not mutated
+#' - diagnostics are returned for auditability
 #'
-#' @return list with elements:
-#'   - simlr_result: original simlr_result updated with new v (if returned by simlr.perm)
-#'   - simlr_permutations: object returned by simlr.perm()
-#'   - blocks: named list of scaled blocks used for SIMLR
-#'   - adjacency: adjacency list (thresholded correlations)
-#'   - projected_data: the projection output from apply_simlr_matrices_dtfix()
-#'   - k_new_used: named integer vector of k used per new modality
-#'   - rv_weights: named numeric vector of RV-based weights (if rv_weighting=TRUE)
+#' @param pymm Input multimodal object passed through to
+#'   \code{apply_simlr_matrices_dtfix()}.
+#' @param simlr_result Existing SIMLR result object with a \code{$v} element.
+#' @param new_modalities Named list mapping modality names to projected-data
+#'   column names, e.g. \code{list(pet = c("petPC1","petPC2"))}.
+#' @param mode How to construct existing blocks from the current SIMLR
+#'   projection. One of \code{"concatenate"}, \code{"split"}, or \code{"auto"}.
+#' @param split_prefixes Character vector of prefixes used when
+#'   \code{mode = "split"}.
+#' @param adjacency_type Type of within-block adjacency to build. Currently
+#'   \code{"feature_correlation"} is supported.
+#' @param cor_threshold Nonnegative threshold applied to absolute correlations
+#'   when building adjacency matrices.
+#' @param use_abs_correlation Logical; if \code{TRUE}, threshold on absolute
+#'   correlation magnitude.
+#' @param k_new Optional rank specification for new modalities. May be
+#'   \code{NULL}, a single positive integer, or a named numeric vector keyed by
+#'   new modality names.
+#' @param k_method Method for automatic rank selection when \code{k_new} is not
+#'   supplied for a modality. One of \code{"cumulative"} or \code{"elbow"}.
+#' @param cumvar_threshold Cumulative variance threshold used when
+#'   \code{k_method = "cumulative"}.
+#' @param min_k Minimum admissible latent dimension.
+#' @param joint_k_policy Policy used to combine per-modality recommended ranks
+#'   into a single initialization rank. One of \code{"max"}, \code{"median"},
+#'   or \code{"min"}.
+#' @param preprocess Policy for invalid columns. One of \code{"drop"} or
+#'   \code{"zero"}.
+#' @param verbose Logical; emit progress messages.
+#' @param ... Additional arguments forwarded to \code{simlr.perm()}.
+#'
+#' @return A list with:
+#' \describe{
+#'   \item{updated_simlr_result}{Copy of \code{simlr_result} with any returned
+#'     modality-specific \code{$v} entries merged in, without mutating input.}
+#'   \item{simlr_permutations}{Result from \code{simlr.perm()}.}
+#'   \item{blocks}{Named list of processed block matrices used for fitting.}
+#'   \item{adjacency}{Named list of adjacency matrices.}
+#'   \item{projected_data}{Projected data returned by
+#'     \code{apply_simlr_matrices_dtfix()}.}
+#'   \item{k_new_used}{Named integer vector of per-new-modality ranks used.}
+#'   \item{joint_k}{Joint initialization rank passed to
+#'     \code{initializeSimlr()}.}
+#'   \item{diagnostics}{List of validation and preprocessing diagnostics.}
+#' }
 #'
 #' @export
-extend_simlr <- function(
+extend_simlr_embedding_with_new_modalities <- function(
   pymm,
   simlr_result,
   new_modalities,
   mode = c("concatenate", "split", "auto"),
-  split_prefixes = c("t1","dt","rsf"),
+  split_prefixes = c("t1", "dt", "rsf"),
+  adjacency_type = c("feature_correlation"),
   cor_threshold = 0.8,
+  use_abs_correlation = TRUE,
   k_new = NULL,
-  k_method = c("elbow","cumulative"),
+  k_method = c("cumulative", "elbow"),
   cumvar_threshold = 0.90,
-  min_k = 2,
-  rv_weighting = TRUE,
+  min_k = 2L,
+  joint_k_policy = c("max", "median", "min"),
+  preprocess = c("drop", "zero"),
   verbose = FALSE,
   ...
 ) {
   mode <- match.arg(mode)
+  adjacency_type <- match.arg(adjacency_type)
   k_method <- match.arg(k_method)
+  joint_k_policy <- match.arg(joint_k_policy)
+  preprocess <- match.arg(preprocess)
 
-  if (!is.list(new_modalities) || is.null(names(new_modalities))) {
-    stop("`new_modalities` must be a named list, e.g. list(pet = pet_cols).")
+  .msg <- function(...) {
+    if (isTRUE(verbose)) {
+      message(...)
+    }
   }
 
-  # ---- helpers ----
-  safe_scale <- function(m, verbose = FALSE, jitter_sd = 1e-6) {
-    m <- as.matrix(m)
-
-    if (ncol(m) == 0L) {
-      return(matrix(nrow = nrow(m), ncol = 0L))
+  .assert_scalar_numeric_in_range <- function(x, nm, lower = -Inf, upper = Inf,
+                                              lower_open = FALSE, upper_open = FALSE) {
+    if (!is.numeric(x) || length(x) != 1L || is.na(x) || !is.finite(x)) {
+      stop(sprintf("`%s` must be one finite numeric scalar.", nm), call. = FALSE)
     }
-
-    if (!is.numeric(m)) {
-      stop("safe_scale: input must be numeric.")
+    lower_ok <- if (lower_open) x > lower else x >= lower
+    upper_ok <- if (upper_open) x < upper else x <= upper
+    if (!lower_ok || !upper_ok) {
+      lb <- if (lower_open) "(" else "["
+      ub <- if (upper_open) ")" else "]"
+      stop(sprintf("`%s` must be in %s%s, %s%s.", nm, lb, lower, upper, ub), call. = FALSE)
     }
+  }
 
-    badcol <- vapply(
-      seq_len(ncol(m)),
-      function(j) {
-        x <- m[, j]
-        all_na <- all(is.na(x))
-        s <- stats::sd(x, na.rm = TRUE)
-        all_na || is.na(s) || s == 0
-      },
-      logical(1)
-    )
+  .assert_positive_integer_scalar <- function(x, nm) {
+    if (!is.numeric(x) || length(x) != 1L || is.na(x) || x < 1 || x != as.integer(x)) {
+      stop(sprintf("`%s` must be a positive integer scalar.", nm), call. = FALSE)
+    }
+  }
 
-    if (any(badcol)) {
-      if (verbose) {
-        message("Replacing constant/NA columns with small noise for scaling.")
-      }
-      m[, badcol] <- matrix(
-        stats::rnorm(nrow(m) * sum(badcol), sd = jitter_sd),
-        nrow = nrow(m),
-        ncol = sum(badcol)
+  .validate_new_modalities <- function(x) {
+    if (!is.list(x) || is.null(names(x)) || any(names(x) == "")) {
+      stop(
+        "`new_modalities` must be a named list, e.g. list(pet = c('petPC1','petPC2')).",
+        call. = FALSE
       )
     }
+    for (nm in names(x)) {
+      cols <- x[[nm]]
+      if (!is.character(cols) || length(cols) < 1L || anyNA(cols)) {
+        stop(sprintf("`new_modalities[['%s']]` must be a non-empty character vector.", nm),
+             call. = FALSE)
+      }
+      if (anyDuplicated(cols)) {
+        stop(sprintf("`new_modalities[['%s']]` contains duplicated column names.", nm),
+             call. = FALSE)
+      }
+    }
+    invisible(TRUE)
+  }
 
-    out <- scale(m, center = TRUE, scale = TRUE)
+  .validate_k_new <- function(k_new, modality_names) {
+    if (is.null(k_new)) {
+      return(invisible(TRUE))
+    }
+    if (length(k_new) == 1L && is.numeric(k_new) && !is.na(k_new) &&
+        k_new >= 1 && k_new == as.integer(k_new)) {
+      return(invisible(TRUE))
+    }
+    if (is.numeric(k_new) && !is.null(names(k_new))) {
+      bad_names <- setdiff(names(k_new), modality_names)
+      if (length(bad_names) > 0L) {
+        stop(
+          sprintf("`k_new` has names not present in `new_modalities`: %s",
+                  paste(bad_names, collapse = ", ")),
+          call. = FALSE
+        )
+      }
+      bad_vals <- !is.finite(k_new) | is.na(k_new) | k_new < 1 | k_new != as.integer(k_new)
+      if (any(bad_vals)) {
+        stop("Named `k_new` values must all be positive integers.", call. = FALSE)
+      }
+      return(invisible(TRUE))
+    }
+    stop(
+      "`k_new` must be NULL, one positive integer, or a named numeric vector keyed by new modality names.",
+      call. = FALSE
+    )
+  }
 
-    # final guard against any residual non-finite values
-    out[!is.finite(out)] <- 0
+  .require_function <- function(fn_name) {
+    fn <- get0(fn_name, mode = "function", inherits = TRUE)
+    if (!is.function(fn)) {
+      stop(sprintf("Required function `%s()` was not found.", fn_name), call. = FALSE)
+    }
+    fn
+  }
+
+  .parse_prefix <- function(x) {
+    m <- regexec("^(.+?)PC([0-9]+)$", x, perl = TRUE)
+    reg <- regmatches(x, m)
+    out <- vapply(
+      reg,
+      function(z) if (length(z) == 3L) z[2] else NA_character_,
+      character(1)
+    )
+    out
+  }
+
+  .detect_prefixes <- function(simnames) {
+    prefixes <- .parse_prefix(simnames)
+    prefixes <- unique(prefixes[!is.na(prefixes) & nzchar(prefixes)])
+    prefixes
+  }
+
+  .preprocess_matrix <- function(M, block_name, preprocess, verbose = FALSE) {
+    M <- as.matrix(M)
+    storage.mode(M) <- "numeric"
+
+    if (ncol(M) < 1L) {
+      stop(sprintf("Block `%s` has zero columns.", block_name), call. = FALSE)
+    }
+
+    all_na <- apply(M, 2L, function(x) all(is.na(x)))
+    zero_var <- apply(M, 2L, function(x) {
+      y <- x[is.finite(x)]
+      if (length(y) <= 1L) {
+        return(TRUE)
+      }
+      stats::sd(y) == 0
+    })
+    invalid_cols <- all_na | zero_var
+
+    dropped <- character(0)
+    zeroed <- character(0)
+
+    if (any(invalid_cols)) {
+      bad_names <- colnames(M)[invalid_cols]
+      if (preprocess == "drop") {
+        if (verbose) {
+          message(
+            sprintf("Dropping %d invalid columns from `%s`: %s",
+                    length(bad_names), block_name, paste(bad_names, collapse = ", "))
+          )
+        }
+        M <- M[, !invalid_cols, drop = FALSE]
+        dropped <- bad_names
+      } else if (preprocess == "zero") {
+        if (verbose) {
+          message(
+            sprintf("Zeroing %d invalid columns in `%s`: %s",
+                    length(bad_names), block_name, paste(bad_names, collapse = ", "))
+          )
+        }
+        M[, invalid_cols] <- 0
+        zeroed <- bad_names
+      }
+    }
+
+    if (ncol(M) < 1L) {
+      stop(sprintf("Block `%s` has no usable columns after preprocessing.", block_name),
+           call. = FALSE)
+    }
+
+    M_scaled <- scale(M, center = TRUE, scale = TRUE)
+    M_scaled[!is.finite(M_scaled)] <- 0
+
+    list(
+      matrix = M_scaled,
+      dropped_columns = dropped,
+      zeroed_columns = zeroed
+    )
+  }
+
+  .build_feature_correlation_adjacency <- function(M, threshold, use_abs) {
+    if (ncol(M) == 1L) {
+      out <- matrix(1, nrow = 1L, ncol = 1L,
+                    dimnames = list(colnames(M), colnames(M)))
+      return(out)
+    }
+
+    C <- stats::cor(M, use = "pairwise.complete.obs")
+    C[!is.finite(C)] <- 0
+
+    if (use_abs) {
+      A <- abs(C)
+    } else {
+      A <- C
+    }
+
+    A[A < threshold] <- 0
+    diag(A) <- 1
+    A
+  }
+
+  .compute_recommended_k <- function(M, method, cumulative_thresh, min_k) {
+    max_k <- max(1L, min(nrow(M) - 1L, ncol(M)))
+    min_k_eff <- min(max_k, as.integer(min_k))
+
+    if (ncol(M) <= 1L || nrow(M) <= 2L) {
+      return(min_k_eff)
+    }
+
+    pca <- try(stats::prcomp(M, center = FALSE, scale. = FALSE), silent = TRUE)
+    if (inherits(pca, "try-error")) {
+      return(min_k_eff)
+    }
+
+    sdsq <- pca$sdev^2
+    if (length(sdsq) < 1L || sum(sdsq) <= 0) {
+      return(min_k_eff)
+    }
+
+    if (method == "cumulative") {
+      prop <- sdsq / sum(sdsq)
+      k <- which(cumsum(prop) >= cumulative_thresh)[1]
+      if (is.na(k)) {
+        k <- length(prop)
+      }
+    } else {
+      if (length(sdsq) < 2L) {
+        k <- min_k_eff
+      } else {
+        ratios <- sdsq[-length(sdsq)] / pmax(sdsq[-1], .Machine$double.eps)
+        k <- which.max(ratios)
+        if (length(k) != 1L || is.na(k) || k < 1L) {
+          k <- min_k_eff
+        }
+      }
+    }
+
+    as.integer(max(min_k_eff, min(k, max_k)))
+  }
+
+  .resolve_k_new <- function(k_new, new_modality_names, blocks, k_method, cumvar_threshold, min_k) {
+    out <- stats::setNames(integer(length(new_modality_names)), new_modality_names)
+
+    if (is.null(k_new)) {
+      for (nm in new_modality_names) {
+        out[[nm]] <- .compute_recommended_k(
+          blocks[[nm]],
+          method = k_method,
+          cumulative_thresh = cumvar_threshold,
+          min_k = min_k
+        )
+      }
+      return(out)
+    }
+
+    if (length(k_new) == 1L && is.numeric(k_new) && is.null(names(k_new))) {
+      out[] <- as.integer(k_new)
+      return(out)
+    }
+
+    for (nm in new_modality_names) {
+      if (!is.null(k_new[[nm]])) {
+        out[[nm]] <- as.integer(k_new[[nm]])
+      } else {
+        out[[nm]] <- .compute_recommended_k(
+          blocks[[nm]],
+          method = k_method,
+          cumulative_thresh = cumvar_threshold,
+          min_k = min_k
+        )
+      }
+    }
 
     out
   }
 
-  # extract simlr projection names produced by apply_simlr_matrices_dtfix
-  if (!is.function(apply_simlr_matrices_dtfix)) {
-    stop("Your environment must provide apply_simlr_matrices_dtfix().")
-  }
-  proj <- apply_simlr_matrices_dtfix(pymm, simlr_result$v)
-  pymm_proj <- proj[[1]]
-  simnames   <- proj[[2]]
+  .combine_joint_k <- function(k_vec, policy, min_k) {
+    vals <- as.integer(k_vec)
+    vals <- vals[is.finite(vals) & !is.na(vals) & vals >= 1L]
+    if (length(vals) < 1L) {
+      return(as.integer(min_k))
+    }
 
-  # ---- detect prefixes automatically if requested ----
-  detect_prefixes <- function(simnames) {
-    # attempt to strip trailing "PC\d+" or digits; produce prefix tokens
-    # works with "t1PC1", "neuroimaging_t1PC1", "petPC1", "rsfPC1"
-    token <- gsub("PC\\d+$", "", simnames, perl = TRUE)
-    token <- gsub("([a-zA-Z0-9]+)\\d+$", "\\1", token, perl = TRUE) # fallback
-    # collapse patterns like "neuroimaging_t1" -> keep as-is
-    unique(token)
-  }
-  if (mode == "auto") {
-    split_prefixes <- detect_prefixes(simnames)
-    if (verbose) message("Auto-detected split_prefixes: ", paste(split_prefixes, collapse = ", "))
+    out <- switch(
+      policy,
+      max = max(vals),
+      median = as.integer(stats::median(vals)),
+      min = min(vals)
+    )
+
+    as.integer(max(out, min_k))
   }
 
-  # ---- build existing blocks ----
-  if (mode == "concatenate") {
-    blocks <- list(sim = safe_scale(pymm_proj[, simnames, drop = FALSE]))
-  } else {
-    blocks <- list()
-    for (pref in split_prefixes) {
-      keep_idx <- grepl(paste0("^", pref), simnames)
-      if (any(keep_idx)) {
-        blocks[[pref]] <- safe_scale(pymm_proj[, simnames[keep_idx], drop = FALSE])
-      } else {
-        if (verbose) message("Prefix '", pref, "' not found among simnames; skipping.")
+  .copy_and_merge_simlr_result <- function(simlr_result, simlr_fit, new_modality_names) {
+    updated <- simlr_result
+    if (!is.null(simlr_fit$simlr_result) &&
+        !is.null(simlr_fit$simlr_result$v) &&
+        is.list(simlr_fit$simlr_result$v)) {
+      if (is.null(updated$v)) {
+        updated$v <- list()
+      }
+      for (nm in intersect(new_modality_names, names(simlr_fit$simlr_result$v))) {
+        updated$v[[nm]] <- simlr_fit$simlr_result$v[[nm]]
       }
     }
-    if (length(blocks) == 0) {
-      stop("No blocks constructed from split_prefixes. Check simnames or set mode = 'concatenate'.")
+    updated
+  }
+
+  .assert_scalar_numeric_in_range(cor_threshold, "cor_threshold", 0, 1)
+  .assert_scalar_numeric_in_range(cumvar_threshold, "cumvar_threshold", 0, 1, lower_open = TRUE)
+  .assert_positive_integer_scalar(min_k, "min_k")
+  .validate_new_modalities(new_modalities)
+  .validate_k_new(k_new, names(new_modalities))
+
+  if (!is.character(split_prefixes) || length(split_prefixes) < 1L || anyNA(split_prefixes)) {
+    stop("`split_prefixes` must be a non-empty character vector.", call. = FALSE)
+  }
+  split_prefixes <- unique(split_prefixes)
+
+  if (!is.list(simlr_result) || is.null(simlr_result$v)) {
+    stop("`simlr_result` must be a list with a `$v` element.", call. = FALSE)
+  }
+
+  apply_proj_fn <- .require_function("apply_simlr_matrices_dtfix")
+  initialize_simlr_fn <- .require_function("initializeSimlr")
+  simlr_perm_fn <- .require_function("simlr.perm")
+
+  proj <- apply_proj_fn(pymm, simlr_result$v)
+  if (!is.list(proj) || length(proj) < 2L) {
+    stop("`apply_simlr_matrices_dtfix()` must return a list with projected data and simnames.",
+         call. = FALSE)
+  }
+
+  pymm_proj <- proj[[1]]
+  simnames <- proj[[2]]
+
+  if (!is.matrix(pymm_proj) && !is.data.frame(pymm_proj)) {
+    stop("Projected data returned by `apply_simlr_matrices_dtfix()` must be matrix-like.",
+         call. = FALSE)
+  }
+  pymm_proj <- as.data.frame(pymm_proj)
+
+  if (!is.character(simnames) || length(simnames) < 1L) {
+    stop("Projected SIMLR names returned by `apply_simlr_matrices_dtfix()` must be a non-empty character vector.",
+         call. = FALSE)
+  }
+
+  missing_existing <- setdiff(simnames, colnames(pymm_proj))
+  if (length(missing_existing) > 0L) {
+    stop(
+      sprintf("Projected data is missing SIMLR columns: %s",
+              paste(missing_existing, collapse = ", ")),
+      call. = FALSE
+    )
+  }
+
+  if (mode == "auto") {
+    detected <- .detect_prefixes(simnames)
+    if (length(detected) < 1L) {
+      stop("Could not auto-detect prefixes from `simnames`; use `mode = 'concatenate'` or provide `split_prefixes`.",
+           call. = FALSE)
+    }
+    split_prefixes <- detected
+    .msg("Auto-detected split prefixes: ", paste(split_prefixes, collapse = ", "))
+  }
+
+  overlap_with_existing <- intersect(unlist(new_modalities, use.names = FALSE), simnames)
+  if (length(overlap_with_existing) > 0L) {
+    stop(
+      sprintf(
+        "New modality columns overlap existing SIMLR projection columns: %s",
+        paste(overlap_with_existing, collapse = ", ")
+      ),
+      call. = FALSE
+    )
+  }
+
+  missing_new <- setdiff(unlist(new_modalities, use.names = FALSE), colnames(pymm_proj))
+  if (length(missing_new) > 0L) {
+    stop(
+      sprintf("`new_modalities` contains columns not found in projected data: %s",
+              paste(missing_new, collapse = ", ")),
+      call. = FALSE
+    )
+  }
+
+  blocks_raw <- list()
+
+  if (mode == "concatenate") {
+    blocks_raw[["sim"]] <- as.matrix(pymm_proj[, simnames, drop = FALSE])
+  } else {
+    for (pref in split_prefixes) {
+      keep <- grepl(sprintf("^%s", pref), simnames)
+      if (any(keep)) {
+        blocks_raw[[pref]] <- as.matrix(pymm_proj[, simnames[keep], drop = FALSE])
+      } else {
+        .msg("Prefix `", pref, "` not found among projected SIMLR names; skipping.")
+      }
+    }
+    if (length(blocks_raw) < 1L) {
+      stop("No existing SIMLR blocks were constructed. Check `split_prefixes` or use `mode = 'concatenate'`.",
+           call. = FALSE)
     }
   }
 
-  # ---- validate projected data rows and block shapes ----
-  n_subj <- nrow(pymm_proj)
-  for (nm in names(blocks)) {
-    M <- blocks[[nm]]
-    if (nrow(M) != n_subj) stop("Block '", nm, "' has ", nrow(M), " rows but expected ", n_subj)
-    if (ncol(M) < 1) warning("Block '", nm, "' has zero columns.")
-  }
-
-  # ---- add new modalities: validate columns exist in pymm_proj ----
   for (mod in names(new_modalities)) {
     cols <- new_modalities[[mod]]
-    missing_cols <- setdiff(cols, colnames(pymm_proj))
-    if (length(missing_cols) > 0) {
-      stop("New modality '", mod, "' contains columns not found in pymm_proj: ",
-           paste(missing_cols, collapse = ", "))
-    }
-    blocks[[mod]] <- safe_scale(pymm_proj[, cols, drop = FALSE])
+    blocks_raw[[mod]] <- as.matrix(pymm_proj[, cols, drop = FALSE])
   }
 
-  # ---- validate block sizes now that new blocks added ----
-  for (nm in names(blocks)) {
-    M <- blocks[[nm]]
-    if (ncol(M) < 1) {
-      warning("Block '", nm, "' has <1 column after processing; SIMLR may fail.")
+  n_subjects <- nrow(pymm_proj)
+  for (nm in names(blocks_raw)) {
+    if (nrow(blocks_raw[[nm]]) != n_subjects) {
+      stop(sprintf("Block `%s` has %d rows; expected %d.",
+                   nm, nrow(blocks_raw[[nm]]), n_subjects),
+           call. = FALSE)
     }
   }
 
-  # ---- adjacency: thresholded correlation matrices ----
-  adjacency <- lapply(blocks, function(M) {
-    if (ncol(M) < 2) {
-      # correlation undefined for 1 col => produce matrix 1x1 with 1
-      C <- matrix(1, nrow = ncol(M), ncol = ncol(M),
-                  dimnames = list(colnames(M), colnames(M)))
-    } else {
-      C <- cor(M)
-      C[is.na(C)] <- 0
-    }
-    C[C < cor_threshold] <- 0
-    C
-  })
-
-  # ---- RV coefficient helper (internal) ----
-  rvcoef_local <- function(X, Y) {
-    # RV(X,Y) = sum(S_xy^2) / sqrt(sum(S_xx^2) * sum(S_yy^2))
-    # where S_xy = t(X) %*% Y (or crossprod)
-    if (ncol(X) == 0 || ncol(Y) == 0) return(0)
-    Sxx <- crossprod(X)
-    Syy <- crossprod(Y)
-    Sxy <- crossprod(X, Y)
-    num <- sum(Sxy^2)
-    den <- sqrt(sum(Sxx^2) * sum(Syy^2))
-    if (den == 0) return(0)
-    as.numeric(num / den)
+  blocks <- list()
+  preprocessing_diagnostics <- list()
+  for (nm in names(blocks_raw)) {
+    prep <- .preprocess_matrix(blocks_raw[[nm]], nm, preprocess = preprocess, verbose = verbose)
+    blocks[[nm]] <- prep$matrix
+    preprocessing_diagnostics[[nm]] <- list(
+      dropped_columns = prep$dropped_columns,
+      zeroed_columns = prep$zeroed_columns,
+      n_rows = nrow(prep$matrix),
+      n_cols = ncol(prep$matrix),
+      colnames = colnames(prep$matrix)
+    )
   }
 
-  # ---- compute RV matrix and block weights (if requested) ----
-  rv_weights <- NULL
-  if (rv_weighting) {
-    nblk <- length(blocks)
-    blk_names <- names(blocks)
-    RVmat <- matrix(0, nblk, nblk, dimnames = list(blk_names, blk_names))
-    for (i in seq_len(nblk)) {
-      for (j in seq_len(nblk)) {
-        RVmat[i,j] <- rvcoef_local(blocks[[blk_names[i]]], blocks[[blk_names[j]]])
-      }
-    }
-    # compute per-block weight as mean RV with others (or self-weight included)
-    per_block_score <- rowMeans(RVmat, na.rm = TRUE)
-    # normalize to sum to 1
-    if (sum(per_block_score) == 0) {
-      rv_weights <- rep(1 / length(per_block_score), length(per_block_score))
-    } else {
-      rv_weights <- per_block_score / sum(per_block_score)
-    }
-    names(rv_weights) <- blk_names
-    if (verbose) {
-      message("RV weights computed: ", paste(sprintf("%s=%.3f", names(rv_weights), rv_weights), collapse = "; "))
-    }
-  }
+  adjacency <- switch(
+    adjacency_type,
+    feature_correlation = lapply(
+      blocks,
+      function(M) .build_feature_correlation_adjacency(
+        M,
+        threshold = cor_threshold,
+        use_abs = use_abs_correlation
+      )
+    )
+  )
 
-  # ---- determine k_new per new modality if k_new is NULL or partially provided ----
-  compute_recommended_k <- function(M, method = c("elbow","cumulative"), cumulative_thresh = 0.9, min_k = 2) {
-    method <- match.arg(method)
-    if (ncol(M) < 2) return(min_k)
-    pca <- try(prcomp(M, center = FALSE, scale. = FALSE), silent = TRUE)
-    if (inherits(pca, "try-error")) return(min_k)
-    sdsq <- pca$sdev^2
-    prop <- sdsq / sum(sdsq)
-    if (method == "cumulative") {
-      k <- which(cumsum(prop) >= cumulative_thresh)[1]
-      if (is.na(k)) k <- length(prop)
-    } else {
-      # elbow: find largest drop in successive eigenvalues (ratio heuristic)
-      ratios <- sdsq[-length(sdsq)] / sdsq[-1]
-      k <- which.max(ratios)  # index of largest ratio indicates elbow
-      if (length(k) == 0 || is.na(k) || k < 1) k <- min_k
-    }
-    max(k, min_k)
-  }
+  new_modality_names <- names(new_modalities)
+  k_new_used <- .resolve_k_new(
+    k_new = k_new,
+    new_modality_names = new_modality_names,
+    blocks = blocks,
+    k_method = k_method,
+    cumvar_threshold = cumvar_threshold,
+    min_k = min_k
+  )
 
-  # unify k_new input into named vector
-  new_mod_names <- names(new_modalities)
-  k_new_used <- integer(length(new_mod_names))
-  names(k_new_used) <- new_mod_names
+  joint_k <- .combine_joint_k(k_new_used, policy = joint_k_policy, min_k = min_k)
 
-  if (is.null(k_new)) {
-    # auto for each new modality
-    for (mod in new_mod_names) {
-      M <- blocks[[mod]]
-      k_new_used[mod] <- compute_recommended_k(M, method = k_method, cumulative_thresh = cumvar_threshold, min_k = min_k)
-    }
-  } else if (length(k_new) == 1 && is.numeric(k_new)) {
-    # same value for all new modalities
-    k_new_used[] <- as.integer(k_new)
-  } else {
-    # user passed named list/vector or integer vector
-    if (is.numeric(k_new) && !is.null(names(k_new))) {
-      for (mod in new_mod_names) {
-        if (!is.null(k_new[[mod]])) {
-          k_new_used[mod] <- as.integer(k_new[[mod]])
-        } else {
-          # fallback to auto if missing
-          M <- blocks[[mod]]
-          k_new_used[mod] <- compute_recommended_k(M, method = k_method, cumulative_thresh = cumvar_threshold, min_k = min_k)
-        }
-      }
-    } else {
-      stop("k_new must be NULL, a single integer, or a named numeric vector/list keyed by new modality names.")
-    }
-  }
+  .msg(
+    "k_new used: ",
+    paste(sprintf("%s=%d", names(k_new_used), k_new_used), collapse = "; "),
+    " | joint_k=",
+    joint_k
+  )
 
-  if (verbose) {
-    message("k_new used per new modality: ", paste(names(k_new_used), k_new_used, sep = "=", collapse = "; "))
-  }
-
-  # For SIMLR we need a single k (joint latent dimension). Choose policy:
-  # - Use max of k_new_used to ensure capacity for largest new block
-  joint_k <- max(k_new_used, min_k)
-
-  # ---- initialize SIMLR U matrix ----
-  initU <- initializeSimlr(
+  initU <- initialize_simlr_fn(
     blocks,
     joint_k,
     jointReduction = TRUE,
@@ -12991,32 +13241,44 @@ extend_simlr <- function(
     addNoise = 0
   )
 
-  # ---- call simlr.perm forwarding all user params ----
-  simlr_fit <- simlr.perm(
+  simlr_fit <- simlr_perm_fn(
     blocks,
     adjacency,
     initialUMatrix = initU,
     ...
   )
 
-  # ---- update simlr_result$v with returned v matrices (if available) ----
-  if (!is.null(simlr_fit$simlr_result) && !is.null(simlr_fit$simlr_result$v)) {
-    for (nm in intersect(names(new_modalities), names(simlr_fit$simlr_result$v))) {
-      simlr_result$v[[nm]] <- simlr_fit$simlr_result$v[[nm]]
-    }
-  }
-
-  # ---- return ----
-  out <- list(
+  updated_simlr_result <- .copy_and_merge_simlr_result(
     simlr_result = simlr_result,
+    simlr_fit = simlr_fit,
+    new_modality_names = new_modality_names
+  )
+
+  diagnostics <- list(
+    mode_used = mode,
+    split_prefixes_used = split_prefixes,
+    adjacency_type = adjacency_type,
+    cor_threshold = cor_threshold,
+    use_abs_correlation = use_abs_correlation,
+    preprocess = preprocess,
+    n_subjects = n_subjects,
+    block_names = names(blocks),
+    block_dims = lapply(blocks, dim),
+    preprocessing = preprocessing_diagnostics,
+    k_method = k_method,
+    cumvar_threshold = cumvar_threshold,
+    min_k = min_k,
+    joint_k_policy = joint_k_policy
+  )
+
+  list(
+    updated_simlr_result = updated_simlr_result,
     simlr_permutations = simlr_fit,
     blocks = blocks,
     adjacency = adjacency,
     projected_data = pymm_proj,
-    k_new_used = k_new_used
+    k_new_used = k_new_used,
+    joint_k = joint_k,
+    diagnostics = diagnostics
   )
-
-  if (rv_weighting) out$rv_weights <- rv_weights
-
-  return(out)
 }
