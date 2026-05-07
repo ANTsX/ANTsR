@@ -6000,101 +6000,89 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
 
 
 #' Visualize Low-Rank Relationships
-#'
-#' Compute low-rank projections, pairwise correlations, and RV coefficient, and visualize the relationships using a heatmap and pairs plot.
-#'
-#' @param X1 First matrix
-#' @param X2 Second matrix
-#' @param V1 First feature matrix
-#' @param V2 Second feature matrix
-#' @param plot_title Title of the plot (optional)
-#' @param nm1 Name of the first matrix (default: "X1")
-#' @param nm2 Name of the second matrix (default: "X2")
-#'
-#' @return A list containing the heatmap, pairs plot, correlation matrix, and RV coefficient
-#'
-#' @examples
-#' set.seed(123)
-#' X1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
-#' X2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
-#' V1 <- matrix(rnorm(100), nrow = 10, ncol = 10)
-#' V2 <- matrix(rnorm(100), nrow = 10, ncol = 10)
-#' # result <- visualize_lowrank_relationships(X1, X2, V1, V2)
+#' @param X1 First matrix (Subjects x Features)
+#' @param X2 Second matrix (Subjects x Features)
+#' @param V1 First feature loading matrix (Features x Components)
+#' @param V2 Second feature loading matrix (Features x Components)
+#' @param plot_title Title of the plot
+#' @param nm1 Label for view 1
+#' @param nm2 Label for view 2
+#' @param max_pairs Maximum components to include in the pairs plot (Safety cap)
 #' @export
-visualize_lowrank_relationships <- function(X1, X2, V1, V2, plot_title, nm1='X1', nm2='X2') {
+visualize_lowrank_relationships <- function(X1, X2, V1, V2, 
+                                            plot_title = NULL, 
+                                            nm1 = 'X1', 
+                                            nm2 = 'X2',
+                                            max_pairs = 5) {
   
-  unique_column_names <- function(df) {
-    names <- colnames(df)
-    new_names <- character(length(names))
-    counter <- 1
-    for (i in 1:length(names)) {
-      if (sum(names == names[i]) == 1) {
-        new_names[i] <- names[i]
-      } else {
-        new_names[i] <- paste0(names[i], counter)
-        counter <- counter + 1
-      }
-    }
-    colnames(df) <- new_names
-    return(df)
-  }
+  # --- 1. DIMENSION GUARDS ---
+  if (ncol(X1) != nrow(V1)) stop(glue::glue("Dimension mismatch: {nm1} columns ({ncol(X1)}) != {nm1} loadings rows ({nrow(V1)})"))
+  if (ncol(X2) != nrow(V2)) stop(glue::glue("Dimension mismatch: {nm2} columns ({ncol(X2)}) != {nm2} loadings rows ({nrow(V2)})"))
+  if (nrow(X1) != nrow(X2)) stop("Subject count mismatch: X1 and X2 must have the same number of rows.")
+
+  if (is.null(plot_title)) plot_title <- paste("Shared Latent Space:", nm1, "&", nm2)
+
+  # --- 2. COMPUTE PROJECTIONS ---
+  # Ensure we are working with matrices
+  proj1 <- as.matrix(X1) %*% as.matrix(V1)
+  proj2 <- as.matrix(X2) %*% as.matrix(V2)
   
-  if (missing(plot_title)) plot_title=paste("LRRc: ", nm1, " & ", nm2 )
-  # Compute the low-rank projections
-  projection1 <- X1 %*% V1
-  projection2 <- X2 %*% V2
-  cordf=  unique_column_names( cbind( data.frame(projection1), data.frame(projection2 )) )
-  # Compute pairwise correlations
-  correlation_matrix <- cor(projection1, projection2)
+  # Standardize column names for the projections
+  colnames(proj1) <- paste0(nm1, "_C", 1:ncol(proj1))
+  colnames(proj2) <- paste0(nm2, "_C", 1:ncol(proj2))
+
+  # --- 3. CORRELATION & RV ---
+  correlation_matrix <- cor(proj1, proj2, use = "pairwise.complete.obs")
   
-  # Perform CCA
-  #   cca_result <- cancor(projection1, projection2)
-  # canonical_correlations <- cca_result$cor
+  # Assuming rvcoef and adjusted_rvcoef are available in your environment
+  rv_val <- tryCatch(adjusted_rvcoef(proj1, proj2), error = function(e) NA)
   
-  # Perform Wilks' lambda test
-  # wilks_test <- WilksLambda(projection1, projection2, cca_result)
-  
-  # Compute RV coefficient
-  rvcoefval <- rvcoef(projection1, projection2)
-  adj_rvcoefval <- adjusted_rvcoef(projection1, projection2)
-  
-  # Prepare data for plotting
+  # --- 4. HEATMAP (GGPLOT2) ---
   cor_data <- as.data.frame(as.table(correlation_matrix))
-  
-  # fix for no visible binding for global variable NOTE
-  Var1 = Var2 = Freq = NULL
-  rm(list = c("Var1", "Var2", "Freq"))
-  # Plot the pairwise correlations
-  p <- ggplot2::ggplot(cor_data, ggplot2::aes(Var1, Var2, fill = Freq)) +
+  colnames(cor_data) <- c("View1", "View2", "Correlation")
+
+  p_heat <- ggplot2::ggplot(cor_data, ggplot2::aes(x = .data$View1, y = .data$View2, fill = .data$Correlation)) +
     ggplot2::geom_tile(color = "white") +
     ggplot2::scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
-                         midpoint = 0, limit = c(-1,1), space = "Lab", 
-                         name="Correlation") +
-    ggplot2::geom_text(ggplot2::aes(label = format(Freq, digits = 2, nsmall = 2)), size = 3)+
+                                  midpoint = 0, limit = c(-1, 1), 
+                                  name = "Pearson\nCorr") +
+    ggplot2::geom_text(ggplot2::aes(label = sprintf("%.2f", .data$Correlation)), 
+                       size = 3, color = ifelse(abs(cor_data$Correlation) > 0.7, "white", "black")) +
     ggplot2::theme_minimal() +
-    ggplot2::theme(
-      axis.text.x = ggplot2::element_text(
-        angle = 45, vjust = 1, 
-                                     size = 12, hjust = 1)) +
-    ggplot2::coord_fixed() +
-    ggplot2::labs(title = plot_title, x = "Projection 1", y = "Projection 2")  
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)) +
+    ggplot2::labs(title = plot_title, subtitle = paste("Global Adjusted RV:", round(rv_val, 3))) +
+    ggplot2::coord_fixed()
+
+  # --- 5. PAIRS PLOT (WITH SAFETY CAP) ---
+  # Taking only the top components to prevent GGally from hanging
+  k_show1 <- min(ncol(proj1), max_pairs)
+  k_show2 <- min(ncol(proj2), max_pairs)
   
-  ggp=GGally::ggpairs( cordf,
-               upper = list(continuous = "points"), 
-               lower = list(continuous = "cor"),
-               title = plot_title )
+  cordf <- cbind(as.data.frame(proj1[, 1:k_show1, drop = FALSE]), 
+                 as.data.frame(proj2[, 1:k_show2, drop = FALSE]))
   
-  # Return a list of results
+  # Robust naming
+  colnames(cordf) <- make.unique(colnames(cordf))
+
+  p_pairs <- NULL
+  if (requireNamespace("GGally", quietly = TRUE)) {
+    p_pairs <- GGally::ggpairs(
+      cordf,
+      upper = list(continuous = GGally::wrap("points", alpha = 0.4, size = 1)),
+      lower = list(continuous = GGally::wrap("cor", digits = 2)),
+      title = paste("Pairwise Projections (Top", max_pairs, "Components)")
+    ) + ggplot2::theme_bw()
+  }
+
+  # --- 6. RETURN ---
   return(list(
-    plot = p,
-    pairsplot = ggp,
+    heatmap = p_heat,
+    pairsplot = p_pairs,
     correlations = correlation_matrix,
-    # wilks_test = NA,
-    rv_coefficient = rvcoefval,
-    adj_rv_coefficient=adj_rvcoefval
+    adj_rv = rv_val,
+    projections = list(proj1 = proj1, proj2 = proj2)
   ))
 }
-
 
 #' Take Absolute Value of Unsigned Columns
 #'
