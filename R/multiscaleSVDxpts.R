@@ -177,64 +177,77 @@ mapLRAverageVar <- function( mydataframe, leftvar, leftname='left',rightname='ri
 ba_svd <- function(x,
                    nu = min(nrow(x), ncol(x)),
                    nv = min(nrow(x), ncol(x)),
-                   dividebymax = FALSE, NA2Noise=TRUE ) {
+                   dividebymax = FALSE, 
+                   NA2Noise = TRUE) {
 
-  if (!is.matrix(x))
-    stop("Input `x` must be a matrix.")
+  if (!is.matrix(x)) stop("Input `x` must be a matrix.")
+  
+  orig_ncol <- ncol(x)
+  col_names <- colnames(x)
 
-  # ---------------------------------------------------------------
-  # Handle NA/Inf early to avoid immediate SVD failure
-  # ---------------------------------------------------------------
-  if ( NA2Noise ) {
+  # 1. Handle NA/Inf early
+  if (NA2Noise) {
     if (anyNA(x) || any(is.infinite(x))) {
-      warning("Input matrix contains NA/Inf — replacing with small random noise.")
+      warning("Input contains NA/Inf — replacing with small random noise.")
       bad <- which(!is.finite(x))
       x[bad] <- rnorm(length(bad), mean = 0, sd = 1e-6)
     }
   }
 
-  # ---------------------------------------------------------------
-  # Optional stability scaling
-  # ---------------------------------------------------------------
+  # 2. Identify and Remove Zero-Variance Columns
+  # We use matrixStats or apply for speed; here checking if min == max
+  col_min <- apply(x, 2, min)
+  col_max <- apply(x, 2, max)
+  keep_cols <- col_min != col_max
+  
+  if (sum(keep_cols) == 0) stop("All columns have zero variance.")
+  
+  x_working <- x[, keep_cols, drop = FALSE]
+
+  # 3. Optional stability scaling
   if (dividebymax) {
-    mx <- max(abs(x))
-    if (mx > 0) {
-      x <- x / mx
-    } else {
-      warning("Matrix maximum is zero; skipping scaling.")
-    }
+    mx <- max(abs(x_working))
+    if (mx > 0) x_working <- x_working / mx
   }
 
-  # ---------------------------------------------------------------
-  # Attempt base SVD first
-  # ---------------------------------------------------------------
-  svd_try <- try(svd(x, nu = nu, nv = nv), silent = TRUE)
+  # 4. Perform SVD (Attempt base, then rsvd)
+  # Adjust nu/nv for the reduced dimensions to avoid subscript out of bounds
+  safe_nu <- min(nu, nrow(x_working), ncol(x_working))
+  safe_nv <- min(nv, nrow(x_working), ncol(x_working))
 
-  if (!inherits(svd_try, "try-error")) {
-    return(svd_try)
+  svd_out <- try(svd(x_working, nu = safe_nu, nv = safe_nv), silent = TRUE)
+
+  if (inherits(svd_out, "try-error")) {
+    message("Base svd() failed; switching to randomized SVD (rsvd).")
+    if (!requireNamespace("rsvd", quietly = TRUE)) stop("Package 'rsvd' required.")
+    
+    r <- rsvd::rsvd(x_working, k = max(safe_nu, safe_nv))
+    svd_out <- list(
+      u = if (safe_nu > 0) r$u[, seq_len(safe_nu), drop = FALSE] else matrix(0, nrow(x), 0),
+      d = r$d,
+      v = if (safe_nv > 0) r$v[, seq_len(safe_nv), drop = FALSE] else matrix(0, ncol(x_working), 0)
+    )
   }
 
-  # ---------------------------------------------------------------
-  # Fallback: rsvd
-  # ---------------------------------------------------------------
-  message("Base svd() failed; switching to randomized SVD (rsvd).")
-
-  if (!requireNamespace("rsvd", quietly = TRUE)) {
-    stop("Package 'rsvd' is required for fallback but not installed.")
-  }
-
-  r <- rsvd::rsvd(x, k = min(nu, nv))  # rsvd uses 'k' for rank
-
-  # rsvd returns U(k), V(k), s(k)
-  out <- list(
-    u = if (nu > 0) r$u[, seq_len(nu), drop = FALSE] else matrix(, nrow(x), 0),
-    d = r$d[seq_len(min(length(r$d), nu, nv))],
-    v = if (nv > 0) r$v[, seq_len(nv), drop = FALSE] else matrix(, ncol(x), 0)
+  # 5. RE-INFLATE V DIMENSIONALLY
+  # Create a matrix of zeros with original column count as rows
+  v_inflated <- matrix(0, nrow = orig_ncol, ncol = ncol(svd_out$v))
+  
+  # Map the computed loadings back to their original positions
+  v_inflated[keep_cols, ] <- svd_out$v
+  
+  # Restore names if they existed
+  if (!is.null(col_names)) rownames(v_inflated) <- col_names
+  
+  # Update output list
+  final_out <- list(
+    u = svd_out$u,
+    d = svd_out$d,
+    v = v_inflated
   )
 
-  return(out)
+  return(final_out)
 }
-
 
 
 #' Create sparse distance, covariance or correlation matrix
@@ -2208,12 +2221,6 @@ smoothAppGradCCA <- function(x, y,
   y <- y / norm(y)
   if (any(is.na(smoox))) smoox <- diag(ncol(x))
   if (any(is.na(smooy))) smooy <- diag(ncol(y))
-  #  phix = RSpectra::svds( x, k=k )$v
-  #  phiy = RSpectra::svds( y, k=k )$v
-  #  phix = t( y ) %*% irlba::irlba( x, nu=k, nv=0, maxit=1000, tol=1.e-6 )$u
-  #  phiy = t( x ) %*% irlba::irlba( y, nu=k, nv=0, maxit=1000, tol=1.e-6 )$u
-  #  phix = t( y ) %*% svd( x, nu=k, nv=0  )$u
-  #  phiy = t( x ) %*% svd( y, nu=k, nv=0  )$u
   if (initialization == "randxy") {
     phiy <- t(y) %*% (x %*% matrix(rnorm(k * ncol(x), 0, 1), ncol = k))
     phix <- t(x) %*% (y %*% matrix(rnorm(k * ncol(y), 0, 1), ncol = k))
@@ -3048,10 +3055,6 @@ mild <- function(dataFrame, voxmats, basisK,
   )
   xOrth <- mildy$u[, -1]
   yOrth <- mildx$u[, -1]
-  #    xOrth = svd( antsrimpute( voxmats[[2]] %*% mildy$v[,-1] ) )$u
-  #    yOrth = svd( antsrimpute( voxmats[[1]] %*% mildx$v[,-1] ) )$u
-  # mildy$v = matrix(  rnorm( length( mildy$v ) ), nrow = nrow( mildy$v ) )
-  # mildx$v = matrix(  rnorm( length( mildx$v ) ), nrow = nrow( mildx$v ) )
   for (i in 1:iterations) {
     if (orthogonalizeBasis == TRUE) {
       xOrthN <- myorth(voxmats[[2]] %*% mildy$v[, -1])
@@ -3175,8 +3178,26 @@ mild <- function(dataFrame, voxmats, basisK,
 #' @export
 initializeSimlr <- function(
     voxmats, k, jointReduction = FALSE,
-    zeroUpper = FALSE, uAlgorithm = "svd", addNoise = 0) {
+    zeroUpper = FALSE, uAlgorithm = "ba_svd", addNoise = 0) {
   nModalities <- length(voxmats)
+
+  for ( i in 1:nModalities ) {
+    col_min <- apply(voxmats[[i]], 2, min, na.rm = TRUE)
+    col_max <- apply(voxmats[[i]], 2, max, na.rm = TRUE)
+    zero_var_idx <- which(col_min == col_max)
+    if (length(zero_var_idx) > 0) {
+      # 2. Calculate the mean of each row across all columns
+      # na.rm = TRUE ensures we get a value even if some other columns have NAs
+      r_means <- rowMeans(voxmats[[i]], na.rm = TRUE)
+      
+      # 3. Replace only the zero-variance columns
+      # We use a loop or an apply-based approach to ensure 
+      # each constant column now reflects the row-wise average
+      for (col in zero_var_idx) {
+        voxmats[[i]][, col] <- r_means
+      }
+    }
+  }
   localAlgorithm <- uAlgorithm
   if (uAlgorithm == "avg") {
     uAlgorithm <- "svd"
@@ -3187,8 +3208,8 @@ initializeSimlr <- function(
   }
   if (jointReduction) {
     X <- Reduce(cbind, voxmats) # bind all matrices
-    if (uAlgorithm == "pca" | uAlgorithm == "svd") {
-      X.pcr <- stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "svd") # PCA
+    if (uAlgorithm == "pca" | uAlgorithm == "svd" | uAlgorithm == "ba_svd" ) {
+      X.pcr <- stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "ba_svd") # PCA
       u <- (X.pcr$rotation)
     } else if (uAlgorithm == "ica") {
       u <- t(fastICA::fastICA(t(X), method = "C", n.comp = k)$A)
@@ -3210,7 +3231,7 @@ initializeSimlr <- function(
   for (s in 1:nModalities) {
     X <- Reduce(cbind, voxmats[-s])
     if (localAlgorithm == "pca " | localAlgorithm == "svd") {
-      uOut[[s]] <- (stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "svd")$rotation)
+      uOut[[s]] <- (stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "ba_svd")$rotation)
     } else if (localAlgorithm == "ica") {
       uOut[[s]] <- t(fastICA::fastICA(t(X), method = "C", n.comp = k)$A)
     } else if (localAlgorithm == "cca") {
@@ -3221,7 +3242,7 @@ initializeSimlr <- function(
       uOut[[s]] <- t((t(uRand) %*% voxmats[[s]]) %*% t(voxmats[[s]]))
       uOut[[s]] <- uOut[[s]] / norm(uOut[[s]], "F")
     } else {
-      uOut[[s]] <- (stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "svd")$rotation)
+      uOut[[s]] <- (stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "ba_svd")$rotation)
     }
     if (addNoise > 0) uOut[[s]] <- uOut[[s]] + replicate(k, rnorm(nrow(voxmats[[1]]))) * addNoise
     if (zeroUpper) uOut[[s]][upper.tri(uOut[[s]])] <- 0
@@ -4779,10 +4800,27 @@ simlr <- function(
     if ( is.list( initialUMatrix ) ) if ( is.matrix(initialUMatrix[[1]])) 
       lrbasis=ncol(initialUMatrix[[1]])
   }
-  
   # 1.0 adjust matrix norms
   if (!(any(scaleList == "none"))) {
     for (i in 1:nModalities) {
+ 
+      # write code to replace zero variance columns with the row mean
+      col_min <- apply(data_matrices[[i]], 2, min, na.rm = TRUE)
+      col_max <- apply(data_matrices[[i]], 2, max, na.rm = TRUE)
+      zero_var_idx <- which(col_min == col_max)
+
+      if (length(zero_var_idx) > 0) {
+        # 2. Calculate the mean of each row across all columns
+        # na.rm = TRUE ensures we get a value even if some other columns have NAs
+        r_means <- rowMeans(data_matrices[[i]], na.rm = TRUE)
+        
+        # 3. Replace only the zero-variance columns
+        # We use a loop or an apply-based approach to ensure 
+        # each constant column now reflects the row-wise average
+        for (col in zero_var_idx) {
+          data_matrices[[i]][, col] <- r_means
+        }
+      }
       if (any(is.null(data_matrices[[i]])) | any(is.na(data_matrices[[i]]))) {
         stop(paste("input matrix", i, "is null or NA."))
       }
@@ -5787,7 +5825,7 @@ rvcoef_trace_impl <- function(X_centered, Y_centered) {
 #' @export
 rvcoef_gram_impl <- function(X_centered, Y_centered) {
   cross_product_matrix <- t(X_centered) %*% Y_centered
-  svd_C <- svd(cross_product_matrix, nu = 0, nv = 0)
+  svd_C <- ba_svd(cross_product_matrix, nu = 0, nv = 0)
   numerator <- sum(svd_C$d^2)
   
   G_X <- t(X_centered) %*% X_centered
@@ -7043,13 +7081,13 @@ fast_whiten <- function(X, epsilon = 1e-8) {
   
   if (p > n) {
     # Case 1: p >> n
-    svd_res <- svd(X_centered, nu = n, nv = 0)
+    svd_res <- ba_svd(X_centered, nu = n, nv = 0)
     s <- svd_res$d
     W <- diag(1 / sqrt(s^2 + epsilon))
     X_whitened <- svd_res$u %*% W %*% t(svd_res$u) %*% X_centered
   } else {
     # Case 2: n >> p
-    svd_res <- svd(X_centered, nu = 0, nv = p)
+    svd_res <- ba_svd(X_centered, nu = 0, nv = p)
     s <- svd_res$d
     W <- diag(1 / sqrt(s^2 + epsilon))
     X_whitened <- X_centered %*% svd_res$v %*% W %*% t(svd_res$v)
@@ -7399,6 +7437,7 @@ NNHEmbed <- function(
   if (verbose) message("Step 1: Selecting and filtering features (IDPs)...")
   
   idps <- antspymm_predictors(blaster, TRUE, TRUE)
+  idps = idps[ !grepl("Unnamed",idps)]
   rsfnames <- idps[grepl("rsfMRI", idps)]
   if (length(rsfnames) > 0) rsfnames <- rsfnames[safegrep("_2_", rsfnames)]
   if (!all(grepl("rsfMRI", rsfnames))) rsfnames <- c()
@@ -8917,7 +8956,7 @@ select_joint_k <- function(mat_list = NULL,
 
     if (method == "pca") {
       X_centered <- scale(X, center = TRUE, scale = FALSE)
-      singular_values <- svd(X_centered, nu = k_max_local, nv = 0)$d
+      singular_values <- ba_svd(X_centered, nu = k_max_local, nv = 0)$d
       prop_var_per_component <- singular_values^2 / sum(X_centered^2)
       return(cumsum(prop_var_per_component))
     } else { # "spca"
@@ -12219,7 +12258,7 @@ nsa_flow_pca_fa_2 <- function(
   Rmat <- XtX / n
   # --- initialization -------------------------------------------------------
   # Improved: Use SVD for initialization (PCA-like for both objectives)
-  svd_res <- svd(Xc, nu = 0, nv = k)
+  svd_res <- ba_svd(Xc, nu = 0, nv = k)
   Y <- svd_res$v %*% diag(svd_res$d[1:k]) / sqrt(n)  # Scaled to match covariance approximation
   # For FA, optionally reduce communalities or add noise, but keep simple
   energy_trace <- numeric(max_iter)
