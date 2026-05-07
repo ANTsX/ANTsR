@@ -4681,7 +4681,7 @@ simlr <- function(
     lineSearchRange = c(-5e2, 5e2),
     lineSearchTolerance = 1e-12,
     randomSeed=0,
-    constraint = c( "orthox0x1", "Grassmannx0", "Stiefelx0",  "none","nsaflow0.5x500"),
+    constraint = c("nsaflowx0.5x500", "orthox0x1", "Grassmannx0", "Stiefelx0",  "none"),
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc','dat', 'lrr', 'reconorm', 'logcosh', 'exp', 'kurtosis', 'gauss'),
     vmats,
     connectors = NULL,
@@ -5082,7 +5082,6 @@ for (myit in 1:iterations) { # Begin main optimization loop
       g <- sim_grad + dom_grad - orth_grad
       g <- clip_gradient_by_quantile( 
         constrainG(as.matrix(g), i, constraint_type), clipper)
-
       g <- simlr_sparseness(
         g,
         constraint_type = constraint_type,
@@ -5655,7 +5654,7 @@ simlr.perm <- function(data_matrices,
   orthogonalizeU = FALSE,
   repeatedMeasures = NA, lineSearchRange = c(-5e2, 5e2), 
   lineSearchTolerance = 1e-12, randomSeed, 
-  constraint = c("orthox0.001x1", "Grassmannx0", "Stiefelx0", "none" ), 
+  constraint = c( "nsaflowx0.5x100" , "orthox0.001x1", "Grassmannx0", "Stiefelx0", "none" ), 
   energyType = c("cca", "regression","normalized", "acc", "dat", "lowRank", "lowRankRegression",'normalized_correlation', 'logcosh', 'exp', 'kurtosis','gauss'), 
   vmats, connectors = NULL, optimizationStyle = 'adam', 
   scale = c("centerAndScale", "eigenvalue"), 
@@ -7489,6 +7488,8 @@ NNHEmbed <- function(
   mats <- list()
   for (kk in 1:length(idplist)) {
     matsFull[[names(idplist)[kk]]] <- blaster[, idplist[[kk]]]
+    nnacount = sum( is.na( blaster2[allnna, idplist[[kk]]] ))
+    message(paste("Imputing:",nnacount, 'in modality kk'))
     mats[[names(idplist)[kk]]] <- antsrimpute(blaster2[allnna, idplist[[kk]]])
   }
   if (doperm) {
@@ -7524,14 +7525,16 @@ NNHEmbed <- function(
   regs0 <- lapply(mats, function(mat) {
     mycor <- cor(mat)
     mycor[mycor < 0.8] <- 0
-    data.matrix(mycor)
+    data.matrix((mycor))
   })
   regs <- regs0
   if (!missing(connect_cog)) {
     if (verbose) message("  Setting up sparse regularization for 'cg' modality.")
     regs[["cg"]] <- Matrix::Matrix(regs0[["cg"]], sparse = TRUE)
   }
-
+  for ( k in 1:length(regs)) {
+    regs[[k]][ is.na(regs[[k]]) ]=0
+  }
 
   if (returnidps==2) {
     return( list( matrices=mats, regs=regs ) )
