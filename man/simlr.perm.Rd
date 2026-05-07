@@ -17,7 +17,7 @@ simlr.perm(
   lineSearchRange = c(-500, 500),
   lineSearchTolerance = 1e-12,
   randomSeed,
-  constraint = c("orthox0.001x1", "Grassmannx0", "Stiefelx0", "none"),
+  constraint = c("nsaflowx0.5x100", "orthox0.001x1", "Grassmannx0", "Stiefelx0", "none"),
   energyType = c("cca", "regression", "normalized", "acc", "dat", "lowRank",
     "lowRankRegression", "normalized_correlation", "logcosh", "exp", "kurtosis", "gauss"),
   vmats,

@@ -7,27 +7,25 @@
 estimate_rank_by_permutation_rv(
   mat_list,
   n_permutations = 20,
-  var_explained_threshold = 0.99,
+  var_explained_threshold = 0.9,
+  handle_missing = TRUE,
   return_max = FALSE
 )
 }
 \arguments{
 \item{mat_list}{A list of numeric matrices [subjects x features].}
 
-\item{n_permutations}{The number of permutations to create the null model.
-If set to 0, the function will use the elbow detection method instead.}
+\item{n_permutations}{Number of permutations (0 = Elbow method).}
 
-\item{var_explained_threshold}{The variance threshold to determine the
-upper bound on k.}
+\item{var_explained_threshold}{Variance threshold to determine individual k_max.}
 
-\item{return_max}{boolean just return the max likely rank from an individual matrix}
+\item{handle_missing}{Boolean; if TRUE, replaces NA/Constant columns with row means.}
+
+\item{return_max}{Boolean; if TRUE, returns only the k_max and skips curves.}
 }
 \value{
-A list containing `optimal_k`, a results tibble, and a plot.
+A list containing optimal_k, results tibble, and a diagnostic plot.
 }
 \description{
-Estimates the shared rank of a multi-view dataset. If permutations
-  are used, it finds the rank that maximizes the signal-to-noise ratio against
-  a permuted null model. If `n_permutations = 0`, it finds the "elbow" of the
-  real data's signal curve.
+Estimate Joint Rank via Cross-View RV Analysis
 }

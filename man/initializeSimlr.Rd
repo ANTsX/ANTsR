@@ -9,7 +9,7 @@ initializeSimlr(
   k,
   jointReduction = FALSE,
   zeroUpper = FALSE,
-  uAlgorithm = "svd",
+  uAlgorithm = "ba_svd",
   addNoise = 0
 )
 }

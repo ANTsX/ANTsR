@@ -9257,150 +9257,160 @@ estimate_joint_rank <- function(mat_list,
 
 #' Estimate Joint Rank via Cross-View RV Analysis
 #'
-#' @description Estimates the shared rank of a multi-view dataset. If permutations
-#'   are used, it finds the rank that maximizes the signal-to-noise ratio against
-#'   a permuted null model. If `n_permutations = 0`, it finds the "elbow" of the
-#'   real data's signal curve.
-#'
 #' @param mat_list A list of numeric matrices [subjects x features].
-#' @param n_permutations The number of permutations to create the null model.
-#'   If set to 0, the function will use the elbow detection method instead.
-#' @param var_explained_threshold The variance threshold to determine the
-#'   upper bound on k.
-#' @param return_max boolean just return the max likely rank from an individual matrix
-#' @return A list containing `optimal_k`, a results tibble, and a plot.
+#' @param n_permutations Number of permutations (0 = Elbow method).
+#' @param var_explained_threshold Variance threshold to determine individual k_max.
+#' @param handle_missing Boolean; if TRUE, replaces NA/Constant columns with row means.
+#' @param return_max Boolean; if TRUE, returns only the k_max and skips curves.
+#' @return A list containing optimal_k, results tibble, and a diagnostic plot.
 #' @export
 estimate_rank_by_permutation_rv <- function(mat_list,
                                             n_permutations = 20,
-                                            var_explained_threshold = 0.99, return_max=FALSE ) {
+                                            var_explained_threshold = 0.90, 
+                                            handle_missing = TRUE,
+                                            return_max = FALSE) {
   
-  # --- 1. Setup and k_max determination ---
+  if (!requireNamespace("pbapply", quietly = TRUE)) stop("Install 'pbapply'.")
+  if (!requireNamespace("ggplot2", quietly = TRUE)) stop("Install 'ggplot2'.")
+
+  # --- 1. DATA DIAGNOSTICS & CLEANING ---
+  message("🔍 Running Pre-Flight Data Diagnostics...")
   n_modalities <- length(mat_list)
-  if (n_modalities < 2 && n_permutations > 0) {
-    warning("Permutation method requires at least 2 modalities. Switching to elbow method.")
-    n_permutations <- 0
-  }
+  n_subs <- unique(sapply(mat_list, nrow))
   
-  message("Determining max rank from individual modalities...")
-  k_max <- min(sapply(mat_list, function(m) {
-    if (ncol(m) < 2) return(1)
-    eigenvalues <- svd(scale(m, center = TRUE, scale = FALSE))$d^2
-    prop_var <- cumsum(eigenvalues) / sum(eigenvalues)
-    min(which(prop_var >= var_explained_threshold))
-  }))
-  message(paste("Maximum possible rank (k_max) set to:", k_max))
-  if (k_max < 1) stop("k_max is less than 1. Check input matrices.")
-  if ( return_max ) return( list(optimal_k=k_max))
+  if (length(n_subs) > 1) stop("All matrices must have the same number of rows (subjects).")
 
-  # --- Core function to calculate the RV curve for a given dataset ---
-  .calculate_rv_curve <- function(inner_mat_list, k_max_local) {
-    U_list <- lapply(inner_mat_list, function(m) svd(m, nu = k_max_local)$u)
-    rv_adj_matrix <- matrix(NA, nrow = k_max_local, ncol = n_modalities)
-    for (k in 1:k_max_local) {
-      for (i in 1:n_modalities) {
-        Y_target <- U_list[[i]][, 1:k, drop = FALSE]
-        other_indices <- setdiff(1:n_modalities, i)
-        if (length(other_indices) == 0) { rv_adj_matrix[k, i] <- 0; next }
-        U_other_combined <- do.call(cbind, U_list[other_indices])
-        consensus_basis <- svd(U_other_combined, nu = k, nv = 0)$u
-        rv_adj_matrix[k, i] <- adjusted_rvcoef(Y_target, consensus_basis)
-      }
-    }
-    return(rowMeans(rv_adj_matrix, na.rm = TRUE))
-  }
-  
-  preprocess_for_simlr <- function(modality_list) {
-      lapply(modality_list, function(mat) {
-        mat_centered <- scale(mat, center = TRUE, scale = FALSE)
-        frobenius_norm <- sqrt(sum(mat_centered^2))
-        if (frobenius_norm > .Machine$double.eps) mat_centered / frobenius_norm else mat_centered
-      })
-    }
-
-  # --- 2. Calculate the "Real" Signal Curve (Always needed) ---
-  message("Calculating RV curve for real data...")
-  processed_mats <- preprocess_for_simlr(mat_list)
-  real_rv_curve_vals <- .calculate_rv_curve(processed_mats, k_max)
-  
-  results_df <- tibble::tibble(
-    k = 1:k_max,
-    score = real_rv_curve_vals,
-    type = "Real Data"
-  )
-  
-  # --- 3. Determine Optimal K based on method ---
-  
-  if (n_permutations > 0) {
-    # --- METHOD 1: PERMUTATION TEST ---
-    message(paste("Calculating null distribution with", n_permutations, "permutations..."))
-    pb <- progress::progress_bar$new(format = "  Permuting [:bar] :percent", total = n_permutations, width=60)
+  # Clean constant/NA columns
+  mat_list <- lapply(seq_along(mat_list), function(i) {
+    m <- mat_list[[i]]
+    col_min <- apply(m, 2, function(x) if(all(is.na(x))) NA else min(x, na.rm = TRUE))
+    col_max <- apply(m, 2, function(x) if(all(is.na(x))) NA else max(x, na.rm = TRUE))
     
-    permuted_rv_curves <- purrr::map(1:n_permutations, ~{
-      pb$tick()
-      permuted_mats <- processed_mats
-      for (j in 2:n_modalities) {
-        permuted_mats[[j]] <- permuted_mats[[j]][sample(nrow(permuted_mats[[j]])), ]
+    targets <- which(is.na(col_min) | col_min == col_max)
+    
+    if (length(targets) > 0) {
+      if (handle_missing) {
+        message(paste0("⚠️ View ", i, ": Found ", length(targets), " dead columns. Replacing with row means."))
+        r_means <- rowMeans(m, na.rm = TRUE)
+        r_means[is.nan(r_means)] <- 0
+        for (col in targets) m[, col] <- r_means
+      } else {
+        message(paste0("✂️ View ", i, ": Dropping ", length(targets), " dead columns."))
+        m <- m[, -targets, drop = FALSE]
       }
-      .calculate_rv_curve(permuted_mats, k_max)
+    }
+    return(m)
+  })
+
+  # --- 2. ROBUST K_MAX DETERMINATION ---
+  get_max_k <- function(m) {
+    # Scaling is CRITICAL to prevent one feature from dominating variance
+    m_scaled <- scale(m, center = TRUE, scale = TRUE)
+    
+    # Use base svd or ba_svd if available
+    s_obj <- tryCatch(svd(m_scaled, nu = 0, nv = 0), error = function(e) NULL)
+    if (is.null(s_obj) || is.null(s_obj$d)) return(1)
+    
+    ev <- s_obj$d^2
+    prop_var <- cumsum(ev) / sum(ev)
+    
+    # Fix the 'Inf' warning: if threshold is never met, use max rank
+    idx <- which(prop_var >= var_explained_threshold)
+    return(if (length(idx) == 0) length(ev) else min(idx))
+  }
+
+  # Calculate individual ranks
+  k_candidates <- sapply(mat_list, get_max_k)
+  
+  # CRITICAL: k_max cannot exceed the number of columns in your SMALLEST matrix
+  # or the number of subjects - 1
+  feat_counts <- sapply(mat_list, ncol)
+  k_max <- min(c(k_candidates, feat_counts, n_subs - 1))
+  
+  message(paste("✅ Search space set: k = 1 to", k_max))
+  if (return_max) return(list(optimal_k = k_max))
+
+  # --- 3. INTERNAL RV LOGIC ---
+  .calculate_rv_curve <- function(inner_mat_list, k_limit) {
+    # Pre-calculate U matrices (Orthogonal Subject Scores)
+    U_list <- lapply(inner_mat_list, function(m) {
+      # nu must be k_limit to allow subsetting inside the loop
+      svd(m, nu = k_limit, nv = 0)$u
     })
     
-    null_rv_curve <- rowMeans(do.call(cbind, permuted_rv_curves))
-    results_df <- results_df %>%
-      bind_rows(tibble::tibble(k = 1:k_max, score = null_rv_curve, type = "Permuted Null"))
-      
-    signal_vs_noise <- real_rv_curve_vals - null_rv_curve
-    optimal_k <- which.max(signal_vs_noise)
-    plot_subtitle <- "Optimal k maximizes the difference between real and permuted signal strength"
-
-  } else {
-    # --- METHOD 2: ELBOW DETECTION (Fallback when n_permutations = 0) ---
-    message("n_permutations is 0. Using elbow detection to find optimal k...")
-    
-    if (nrow(results_df) < 3) {
-      warning("Not enough points to find an elbow; returning k=1.")
-      optimal_k <- 1
-    } else {
-      y <- results_df$score
-      k_values <- results_df$k
-      x_norm <- (k_values - min(k_values)) / (max(k_values) - min(k_values))
-      y_norm <- (y - min(y)) / (max(y) - min(y))
-      distances <- y_norm - x_norm
-      optimal_k <- k_values[which.max(distances)]
-    }
-    plot_subtitle <- "Optimal k is the 'elbow' of the real data's signal curve"
+    rv_scores <- sapply(1:k_limit, function(k) {
+      scores_k <- sapply(1:n_modalities, function(i) {
+        Y_target <- U_list[[i]][, 1:k, drop = FALSE]
+        other_indices <- setdiff(1:n_modalities, i)
+        
+        # Concatenate subject scores from other views
+        U_other_combined <- do.call(cbind, lapply(U_list[other_indices], function(u) u[, 1:k, drop = FALSE]))
+        
+        # Orthogonalize the consensus basis
+        consensus_basis <- svd(U_other_combined, nu = k, nv = 0)$u
+        
+        # Adjusted RV Coefficient Calculation
+        return(adjusted_rvcoef(Y_target, consensus_basis))
+      })
+      return(mean(scores_k, na.rm = TRUE))
+    })
+    return(rv_scores)
   }
+
+  # Normalize and Center
+  preprocess <- function(ml) {
+    lapply(ml, function(mat) {
+      m_c <- scale(mat, center = TRUE, scale = TRUE)
+      f_norm <- sqrt(sum(m_c^2))
+      if (f_norm > .Machine$double.eps) m_c / f_norm else m_c
+    })
+  }
+
+  message("🚀 Estimating Joint Signal Curve...")
+  processed_mats <- preprocess(mat_list)
+  real_scores <- .calculate_rv_curve(processed_mats, k_max)
   
-  # --- 4. Visualize and Return Results ---
-  plot <- ggplot(results_df, aes(x = k, y = score, color = type, linetype = type)) +
-    geom_line(linewidth = 1.2) +
-    geom_point(size = 3) +
-    geom_vline(xintercept = optimal_k, color = "firebrick", linetype = "dashed", linewidth = 1.2) +
-    ggrepel::geom_text_repel(
-      data = ~subset(., k == optimal_k & type == "Real Data"),
-      aes(label = paste("Optimal k =", optimal_k)),
-      color = "firebrick", nudge_y = 0.05, fontface = "bold",
-      min.segment.length = 0, point.padding = 0.5
-    ) +
-    labs(
-      title = "Shared Rank Estimation via Cross-View RV",
-      subtitle = plot_subtitle,
-      x = "Number of Shared Components (k)",
-      y = "Joint Adjusted RV-Coefficient",
-      color = "Data Type", linetype = "Data Type"
-    ) +
-    scale_color_manual(values = c("Real Data" = "navyblue", "Permuted Null" = "gray50", "Difference" = "firebrick")) +
-    scale_linetype_manual(values = c("Real Data" = "solid", "Permuted Null" = "dotted", "Difference" = "dashed")) +
-    theme_minimal(base_size = 14) +
-    theme(legend.position = "bottom")
-    
+  results_df <- data.frame(k = 1:k_max, score = real_scores, type = "Real Data")
+
+  # --- 4. PERMUTATION VS ELBOW ---
   if (n_permutations > 0) {
-    diff_df <- tibble(k = 1:k_max, score = signal_vs_noise, type = "Difference")
-    plot <- plot + geom_line(data = diff_df, aes(x = k, y = score), color = "firebrick", alpha = 0.6)
+    message(paste("🎲 Permuting", n_permutations, "times..."))
+    perm_results <- pbapply::pblapply(1:n_permutations, function(p) {
+      p_mats <- processed_mats
+      # Shuffle subject order in all views except the first to break covariance
+      for (j in 2:n_modalities) p_mats[[j]] <- p_mats[[j]][sample(nrow(p_mats[[j]])), ]
+      .calculate_rv_curve(p_mats, k_max)
+    })
+    
+    null_scores <- rowMeans(do.call(cbind, perm_results))
+    results_df <- rbind(results_df, data.frame(k = 1:k_max, score = null_scores, type = "Permuted Null"))
+    
+    # Optimal k maximizes the signal-to-noise gap
+    signal_diff <- real_scores - null_scores
+    optimal_k <- which.max(signal_diff)
+    plot_sub <- paste("Optimal k =", optimal_k, "(Max Signal-to-Noise)")
+  } else {
+    # Elbow detection: Perpendicular distance from secant line
+    y <- real_scores
+    optimal_k <- which.max(y - (seq(y[1], y[length(y)], length.out = length(y))))
+    plot_sub <- paste("Optimal k =", optimal_k, "(Elbow Detection)")
   }
 
-  return(list(optimal_k = optimal_k, results = results_df, plot = plot))
-}
+  # --- 5. VISUALIZATION ---
+  p <- ggplot2::ggplot(results_df, ggplot2::aes(x = k, y = score, color = type)) +
+    ggplot2::geom_line(linewidth = 1) + 
+    ggplot2::geom_point() +
+    ggplot2::geom_vline(xintercept = optimal_k, linetype = "dashed", color = "firebrick") +
+    ggplot2::labs(
+      title = "Joint Rank Estimation (Cross-View RV)",
+      subtitle = plot_sub,
+      x = "Number of Shared Components (k)",
+      y = "Adjusted RV Coefficient"
+    ) +
+    ggplot2::theme_minimal()
 
+  return(list(optimal_k = optimal_k, results = results_df, plot = p))
+}
 
 #' Create a Smoothed Sparse Matrix via Permutation Ensemble Averaging
 #'
