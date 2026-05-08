@@ -195,7 +195,7 @@ sim2nm=tempfile()
 write_simlr_data_frames( result$v, sim2nm  )
 simres2=read_simlr_data_frames( sim2nm, names(matlist) )
 popdf = data.frame( age = outcome, cog=outcome1, mat1, mat2, mat3 )
-temp2=apply_simlr_matrices( popdf, simres2, center=TRUE, scale=TRUE )
+temp2=apply_simlr_matrices( popdf, simres2 )
 simnames=temp2[[2]]
 zz=exploratory_visualization( temp2[[1]][,simnames[1:4]], dotsne=FALSE )
 print( zz$plot )
