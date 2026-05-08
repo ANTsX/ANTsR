@@ -228,25 +228,7 @@ ba_svd <- function(x,
       v = if (safe_nv > 0) r$v[, seq_len(safe_nv), drop = FALSE] else matrix(0, ncol(x_working), 0)
     )
   }
-
-  # 5. RE-INFLATE V DIMENSIONALLY
-  # Create a matrix of zeros with original column count as rows
-  v_inflated <- matrix(0, nrow = orig_ncol, ncol = ncol(svd_out$v))
-  
-  # Map the computed loadings back to their original positions
-  v_inflated[keep_cols, ] <- svd_out$v
-  
-  # Restore names if they existed
-  if (!is.null(col_names)) rownames(v_inflated) <- col_names
-  
-  # Update output list
-  final_out <- list(
-    u = svd_out$u,
-    d = svd_out$d,
-    v = v_inflated
-  )
-
-  return(final_out)
+  return(svd_out)
 }
 
 

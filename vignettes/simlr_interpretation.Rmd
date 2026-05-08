@@ -38,8 +38,8 @@ library(ANTsR)
 library(reshape2)
 set.seed(1500)
 nsub <- 100          # Number of subjects/samples
-npix <- c(100, 200, 133)  # Number of features in each view
-nk <- 5             # Number of latent factors
+npix <- c(50, 200, 93)  # Number of features in each view
+nk <- 4             # Number of latent factors
 
 # Generating outcome matrices for each view
 outcome <- matrix(rnorm(nsub * nk), ncol = nk)
@@ -85,7 +85,7 @@ Now we apply the SiMLR algorithm to the simulated multi-view data to find a comm
 ```{r step2}
 # Applying SiMLR
 prepro=c( "centerAndScale","np")
-constr='orthox0.5x50' # good default
+constr='nsaflowx0.5x10' # good default
 result <- simlr(matlist,constraint=constr,scale=prepro, 
   mixAlg='pca', energyType='acc', # recommended
   verbose=TRUE)
@@ -192,10 +192,11 @@ library(cluster)
 library(gridExtra)
 library(ggpubr)
 sim2nm=tempfile()
-write_simlr_data_frames( result$v, sim2nm  )
-simres2=read_simlr_data_frames( sim2nm, names(matlist) )
+sim2nmr=paste0(sim2nm,"_simlr") 
+write_simlr( result, sim2nm )
+simres2=read_simlr( sim2nmr )
 popdf = data.frame( age = outcome, cog=outcome1, mat1, mat2, mat3 )
-temp2=apply_simlr_matrices( popdf, simres2 )
+temp2=apply_simlr_matrices( popdf, simres2$v )
 simnames=temp2[[2]]
 zz=exploratory_visualization( temp2[[1]][,simnames[1:4]], dotsne=FALSE )
 print( zz$plot )
@@ -211,7 +212,6 @@ summary( lm( age.1 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
 summary( lm( age.2 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
 summary( lm( age.3 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
 summary( lm( age.4 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
-summary( lm( age.5 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
 ```
 
 
@@ -220,7 +220,7 @@ summary( lm( age.5 ~ View1PC1 + View2PC1 + View3PC1, data=temp2[[1]] ))
 SiMLR incorporates sparse feature selection, allowing users to identify a minimal subset of features that contribute most to the joint embedding space. This can be particularly advantageous in settings where interpretability is crucial, such as biomarker discovery in biological datasets.
 
 ```{r featureselection,fig.width=12,fig.height=8}
-pp=plot_features( simres2 )
+pp=plot_features( simres2$v )
 grid.arrange( grobs=pp, nrow=3, top='Joint features' )
 ```
 
@@ -241,7 +241,7 @@ proportion <- 0.25
 num_NAs <- ceiling(proportion * nrow(popdfi) * ncol(popdfi))
 indices <- arrayInd(sample(1:(nrow(popdfi) * ncol(popdfi)), num_NAs), .dim = dim(popdfi))
 popdfi[indices] <- NA
-nms=names(simres2)
+nms=names(simres2$v)
 nsimx=3
 sep='.'
 imputedcols=c()
@@ -274,8 +274,8 @@ myperm = simlr.perm(  matlist,
   constraint=constr,scale=prepro, 
   mixAlg='pca', # recommended
   initialUMatrix=initu,
-  iterations=500,
-  nperms=np, FUN=adjusted_rvcoef, verbose=TRUE )
+  iterations=50,
+  nperms=np, FUN=rvcoef, verbose=FALSE )
 print( tail( myperm$significance, 2 )  )
 gglist = list()
 simlrmaps=colnames(myperm$significance)[-c(1:2)]
@@ -293,11 +293,11 @@ grid.arrange( grobs=gglist, top='Cross-modality relationships: permutation teste
 gglist2=list()
 for ( i in 1:(length(matlist)-1)) {
     for ( j in ((i+1):length(matlist))) {
-        toviz1=data.matrix(simres2[[i]])
-        toviz2=data.matrix(simres2[[j]])
+        toviz1=data.matrix(simres2$v[[i]])
+        toviz2=data.matrix(simres2$v[[j]])
         temp=visualize_lowrank_relationships( matlist[[i]], matlist[[j]], 
             toviz1, toviz2,
-            nm1=names(matlist)[i], nm2=names(matlist)[j] )$plot
+            nm1=names(matlist)[i], nm2=names(matlist)[j] )$heatmap
         gglist2[[length(gglist2)+1]]=temp
     }
 }
@@ -339,7 +339,7 @@ In this step, the simlr.parameters function is called to create a parameter list
 paster <- function(vec1, vec2) {
   paste0(rep(vec1, each = length(vec2)), vec2)
 }
-csearch = list( "orthox0.05x50", "orthox0.5x50")
+csearch = list( "nsaflowx0.05x50", "nsaflowx0.5x50")
 # the 10x10 are weights on the optimization term of the energy
 simparms = simlr.parameters( 
     nsimlr_options = list( 2 ),
@@ -375,7 +375,7 @@ simlrXs=simlr.search(
         matlist,
         regs=regs,
         simparms,
-        maxits=500,
+        maxits=50,
         nperms=10, # just fast for vignette
         verbose=1
         )
