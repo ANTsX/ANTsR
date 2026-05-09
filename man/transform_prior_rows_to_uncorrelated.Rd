@@ -17,7 +17,7 @@ transform_prior_rows_to_uncorrelated(
 )
 }
 \arguments{
-\item{P}{numeric matrix (k x p) — rows are the priors to compress/orthogonalize.}
+\item{P}{numeric matrix (k x p) --- rows are the priors to compress/orthogonalize.}
 
 \item{j}{integer or NULL. Number of components to keep. If NULL, chosen automatically.}
 

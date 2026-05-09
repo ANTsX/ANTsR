@@ -81,39 +81,39 @@ Wiki: [Notes and work in progress examples](https://github.com/ANTsX/ANTsR/wiki)
 
 Package source: [from github](https://github.com/ANTsX/ANTsR/zipball/master)
 
-Binaries: [here](http://github.com/ANTsX/ANTsR/releases/)
+Binaries: [here](https://github.com/ANTsX/ANTsR/releases/)
 
 _Windows_ installation option [here](<https://github.com/ANTsX/ANTsR/wiki/Installing-ANTsR-on-Windows-10-(using-WSL2)>)
 
-**Suggested packages** [https://github.com/stnava/ANTsRDocker/blob/master/install.R](https://github.com/stnava/ANTsRDocker/blob/master/install.R)
+**Suggested packages** can be installed via `install.packages` or `remotes::install_github`.
 
 <br />
 
 ## Research using ANTsR
 
-- [Inter-modality inference](http://www.ncbi.nlm.nih.gov/pubmed/25449745) yet to be added RIPMMARC
+- [Inter-modality inference](https://pubmed.ncbi.nlm.nih.gov/25449745) yet to be added RIPMMARC
 
-- [Eigenanatomy for multiple modality population studies](http://www.ncbi.nlm.nih.gov/pubmed/25448483) function `sparseDecom`
+- [Eigenanatomy for multiple modality population studies](https://pubmed.ncbi.nlm.nih.gov/25448483) function `sparseDecom`
 
-- [Tumor segmentation](http://www.ncbi.nlm.nih.gov/pubmed/25433513) function `mrvnrfs` (not exactly the same but close)
+- [Tumor segmentation](https://pubmed.ncbi.nlm.nih.gov/25433513) function `mrvnrfs` (not exactly the same but close)
 
-- [Multiple modality pediatric template and population study](http://www.nature.com/articles/sdata20153) employs several aspects of ANTsR
+- [Multiple modality pediatric template and population study](https://www.nature.com/articles/sdata20153) employs several aspects of ANTsR
 
-- [Structural networks from subject-level data](http://www.ncbi.nlm.nih.gov/pubmed/25320792) function `makeGraph` plus yet to be added RIPMMARC
+- [Structural networks from subject-level data](https://pubmed.ncbi.nlm.nih.gov/25320792) function `makeGraph` plus yet to be added RIPMMARC
 
-- [SCCAN relating neuroimaging and cognitive batteries](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3911786/) function `sparseDecom2`
+- [SCCAN relating neuroimaging and cognitive batteries](https://pmc.ncbi.nlm.nih.gov/articles/PMC3911786/) function `sparseDecom2`
 
-- [Sparse regression with manifold smoothness constraints](http://www.ncbi.nlm.nih.gov/pubmed/24683960) function `sparseRegression`
+- [Sparse regression with manifold smoothness constraints](https://pubmed.ncbi.nlm.nih.gov/24683960) function `sparseRegression`
 
-- [Prior-based eigenanatomy](http://www.ncbi.nlm.nih.gov/pubmed/24852460) function `sparseDecom`
+- [Prior-based eigenanatomy](https://pubmed.ncbi.nlm.nih.gov/24852460) function `sparseDecom`
 
-- [Corrective learning for segmentation](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049832/) functions `segmentationRefinement.train` and `segmentationRefinement.predict`.
+- [Corrective learning for segmentation](https://pmc.ncbi.nlm.nih.gov/articles/PMC3049832/) functions `segmentationRefinement.train` and `segmentationRefinement.predict`.
 
-- [LINDA: automated segmentation of stroke lesions](https://www.ncbi.nlm.nih.gov/pubmed/26756101) function `mrvnrfs`.
+- [LINDA: automated segmentation of stroke lesions](https://pubmed.ncbi.nlm.nih.gov/26756101) function `mrvnrfs`.
 
-- [LESYMAP: lesion to symptom mapping](https://www.ncbi.nlm.nih.gov/pubmed/28882479) function `sparseDecom2`.
+- [LESYMAP: lesion to symptom mapping](https://pubmed.ncbi.nlm.nih.gov/28882479) function `sparseDecom2`.
 
-- [ANTsRNet](https://github.com/ntustison/ANTsRNet) A growing collection of well-known deep learning
+- [ANTsRNet](https://github.com/ntustison/ANTsRNetExamples) A growing collection of well-known deep learning
   architectures ported to the R language.
   _ Image segmentation
   _ U-Net (2-D)

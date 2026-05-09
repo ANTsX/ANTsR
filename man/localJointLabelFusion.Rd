@@ -86,5 +86,5 @@ for the latter approach.
 \author{
 Brian B. Avants
 }
-\keyword{fusion,}
+\keyword{fusion}
 \keyword{template}

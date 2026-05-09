@@ -375,7 +375,7 @@ fMRINormalization <- function(
   nuisance <- cbind(nuisance, runs = runNuis)
   if (nCompCor > 0) {
     # use seg2bold and moco_img to get a better compcor set "anatomical compcor"
-    # http://www.ncbi.nlm.nih.gov/pubmed/25987368
+    # https://pubmed.ncbi.nlm.nih.gov/25987368
     tempMask <- thresholdImage(seg2bold, 1, 1)
     tempMask <- tempMask + thresholdImage(seg2bold, 3, 3) %>% iMath("ME", 1)
     tempMat <- timeseries2matrix(fusedImg, tempMask)

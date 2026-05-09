@@ -72,7 +72,7 @@ preprocessfMRI <- function(
 
   numberOfTimePoints <- dim(boldImage)[4]
 
-  # do motion correction http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/
+  # do motion correction https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/
 
   framewiseDisplacement <- rep(0, numberOfTimePoints)
   if (doMotionCorrection) {
@@ -144,7 +144,7 @@ preprocessfMRI <- function(
 
 
   # Calculate CompCor nuisance variables
-  # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2214855/
+  # https://pmc.ncbi.nlm.nih.gov/articles/PMC2214855/
   if (numberOfCompCorComponents > 0) {
     compCorNuisanceVariables <- compcor(boldImage, maskImage,
       ncompcor = numberOfCompCorComponents,

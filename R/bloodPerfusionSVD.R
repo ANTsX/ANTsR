@@ -1,11 +1,11 @@
 #' Calculate blood perfusion using deconvolution.
 #'
 #' Implementation of the deconvolution technique of Ostergaard et al.
-#' (http://www.ncbi.nlm.nih.gov/pubmed/8916023) for calculating cerebral
+#' (https://pubmed.ncbi.nlm.nih.gov/8916023) for calculating cerebral
 #' (or pulmonary) blood flow.  Other relevant references include
-#' http://www.ncbi.nlm.nih.gov/pubmed/16261573,
-#' http://www.ncbi.nlm.nih.gov/pubmed/8916023, and
-#' http://www.ncbi.nlm.nih.gov/pubmed/15332240.
+#' https://pubmed.ncbi.nlm.nih.gov/16261573,
+#' https://pubmed.ncbi.nlm.nih.gov/8916023, and
+#' https://pubmed.ncbi.nlm.nih.gov/15332240.
 #'
 #' @param perfusionImage time series (n-D + time) perfusion acquisition.
 #' @param voiMaskImage n-D mask image indicating where the cerebral blood
@@ -15,7 +15,7 @@
 #' @param thresholdSVD is used to threshold the smaller elements of the
 #' diagonal matrix during the SVD regularization.  0.2 is a common choice
 #' (cf. page 571, end of column 2 in
-#' http://www.ncbi.nlm.nih.gov/pubmed/16971140).
+#' https://pubmed.ncbi.nlm.nih.gov/16971140).
 #' @param deltaTime time between volumetric acquisitions.  We assume a uniform
 #' time sampling.
 #'
@@ -99,7 +99,7 @@ bloodPerfusionSVD <- function(
 
   S0aif <- mean(Saif[1:(SaifStartIndex - 1)], na.rm = TRUE)
 
-  # See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711,
+  # See https://pubmed.ncbi.nlm.nih.gov/16261573, page 711,
   # equation (3).  Note that we exclude the constant of proportionality, k,
   # and the TE parameters as they cancel out in estimating the residue
   # function.
@@ -108,7 +108,7 @@ bloodPerfusionSVD <- function(
 
   # If we can estimate the product CBF * R(t) we obtain an estimate for
   # CBF because R(0) = 1. CBF * dT * R = ( V * L^-1 * U^T ) * Cvoi (cf
-  # http://www.ncbi.nlm.nih.gov/pubmed/8916023, page 713, equation (9)).
+  # https://pubmed.ncbi.nlm.nih.gov/8916023, page 713, equation (9)).
 
   dSVD <- deconvolutionSVD(Caif, thresholdSVD)
 
@@ -124,7 +124,7 @@ bloodPerfusionSVD <- function(
     nrow = numberOfTimePoints, byrow = TRUE
   )
 
-  # See http://www.ncbi.nlm.nih.gov/pubmed/16261573, page 711, equation (3).
+  # See https://pubmed.ncbi.nlm.nih.gov/16261573, page 711, equation (3).
   # Note that we exclude the constant of proportionality, k, and the TE
   # parameters as they cancel out in estimating the residue function.
 
@@ -205,14 +205,14 @@ trapz <- function(x, y) {
 #'
 #' Ostergaard's regularization approach for a model independent solution of
 #' cerebral blood flow using a blood pool contrast agent
-#' (http://www.ncbi.nlm.nih.gov/pubmed/8916023).
+#' (https://pubmed.ncbi.nlm.nih.gov/8916023).
 #'
 #' @param arterialInputFunction vector specifying the arterial input function
 #' over time.
 #' @param thresholdSVD is used to threshold the smaller elements of the
 #' diagonal matrix during the SVD regularization.  0.2 is a common choice
 #' (cf. page 571, end of column 2 in
-#' http://www.ncbi.nlm.nih.gov/pubmed/16971140).
+#' https://pubmed.ncbi.nlm.nih.gov/16971140).
 #'
 #' @return regularized residue function, i.e. the right-hand side of
 #'         CBF * dT * R = ( V * L^-1 * U^T ) * Cvoi.
@@ -255,7 +255,7 @@ deconvolutionSVD <- function(arterialInputFunction, thresholdSVD = 0.2) {
 #'
 #' Automated approach for generating a mask to be used for modeling the
 #' arterial input function using the method described in
-#' https://www.ncbi.nlm.nih.gov/pubmed/15956519.
+#' https://pubmed.ncbi.nlm.nih.gov/15956519.
 #'
 #' @param perfusionImage time series (n-D + time) perfusion acquisition.
 #' @param voiMaskImage n-D mask image indicating where the cerebral blood

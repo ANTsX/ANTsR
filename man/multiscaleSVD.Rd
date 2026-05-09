@@ -92,7 +92,7 @@ if (usePkg("pracma")) {
 }
 }
 \references{
-\url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
+Maggioni, M., et al. "Multiscale data geometry."
 }
 \author{
 Avants BB

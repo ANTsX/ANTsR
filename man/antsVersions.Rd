@@ -15,5 +15,5 @@ A data frame defining the git tag for the current
 ANTsRCore version of ANTs.
 }
 \references{
-\url{https://github.com/stnava/ANTs}
+\url{https://github.com/ANTsX/ANTs}
 }

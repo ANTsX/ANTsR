@@ -1,7 +1,7 @@
 #' fitBsplineObjectToScatteredData
 #'
 #' Fit a b-spline object to scattered data.  This is basically a wrapper
-#' for the ITK filter \url{https://itk.org/Doxygen/html/classitk_1_1BSplineScatteredDataPointSetToImageFilter.html}.
+#' for the ITK filter \url{http://docs.itk.org/projects/doxygen/en/stable/classitk_1_1BSplineScatteredDataPointSetToImageFilter.html}.
 #' This filter is flexible in the possible objects that can be approximated.
 #' Possibilities include:
 #' \describe{

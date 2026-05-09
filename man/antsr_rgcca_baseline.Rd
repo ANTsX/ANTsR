@@ -7,7 +7,7 @@
 antsr_rgcca_baseline(data_matrices, tau = 0.5, scheme = "factorial", ncomp = 3)
 }
 \arguments{
-\item{data_matrices}{A named list of subject × feature matrices}
+\item{data_matrices}{A named list of subject x feature matrices}
 
 \item{tau}{Regularization parameter (0 = no regularization, 1 = PCA limit)}
 

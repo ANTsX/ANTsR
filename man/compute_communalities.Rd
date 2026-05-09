@@ -19,7 +19,7 @@ A named numeric vector of length p containing the communalities for
 }
 \description{
 This function calculates the communality for each variable in the dataset,
-defined as the proportion of variance explained by the factor scores (R² from
+defined as the proportion of variance explained by the factor scores (R^2 from
 multiple linear regression of each variable on the scores). It provides an
 empirical estimate of how much each variable's variance is accounted for by
 the common factors. The function assumes the data is centered or standardized
@@ -27,7 +27,7 @@ as appropriate for factor analysis.
 }
 \details{
 For each variable, a linear model is fit: \code{lm(data[, i] ~ scores)}, and
-the R² is extracted. This aligns with model-based communalities in factor
+the R^2 is extracted. This aligns with model-based communalities in factor
 analysis for large samples but may slightly overestimate due to in-sample
 fitting. For efficiency with large p, consider matrix-based alternatives, but
 this loop-based approach is simple and leverages base R.

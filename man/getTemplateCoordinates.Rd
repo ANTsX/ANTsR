@@ -78,6 +78,5 @@ gcoords <- getTemplateCoordinates(template_cluster_pair,
 \author{
 Avants, BB
 }
-\keyword{Coordinates}
-\keyword{Talairach,}
-\keyword{Template,}
+\keyword{Talairach}
+\keyword{Template}

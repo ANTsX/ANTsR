@@ -17,7 +17,8 @@
 #' @param priorBetas prior betas for each tissue and predictor
 #' @return estimated cbf image
 #' @author Brian Beaumont Avants and Benjamin M. Kandel
-#' @keywords asl, bayesian blood cerebral flow,
+#' @keywords asl
+#' @keywords flow
 #' @examples
 #' \dontrun{
 #' set.seed(123)

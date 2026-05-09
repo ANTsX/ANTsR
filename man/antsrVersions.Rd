@@ -23,6 +23,6 @@ those dependencies.
 data(antsrVersions)
 }
 \references{
-\url{https://github.com/stnava/ANTs}
+\url{https://github.com/ANTsX/ANTs}
 }
 \keyword{datasets}

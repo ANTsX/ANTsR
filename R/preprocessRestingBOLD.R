@@ -73,7 +73,7 @@ preprocessRestingBOLD <- function(
 
   numberOfTimePoints <- dim(boldImage)[4]
 
-  # do motion correction http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/
+  # do motion correction https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/
   framewiseDisplacement <- rep(0, numberOfTimePoints)
 
   if (doMotionCorrection) {
@@ -161,7 +161,7 @@ preprocessRestingBOLD <- function(
 
 
   # Calculate CompCor nuisance variables
-  # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2214855/
+  # https://pmc.ncbi.nlm.nih.gov/articles/PMC2214855/
   if (numberOfCompCorComponents > 0) {
     compCorNuisanceVariables <- compcor(boldImage, maskImage,
       ncompcor = numberOfCompCorComponents,
@@ -237,7 +237,7 @@ preprocessRestingBOLD <- function(
 computeDVARS <- function(boldMatrix) {
   # For quality assurance measures, we calculate the temporal derivative of the RMS
   # variance over voxels (DVARS as in
-  # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/)
+  # https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/)
   DVARS <- rep(0, nrow(boldMatrix))
   for (i in 2:nrow(boldMatrix)) {
     DVARS[i] <- sqrt(mean((boldMatrix[i, ] - boldMatrix[i - 1, ])^2))
@@ -265,7 +265,7 @@ computeDVARS <- function(boldMatrix) {
 computeDVARSspatialMap <- function(boldMatrix) {
   # For quality assurance measures, we calculate the temporal derivative of the RMS
   # variance over voxels (DVARS as in
-  # http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3254728/)
+  # https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/)
   dvmat <- boldMatrix * 0
   for (i in 2:nrow(boldMatrix)) {
     dvmat[i, ] <- sqrt((boldMatrix[i, ] - boldMatrix[i - 1, ])^2)

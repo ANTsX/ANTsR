@@ -67,7 +67,7 @@ list with the models per label (LabelModels), the label set
 \description{
 A random forest implementation of the corrective learning wrapper introduced
 in Wang, et al., Neuroimage 2011
-(http://www.ncbi.nlm.nih.gov/pubmed/21237273).
+(https://pubmed.ncbi.nlm.nih.gov/21237273).
 The training process involves building two sets of models from training data
 for each label in the initial segmentation data.
 }

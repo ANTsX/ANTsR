@@ -24,7 +24,7 @@ function is calculated.}
 \item{thresholdSVD}{is used to threshold the smaller elements of the
 diagonal matrix during the SVD regularization.  0.2 is a common choice
 (cf. page 571, end of column 2 in
-http://www.ncbi.nlm.nih.gov/pubmed/16971140).}
+https://pubmed.ncbi.nlm.nih.gov/16971140).}
 
 \item{deltaTime}{time between volumetric acquisitions.  We assume a uniform
 time sampling.}
@@ -37,11 +37,11 @@ function concentration (aifConcentration).
 }
 \description{
 Implementation of the deconvolution technique of Ostergaard et al.
-(http://www.ncbi.nlm.nih.gov/pubmed/8916023) for calculating cerebral
+(https://pubmed.ncbi.nlm.nih.gov/8916023) for calculating cerebral
 (or pulmonary) blood flow.  Other relevant references include
-http://www.ncbi.nlm.nih.gov/pubmed/16261573,
-http://www.ncbi.nlm.nih.gov/pubmed/8916023, and
-http://www.ncbi.nlm.nih.gov/pubmed/15332240.
+https://pubmed.ncbi.nlm.nih.gov/16261573,
+https://pubmed.ncbi.nlm.nih.gov/8916023, and
+https://pubmed.ncbi.nlm.nih.gov/15332240.
 }
 \examples{
 \dontrun{

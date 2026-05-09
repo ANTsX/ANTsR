@@ -24,7 +24,6 @@ mni2tal(c(10, 12, 14))
 
 }
 \references{
-\url{http://bioimagesuite.yale.edu/mni2tal/501_95733_More\%20Accurate\%20Talairach\%20Coordinates\%20SLIDES.pdf},
 \url{http://imaging.mrc-cbu.cam.ac.uk/imaging/MniTalairach}
 }
 \author{

@@ -202,6 +202,7 @@ nsa_flow_torch <- function(
 
   Y_torch <- torch$tensor(Y0, dtype = torch$float64)
   Xc_torch <- torch$tensor(X0, dtype = torch$float64)
+  retraction <- match.arg(retraction)
 
   res <- pynsa$nsa_flow(
     Y_torch, 
@@ -217,8 +218,6 @@ nsa_flow_torch <- function(
     initial_learning_rate = lr_res,
     record_every = as.integer(record_every),
     window_size = as.integer(window_size),
-    simplified = simplified,
-    project_full_gradient = project_full_gradient,
     precision=precision
     #
 #    armijo_beta = armijo_beta,
@@ -226,9 +225,10 @@ nsa_flow_torch <- function(
   )
 
 
-  trace_df = as.data.frame(reticulate::py_to_r(res$traces))
-
-  if (plot && !is.null(trace_df) && nrow(trace_df) > 0) {
+  trace_df = reticulate::py_to_r(res$traces)
+  energy_plot <- NULL
+  if (plot && !is.null(trace_df)) {
+    if ( is.data.frame(trace_df) && nrow(trace_df) > 0) {
     max_fid <- max(trace_df$fidelity, na.rm = TRUE)
     max_orth <- max(trace_df$orthogonality, na.rm = TRUE)
     ratio <- if (max_orth > 0) max_fid / max_orth else 1
@@ -253,6 +253,7 @@ nsa_flow_torch <- function(
                      axis.text.y.left = ggplot2::element_text(color = "#1f78b4"),
                      axis.title.y.right = ggplot2::element_text(color = "#33a02c"),
                      axis.text.y.right = ggplot2::element_text(color = "#33a02c"))
+    }
   }
   Y = as.matrix(res$Y$detach()$numpy())
   rownames(Y) <- rownames(Y0)
@@ -475,6 +476,7 @@ nsa_flow_torch_ag <- function(
 
   Y_torch <- torch$tensor(Y0, dtype = torch$float64)
   Xc_torch <- torch$tensor(X0, dtype = torch$float64)
+  retraction <- match.arg(retraction)
   res <- pynsa$nsa_flow_autograd(
     Y_torch, 
     Xc_torch,
@@ -494,9 +496,10 @@ nsa_flow_torch_ag <- function(
   )
 
 
-  trace_df = as.data.frame(reticulate::py_to_r(res$traces))
-
-  if (plot && !is.null(trace_df) && nrow(trace_df) > 0) {
+  trace_df = reticulate::py_to_r(res$traces)
+  energy_plot <- NULL
+  if (plot && !is.null(trace_df)) {
+    if ( is.data.frame(trace_df) && nrow(trace_df) > 0) {
     max_fid <- max(trace_df$fidelity, na.rm = TRUE)
     max_orth <- max(trace_df$orthogonality, na.rm = TRUE)
     ratio <- if (max_orth > 0) max_fid / max_orth else 1
@@ -521,6 +524,7 @@ nsa_flow_torch_ag <- function(
                      axis.text.y.left = ggplot2::element_text(color = "#1f78b4"),
                      axis.title.y.right = ggplot2::element_text(color = "#33a02c"),
                      axis.text.y.right = ggplot2::element_text(color = "#33a02c"))
+    }
   }
   Y = as.matrix(res$Y$detach()$numpy()) 
   rownames(Y) <- rownames(Y0)
@@ -560,6 +564,7 @@ nsa_flow_torch_ag <- function(
 #' @param orth_type character ('basic','scale_invariant')
 #' @param record_every integer frequency of recording traces
 #' @param window_size integer window for energy stability
+#' @param warmup_iters integer number of warmup iterations
 #' @param plot logical produce ggplot (default FALSE)
 #' @param precision 'float32' or 'float64'
 #' @return list: Y (matrix), traces (data.frame), final_iter, best_total_energy, best_Y_iteration, plot (ggplot or NULL), settings
@@ -710,7 +715,8 @@ nsa_flow_autograd <- function(
 
   # Build ggplot trace if requested and data available
   energy_plot <- NULL
-  if (plot && !is.null(traces_df) && nrow(traces_df) > 0) {
+  if (plot && !is.null(traces_df)) {
+    if (is.data.frame(traces_df) && nrow(traces_df) > 0) {
     if (!("fidelity" %in% colnames(traces_df)) || !("orthogonality" %in% colnames(traces_df))) {
       # try to coerce likely-named columns
       possible_fid <- grep("fid", names(traces_df), value = TRUE, ignore.case = TRUE)
@@ -738,6 +744,7 @@ nsa_flow_autograd <- function(
         ggplot2::theme_minimal(base_size = 13) +
         ggplot2::theme(plot.title = ggplot2::element_text(face = "bold", hjust = 0.5),
                        legend.position = "top")
+    }
     }
   }
 

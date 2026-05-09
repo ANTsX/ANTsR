@@ -11,5 +11,5 @@
 #'    \item{\code{Dependency}}{ Name of software dependency. }
 #'    \item{\code{GitTag}}{ The git tag.  This can also be used to trace other dependencies, e.g. the ITK version used by the current ANTs version. }
 #' }
-#' @references \url{https://github.com/stnava/ANTs}
+#' @references \url{https://github.com/ANTsX/ANTs}
 NULL

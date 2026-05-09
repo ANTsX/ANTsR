@@ -68,7 +68,7 @@ testthat::expect_equal(sum(smat2), 63.7344262003899)
 }
 }
 \references{
-\url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
+Maggioni, M., et al. "Multiscale data geometry."
 }
 \author{
 Avants BB

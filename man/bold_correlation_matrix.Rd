@@ -18,6 +18,6 @@ A data frame with an example square BOLD correlation matrix.
 data(bold_correlation_matrix)
 }
 \references{
-\url{http://en.wikipedia.org/wiki/Automated_Anatomical_Labeling}
+\url{https://en.wikipedia.org/wiki/Automated_Anatomical_Labeling}
 }
 \keyword{datasets}

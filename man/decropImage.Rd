@@ -29,6 +29,4 @@ decropped <- decropImage(cropped, fi)
 \author{
 Brian B. Avants, Nicholas J. Tustison
 }
-\keyword{decrop,}
-\keyword{extract}
-\keyword{sub-image}
+\keyword{decrop}

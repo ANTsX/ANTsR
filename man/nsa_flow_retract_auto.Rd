@@ -16,6 +16,25 @@ nsa_flow_retract_auto(
   verbose = FALSE
 )
 }
+\arguments{
+\item{Y_cand}{Candidate matrix.}
+
+\item{w_retract}{Weight for soft retraction.}
+
+\item{retraction_type}{Type of retraction ('polar', 'soft_polar', or 'none').}
+
+\item{eps_rf}{Small numeric value for stability.}
+
+\item{inv_method}{Method for inverse square root.}
+
+\item{ns_iter}{Number of iterations for Newton-Schulz.}
+
+\item{eig_thresh}{Threshold for eigen-decomposition.}
+
+\item{diag_thresh}{Threshold for diagonal check.}
+
+\item{verbose}{Verbose output.}
+}
 \description{
 Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)
 }

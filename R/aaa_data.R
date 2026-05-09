@@ -4,7 +4,7 @@
 #' DesikanKillianyTourville labels.
 #'
 #' @docType data
-#' @references  \url{http://www.ncbi.nlm.nih.gov/pubmed/23227001}
+#' @references  \url{https://pubmed.ncbi.nlm.nih.gov/23227001}
 #' @format A data frame listing the following variables.
 #' \describe{
 #'    \item{\code{label_num}}{ Numerical label value. }
@@ -26,7 +26,7 @@
 #'
 #' @format A data frame square correlation matrix listed by AAL
 #' anatomical column names.
-#' @references \url{http://en.wikipedia.org/wiki/Automated_Anatomical_Labeling}
+#' @references \url{https://en.wikipedia.org/wiki/Automated_Anatomical_Labeling}
 #' @examples
 #' data(bold_correlation_matrix)
 "bold_correlation_matrix"
@@ -54,7 +54,7 @@
 #'   \item{\code{Brodmann}}{ Broadmann area number }
 #'   \item{\code{AAL}}{ AAL region label }
 #' }
-#' #' @references \url{http://www.nil.wustl.edu/labs/petersen/Resources.html}
+#' @references Power, J. D., et al. (2011). "Functional network organization of the human brain." Neuron 72(4): 665-678.
 #'
 #' @examples
 #' data(powers_areal_mni_itk)
@@ -90,7 +90,7 @@
 #' \item{\code{label_num}}{ Numerical label value. }
 #' \item{\code{label_name}}{ Shorthand anatomical value. }
 #' }
-#' @references \url{http://www.ncbi.nlm.nih.gov/pubmed/18407524}
+#' @references \url{https://pubmed.ncbi.nlm.nih.gov/18407524}
 #' @examples data(tracts)
 #' @keywords datasets
 "tracts"
@@ -119,7 +119,7 @@
 #'   \item{\code{unknown}}{binary value}
 #' }
 #' @references
-#' \url{http://en.wikipedia.org/wiki/Automated_Anatomical_Labeling}
+#' \url{https://en.wikipedia.org/wiki/Automated_Anatomical_Labeling}
 #' @examples
 #' data(aal)
 #' @keywords datasets
@@ -140,7 +140,7 @@
 #'   trace other dependencies, e.g. the ITK version used by the
 #'   current ANTs version. }
 #' }
-#' @references \url{https://github.com/stnava/ANTs}
+#' @references \url{https://github.com/ANTsX/ANTs}
 #' @examples data(antsrVersions)
 #' @keywords datasets
 NULL

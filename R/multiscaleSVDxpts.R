@@ -188,7 +188,7 @@ ba_svd <- function(x,
   # 1. Handle NA/Inf early
   if (NA2Noise) {
     if (anyNA(x) || any(is.infinite(x))) {
-      warning("Input contains NA/Inf — replacing with small random noise.")
+      warning("Input contains NA/Inf --- replacing with small random noise.")
       bad <- which(!is.finite(x))
       x[bad] <- rnorm(length(bad), mean = 0, sd = 1e-6)
     }
@@ -200,7 +200,13 @@ ba_svd <- function(x,
   col_max <- apply(x, 2, max)
   keep_cols <- col_min != col_max
   
-  if (sum(keep_cols) == 0) stop("All columns have zero variance.")
+  if (sum(keep_cols) == 0) {
+    # If all columns are constant, the SVD is simple: 
+    # one non-zero singular value if the constant is non-zero.
+    # But for simplicity and safety in these pipelines, we can just 
+    # use the base svd on the original matrix if it's very small or constant.
+    return(svd(x, nu = nu, nv = nv))
+  }
   
   x_working <- x[, keep_cols, drop = FALSE]
 
@@ -255,8 +261,7 @@ ba_svd <- function(x,
 #' @param verbose verbose output
 #' @return matrix sparse p by p matrix is output with p by k nonzero entries
 #' @author Avants BB
-#' @references
-#' \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
+#' @references Maggioni, M., et al. "Multiscale data geometry."
 #' @examples
 #' \dontrun{
 #' set.seed(120)
@@ -469,8 +474,7 @@ whiten_matrix <- function(X) {
 #' @param verbose verbose output
 #' @return matrix sparse p by q matrix is output with p by k nonzero entries
 #' @author Avants BB
-#' @references
-#' \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
+#' @references Maggioni, M., et al. "Multiscale data geometry."
 #' @examples
 #' \dontrun{
 #' set.seed(120)
@@ -663,8 +667,7 @@ sparseDistanceMatrixXY <- function(x, y, k = 3, r = Inf, sigma = NA,
 #'   \item{evalClustering:}{data-driven clustering of the eigenvalues}
 #' }
 #' @author Avants BB
-#' @references
-#' \url{http://www.math.jhu.edu/~mauro/multiscaledatageometry.html}
+#' @references Maggioni, M., et al. "Multiscale data geometry."
 #' @examples
 #'
 #' sphereDim <- 9
@@ -4558,7 +4561,7 @@ optimal_simlr_initializer <- function(data_matrices,
   }
 
   if (verbose) {
-    message(sprintf("✅ Best initialization found with mean energy = %.4f", bestEnergy))
+    message(sprintf("[OK] Best initialization found with mean energy = %.4f", bestEnergy))
   }
 
   return(list(bestU = bestU, bestV = bestV, bestEnergy = bestEnergy))
@@ -4945,15 +4948,15 @@ simlr <- function(
   if (verbose) {
     cat(sprintf("
       --- Method Summary ---
-        • Mixer Algorithm  : %s
-        • Energy Type      : %s
-        • Sparseness Alg.  : %s
-        • expBeta          : %s
-        • constraint       : %s
-        • constraint-it    : %s
-        • constraint-wt    : %s
-        • optimizationStyle: %s
-        • domain-knowledge : %s
+        * Mixer Algorithm  : %s
+        * Energy Type      : %s
+        * Sparseness Alg.  : %s
+        * expBeta          : %s
+        * constraint       : %s
+        * constraint-it    : %s
+        * constraint-wt    : %s
+        * optimizationStyle: %s
+        * domain-knowledge : %s
       ----------------------
       ", mixAlg, energyType, sparsenessAlg, expBeta, constraint_type, constraint_iterations, constraint_weight, optimizationStyle, domain_knowledge ))
   }
@@ -5389,7 +5392,7 @@ plot_energy_decomposition <- function(simlr_result, modality, show_weights = FAL
       title = paste("Energy Decomposition for", modality),
       subtitle = "All energies rescaled to [0,1] for comparability",
       x = "Iteration",
-      y = "Rescaled Energy (0–1)",
+      y = "Rescaled Energy (0-1)",
       color = "Energy type"
     )
   
@@ -5450,7 +5453,7 @@ safe_pca <- function(X, nc = min(dim(X)), center = TRUE, scale = TRUE) {
   
   for (j in seq_len(ncol(X))) {
     if (all_na[j]) {
-      # Replace all-NA col with fixed ±1 pattern
+      # Replace all-NA col with fixed +1 pattern
       X[, j] <- rep(c(-1, 1), length.out = n)
       fix_count <- fix_count + 1
     } else if (col_var[j] == 0 || is.na(col_var[j])) {
@@ -6470,9 +6473,9 @@ l1_normalize_features <- function(features) {
 #'
 #' Automatically handles name collisions by appending versioned suffixes:
 #' \itemize{
-#'   \item No collision → \code{petPC1}, \code{petPC2}, ...
-#'   \item Collision    → \code{petPCr01.1}, \code{petPCr01.2}, ...
-#'   \item Next round   → \code{petPCr02.1}, \code{petPCr02.2}, ...
+#'   \item No collision -> \code{petPC1}, \code{petPC2}, ...
+#'   \item Collision    -> \code{petPCr01.1}, \code{petPCr01.2}, ...
+#'   \item Next round   -> \code{petPCr02.1}, \code{petPCr02.2}, ...
 #' }
 #'
 #' @param existing_df Data frame (samples in rows, features in columns)
@@ -6532,7 +6535,7 @@ apply_simlr_matrices <- function(existing_df,
     if (is.null(rownames(W))) stop("Weight matrix '", block_name, "' has no rownames")
     if (is.null(colnames(W))) colnames(W) <- paste0("C", seq_len(ncol(W)))
     
-    # Base names: pet + PC1 → petPC1
+    # Base names: pet + PC1 -> petPC1
     base_names <- paste0(block_name, colnames(W))
     
     final_names <- character(length(base_names))
@@ -6566,13 +6569,13 @@ apply_simlr_matrices <- function(existing_df,
       used_names <- c(used_names, candidate)
       
       if (verbose && (major > 0 || minor > 0)) {
-        message(original, " → ", candidate)
+        message(original, " -> ", candidate)
       }
     }
     
     overlap <- intersect(rownames(W), names(existing_df))
     if (length(overlap) == 0) {
-      warning("No overlapping features for block '", block_name, "' – skipping")
+      warning("No overlapping features for block '", block_name, "' - skipping")
       next
     }
     
@@ -8186,7 +8189,7 @@ antsr_spca_features <- function(data_matrices, k, method = c( "default", "elasti
 
 #' Multi-view Regularized CCA baseline using RGCCA
 #'
-#' @param data_matrices A named list of subject × feature matrices
+#' @param data_matrices A named list of subject x feature matrices
 #' @param tau Regularization parameter (0 = no regularization, 1 = PCA limit)
 #' @param scheme RGCCA scheme ('horst', 'factorial', 'centroid')
 #' @param ncomp Number of components
@@ -8227,7 +8230,7 @@ antsr_rgcca_baseline <- function(data_matrices, tau = 0.5,
 #' enforcing sparsity on each modality to obtain interpretable feature loadings.
 #' Compatible with RGCCA >= 3.0 (using `blocks` and `connection` arguments).
 #'
-#' @param data_matrices Named list of subject × feature matrices. Each must have the same number of rows.
+#' @param data_matrices Named list of subject x feature matrices. Each must have the same number of rows.
 #' @param ncomp Number of canonical components per view (default = 3)
 #' @param tau Numeric in [0,1] or vector. Regularization per view (0 = pure CCA, 1 = PCA limit)
 #' @param sparsity Numeric in (0,1]. L1 sparsity per view; lower = sparser (default = 0.3)
@@ -8236,8 +8239,8 @@ antsr_rgcca_baseline <- function(data_matrices, tau = 0.5,
 #' @param verbose Logical. Print progress messages (default = FALSE)
 #'
 #' @return A list with:
-#'   \item{loadings}{List of sparse feature loadings (features × components)}
-#'   \item{scores}{List of subject × component canonical variates}
+#'   \item{loadings}{List of sparse feature loadings (features x components)}
+#'   \item{scores}{List of subject x component canonical variates}
 #'   \item{shared_embedding}{Average canonical embedding across modalities}
 #'   \item{correlations}{Canonical correlations across shared space}
 #'
@@ -8337,7 +8340,7 @@ antsr_rgcca_sparse <- function(data_matrices,
 #'
 #' This provides a classical linear baseline for benchmarking against SiMLR or multimodal deep models.
 #'
-#' @param data_matrices A named list of numeric matrices, each subjects × features.
+#' @param data_matrices A named list of numeric matrices, each subjects x features.
 #'                      All matrices must have the same number of subjects (rows).
 #' @param k Integer. Number of canonical components to extract.
 #' @param regularization Scalar ridge penalty to improve numerical stability (default = 1e-3).
@@ -8345,9 +8348,9 @@ antsr_rgcca_sparse <- function(data_matrices,
 #' @param scale Logical. Whether to scale each matrix to unit variance (default = FALSE).
 #'
 #' @return A list containing:
-#'   \item{loadings}{List of projection matrices (features × k) for each view.}
-#'   \item{scores}{List of canonical variates (subjects × k) for each view.}
-#'   \item{shared_embedding}{Average canonical embedding across views (subjects × k).}
+#'   \item{loadings}{List of projection matrices (features x k) for each view.}
+#'   \item{scores}{List of canonical variates (subjects x k) for each view.}
+#'   \item{shared_embedding}{Average canonical embedding across views (subjects x k).}
 #'   \item{correlations}{Vector of canonical correlations.}
 #'
 #' @examples
@@ -9244,7 +9247,7 @@ estimate_rank_by_permutation_rv <- function(mat_list,
   if (!requireNamespace("ggplot2", quietly = TRUE)) stop("Install 'ggplot2'.")
 
   # --- 1. DATA DIAGNOSTICS & CLEANING ---
-  message("🔍 Running Pre-Flight Data Diagnostics...")
+  message("[Search] Running Pre-Flight Data Diagnostics...")
   n_modalities <- length(mat_list)
   n_subs <- unique(sapply(mat_list, nrow))
   
@@ -9260,12 +9263,12 @@ estimate_rank_by_permutation_rv <- function(mat_list,
     
     if (length(targets) > 0) {
       if (handle_missing) {
-        message(paste0("⚠️ View ", i, ": Found ", length(targets), " dead columns. Replacing with row means."))
+        message(paste0("[Warning] View ", i, ": Found ", length(targets), " dead columns. Replacing with row means."))
         r_means <- rowMeans(m, na.rm = TRUE)
         r_means[is.nan(r_means)] <- 0
         for (col in targets) m[, col] <- r_means
       } else {
-        message(paste0("✂️ View ", i, ": Dropping ", length(targets), " dead columns."))
+        message(paste0("[Cut] View ", i, ": Dropping ", length(targets), " dead columns."))
         m <- m[, -targets, drop = FALSE]
       }
     }
@@ -9297,7 +9300,7 @@ estimate_rank_by_permutation_rv <- function(mat_list,
   feat_counts <- sapply(mat_list, ncol)
   k_max <- min(c(k_candidates, feat_counts, n_subs - 1))
   
-  message(paste("✅ Search space set: k = 1 to", k_max))
+  message(paste("[OK] Search space set: k = 1 to", k_max))
   if (return_max) return(list(optimal_k = k_max))
 
   # --- 3. INTERNAL RV LOGIC ---
@@ -9336,7 +9339,7 @@ estimate_rank_by_permutation_rv <- function(mat_list,
     })
   }
 
-  message("🚀 Estimating Joint Signal Curve...")
+  message("[Rocket] Estimating Joint Signal Curve...")
   processed_mats <- preprocess(mat_list)
   real_scores <- .calculate_rv_curve(processed_mats, k_max)
   
@@ -9344,7 +9347,7 @@ estimate_rank_by_permutation_rv <- function(mat_list,
 
   # --- 4. PERMUTATION VS ELBOW ---
   if (n_permutations > 0) {
-    message(paste("🎲 Permuting", n_permutations, "times..."))
+    message(paste("[Permute] Permuting", n_permutations, "times..."))
     perm_results <- pbapply::pblapply(1:n_permutations, function(p) {
       p_mats <- processed_mats
       # Shuffle subject order in all views except the first to break covariance
@@ -10035,7 +10038,7 @@ read_simlr <- function(dir) {
 #'  3. select j (user provided or automatic by variance explained)
 #'  4. return j orthogonal (uncorrelated) row-vectors in R^p
 #'
-#' @param P numeric matrix (k x p) — rows are the priors to compress/orthogonalize.
+#' @param P numeric matrix (k x p) --- rows are the priors to compress/orthogonalize.
 #' @param j integer or NULL. Number of components to keep. If NULL, chosen automatically.
 #' @param method character, one of "svd" or "cluster_then_svd".
 #' @param row_center logical. Subtract row means before analysis (recommended).
@@ -10301,6 +10304,7 @@ inv_sqrt_newton <- function(A, max_iter = 1, tol = 1e-6) {
 #' Computes the inverse square root of a symmetric positive semi-definite matrix using eigen-decomposition.
 #'
 #' @param M Numeric symmetric matrix (k x k).
+#' @param epsilon Small numeric value for numerical stability (default 1e-10).
 #' @return Numeric matrix, the inverse square root of M.
 #' @details
 #' For a symmetric matrix M, computes \eqn{M^{-1/2}} via eigen-decomposition, clipping eigenvalues
@@ -10330,6 +10334,10 @@ inv_sqrt_sym <- function(M, epsilon = 1e-10) {
 } 
 
 #' Retraction onto the Stiefel Manifold
+#'
+#' @param Y_cand Candidate matrix.
+#' @param w_retract Weight for soft retraction.
+#' @param retraction_type Type of retraction ('polar', 'soft_polar', or 'none').
 #' @export
 nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
   soft_retract_wide <- function(Y, w_retract = 1.0, eps = 1e-8) {
@@ -10383,7 +10391,7 @@ nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
     } else if (p < k && k > 512) {
       Ytilde <- soft_retract_wide(Y_cand, w_retract)
     } else if (k > 512) {
-      # tall but big k: Newton–Schulz
+      # tall but big k: Newton-Schulz
       YtY <- crossprod(Y_cand)
       T <- inv_sqrt_newton(YtY)
       Ytilde <- Y_cand %*% T
@@ -10410,7 +10418,7 @@ nsa_flow_retract <- function(Y_cand, w_retract, retraction_type) {
 
 
 # -------------------------------------------------------------------------
-# Scaled Newton–Schulz iteration for A^{-1/2} with convergence check
+# Scaled Newton-Schulz iteration for A^{-1/2} with convergence check
 # -------------------------------------------------------------------------
 inv_sqrt_sym_newton <- function(A, epsilon = 1e-10, max_iter = 10L, tol = 1e-6, verbose = FALSE) {
   k <- nrow(A)
@@ -10427,12 +10435,12 @@ inv_sqrt_sym_newton <- function(A, epsilon = 1e-10, max_iter = 10L, tol = 1e-6, 
   Z <- diag(k)
 
   for (iter in seq_len(max_iter)) {
-    # Core Newton–Schulz step
+    # Core Newton-Schulz step
     M <- 0.5 * (3 * diag(k) - Z %*% Y)
     Y_new <- Y %*% M
     Z_new <- M %*% Z
 
-    # Convergence check on residual: I - YZ should → 0
+    # Convergence check on residual: I - YZ should -> 0
     res <- norm(diag(k) - Y_new %*% Z_new, "F") / sqrt(k)
     if (verbose) message("  NS iter ", iter, " residual: ", signif(res, 4))
     Y <- Y_new
@@ -10520,10 +10528,10 @@ inv_sqrt_sym_adaptive <- function(A, epsilon = 1e-4, method = c( "diag", "auto",
 #'     \item `"center"`: subtract column means
 #'     \item `"zscore"`: center and scale columns by their standard deviations
 #'     \item `"minmax"`: rescale columns to [0, 1]
-#'     \item `"l2"`: normalize each column to unit L2 norm, then multiply by √(p·k)
-#'     \item `"frob"`: normalize entire matrix to unit Frobenius norm, then multiply by √(p·k)
+#'     \item `"l2"`: normalize each column to unit L2 norm, then multiply by sqrt(p*k)
+#'     \item `"frob"`: normalize entire matrix to unit Frobenius norm, then multiply by sqrt(p*k)
 #'     \item `"frob_zscore"`: z-score columns, then normalize Frobenius norm,
-#'           then multiply by √(p·k)
+#'           then multiply by sqrt(p*k)
 #'   }
 #'
 #' @return A list with:
@@ -10872,8 +10880,8 @@ estimate_learning_rate_nsa <- function(
       ggplot2::geom_vline(xintercept = best_alpha, color = "red", linetype = "dashed") +
       ggplot2::scale_x_log10() +
       ggplot2::labs(title = paste("Learning Rate Estimation (", method, ")", sep = ""),
-                    subtitle = sprintf("Estimated α = %.3e", best_alpha),
-                    x = "Learning Rate (α, log scale)", y = "Energy") +
+                    subtitle = sprintf("Estimated alpha = %.3e", best_alpha),
+                    x = "Learning Rate (alpha, log scale)", y = "Energy") +
       ggplot2::theme_minimal(base_size = 14)
   }
 
@@ -10886,6 +10894,16 @@ estimate_learning_rate_nsa <- function(
 
 
 #' Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)
+#'
+#' @param Y_cand Candidate matrix.
+#' @param w_retract Weight for soft retraction.
+#' @param retraction_type Type of retraction ('polar', 'soft_polar', or 'none').
+#' @param eps_rf Small numeric value for stability.
+#' @param inv_method Method for inverse square root.
+#' @param ns_iter Number of iterations for Newton-Schulz.
+#' @param eig_thresh Threshold for eigen-decomposition.
+#' @param diag_thresh Threshold for diagonal check.
+#' @param verbose Verbose output.
 #' @export
 nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("polar", "soft_polar", "none"),
                              eps_rf = 1e-8, inv_method = "diag", ns_iter = 1L,
@@ -11277,7 +11295,7 @@ nsa_flow <- function(
 
     # --- Handle backtracking outcomes ---
     if (count == max_bt_count) {
-      # Backtracking failed → revert
+      # Backtracking failed -> revert
       Y <- best_Y
       retracted_in_loop <- TRUE  # previous Y was already retracted
       if (verbose) cat("Backtracking failed to reduce energy; reverting to previous Y.\n")
@@ -11435,7 +11453,7 @@ nsa_flow_flowchart <- function(
   graph_rankdir = "TB",
   fontsize = 10
 ) {
-  library(DiagrammeR)
+  if (!requireNamespace("DiagrammeR", quietly = TRUE)) stop("Install DiagrammeR")
   
   # Define the graph specification using grViz
   graph_spec <- paste0("
@@ -11446,15 +11464,15 @@ digraph nsa_flow_algorithm {
   edge [color = ", edge_color, ", fontsize = ", fontsize, "]
 
   # Main nodes
-  A [label = 'Initialize Y₀\\n(Random, Orthogonal, or SVD-based)']
+  A [label = 'Initialize Y0\\n(Random, Orthogonal, or SVD-based)']
   B [label = 'Set Parameters\\n(w, retraction, optimizer)']
-  C [label = 'Compute Euclidean Gradient\\n∇F(Y) = (1−w)∇g(Y) + w∇ₒᵣₜₕ(Y)']
-  D [label = 'Project to Tangent Space\\nRiemannian grad_ℳ F']
-  E [label = 'Descent Step\\nZ = Y − α · grad_ℳ F']
+  C [label = 'Compute Euclidean Gradient\\ngradF(Y) = (1-w)gradg(Y) + wgrad_srcn(Y)']
+  D [label = 'Project to Tangent Space\\nRiemannian grad_R F']
+  E [label = 'Descent Step\\nZ = Y - alpha * grad_R F']
   F [label = 'Choose Retraction\\n(polar, QR, soft, soft-polar, soft-QR, none)']
-  G [label = 'Apply Retraction\\nMap Z → 𝓜 (Stiefel manifold)']
-  H [label = 'Proximal Projection\\nP₊(Y) = max(Y, 0)']
-  I [label = 'Check Convergence\\n(ΔEnergy < tol or ∥grad∥ < tol)']
+  G [label = 'Apply Retraction\\nMap Z -> M (Stiefel manifold)']
+  H [label = 'Proximal Projection\\nP+(Y) = max(Y, 0)']
+  I [label = 'Check Convergence\\n(DeltaEnergy < tol or ||grad|| < tol)']
   J [label = 'Update Y and Record\\n(iter, energy, orth, neg)']
   K [label = 'Output Final Y*\\nand Diagnostic Traces']
 
@@ -11476,10 +11494,10 @@ digraph nsa_flow_algorithm {
     style = dashed
     color = gray
     label = 'Retraction Options'
-    F1 [label = 'Polar\\nỸ = Y (YᵀY)^{−1/2}', fillcolor = lightyellow]
-    F2 [label = 'QR\\nỸ = Q sign(diag(R))', fillcolor = lightyellow]
-    F3 [label = 'Soft\\nỸ = (1−λ)Y + λQ', fillcolor = lightyellow]
-    F4 [label = 'Soft-Polar\\nỸ = Y[(1−λ)I + λ(YᵀY)^{−1/2}]', fillcolor = lightyellow]
+    F1 [label = 'Polar\\nY~ = Y (YTY)^{-1/2}', fillcolor = lightyellow]
+    F2 [label = 'QR\\nY~ = Q sign(diag(R))', fillcolor = lightyellow]
+    F3 [label = 'Soft\\nY~ = (1-lambda)Y + lambdaQ', fillcolor = lightyellow]
+    F4 [label = 'Soft-Polar\\nY~ = Y[(1-lambda)I + lambda(YTY)^{-1/2}]', fillcolor = lightyellow]
     F5 [label = 'None\\n(No retraction)', fillcolor = lightyellow]
     F -> F1 [style = invis]
     F -> F2 [style = invis]
@@ -11525,18 +11543,18 @@ digraph NSA_Flow_FA {
   # Nodes
   Data [label='Input Data (X) or R', shape=box]
   RegR [label='Regularize R', shape=box]
-  InitComm [label='Initialize Communalities (h²)', shape=box]
-  BuildRmod [label='Build R_mod with h² on Diagonal', shape=box]
+  InitComm [label='Initialize Communalities (h^2)', shape=box]
+  BuildRmod [label='Build R_mod with h^2 on Diagonal', shape=box]
   PowerIter [label='Power Iteration: Orthonormal Basis & Loadings', shape=box]
   NSAFlow [label='NSA-Flow Regularization (w)', shape=box]
   EnergyPre [label='Compute Energy Pre-Rotation', shape=box]
   Rotate [label='Optional Rotation (varimax/promax/oblimin)', shape=box]
   EnergyPost [label='Compute Energy Post-Rotation', shape=box]
   UpdateBest [label='Update Best Loadings if Improved', shape=box]
-  UpdateH2 [label='Damped Update of h²', shape=box]
-  ConvergeCheck [label='Convergence Check (Δenergy & Δh²)', shape=diamond]
+  UpdateH2 [label='Damped Update of h^2', shape=box]
+  ConvergeCheck [label='Convergence Check (Deltaenergy & Deltah^2)', shape=diamond]
   FactorScores [label='Compute Factor Scores (optional)', shape=box]
-  Output [label='Output: Best Loadings, h², Energy Trace, etc.', shape=box]
+  Output [label='Output: Best Loadings, h^2, Energy Trace, etc.', shape=box]
 
   # Edges
   Data -> RegR -> InitComm -> BuildRmod -> PowerIter -> NSAFlow -> EnergyPre -> Rotate -> EnergyPost -> UpdateBest -> UpdateH2 -> ConvergeCheck
@@ -11747,7 +11765,7 @@ nsa_flow_pca <- function(X, k,
       alpha_init <- max(alpha_init * lr_reduction_factor, 1e-12)
       lr_reductions <- lr_reductions + 1
       if (verbose) {
-        cat(sprintf("No improvement for %d iters → reducing alpha_init by factor %.3f to %.3e (lr_reductions=%d)\n",
+        cat(sprintf("No improvement for %d iters -> reducing alpha_init by factor %.3f to %.3e (lr_reductions=%d)\n",
                     patience, lr_reduction_factor, alpha_init, lr_reductions))
       }
       no_improve_count <- 0  # reset after reducing LR
@@ -11773,8 +11791,8 @@ nsa_flow_pca <- function(X, k,
       converged_condition <- (iter > min_iters_before_stop) && (rel_energy_change < tol) && (grad_ok || delta_ok)
 
       if (verbose) {
-        cat(sprintf("  ΔEnergy: %.2e | GradNorm: %.2e | ΔY: %.2e | ConvergedCond: %s\n",
-                    rel_energy_change, rgrad_norm, delta_Y, ifelse(converged_condition, "✓", "×")))
+        cat(sprintf("  DeltaEnergy: %.2e | GradNorm: %.2e | DeltaY: %.2e | ConvergedCond: %s\n",
+                    rel_energy_change, rgrad_norm, delta_Y, ifelse(converged_condition, "[OK]", "x")))
       }
 
       if (converged_condition) {
@@ -12001,7 +12019,7 @@ nsa_flow_pca_fa <- function(
         } else if (rotate == "promax") {
           rot_res <- tryCatch(stats::promax(Y_ret), error = function(e) NULL)
         } else if (rotate == "oblimin") {
-          rot_res <- tryCatch(psych::oblimin(Y_ret, normalize = FALSE), error = function(e) NULL)
+          rot_res <- tryCatch(GPArotation::oblimin(Y_ret, normalize = FALSE), error = function(e) NULL)
         } else rot_res <- NULL
         if (!is.null(rot_res) && !is.null(rot_res$loadings)) {
           # psych rotations may return a "loadings" object; coerce to matrix
@@ -12084,8 +12102,8 @@ nsa_flow_pca_fa <- function(
       delta_ok <- (delta_Y < tol)
       converged_condition <- (iter > min_iters_before_stop) && (rel_energy_change < tol) && (grad_ok || delta_ok)
       if (verbose) {
-        cat(sprintf(" ΔEnergy: %.2e | ΔY: %.2e | ConvergedCond: %s\n",
-                    rel_energy_change, delta_Y, ifelse(converged_condition, "✓", "×")))
+        cat(sprintf(" DeltaEnergy: %.2e | DeltaY: %.2e | ConvergedCond: %s\n",
+                    rel_energy_change, delta_Y, ifelse(converged_condition, "[OK]", "x")))
       }
       if (converged_condition) {
         converged <- TRUE
@@ -12117,7 +12135,7 @@ nsa_flow_pca_fa <- function(
     rot_fun <- switch(rotate,
                       varimax = stats::varimax,
                       promax = stats::promax,
-                      oblimin = psych::oblimin,
+                      oblimin = GPArotation::oblimin,
                       NULL)
     if (!is.null(rot_fun)) {
       rot_res <- tryCatch(rot_fun(loadings), error = function(e) NULL)
@@ -12347,7 +12365,7 @@ nsa_flow_pca_fa_2 <- function(
         rot_fun <- switch(rotate,
                           varimax = stats::varimax,
                           promax = stats::promax,
-                          oblimin = psych::oblimin,
+                          oblimin = GPArotation::oblimin,
                           NULL)
         if (!is.null(rot_fun)) {
           rot_res <- tryCatch(rot_fun(Y_ret), error = function(e) NULL)
@@ -12420,8 +12438,8 @@ nsa_flow_pca_fa_2 <- function(
       delta_ok <- (delta_Y < tol)
       converged_condition <- (iter > min_iters_before_stop) && (rel_energy_change < tol) && (grad_ok || delta_ok)
       if (verbose) {
-        cat(sprintf(" ΔEnergy: %.2e | ΔY: %.2e | ConvergedCond: %s\n",
-                    rel_energy_change, delta_Y, ifelse(converged_condition, "✓", "×")))
+        cat(sprintf(" DeltaEnergy: %.2e | DeltaY: %.2e | ConvergedCond: %s\n",
+                    rel_energy_change, delta_Y, ifelse(converged_condition, "[OK]", "x")))
       }
       if (converged_condition) {
         converged <- TRUE
@@ -12451,7 +12469,7 @@ nsa_flow_pca_fa_2 <- function(
     rot_fun <- switch(rotate,
                       varimax = stats::varimax,
                       promax = stats::promax,
-                      oblimin = psych::oblimin,
+                      oblimin = GPArotation::oblimin,
                       NULL)
     if (!is.null(rot_fun)) {
       rot_res <- tryCatch(rot_fun(loadings), error = function(e) NULL)
@@ -12483,7 +12501,7 @@ nsa_flow_pca_fa_2 <- function(
 #' Compute Communalities from Factor Scores
 #'
 #' This function calculates the communality for each variable in the dataset,
-#' defined as the proportion of variance explained by the factor scores (R² from
+#' defined as the proportion of variance explained by the factor scores (R^2 from
 #' multiple linear regression of each variable on the scores). It provides an
 #' empirical estimate of how much each variable's variance is accounted for by
 #' the common factors. The function assumes the data is centered or standardized
@@ -12499,7 +12517,7 @@ nsa_flow_pca_fa_2 <- function(
 #'
 #' @details
 #' For each variable, a linear model is fit: \code{lm(data[, i] ~ scores)}, and
-#' the R² is extracted. This aligns with model-based communalities in factor
+#' the R^2 is extracted. This aligns with model-based communalities in factor
 #' analysis for large samples but may slightly overestimate due to in-sample
 #' fitting. For efficiency with large p, consider matrix-based alternatives, but
 #' this loop-based approach is simple and leverages base R.
@@ -12659,8 +12677,8 @@ posthoc_fa_summary <- function(data, loadings, scores = NULL, method = "PAF") {
     inv_mat <- tryCatch(solve(t(loadings) %*% loadings), error = function(e) NULL)
     if (is.null(inv_mat)) stop("Loadings matrix is singular, cannot compute factor scores.")
 
-    weights <- loadings %*% inv_mat  # p × k times k × k = p × k
-    scores <- data %*% weights       # n × p times p × k = n × k
+    weights <- loadings %*% inv_mat  # p x k times k x k = p x k
+    scores <- data %*% weights       # n x p times p x k = n x k
     colnames(scores) <- paste0("Factor", seq_len(ncol(loadings)))
 
     scores

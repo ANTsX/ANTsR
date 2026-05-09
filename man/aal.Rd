@@ -35,6 +35,6 @@ for the neuroanatomical AAL labels.
 data(aal)
 }
 \references{
-\url{http://en.wikipedia.org/wiki/Automated_Anatomical_Labeling}
+\url{https://en.wikipedia.org/wiki/Automated_Anatomical_Labeling}
 }
 \keyword{datasets}

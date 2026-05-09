@@ -7,7 +7,7 @@
 #' @param crop boolean automatically crops kernelImage
 #' @return convimage
 #' @author Brian B. Avants
-#' @keywords convolve, convolution
+#' @keywords convolve
 #' @examples
 #'
 #' fi <- antsImageRead(getANTsRData("r16"), 2)

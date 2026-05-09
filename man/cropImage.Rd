@@ -30,6 +30,4 @@ cropped <- cropImage(fi, fi, 100)
 \author{
 Brian B. Avants, Nicholas J. Tustison
 }
-\keyword{crop,}
-\keyword{extract}
-\keyword{sub-image}
+\keyword{crop}

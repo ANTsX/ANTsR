@@ -70,6 +70,5 @@ mytem <- list(smoothImage(tem, 3), temlab, temlab2)
 \author{
 Avants, BB
 }
-\keyword{Coordinates}
-\keyword{Talairach,}
-\keyword{Template,}
+\keyword{Talairach}
+\keyword{Template}

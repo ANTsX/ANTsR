@@ -33,7 +33,8 @@
 #' @param verbose boolean
 #' @return approximated image, segmentation and probabilities
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich, Nicholas J. Tustison
-#' @keywords fusion, template
+#' @keywords fusion
+#' @keywords template
 #' @importFrom grDevices colorRampPalette dev.off heat.colors hsv png rainbow rgb
 #' @importFrom graphics hist par plot points
 #' @importFrom magrittr %>%
@@ -326,7 +327,8 @@ jointLabelFusion <- function(
 #' @param ... extra parameters passed to JLF
 #' @return label probabilities and segmentations
 #' @author Brian B. Avants
-#' @keywords fusion, template
+#' @keywords fusion
+#' @keywords template
 #'
 #' @export localJointLabelFusion
 localJointLabelFusion <- function(

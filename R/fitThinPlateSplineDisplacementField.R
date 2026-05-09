@@ -2,7 +2,7 @@
 #'
 #' Fit a thin-plate spline object to a set of source points with associated displacements.
 #' This is basically a wrapper
-#' for the ITK class \url{https://itk.org/Doxygen/html/itkThinPlateSplineKernelTransform_8h.html}.
+#' for the ITK class \url{http://docs.itk.org/projects/doxygen/en/stable/itkThinPlateSplineKernelTransform_8h.html}.
 #' Returns a displacement field.
 #'
 #' @param displacementOrigins matrix (\code{numberOfPoints x dimension}) defining the

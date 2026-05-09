@@ -1,4 +1,3 @@
-library(forcats) # For fct_rev
 library(ANTsR)
 library(ggrepel)
 library(ggplot2)

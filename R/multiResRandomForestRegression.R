@@ -57,7 +57,7 @@
 #' )
 #' preds <- predict(rfm, newdata = featMat)
 #' \dontrun{
-#' # data: https://github.com/stnava/ANTsTutorial/tree/master/phantomData
+#' # data: https://github.com/ANTsX/ANTsTutorial/tree/master/phantomData
 #' fns <- Sys.glob("phantom*wmgm.jpg")
 #' ilist <- imageFileNames2ImageList(fns)
 #' masklist <- list()

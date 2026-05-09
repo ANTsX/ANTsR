@@ -26,6 +26,6 @@ DesikanKillianyTourville labels.
 data(DesikanKillianyTourville)
 }
 \references{
-\url{http://www.ncbi.nlm.nih.gov/pubmed/23227001}
+\url{https://pubmed.ncbi.nlm.nih.gov/23227001}
 }
 \keyword{datasets}

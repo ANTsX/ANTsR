@@ -13,7 +13,7 @@ over time.}
 \item{thresholdSVD}{is used to threshold the smaller elements of the
 diagonal matrix during the SVD regularization.  0.2 is a common choice
 (cf. page 571, end of column 2 in
-http://www.ncbi.nlm.nih.gov/pubmed/16971140).}
+https://pubmed.ncbi.nlm.nih.gov/16971140).}
 }
 \value{
 regularized residue function, i.e. the right-hand side of
@@ -22,7 +22,7 @@ regularized residue function, i.e. the right-hand side of
 \description{
 Ostergaard's regularization approach for a model independent solution of
 cerebral blood flow using a blood pool contrast agent
-(http://www.ncbi.nlm.nih.gov/pubmed/8916023).
+(https://pubmed.ncbi.nlm.nih.gov/8916023).
 }
 \examples{
 

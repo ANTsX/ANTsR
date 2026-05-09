@@ -141,5 +141,5 @@ plot(pp$intensity)
 \author{
 Brian B. Avants, Hongzhi Wang, Paul Yushkevich, Nicholas J. Tustison
 }
-\keyword{fusion,}
+\keyword{fusion}
 \keyword{template}

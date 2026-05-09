@@ -21,7 +21,8 @@
 #' @return The output point coordinates are in approximate Talairach / MNI (or
 #' whatever) template space.
 #' @author Avants, BB
-#' @keywords Talairach, Template, Coordinates
+#' @keywords Talairach
+#' @keywords Template
 #' @examples
 #' \dontrun{
 #' tem <- antsImageRead(getANTsRData("ch2"))

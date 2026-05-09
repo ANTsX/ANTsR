@@ -19,7 +19,7 @@ Wrapper for the ITK class HausdorffDistanceImageFilter.  More documentaiton
 available here:
 }
 \details{
-\url{https://itk.org/Doxygen/html/classitk_1_1HausdorffDistanceImageFilter.html}
+\url{http://docs.itk.org/projects/doxygen/en/stable/classitk_1_1HausdorffDistanceImageFilter.html}
 }
 \examples{
 

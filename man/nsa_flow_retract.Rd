@@ -6,6 +6,13 @@
 \usage{
 nsa_flow_retract(Y_cand, w_retract, retraction_type)
 }
+\arguments{
+\item{Y_cand}{Candidate matrix.}
+
+\item{w_retract}{Weight for soft retraction.}
+
+\item{retraction_type}{Type of retraction ('polar', 'soft_polar', or 'none').}
+}
 \description{
 Retraction onto the Stiefel Manifold
 }

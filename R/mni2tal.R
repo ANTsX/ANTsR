@@ -9,7 +9,6 @@
 #' @author Matthew Brett, adapted for ANTsR by B Avants
 #' @keywords Talairach
 #' @references
-#' \url{http://bioimagesuite.yale.edu/mni2tal/501_95733_More\%20Accurate\%20Talairach\%20Coordinates\%20SLIDES.pdf},
 #' \url{http://imaging.mrc-cbu.cam.ac.uk/imaging/MniTalairach}
 #' @examples
 #'

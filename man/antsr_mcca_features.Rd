@@ -13,7 +13,7 @@ antsr_mcca_features(
 )
 }
 \arguments{
-\item{data_matrices}{A named list of numeric matrices, each subjects × features.
+\item{data_matrices}{A named list of numeric matrices, each subjects x features.
 All matrices must have the same number of subjects (rows).}
 
 \item{k}{Integer. Number of canonical components to extract.}
@@ -26,9 +26,9 @@ All matrices must have the same number of subjects (rows).}
 }
 \value{
 A list containing:
-  \item{loadings}{List of projection matrices (features × k) for each view.}
-  \item{scores}{List of canonical variates (subjects × k) for each view.}
-  \item{shared_embedding}{Average canonical embedding across views (subjects × k).}
+  \item{loadings}{List of projection matrices (features x k) for each view.}
+  \item{scores}{List of canonical variates (subjects x k) for each view.}
+  \item{shared_embedding}{Average canonical embedding across views (subjects x k).}
   \item{correlations}{Vector of canonical correlations.}
 }
 \description{

@@ -15,7 +15,8 @@
 #' @param convertToTal bool, return talairach coordinates
 #' @return The output point is in approximate template space.
 #' @author Avants, BB
-#' @keywords Talairach, Template, Coordinates
+#' @keywords Talairach
+#' @keywords Template
 #' @examples
 #' \dontrun{
 #' #

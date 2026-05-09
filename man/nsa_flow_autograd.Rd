@@ -62,6 +62,8 @@ nsa_flow_autograd(
 
 \item{window_size}{integer window for energy stability}
 
+\item{warmup_iters}{integer number of warmup iterations}
+
 \item{plot}{logical produce ggplot (default FALSE)}
 
 \item{precision}{'float32' or 'float64'}

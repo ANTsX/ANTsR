@@ -13,22 +13,3 @@
   } 
   invisible()
 }
-
-#' Set ANTs deterministic behavior
-#'
-#' @param on Set deterministic behavior.
-#' @param seedValue Assign random seed value.
-#'
-#' @export setANTsDeterministic
-setANTsDeterministic <- function( on = TRUE, seedValue = 123 ) 
-{
-  options( ants.deterministic = on )
-  if( on ) {
-    Sys.setenv( ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS = "1" )
-    if ( !is.null( seedValue ) ) {
-      set.seed( seedValue )
-      options( ants.randomSeed = seedValue )
-      Sys.setenv( ANTS_RANDOM_SEED = seedValue )
-    }
-  }
-}

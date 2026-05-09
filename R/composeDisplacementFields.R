@@ -15,10 +15,11 @@ composeDisplacementFields <- function(
 ) {
   
   dimensionality <- displacementField@dimension
-  
-  compField <- ANTsRCore::composeDisplacementFields(
-                      dimensionality,
-                      displacementField,
-                      warpingField)
+  outimg <- tempfile(fileext = ".nii.gz")
+  antsApplyTransforms(fixed = displacementField,
+                      moving = displacementField,
+                      transformlist = list(displacementField, warpingField),
+                      compose = outimg)
+  compField <- antsImageRead(outimg)
   return( compField )
 }

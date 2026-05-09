@@ -59,7 +59,7 @@ antsSpatialICAfMRI <- function(
   # Group ICA is performed by concatenating the time series of the bold images
   # (similar to MELODIC---http://fsl.fmrib.ox.ac.uk/fsl/fslwiki/MELODIC).  Other
   # possible group approaches are described in
-  # http://www.ncbi.nlm.nih.gov/pubmed/19059344
+  # https://pubmed.ncbi.nlm.nih.gov/19059344
 
   for (i in 1:numberOfBoldImages) {
     # if there's only 1 bold image, then it will be whitened in the fastICA function

@@ -8,6 +8,8 @@ inv_sqrt_sym(M, epsilon = 1e-10)
 }
 \arguments{
 \item{M}{Numeric symmetric matrix (k x k).}
+
+\item{epsilon}{Small numeric value for numerical stability (default 1e-10).}
 }
 \value{
 Numeric matrix, the inverse square root of M.

@@ -14,7 +14,8 @@
 #' @param verbose boolean
 #' @return segmentation of time series
 #' @author Brian B. Avants
-#' @keywords fusion, template
+#' @keywords fusion
+#' @keywords template
 #' @export
 #'
 #' @examples

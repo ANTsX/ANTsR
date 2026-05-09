@@ -23,7 +23,6 @@ A data frame listing the following variables.
   \item{\code{Brodmann}}{ Broadmann area number }
   \item{\code{AAL}}{ AAL region label }
 }
-#' @references \url{http://www.nil.wustl.edu/labs/petersen/Resources.html}
 }
 \usage{
 powers_areal_mni_itk
@@ -54,5 +53,8 @@ ptrd <- 3
 powersLabels <- makePointsImage(coordsw, moving, radius = pard)
 plot(moving, powersLabels, axis = 3, nslices = 30)
 }
+}
+\references{
+Power, J. D., et al. (2011). "Functional network organization of the human brain." Neuron 72(4): 665-678.
 }
 \keyword{datasets}

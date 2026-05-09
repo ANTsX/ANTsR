@@ -18,10 +18,10 @@ transform_matrix(
   \item `"center"`: subtract column means
   \item `"zscore"`: center and scale columns by their standard deviations
   \item `"minmax"`: rescale columns to [0, 1]
-  \item `"l2"`: normalize each column to unit L2 norm, then multiply by √(p·k)
-  \item `"frob"`: normalize entire matrix to unit Frobenius norm, then multiply by √(p·k)
+  \item `"l2"`: normalize each column to unit L2 norm, then multiply by sqrt(p*k)
+  \item `"frob"`: normalize entire matrix to unit Frobenius norm, then multiply by sqrt(p*k)
   \item `"frob_zscore"`: z-score columns, then normalize Frobenius norm,
-        then multiply by √(p·k)
+        then multiply by sqrt(p*k)
 }}
 }
 \value{

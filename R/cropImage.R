@@ -8,7 +8,7 @@
 #' @param label the label value to use
 #' @return subimage
 #' @author Brian B. Avants, Nicholas J. Tustison
-#' @keywords crop, extract sub-image
+#' @keywords crop
 #' @examples
 #'
 #' fi <- antsImageRead(getANTsRData("r16"))
@@ -42,7 +42,7 @@ cropImage <- function(image, labelImage, label = 1) {
 #' @param upperind vector of upper index, should be length image dimensionality
 #' @return subimage
 #' @author Brian B. Avants, Nicholas J. Tustison
-#' @keywords crop, extract sub-image
+#' @keywords crop
 #' @examples
 #'
 #' fi <- antsImageRead(getANTsRData("r16"))
@@ -88,7 +88,7 @@ cropIndices <- function(image, lowerind, upperind) {
 #' @param fullImage antsImage to put back into
 #' @return decroppedImage
 #' @author Brian B. Avants, Nicholas J. Tustison
-#' @keywords decrop, extract sub-image
+#' @keywords decrop
 #' @examples
 #'
 #' fi <- antsImageRead(getANTsRData("r16"))

@@ -54,8 +54,5 @@ set.seed(123)
 \author{
 Brian Beaumont Avants and Benjamin M. Kandel
 }
-\keyword{asl,}
-\keyword{bayesian}
-\keyword{blood}
-\keyword{cerebral}
-\keyword{flow,}
+\keyword{asl}
+\keyword{flow}

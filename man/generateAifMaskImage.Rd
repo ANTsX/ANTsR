@@ -22,7 +22,7 @@ list( mask image, fitting results )
 \description{
 Automated approach for generating a mask to be used for modeling the
 arterial input function using the method described in
-https://www.ncbi.nlm.nih.gov/pubmed/15956519.
+https://pubmed.ncbi.nlm.nih.gov/15956519.
 }
 \author{
 Tustison NJ

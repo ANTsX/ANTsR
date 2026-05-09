@@ -15,7 +15,7 @@ antsr_rgcca_sparse(
 )
 }
 \arguments{
-\item{data_matrices}{Named list of subject × feature matrices. Each must have the same number of rows.}
+\item{data_matrices}{Named list of subject x feature matrices. Each must have the same number of rows.}
 
 \item{ncomp}{Number of canonical components per view (default = 3)}
 
@@ -31,8 +31,8 @@ antsr_rgcca_sparse(
 }
 \value{
 A list with:
-  \item{loadings}{List of sparse feature loadings (features × components)}
-  \item{scores}{List of subject × component canonical variates}
+  \item{loadings}{List of sparse feature loadings (features x components)}
+  \item{scores}{List of subject x component canonical variates}
   \item{shared_embedding}{Average canonical embedding across modalities}
   \item{correlations}{Canonical correlations across shared space}
 }

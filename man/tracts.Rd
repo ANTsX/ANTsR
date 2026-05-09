@@ -22,6 +22,6 @@ the white matter tracts labels.
 data(tracts)
 }
 \references{
-\url{http://www.ncbi.nlm.nih.gov/pubmed/18407524}
+\url{https://pubmed.ncbi.nlm.nih.gov/18407524}
 }
 \keyword{datasets}

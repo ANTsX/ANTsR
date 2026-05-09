@@ -79,7 +79,7 @@ ANTsR image.
 Fit a b-spline object to a dense displacement field image and/or a set of points
 with associated displacements and smooths them using B-splines.  The inverse
 can also be estimated..  This is basically a wrapper
-for the ITK filter \url{https://itk.org/Doxygen/html/classitk_1_1DisplacementFieldToBSplineImageFilter.html}
+for the ITK filter \url{http://docs.itk.org/projects/doxygen/en/stable/classitk_1_1DisplacementFieldToBSplineImageFilter.html}
 which, in turn is a wrapper for the ITK filter used for the function
 \code{ANTsR::fitBsplineObjectToScatteredData}
 }

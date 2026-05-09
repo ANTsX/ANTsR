@@ -31,5 +31,4 @@ convout2 <- convolveImage(fi, convimg2)
 \author{
 Brian B. Avants
 }
-\keyword{convolution}
-\keyword{convolve,}
+\keyword{convolve}

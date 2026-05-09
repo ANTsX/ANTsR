@@ -60,7 +60,7 @@ a list consisting of the refined segmentation estimate
 A random forest implementation of the corrective learning wrapper
 introduced
 in Wang, et al., Neuroimage 2011
-(http://www.ncbi.nlm.nih.gov/pubmed/21237273).
+(https://pubmed.ncbi.nlm.nih.gov/21237273).
 The prediction process involves using the label-specific training
 models
 to refine an initial segmentation.

@@ -6,17 +6,17 @@
 \alias{ANTsR}
 \title{Advanced Normalization Tools in R}
 \description{
-ANTsR interfaces state of the art image processing with R statistical methods. The project grew out of the need, at University of Pennsylvania, to develop large-scale analytics pipelines that track provenance from scanner to scientific study. ANTsR wraps an ANTs and ITK C++ core via Rcpp to access these frameworks from within R and support reproducible analyses. Specialized functionality in ANTsR includes image segmentation and registration along imaging specific variations of principal component and canonical correlation analysis.
+Quantification tools for biomedical images that interface state of the art image processing with R statistical methods. The project grew out of the need, at University of Pennsylvania, to develop large-scale analytics pipelines that track provenance from scanner to scientific study. ANTsR wraps an ANTs and ITK C++ core via Rcpp to access these frameworks from within R and support reproducible analyses. Specialized functionality in ANTsR includes image segmentation and registration along imaging specific variations of principal component and canonical correlation analysis.
 }
 \author{
-\strong{Maintainer}: Brian B Avants \email{stnava@gmail.com}
+\strong{Maintainer}: Brian B. Avants \email{stnava@gmail.com}
 
 Other contributors:
 \itemize{
-  \item Benjamin M Kandel [contributor]
-  \item Jeff T Duda [contributor]
-  \item Philip A Cook [contributor]
-  \item Nicholas J Tustison [contributor]
+  \item Benjamin M. Kandel [contributor]
+  \item Jeff T. Duda [contributor]
+  \item Philip A. Cook [contributor]
+  \item Nicholas J. Tustison [contributor]
   \item Dorian Pustina [contributor]
 }
 

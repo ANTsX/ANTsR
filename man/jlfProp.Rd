@@ -91,5 +91,5 @@ pp <- jlfProp(tarlist, refmask, ilist,
 \author{
 Brian B. Avants
 }
-\keyword{fusion,}
+\keyword{fusion}
 \keyword{template}
