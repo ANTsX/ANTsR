@@ -2096,7 +2096,9 @@ orthogonalizeAndQSparsify <- function(
   epsval <- 0.0
   
   for (vv in 1:ncol(v)) {
-    if (var(v[, vv]) > epsval) {
+    v_var <- var(v[, vv], na.rm = TRUE)
+    if (!is.finite(v_var)) v_var <- 0
+    if (v_var > epsval) {
       if (vv > 1 && orthogonalize) {
         for (vk in 1:(vv - 1)) {
           temp <- v[, vk]
@@ -3166,20 +3168,30 @@ initializeSimlr <- function(
     zeroUpper = FALSE, uAlgorithm = "ba_svd", addNoise = 0) {
   nModalities <- length(voxmats)
 
-  for ( i in 1:nModalities ) {
+  for (i in 1:nModalities) {
+    # 1. Clean NA and Inf values early
+    if (any(!is.finite(voxmats[[i]]))) {
+      voxmats[[i]] <- antsrimpute(voxmats[[i]])
+      # If still has non-finite (e.g. all NA), replace with 0
+      voxmats[[i]][!is.finite(voxmats[[i]])] <- 0
+    }
+
+    # 2. Replace zero variance columns with the column mean + noise
     col_min <- apply(voxmats[[i]], 2, min, na.rm = TRUE)
     col_max <- apply(voxmats[[i]], 2, max, na.rm = TRUE)
-    zero_var_idx <- which(col_min == col_max)
+    zero_var_idx <- which(col_min == col_max | !is.finite(col_min) | !is.finite(col_max))
+
     if (length(zero_var_idx) > 0) {
-      # 2. Calculate the mean of each row across all columns
-      # na.rm = TRUE ensures we get a value even if some other columns have NAs
-      r_means <- rowMeans(voxmats[[i]], na.rm = TRUE)
-      
-      # 3. Replace only the zero-variance columns
-      # We use a loop or an apply-based approach to ensure 
-      # each constant column now reflects the row-wise average
       for (col in zero_var_idx) {
-        voxmats[[i]][, col] <- r_means
+        # Get the mean of the specific zero-variance column
+        c_mean <- mean(voxmats[[i]][, col], na.rm = TRUE)
+        if (!is.finite(c_mean)) c_mean <- 0
+        
+        # Add deterministic epsilon noise to give it some small variance
+        n_rows <- nrow(voxmats[[i]])
+        eps_noise <- sin(seq_len(n_rows) * (pi / n_rows) * (col + i)) * 1e-6
+        
+        voxmats[[i]][, col] <- c_mean + eps_noise
       }
     }
   }
@@ -3675,7 +3687,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
   norm_C <- sqrt(sum(C^2))
   
   # Handle edge case
-  if (norm_C < .Machine$double.eps) return(V * 0)
+  if (!is.finite(norm_C) || norm_C < .Machine$double.eps) return(V * 0)
   
   # Driving term from the gradient formula
   driving_term <- crossprod(X, U)
@@ -3713,7 +3725,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
   C <- crossprod(U, X %*% V)
   trace_C <- sum(diag(C))
   norm_C_sq <- sum(C^2)
-  if (norm_C_sq < .Machine$double.eps) return(V * 0)
+  if (!is.finite(norm_C_sq) || norm_C_sq < .Machine$double.eps) return(V * 0)
   norm_C <- sqrt(norm_C_sq)
 
   XtU <- crossprod(X, U)
@@ -3737,7 +3749,8 @@ gradient_invariant_orthogonality_salad<- function(A) {
   projection_XV <- X %*% V
   norm_U <- sqrt(sum(U^2))
   norm_XV <- sqrt(sum(projection_XV^2))
-  if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(2.0)
+  if (!is.finite(norm_U) || !is.finite(norm_XV) || 
+      norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(2.0)
   U_norm <- U / norm_U
   XV_norm <- projection_XV / norm_XV
   return(sum((U_norm - XV_norm)^2))
@@ -3751,7 +3764,8 @@ gradient_invariant_orthogonality_salad<- function(A) {
   projection_XV <- X %*% V
   norm_U <- sqrt(sum(U^2))
   norm_XV <- sqrt(sum(projection_XV^2))
-  if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(V * 0)
+  if (!is.finite(norm_U) || !is.finite(norm_XV) || 
+      norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(V * 0)
 
   trace_term <- sum(diag(crossprod(U, projection_XV)))
   grad_J_numerator <- (crossprod(X, U) * (norm_XV^2)) - (trace_term * crossprod(X, projection_XV))
@@ -3769,7 +3783,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
   cross_cov <- crossprod(U, X %*% V)
   numerator <- sum(diag(cross_cov))
   frobenius_norm <- sqrt(sum(cross_cov^2))
-  if (frobenius_norm < .Machine$double.eps) return(0)
+  if (!is.finite(frobenius_norm) || frobenius_norm < .Machine$double.eps) return(0)
   return(numerator / frobenius_norm)
 }
 
@@ -3788,7 +3802,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
   norm_C <- sqrt(sum(C^2))
   
   # Handle edge case
-  if (norm_C < .Machine$double.eps) {
+  if (!is.finite(norm_C) || norm_C < .Machine$double.eps) {
     return(V * 0)
   }
 
@@ -3821,7 +3835,10 @@ gradient_invariant_orthogonality_salad<- function(A) {
   projection_XV <- X %*% V
   norm_U <- sqrt(sum(U^2))
   norm_XV <- sqrt(sum(projection_XV^2))
-  if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(0)
+  if (!is.finite(norm_U) || !is.finite(norm_XV) || 
+      norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) {
+    return(0)
+  }
 
   cross_cov <- crossprod(U, projection_XV)
   numerator <- sum(abs(diag(cross_cov)))
@@ -3835,7 +3852,10 @@ gradient_invariant_orthogonality_salad<- function(A) {
   projection_XV <- X %*% V
   norm_U <- sqrt(sum(U^2))
   norm_XV <- sqrt(sum(projection_XV^2))
-  if (norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) return(V * 0)
+  if (!is.finite(norm_U) || !is.finite(norm_XV) || 
+      norm_U < .Machine$double.eps || norm_XV < .Machine$double.eps) {
+    return(V * 0)
+  }
 
   cross_cov <- crossprod(U, projection_XV)
   signer <- diag(sign(diag(cross_cov)), nrow = ncol(U), ncol = ncol(U))
@@ -3960,7 +3980,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
   # --- 3. Calculate the Normalization Factor ---
   # The factor is the squared Frobenius norm of the ORIGINAL data matrix.
   norm_X_sq <- sum(X^2) + 1e0
-  if (norm_X_sq < .Machine$double.eps) {
+  if (!is.finite(norm_X_sq) || norm_X_sq < .Machine$double.eps) {
     return(0) # Error is zero if the data is zero
   }
 
@@ -3989,7 +4009,7 @@ gradient_invariant_orthogonality_salad<- function(A) {
   # --- 1. Calculate the scaling factor from the energy function ---
   # The factor is 2 / ||X||_F^2.
   norm_X_sq <- sum(X^2) + 1e0
-  if (norm_X_sq < .Machine$double.eps) {
+  if (!is.finite(norm_X_sq) || norm_X_sq < .Machine$double.eps) {
     return(V * 0) # Gradient is zero if data matrix is zero
   }
   scaling_factor <- 2 / norm_X_sq
@@ -4243,9 +4263,9 @@ clip_gradient_by_quantile <- function(gradient, quantile = 0.80) {
   # Calculate the threshold using the specified quantile of these absolute values
   threshold <- quantile(abs_gradient_values, probs = quantile, na.rm = TRUE)
   
-  # Handle the edge case where the threshold is zero (e.g., for a zero matrix)
-  if (threshold < .Machine$double.eps) {
-    return(gradient) # No clipping needed if threshold is zero
+  # Handle the edge case where the threshold is zero or non-finite
+  if (!is.finite(threshold) || threshold < .Machine$double.eps) {
+    return(gradient) # No clipping needed if threshold is zero or invalid
   }
   
   # --- 3. Perform Clipping (Vectorized) ---
@@ -4788,34 +4808,43 @@ simlr <- function(
   # 1.0 adjust matrix norms
   if (!(any(scaleList == "none"))) {
     for (i in 1:nModalities) {
- 
-      # write code to replace zero variance columns with the row mean
+      # 1.1 Clean NA and Inf values early
+      if (any(!is.finite(data_matrices[[i]]))) {
+        data_matrices[[i]] <- antsrimpute(data_matrices[[i]])
+        # If still has non-finite (e.g. all NA), replace with 0
+        data_matrices[[i]][!is.finite(data_matrices[[i]])] <- 0
+      }
+
+      # 1.2 Replace zero variance columns with the column mean + noise
       col_min <- apply(data_matrices[[i]], 2, min, na.rm = TRUE)
       col_max <- apply(data_matrices[[i]], 2, max, na.rm = TRUE)
-      zero_var_idx <- which(col_min == col_max)
+      zero_var_idx <- which(col_min == col_max | !is.finite(col_min) | !is.finite(col_max))
 
       if (length(zero_var_idx) > 0) {
-        # 2. Calculate the mean of each row across all columns
-        # na.rm = TRUE ensures we get a value even if some other columns have NAs
-        r_means <- rowMeans(data_matrices[[i]], na.rm = TRUE)
-        
-        # 3. Replace only the zero-variance columns
-        # We use a loop or an apply-based approach to ensure 
-        # each constant column now reflects the row-wise average
         for (col in zero_var_idx) {
-          data_matrices[[i]][, col] <- r_means
+          # Get the mean of the specific zero-variance column
+          c_mean <- mean(data_matrices[[i]][, col], na.rm = TRUE)
+          if (!is.finite(c_mean)) c_mean <- 0
+          
+          # Add deterministic epsilon noise to give it some small variance
+          n_rows <- nrow(data_matrices[[i]])
+          eps_noise <- sin(seq_len(n_rows) * (pi / n_rows) * (col + i)) * 1e-6
+          
+          data_matrices[[i]][, col] <- c_mean + eps_noise
         }
       }
-      if (any(is.null(data_matrices[[i]])) | any(is.na(data_matrices[[i]]))) {
-        stop(paste("input matrix", i, "is null or NA."))
+
+      if (any(is.null(data_matrices[[i]]))) {
+        stop(paste("input matrix", i, "is null."))
       }
       matnames <- names(data_matrices)[i]
-      if (any(is.na(data_matrices[[i]]))) {
-        data_matrices[[i]][is.na(data_matrices[[i]])] <- mean(data_matrices[[i]], na.rm = T)
-      }
+      
       for (j in 1:length(scaleList)) {
         if (scaleList[j] == "norm") {
-          data_matrices[[i]] <- data_matrices[[i]] / norm(data_matrices[[i]], type = "F")
+          fnorm <- norm(data_matrices[[i]], type = "F")
+          if (is.finite(fnorm) && fnorm > 0) {
+            data_matrices[[i]] <- data_matrices[[i]] / fnorm
+          }
         }
         if (scaleList[j] == "np") {
           data_matrices[[i]] <- data_matrices[[i]] / prod(dim(data_matrices[[i]]))
@@ -4870,7 +4899,7 @@ simlr <- function(
     r <- matrix(0, m, m)
     qi <- x[, 1]
     si <- sqrt(sum(qi^2))
-    if (si < .Machine$double.eps) si <- 1
+    if (!is.finite(si) || si < .Machine$double.eps) si <- 1
     q[, 1] <- qi / si
     r[1, 1] <- si
     for (i in 2:m) {
@@ -4880,7 +4909,7 @@ simlr <- function(
       qi <- xi - qj %*% rj
       r[1:(i - 1), i] <- rj
       si <- sqrt(sum(qi^2))
-      if (si < .Machine$double.eps) si <- 1
+      if (!is.finite(si) || si < .Machine$double.eps) si <- 1
       q[, i] <- qi / si
       r[i, i] <- si
     }
@@ -5230,7 +5259,7 @@ for (myit in 1:iterations) { # Begin main optimization loop
   # Update the "best" solution found so far based on mean total energy
   mean_current_energy <- mean(iter_results$total_energy, na.rm = TRUE)
   printit=FALSE
-  if (mean_current_energy < bestTot & myit >= 2 ) {
+  if (is.finite(mean_current_energy) && mean_current_energy < bestTot & myit >= 2 ) {
     lastBest = bestTot
     bestTot <- mean_current_energy
     bestRow <- myit
@@ -5552,8 +5581,8 @@ simlrU <- function(
     r <- matrix(0, m, m)
     qi <- x[, 1]
     si <- sqrt(sum(qi^2))
+    if (!is.finite(si) || si < .Machine$double.eps) si <- 1
     q[, 1] <- qi / si
-    if (si < .Machine$double.eps) si <- 1
     r[1, 1] <- si
     for (i in 2:m) {
       xi <- x[, i]
@@ -5562,7 +5591,7 @@ simlrU <- function(
       qi <- xi - qj %*% rj
       r[1:(i - 1), i] <- rj
       si <- sqrt(sum(qi^2))
-      if (si < .Machine$double.eps) si <- 1
+      if (!is.finite(si) || si < .Machine$double.eps) si <- 1
       q[, i] <- qi / si
       r[i, i] <- si
     }
@@ -5760,7 +5789,12 @@ simlr.perm <- function(data_matrices,
   simlrpermvarx_ttest <- c()
   if ( nperms >  1  ) {
     for (varname in refvarxmeansnms ) {
-      mytt <- t.test(simlrpermvarx[1, varname] - simlrpermvarx[-1, varname], alternative='greater')
+      # Safely perform t.test, handle "data are essentially constant" error
+      mytt <- tryCatch({
+        t.test(simlrpermvarx[1, varname] - simlrpermvarx[-1, varname], alternative='greater')
+      }, error = function(e) {
+        list(statistic = NA) # Return NA if test fails
+      })
       simlrpermvarx_ttest[varname] = mytt$statistic   
     }
     nexter=nrow(simlrpermvarx)+1
@@ -5969,8 +6003,11 @@ pairwise_matrix_similarity <- function(mat_list, feat_list, FUN=adjusted_rvcoef)
         L_j <- data.matrix(X_j) %*% data.matrix(V_j)
         
         # Compute RV coefficient
-        rv <- FUN(L_i, L_j)
-        
+        rv = 0.
+        if ( all(is.finite(L_i)) & all(is.finite(L_j))) {
+          rv <- FUN(L_i, L_j)
+        }
+
         # Store RV coefficient in matrix
         rv_coeffs[i, j] <- rv
         rv_coeffs_nms[i,j] = paste0( "rvcoef_", nms[i],"_",nms[j])
@@ -6096,10 +6133,10 @@ take_abs_unsigned <- function(m) {
     column <- m[, j]
 
     # Check if the column is unsigned (contains only non-negative or only non-positive values)
-    is_non_negative <- all(column >= 0)
-    is_non_positive <- all(column <= 0)
+    is_non_negative <- all(column >= 0, na.rm = TRUE)
+    is_non_positive <- all(column <= 0, na.rm = TRUE)
 
-    if (is_non_negative || is_non_positive) {
+    if (!is.na(is_non_negative) && !is.na(is_non_positive) && (is_non_negative || is_non_positive)) {
       # Apply absolute value if unsigned
       result_matrix[, j] <- abs(column)
     }
