@@ -40,7 +40,7 @@ jobs:
 
       - name: Query dependencies
         run: |
-          install.packages(c('remotes','pbapply','pak'))
+          install.packages(c('remotes','pbapply','pak','reticulate'))
           options(repos = c(
             ANTsX = 'https://antsx.github.io/drat',
             CRAN = 'https://cloud.r-project.org'
@@ -87,6 +87,9 @@ jobs:
           }
           if (!requireNamespace("ANTsRCore", quietly = TRUE)) {
             remotes::install_github("ANTsX/ANTsRCore")
+          }
+          if (!requireNamespace("reticulate", quietly = TRUE)) {
+            install.packages("reticulate")
           }
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
