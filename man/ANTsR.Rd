@@ -11,6 +11,11 @@ ANTsR interfaces state of the art image processing with R statistical methods. T
 \author{
 \strong{Maintainer}: Brian B Avants \email{stnava@gmail.com}
 
+Authors:
+\itemize{
+  \item Brian B Avants \email{stnava@gmail.com}
+}
+
 Other contributors:
 \itemize{
   \item Benjamin M Kandel [contributor]

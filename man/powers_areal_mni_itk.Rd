@@ -26,7 +26,7 @@ A data frame listing the following variables.
 #' @references \url{http://www.nil.wustl.edu/labs/petersen/Resources.html}
 }
 \usage{
-powers_areal_mni_itk
+data(powers_areal_mni_itk)
 }
 \description{
 A data frame providing coordinates for the nodes

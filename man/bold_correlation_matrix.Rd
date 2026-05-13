@@ -9,7 +9,7 @@ A data frame square correlation matrix listed by AAL
 anatomical column names.
 }
 \usage{
-bold_correlation_matrix
+data(bold_correlation_matrix)
 }
 \description{
 A data frame with an example square BOLD correlation matrix.
