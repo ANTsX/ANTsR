@@ -12,7 +12,7 @@ A data frame listing the following variables.
 }
 }
 \usage{
-tracts
+data(tracts)
 }
 \description{
 A data frame label numbers and names for

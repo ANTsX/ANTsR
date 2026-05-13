@@ -11,6 +11,11 @@ Quantification tools for biomedical images that interface state of the art image
 \author{
 \strong{Maintainer}: Brian B. Avants \email{stnava@gmail.com}
 
+Authors:
+\itemize{
+  \item Brian B Avants \email{stnava@gmail.com}
+}
+
 Other contributors:
 \itemize{
   \item Benjamin M. Kandel [contributor]

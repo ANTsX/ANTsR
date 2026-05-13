@@ -104,5 +104,5 @@ Suggests:
 LazyData: TRUE
 Additional_repositories: https://antsx.github.io/drat
 VignetteBuilder: knitr
-RoxygenNote: 7.3.3
 Encoding: UTF-8
+Config/roxygen2/version: 8.0.0

@@ -16,7 +16,7 @@ A data frame listing the following variables.
 }
 }
 \usage{
-DesikanKillianyTourville
+data(DesikanKillianyTourville)
 }
 \description{
 A data frame label numbers and names for the neuroanatomical

@@ -113,3 +113,60 @@ padOrCropImageToSize <- function( image, size )
   croppedImage <- cropImageCenter( image, size )
   return( croppedImage )
   }
+
+#' Crop a patch from an image around a center point
+#'
+#' @param image Input ANTs image
+#' @param centerPoint Physical space coordinates of center point (vector).
+#' @param patchSize Vector defining patch size.
+#'
+#' @return A cropped resampled patch image
+#' @author Tustison NJ
+#' @examples
+#'
+#' library( ANTsR )
+#' image <- antsImageRead( getANTsRData( "r16" ) )
+#' center <- c( 128, 128 )
+#' patch <- cropImageFromCenterPoint( image, center, c( 64, 64 ) )
+#'
+#' @export
+cropImageFromCenterPoint <- function( image, centerPoint, patchSize )
+{
+  index <- round( antsTransformPhysicalPointToIndex( image, centerPoint ) )
+
+  imageShape <- dim( image )
+
+  for( k in seq_along( imageShape ) )
+    {
+    if( index[k] < 1 )
+      {
+      index[k] <- 1
+      }
+    if( index[k] > imageShape[k] )
+      {
+      index[k] <- imageShape[k]
+      }
+    }
+
+  indexOffset <- index
+  for( k in seq_along( patchSize ) )
+    {
+    indexOffset[k] <- indexOffset[k] - round( 0.5 * patchSize[k] )
+    }
+
+  domainLow <- numeric( length(imageShape) )
+  domainHigh <- numeric( length(imageShape) )
+
+  for( k in seq_along(imageShape) )
+    {
+    domainLow[k] <- max(1, indexOffset[k] - 1)
+    domainHigh[k] <- min(imageShape[k], indexOffset[k] + 1)
+    }
+
+  domain <- cropIndices( image, domainLow, domainHigh )
+
+  patchImage <- makeImage( patchSize, 0 )
+  patchImage <- antsCopyImageInfo( domain, patchImage )
+
+  return( resampleImageToTarget( image, patchImage ) )
+}

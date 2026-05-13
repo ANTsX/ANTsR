@@ -25,7 +25,7 @@ A data frame listing the following variables.
 }
 }
 \usage{
-powers_areal_mni_itk
+data(powers_areal_mni_itk)
 }
 \description{
 A data frame providing coordinates for the nodes
