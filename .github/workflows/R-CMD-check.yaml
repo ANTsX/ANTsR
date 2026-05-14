@@ -88,8 +88,11 @@ jobs:
           if (!requireNamespace("ANTsRCore", quietly = TRUE)) {
             remotes::install_github("ANTsX/ANTsRCore")
           }
-          if (!requireNamespace("reticulate", quietly = TRUE)) {
-            install.packages("reticulate")
+          pkgs <- c("reticulate", "rsvd", "GPArotation", "Rcpp", "RcppEigen")
+          for (pkg in pkgs) {
+            if (!requireNamespace(pkg, quietly = TRUE)) {
+              install.packages(pkg)
+            }
           }
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
