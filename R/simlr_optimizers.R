@@ -961,28 +961,28 @@ step.nadam <- function(optimizer, i, V_current, descent_gradient, ...) {
                                             energy_function, initial_step_size = 1.0,
                                             alpha = 1e-4, beta = 0.5, min_step = 1e-12) {
   step_size <- initial_step_size
-  initial_energy <- energy_function(V_current)
+  initial_energy <- tryCatch(energy_function(V_current), error = function(e) Inf)
   
-  # Slope term: <grad(E), d> (should be negative)
+  # Slope term: <grad(E), d> (should be negative for descent)
   slope_term <- sum(ascent_gradient * descent_direction)
-  if (slope_term >= 0) {
-    warning("Line search given a non-descent direction. Stopping search.")
+  if (!is.finite(slope_term) || slope_term >= 0) {
+    # Silently return 0 step size if it's not a descent direction (e.g. flat gradient at convergence)
     return(0)
   }
   
-  # Backtrack until Armijo satisfied or step too small (guaranteed for small steps)
+  # Backtrack until Armijo satisfied or step too small
   while (step_size > min_step) {
     V_candidate <- V_current + step_size * descent_direction
     new_energy <- tryCatch(energy_function(V_candidate), error = function(e) Inf)
     
     # Armijo condition
-    if (new_energy <= initial_energy + alpha * step_size * slope_term) {
+    if (is.finite(new_energy) && new_energy <= initial_energy + alpha * step_size * slope_term) {
       return(step_size)
     }
     step_size <- beta * step_size
   }
   
-  warning("Robust line search failed to find a suitable step size; possibly at local minimum or numerical issue.")
+  # Return 0 without warning to gracefully handle local minima/flat manifolds
   return(0)
 }
 
