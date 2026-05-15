@@ -40,7 +40,7 @@ jobs:
 
       - name: Query dependencies
         run: |
-          install.packages(c('remotes','pbapply','pak','reticulate'))
+          install.packages(c('remotes','pbapply','pak','reticulate','rmarkdown'))
           options(repos = c(
             ANTsX = 'https://antsx.github.io/drat',
             CRAN = 'https://cloud.r-project.org'
