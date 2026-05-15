@@ -5718,10 +5718,16 @@ simlr.perm <- function(data_matrices,
   vmats, connectors = NULL, optimizationStyle = 'adam', 
   scale = c("centerAndScale", "eigenvalue"), 
   expBeta = 0, jointInitialization = TRUE, sparsenessAlg = NA, 
-  verbose = FALSE, nperms = 50, FUN='mean') {
+  verbose = FALSE, nperms = 50, FUN=adjusted_rvcoef,
+  cores = 1) {
   
   # Set up permutations
   myseeds <- 1:1000000
+  if ( !is.na( randomSeed ) ) {
+    set.seed( randomSeed )
+    myseeds <- sample( 1:1000000, nperms + 1 )
+  }
+
   # Initial SiMLR run
   simlr_result <- simlr( data_matrices, 
     smoothingMatrices=smoothingMatrices, 
@@ -5755,8 +5761,8 @@ simlr.perm <- function(data_matrices,
   simlrpermvarx[1, refvarxmeansnms]=refvarxmeans
   
   # begin permutation  
-  if ( nperms > 1 )
-    for (nperm in 1:nperms) {
+  if ( nperms > 1 ) {
+    perm_func <- function(nperm) {
       set.seed(myseeds[nperm])
       
       data_matrices_perm <- lapply(data_matrices, function(mat) mat[sample(1:nrow(mat)), ])
@@ -5780,17 +5786,33 @@ simlr.perm <- function(data_matrices,
           optimizationStyle=optimizationStyle, 
           scale=scale, expBeta=expBeta, 
           jointInitialization=jointInitialization, 
-          sparsenessAlg=sparsenessAlg, verbose=verbose )
+          sparsenessAlg=sparsenessAlg, verbose=FALSE )
       for ( k in 1:length(data_matrices)) {
-        simlr_result$v[[k]]=take_abs_unsigned(simlr_result$v[[k]])
+        simlr_result_perm$v[[k]] = take_abs_unsigned(simlr_result_perm$v[[k]])
         simlr_result_perm$v[[k]] = l1_normalize_features( simlr_result_perm$v[[k]] )
       }
       refvarxmeans_perm = pairwise_matrix_similarity( data_matrices_perm, simlr_result_perm$v, FUN=FUN )
-      simlrpermvarx[nperm + 1, refvarxmeansnms ] <- refvarxmeans_perm
-      if ( verbose > 2 ) {
-        print( simlrpermvarx[c(1,nperm+1),])
-      }
+      return(refvarxmeans_perm)
     }
+
+    if (cores > 1) {
+      if ( .Platform$OS.type == "unix" ) {
+        perm_results <- pbapply::pblapply(1:nperms, perm_func, cl = cores)
+      } else {
+        cl <- parallel::makeCluster(cores)
+        parallel::clusterExport(cl, varlist = ls(envir = environment()), envir = environment())
+        parallel::clusterEvalQ(cl, library(ANTsR))
+        perm_results <- pbapply::pblapply(1:nperms, perm_func, cl = cl)
+        parallel::stopCluster(cl)
+      }
+    } else {
+      perm_results <- pbapply::pblapply(1:nperms, perm_func)
+    }
+
+    for (nperm in 1:nperms) {
+      simlrpermvarx[nperm + 1, refvarxmeansnms ] <- perm_results[[nperm]]
+    }
+  }
   
   # Statistical significance testing
   simlrpermvarx_ttest <- c()
@@ -6370,7 +6392,8 @@ simlr.search <- function(
       verbose = verbose > 2,
       nperms = nperms,
       sparsenessAlg = sparsenessAlgVal,
-      FUN = FUN
+      FUN = FUN,
+      cores = if (nrow(options_df) == 1) cores else 1
     )
     
     wtest <- 1
