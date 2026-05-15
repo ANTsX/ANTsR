@@ -1,5 +1,7 @@
 #' Set ANTs deterministic behavior
 #'
+#' @name setANTsDeterministic
+#' @rdname setANTsDeterministic
 #' @param on Set deterministic behavior.
 #' @param seedValue Assign random seed value.
 #' @return No return value, called for side effects.

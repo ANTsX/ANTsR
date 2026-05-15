@@ -25,7 +25,7 @@ A data frame listing the following variables.
 }
 }
 \usage{
-data(aal)
+aal
 }
 \description{
 A data frame label numbers and names
