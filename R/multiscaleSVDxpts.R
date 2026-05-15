@@ -5765,6 +5765,9 @@ simlr.perm <- function(data_matrices,
   
   # begin permutation  
   if ( nperms > 1 ) {
+    if (verbose) {
+      cat(sprintf("Starting %d permutations using %d core(s)...\n", nperms, cores))
+    }
     perm_func <- function(nperm) {
       set.seed(myseeds[nperm])
       
