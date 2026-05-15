@@ -5042,16 +5042,36 @@ for (j in 1:nModalities) {
 }
 v_initial = vmats
 u_initial = initialUMatrix
-# --- 2. Main Optimization Loop ---
-for (myit in 1:iterations) { # Begin main optimization loop
-# --- Calculate dynamic learning rate for non-line-search methods ---
-  if ( myit <= 2 ) {
-    vmats = v_initial
-    initialUMatrix = u_initial
-  }
-  decay_progress <- (myit - 1) / max(1, iterations - 1)
-  current_learning_rate <- final_learning_rate + 0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
-  # --- A. Update each V_i matrix ---
+  v_prev <- vmats
+  stagnation_counter <- 0
+  # --- 2. Main Optimization Loop ---
+  for (myit in 1:iterations) { # Begin main optimization loop
+    # --- Calculate dynamic learning rate for non-line-search methods ---
+    if ( myit <= 2 ) {
+      vmats = v_initial
+      initialUMatrix = u_initial
+    }
+    decay_progress <- (myit - 1) / max(1, iterations - 1)
+    current_learning_rate <- final_learning_rate + 0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
+    
+    # Track if any matrix changed in this iteration
+    v_diff <- 0
+    for (kk in 1:nModalities) {
+      v_diff <- v_diff + sum((vmats[[kk]] - v_prev[[kk]])^2)
+    }
+    if (v_diff < .Machine$double.eps & myit > 2) {
+      stagnation_counter <- stagnation_counter + 1
+    } else {
+      stagnation_counter <- 0
+    }
+    v_prev <- vmats
+    
+    if (stagnation_counter >= 10) {
+      if (verbose) message("~~Parameter stagnation detected. Breaking loop.")
+      break
+    }
+    
+    # --- A. Update each V_i matrix ---
   for (i in 1:nModalities) {
     ##############################################################
     # first define the local versions of the energy and gradient #
@@ -5281,41 +5301,28 @@ for (myit in 1:iterations) { # Begin main optimization loop
     if ( myit > 5 ) {
       change_detector = pct_reduction_less_than( bestTot, lastBest, 0.01 )
       if (  change_detector[1] & verbose > 0 ) {
-        message(paste("~~Small.delt: E ", round(bestTot,4), " E-1 ", round(lastBest, 4),"E / E-1 ",round(change_detector[2],4)))
-        myit=iterations
+        if (verbose) message(paste("~~Small.delt: E ", round(bestTot,4), " E-1 ", round(lastBest, 4),"E / E-1 ",round(change_detector[2],4)))
+        break # Properly exit the loop
       }
     }
   } else {
+    # Lack of improvement - reduce learning rate
     initial_learning_rate = initial_learning_rate * 0.5
     final_learning_rate = final_learning_rate * 0.9
-    perturb_matrices <- function(U, V, scale_U = 1e-3, scale_V = 1e-3) {
-      U_perturbed <- U + matrix(rnorm(length(U), mean = 0, sd = scale_U),
-                                nrow = nrow(U), ncol = ncol(U))
-      V_perturbed <- V + matrix(rnorm(length(V), mean = 0, sd = scale_V),
-                                nrow = nrow(V), ncol = ncol(V))
-      list(U = U_perturbed, V = V_perturbed)
-    }
-#    for ( k in 1:length(vmats)) {
-#      mypert = perturb_matrices( initialUMatrix[[k]], vmats[[k]], scale_U = 1e-3, scale_V = 1e-3)
-#      initialUMatrix[[k]] = mypert$U
-#      vmats[[k]] = mypert$V
-#    }
   }
   
   if (verbose & printit | verbose > 1 ) {
     # Report the mean orthogonality across all modalities for this iteration
     mean_orthogonality <- mean(iter_results$feature_orthogonality, na.rm = TRUE)
-#    message(sprintf("Iter: %d | Mean Energy: %.4f | Best Energy: %.4f (at iter %d) | Mean Orthogonality: %.4f",
-#                  myit, mean_current_energy, bestTot, bestRow, mean_orthogonality))
     cat(sprintf("It: %d | Energy: %.4f | Best.Energy: %.4f (at iter %d) | Ortho: %.4f \n",
                   myit, mean_current_energy, bestTot, bestRow, mean_orthogonality))
     if ( myit == 1) cat("\n----iteration 1 is an auto-tuning iteration----\n")
   }
   
-  # Check for convergence
-  maxitnoimp = round( 0.1 * iterations )
+  # Check for convergence based on lack of improvement
+  maxitnoimp = max(5, round( 0.05 * iterations ))
   if ((myit - bestRow) > maxitnoimp) {
-    if(verbose) message(paste("~~Convergence criteria met @ ",myit," \n No improvement over 10% of max iterations", maxitnoimp))
+    if(verbose) message(paste("~~Convergence criteria met @ ",myit," \n No improvement over ", maxitnoimp, " iterations"))
     break
   }
 } # End main optimization loop
