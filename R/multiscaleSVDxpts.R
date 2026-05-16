@@ -6395,7 +6395,7 @@ simlr.search <- function(
       initialUMatrix = if ("lowrank" %in% prescaling) lowrankRowMatrix(initu, nsimlr * 2) else initu,
       constraint = constraint,
       connectors = connectors,
-      verbose = verbose > 2,
+      verbose = verbose,
       nperms = nperms,
       sparsenessAlg = sparsenessAlgVal,
       FUN = FUN,
@@ -6433,7 +6433,7 @@ simlr.search <- function(
   }
   
   # ---- Parallel or sequential run ----
-  if (cores > 1) {
+  if (cores > 1 && nrow(options_df) > 1) {
     cat(sprintf("Running %d parameter sets on %d cores...\n", nrow(options_df), cores))
     cl <- parallel::makeCluster(cores)
     on.exit(parallel::stopCluster(cl), add = TRUE)
@@ -6461,7 +6461,11 @@ simlr.search <- function(
     # 4. Run in parallel with progress bar
     results_list <- pbapply::pblapply(seq_len(nrow(options_df)), run_one, cl = cl)
   } else {
-    cat(sprintf("Running %d parameter sets sequentially...\n", nrow(options_df)))
+    if (nrow(options_df) > 1) {
+      cat(sprintf("Running %d parameter sets sequentially...\n", nrow(options_df)))
+    } else {
+      cat(sprintf("Running 1 parameter set with %d-core deep parallelism...\n", cores))
+    }
     results_list <- pbapply::pblapply(seq_len(nrow(options_df)), run_one)
   }
   
