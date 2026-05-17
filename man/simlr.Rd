@@ -12,7 +12,7 @@ simlr(
   positivities = NULL,
   initialUMatrix = NULL,
   mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic",
-    "newton-schulz"),
+    "newton-schulz", "ica-newton"),
   repeatedMeasures = NA,
   lineSearchRange = c(-500, 500),
   lineSearchTolerance = 1e-12,
@@ -52,7 +52,7 @@ number of basis functions in which case random initialization occurs. One
 may also pass a single initialization matrix to be used for all matrices.
 If this is set to a scalar, or is missing, a random matrix will be used.}
 
-\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
+\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz', 'ica-newton' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}

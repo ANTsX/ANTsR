@@ -3205,7 +3205,7 @@ initializeSimlr <- function(
   }
   if (jointReduction) {
     X <- Reduce(cbind, voxmats) # bind all matrices
-    if (uAlgorithm == "pca" | uAlgorithm == "svd" | uAlgorithm == "ba_svd" | uAlgorithm == "newton-schulz") {
+    if (uAlgorithm == "pca" | uAlgorithm == "svd" | uAlgorithm == "ba_svd" | uAlgorithm == "newton-schulz" | uAlgorithm == "ica-newton") {
       X.pcr <- stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "ba_svd") # PCA
       u <- (X.pcr$rotation)
     } else if (uAlgorithm == "ica") {
@@ -3227,7 +3227,7 @@ initializeSimlr <- function(
   uRand <- replicate(k, rnorm(nrow(voxmats[[1]])))
   for (s in 1:nModalities) {
     X <- Reduce(cbind, voxmats[-s])
-    if (localAlgorithm == "pca " | localAlgorithm == "svd" | localAlgorithm == "newton-schulz") {
+    if (localAlgorithm == "pca " | localAlgorithm == "svd" | localAlgorithm == "newton-schulz" | localAlgorithm == "ica-newton") {
       uOut[[s]] <- (stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "ba_svd")$rotation)
     } else if (localAlgorithm == "ica") {
       uOut[[s]] <- t(fastICA::fastICA(t(X), method = "C", n.comp = k)$A)
@@ -4609,7 +4609,7 @@ optimal_simlr_initializer <- function(data_matrices,
 #' number of basis functions in which case random initialization occurs. One
 #' may also pass a single initialization matrix to be used for all matrices.
 #' If this is set to a scalar, or is missing, a random matrix will be used.
-#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
+#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz', 'ica-newton' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
@@ -4702,7 +4702,7 @@ simlr <- function(
     sparsenessQuantiles = NULL,
     positivities = NULL,
     initialUMatrix = NULL,
-    mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic", "newton-schulz"),
+    mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic", "newton-schulz", "ica-newton"),
     repeatedMeasures = NA,
     lineSearchRange = c(-5e2, 5e2),
     lineSearchTolerance = 1e-12,
@@ -5664,6 +5664,33 @@ simlrU <- function(
       MtM <- t(M) %*% M
       inv_sqrt_MtM <- inv_sqrt_sym_newton(MtM)
       basis <- M %*% inv_sqrt_MtM
+    } else if (mixAlg == "ica-newton") {
+      # FastICA-style update with Newton-Schulz symmetric decorrelation
+      n_mod_minus_1 <- length(wtobind)
+      M <- matrix(0, nrow(avgU), nc)
+      for (idx in seq_len(n_mod_minus_1)) {
+        start_col <- (idx - 1) * nc + 1
+        end_col <- idx * nc
+        M <- M + avgU[, start_col:end_col]
+      }
+      M <- M / n_mod_minus_1
+      
+      # 1. Initial whitening of the average
+      MtM <- t(M) %*% M
+      M <- M %*% inv_sqrt_sym_newton(MtM)
+      
+      # 2. FastICA step: W_new = E[x * g(W'x)] - E[g'(W'x)] * W
+      # Here M acts as both data and initial weights since it's already a basis
+      # We use log-cosh contrast: g(u) = tanh(u), g'(u) = 1 - tanh^2(u)
+      tanhM <- tanh(M)
+      E1 <- t(M) %*% tanhM / nrow(M)
+      E2 <- colMeans(1 - tanhM^2)
+      # W_new = M %*% (E1 - diag(E2))
+      basis <- M %*% (E1 - diag(E2))
+      
+      # 3. Symmetric decorrelation via Newton-Schulz
+      BtB <- t(basis) %*% basis
+      basis <- basis %*% inv_sqrt_sym_newton(BtB)
     } else {
       basis <- (ba_svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
     }
