@@ -70,7 +70,7 @@ simlr.perm(
 
 \item{scale}{Scaling method. Default is 'centerAndScale'.}
 
-\item{expBeta}{Exponential beta value. Default is 0.}
+\item{expBeta}{Exponential beta value. Default is 0.9.}
 
 \item{jointInitialization}{Logical indicating joint initialization. Default is TRUE.}
 

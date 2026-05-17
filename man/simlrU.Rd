@@ -9,7 +9,8 @@ simlrU(
   mixingAlgorithm,
   initialW,
   orthogonalize = FALSE,
-  connectors = NULL
+  connectors = NULL,
+  expBeta = 0
 )
 }
 \arguments{

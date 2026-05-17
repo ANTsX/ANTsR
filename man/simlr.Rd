@@ -26,7 +26,7 @@ simlr(
   optimizationStyle = c("bidirectional_lookahead", "armijo_gradient", "lookahead",
     "bidirectional_armijo_gradient"),
   scale = c("center", "eigenvalue"),
-  expBeta = 0,
+  expBeta = 0.9,
   jointInitialization = TRUE,
   sparsenessAlg = "soft",
   orthogonalizeU = FALSE,
@@ -79,7 +79,7 @@ of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
 by the number of variables or center or center and scale or ... (see code).
 can be a vector which will apply each strategy in order.}
 
-\item{expBeta}{if greater than zero, use exponential moving average on gradient.}
+\item{expBeta}{if greater than zero, use exponential moving average on gradient and mixing (default 0.9).}
 
 \item{jointInitialization}{boolean for initialization options, default TRUE}
 

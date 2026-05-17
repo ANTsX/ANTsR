@@ -4625,7 +4625,7 @@ optimal_simlr_initializer <- function(data_matrices,
 #' of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
 #' by the number of variables or center or center and scale or ... (see code).
 #' can be a vector which will apply each strategy in order.
-#' @param expBeta if greater than zero, use exponential moving average on gradient.
+#' @param expBeta if greater than zero, use exponential moving average on gradient and mixing (default 0.9).
 #' @param jointInitialization boolean for initialization options, default TRUE
 #' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
 #' @param orthogonalizeU boolean controlling whether we orthogonalize the U matrices
@@ -4713,7 +4713,7 @@ simlr <- function(
     connectors = NULL,
     optimizationStyle = c("bidirectional_lookahead", "armijo_gradient","lookahead","bidirectional_armijo_gradient" ),
     scale = c("center",  "eigenvalue" ),
-    expBeta = 0.0,
+    expBeta = 0.9,
     jointInitialization = TRUE,
     sparsenessAlg = 'soft',
     orthogonalizeU = FALSE,
@@ -5203,9 +5203,10 @@ u_initial = initialUMatrix
       } else {
         tempU <- lapply(1:nModalities, function(j) data_matrices[[j]] %*% vmats[[j]])
       }
-    updated_Us <- simlrU(tempU, mixAlg, myw,
+    updated_Us <- simlrU(tempU, mixAlg, initialUMatrix,
                    orthogonalize = orthogonalizeU,
-                   connectors = connectors)
+                   connectors = connectors,
+                   expBeta = expBeta)
     # Apply Gram-Schmidt orthogonalization (localGS)
     initialUMatrix <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalizeU))
     #   cat(paste("<o><o><o><o><o><o><o><o><o><o>\n"))
@@ -5561,7 +5562,7 @@ safe_pca <- function(X, nc = min(dim(X)), center = TRUE, scale = TRUE) {
 #' @export
 simlrU <- function(
     projections, mixingAlgorithm, initialW,
-    orthogonalize = FALSE, connectors = NULL) {
+    orthogonalize = FALSE, connectors = NULL, expBeta = 0.0) {
   
   projectionsU <- projections
   for (kk in 1:length(projections)) {
@@ -5606,7 +5607,7 @@ simlrU <- function(
   }
   subU <- function(
     projectionsU, mixingAlgorithm, initialW,
-    orthogonalize, i, wtobind) {
+    orthogonalize, i, wtobind, previousU = NULL, expBeta = 0.0) {
     avgU <- NULL
     mixAlg <- mixingAlgorithm
     nComponents <- ncol(projectionsU[[1]])
@@ -5647,10 +5648,6 @@ simlrU <- function(
       basis <- (fastICA::fastICA(avgU, method = "C", n.comp = nc)$S)
     } else if (mixAlg == "newton-schulz") {
       # This is a fast way to get an orthogonal basis from the averaged projections
-      # We first average the projections, then use Newton-Schulz to orthogonalize
-      # avgU is already the concatenated projections here, so we take the mean across modalities
-      # which is essentially what 'avg' does but without the basis extraction.
-      # Here avgU has (nmodalities-1)*nc columns.
       n_mod_minus_1 <- length(wtobind)
       M <- matrix(0, nrow(avgU), nc)
       for (idx in seq_len(n_mod_minus_1)) {
@@ -5660,10 +5657,22 @@ simlrU <- function(
       }
       M <- M / n_mod_minus_1
       
-      # Orthogonalize M using Newton-Schulz: M_ortho = M * (M^T M)^{-1/2}
-      MtM <- t(M) %*% M
-      inv_sqrt_MtM <- inv_sqrt_sym_newton(MtM)
-      basis <- M %*% inv_sqrt_MtM
+      if (expBeta > 0 && !is.null(previousU)) {
+        # Exponential moving average blending
+        M <- (1 - expBeta) * M + expBeta * previousU
+        # Single Newton-Schulz iteration step for symmetric decorrelation
+        MtM <- t(M) %*% M
+        # We use a single NS step logic: W_{k+1} = 0.5 * W_k * (3I - W_k^T W_k)
+        # But we must ensure it's still a valid approximation.
+        # Alternatively, use inv_sqrt_sym_newton with max_iter=1
+        inv_sqrt_MtM <- inv_sqrt_sym_newton(MtM, max_iter = 1L)
+        basis <- M %*% inv_sqrt_MtM
+      } else {
+        # Standard full convergence
+        MtM <- t(M) %*% M
+        inv_sqrt_MtM <- inv_sqrt_sym_newton(MtM)
+        basis <- M %*% inv_sqrt_MtM
+      }
     } else if (mixAlg == "ica-newton") {
       # FastICA-style update with Newton-Schulz symmetric decorrelation
       n_mod_minus_1 <- length(wtobind)
@@ -5675,22 +5684,31 @@ simlrU <- function(
       }
       M <- M / n_mod_minus_1
       
-      # 1. Initial whitening of the average
-      MtM <- t(M) %*% M
-      M <- M %*% inv_sqrt_sym_newton(MtM)
-      
-      # 2. FastICA step: W_new = E[x * g(W'x)] - E[g'(W'x)] * W
-      # Here M acts as both data and initial weights since it's already a basis
-      # We use log-cosh contrast: g(u) = tanh(u), g'(u) = 1 - tanh^2(u)
-      tanhM <- tanh(M)
-      E1 <- t(M) %*% tanhM / nrow(M)
-      E2 <- colMeans(1 - tanhM^2)
-      # W_new = M %*% (E1 - diag(E2))
-      basis <- M %*% (E1 - diag(E2))
-      
-      # 3. Symmetric decorrelation via Newton-Schulz
-      BtB <- t(basis) %*% basis
-      basis <- basis %*% inv_sqrt_sym_newton(BtB)
+      if (expBeta > 0 && !is.null(previousU)) {
+        # 1. Blend current average with previous state
+        M_blended <- (1 - expBeta) * M + expBeta * previousU
+        # 2. Whiten blended (single step)
+        MtM <- t(M_blended) %*% M_blended
+        M_whitened <- M_blended %*% inv_sqrt_sym_newton(MtM, max_iter = 1L)
+        # 3. Single FastICA fixed-point step
+        tanhM <- tanh(M_whitened)
+        E1 <- t(M_whitened) %*% tanhM / nrow(M_whitened)
+        E2 <- colMeans(1 - tanhM^2)
+        basis <- M_whitened %*% (E1 - diag(E2))
+        # 4. Single NS decorrelation step
+        BtB <- t(basis) %*% basis
+        basis <- basis %*% inv_sqrt_sym_newton(BtB, max_iter = 1L)
+      } else {
+        # Standard full convergence (initial step or no EMA)
+        MtM <- t(M) %*% M
+        M <- M %*% inv_sqrt_sym_newton(MtM)
+        tanhM <- tanh(M)
+        E1 <- t(M) %*% tanhM / nrow(M)
+        E2 <- colMeans(1 - tanhM^2)
+        basis <- M %*% (E1 - diag(E2))
+        BtB <- t(basis) %*% basis
+        basis <- basis %*% inv_sqrt_sym_newton(BtB)
+      }
     } else {
       basis <- (ba_svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
     }
@@ -5703,13 +5721,19 @@ simlrU <- function(
   
   outU <- list()
   for (i in 1:length(projectionsU)) {
+    prev_u_i <- NULL
+    if (!is.null(initialW) && is.list(initialW)) prev_u_i <- initialW[[i]]
+    
     if (is.null(connectors)) {
-      outU[[i]] <- subU(projectionsU, mixingAlgorithm, initialW, orthogonalize, i)
+      outU[[i]] <- subU(projectionsU, mixingAlgorithm, initialW, orthogonalize, i, 
+                        previousU = prev_u_i, expBeta = expBeta)
     }
     if (!is.null(connectors)) {
       outU[[i]] <- subU(projectionsU, mixingAlgorithm, initialW, orthogonalize,
                         i,
-                        wtobind = connectors[[i]]
+                        wtobind = connectors[[i]],
+                        previousU = prev_u_i,
+                        expBeta = expBeta
       )
     }
   }
@@ -5743,7 +5767,7 @@ simlrU <- function(
 #' @param connectors List of connectors. Default is NULL.
 #' @param optimizationStyle The simlr optimizer.
 #' @param scale Scaling method. Default is 'centerAndScale'.
-#' @param expBeta Exponential beta value. Default is 0.
+#' @param expBeta Exponential beta value. Default is 0.9.
 #' @param jointInitialization Logical indicating joint initialization. Default is TRUE.
 #' @param sparsenessAlg Sparseness algorithm. Default is NA.
 #' @param verbose Logical indicating whether to print verbose output. Default is FALSE. values > 1 lead to more verbosity
