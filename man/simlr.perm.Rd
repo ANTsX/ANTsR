@@ -8,19 +8,19 @@ simlr.perm(
   data_matrices,
   smoothingMatrices,
   iterations = 10,
-  sparsenessQuantiles,
-  positivities,
-  initialUMatrix,
+  sparsenessQuantiles = NULL,
+  positivities = NULL,
+  initialUMatrix = NULL,
   mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
   orthogonalizeU = FALSE,
   repeatedMeasures = NA,
   lineSearchRange = c(-500, 500),
   lineSearchTolerance = 1e-12,
-  randomSeed,
+  randomSeed = 0,
   constraint = c("nsaflowx0.5x100", "orthox0.001x1", "Grassmannx0", "Stiefelx0", "none"),
   energyType = c("cca", "regression", "normalized", "acc", "dat", "lowRank",
     "lowRankRegression", "normalized_correlation", "logcosh", "exp", "kurtosis", "gauss"),
-  vmats,
+  vmats = NULL,
   connectors = NULL,
   optimizationStyle = "adam",
   scale = c("centerAndScale", "eigenvalue"),
@@ -29,7 +29,8 @@ simlr.perm(
   sparsenessAlg = NA,
   verbose = FALSE,
   nperms = 50,
-  FUN = "mean"
+  FUN = adjusted_rvcoef,
+  cores = 1
 )
 }
 \arguments{

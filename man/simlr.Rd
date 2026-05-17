@@ -8,10 +8,11 @@ simlr(
   data_matrices,
   smoothingMatrices,
   iterations = 500,
-  sparsenessQuantiles,
-  positivities,
-  initialUMatrix,
-  mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
+  sparsenessQuantiles = NULL,
+  positivities = NULL,
+  initialUMatrix = NULL,
+  mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic",
+    "newton-schulz"),
   repeatedMeasures = NA,
   lineSearchRange = c(-500, 500),
   lineSearchTolerance = 1e-12,
@@ -20,7 +21,7 @@ simlr(
   energyType = c("cca", "regression", "normalized", "ucca", "lowRank",
     "lowRankRegression", "normalized_correlation", "acc", "nc", "dat", "lrr", "reconorm",
     "logcosh", "exp", "kurtosis", "gauss"),
-  vmats,
+  vmats = NULL,
   connectors = NULL,
   optimizationStyle = c("bidirectional_lookahead", "armijo_gradient", "lookahead",
     "bidirectional_armijo_gradient"),
@@ -51,7 +52,7 @@ number of basis functions in which case random initialization occurs. One
 may also pass a single initialization matrix to be used for all matrices.
 If this is set to a scalar, or is missing, a random matrix will be used.}
 
-\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
+\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
 
 \item{repeatedMeasures}{list of repeated measurement identifiers. this will
 allow estimates of per identifier intercept.}

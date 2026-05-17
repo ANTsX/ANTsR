@@ -65,7 +65,7 @@ Other options include 'lrr', 'regression', 'nc', 'base.pca', 'base.spca', 'base.
 
 \item{sparseness}{vector or scalar value to set sparseness.}
 
-\item{mixAlg}{string 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
+\item{mixAlg}{string 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
 
 \item{iterations}{int value to set max iterations}
 

@@ -3205,7 +3205,7 @@ initializeSimlr <- function(
   }
   if (jointReduction) {
     X <- Reduce(cbind, voxmats) # bind all matrices
-    if (uAlgorithm == "pca" | uAlgorithm == "svd" | uAlgorithm == "ba_svd" ) {
+    if (uAlgorithm == "pca" | uAlgorithm == "svd" | uAlgorithm == "ba_svd" | uAlgorithm == "newton-schulz") {
       X.pcr <- stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "ba_svd") # PCA
       u <- (X.pcr$rotation)
     } else if (uAlgorithm == "ica") {
@@ -3227,7 +3227,7 @@ initializeSimlr <- function(
   uRand <- replicate(k, rnorm(nrow(voxmats[[1]])))
   for (s in 1:nModalities) {
     X <- Reduce(cbind, voxmats[-s])
-    if (localAlgorithm == "pca " | localAlgorithm == "svd") {
+    if (localAlgorithm == "pca " | localAlgorithm == "svd" | localAlgorithm == "newton-schulz") {
       uOut[[s]] <- (stats::prcomp(t(X), rank. = k, scale. = uAlgorithm == "ba_svd")$rotation)
     } else if (localAlgorithm == "ica") {
       uOut[[s]] <- t(fastICA::fastICA(t(X), method = "C", n.comp = k)$A)
@@ -4609,7 +4609,7 @@ optimal_simlr_initializer <- function(data_matrices,
 #' number of basis functions in which case random initialization occurs. One
 #' may also pass a single initialization matrix to be used for all matrices.
 #' If this is set to a scalar, or is missing, a random matrix will be used.
-#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
+#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
 #' @param repeatedMeasures list of repeated measurement identifiers. this will
 #' allow estimates of per identifier intercept.
 #' @param lineSearchRange lower and upper limit used in \code{optimize}
@@ -4702,7 +4702,7 @@ simlr <- function(
     sparsenessQuantiles = NULL,
     positivities = NULL,
     initialUMatrix = NULL,
-    mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic"),
+    mixAlg = c("svd", "ica", "avg", "rrpca-l", "rrpca-s", "pca", "stochastic", "newton-schulz"),
     repeatedMeasures = NA,
     lineSearchRange = c(-5e2, 5e2),
     lineSearchTolerance = 1e-12,
@@ -5645,6 +5645,25 @@ simlrU <- function(
       }
     } else if (mixAlg == "ica" & missing(initialW)) {
       basis <- (fastICA::fastICA(avgU, method = "C", n.comp = nc)$S)
+    } else if (mixAlg == "newton-schulz") {
+      # This is a fast way to get an orthogonal basis from the averaged projections
+      # We first average the projections, then use Newton-Schulz to orthogonalize
+      # avgU is already the concatenated projections here, so we take the mean across modalities
+      # which is essentially what 'avg' does but without the basis extraction.
+      # Here avgU has (nmodalities-1)*nc columns.
+      n_mod_minus_1 <- length(wtobind)
+      M <- matrix(0, nrow(avgU), nc)
+      for (idx in seq_len(n_mod_minus_1)) {
+        start_col <- (idx - 1) * nc + 1
+        end_col <- idx * nc
+        M <- M + avgU[, start_col:end_col]
+      }
+      M <- M / n_mod_minus_1
+      
+      # Orthogonalize M using Newton-Schulz: M_ortho = M * (M^T M)^{-1/2}
+      MtM <- t(M) %*% M
+      inv_sqrt_MtM <- inv_sqrt_sym_newton(MtM)
+      basis <- M %*% inv_sqrt_MtM
     } else {
       basis <- (ba_svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
     }
@@ -7421,7 +7440,7 @@ NNHEmbed_update_residuals <- function(mats, x, covariate, blaster2, allnna, n.co
 #' @param exclusions vector of strings to exclude from predictors
 #' @param inclusions vector of strings to include in predictors
 #' @param sparseness vector or scalar value to set sparseness.
-#' @param mixAlg string 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
+#' @param mixAlg string 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
 #' @param iterations int value to set max iterations
 #' @param path_modeling the result of a call to \code{simlr_path_models(n)}
 #' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
