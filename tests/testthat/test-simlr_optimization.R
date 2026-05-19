@@ -3,35 +3,39 @@ library(testthat)
 
 context("simlr optimization and energy tracking")
 
-test_that("simlr armijo_gradient maintains monotonic best-energy decrease (regression)", {
-  set.seed(42)
-  n <- 40; p1 <- 15; p2 <- 15; k <- 2
-  U_true <- matrix(rnorm(n * k), n, k)
-  X1 <- U_true %*% matrix(rnorm(k * p1), k, p1) + matrix(rnorm(n * p1, sd = 0.1), n, p1)
-  X2 <- U_true %*% matrix(rnorm(k * p2), k, p2) + matrix(rnorm(n * p2, sd = 0.1), n, p2)
-  matlist <- list(X1 = X1, X2 = X2)
-  
-  result <- simlr(matlist, initialUMatrix = k, 
-                  optimizationStyle = "armijo_gradient",
-                  energyType = "regression",
-                  constraint = "none", 
-                  iterations = 15, 
-                  verbose = FALSE)
-  
-  mean_energy <- result$energyPath %>% 
-    dplyr::group_by(iteration) %>% 
-    dplyr::summarize(mean_e = mean(total_energy)) %>% 
-    dplyr::pull(mean_e)
-  
-  if (length(mean_energy) > 2) {
-    decreasing_part <- mean_energy[2:length(mean_energy)]
-    best_energy_path <- cummin(decreasing_part)
-    expect_true(all(diff(best_energy_path) <= 1e-10), 
-                info = "Best-known energy was not monotonically non-increasing.")
-    # Final error should be better than iteration 2
-    expect_lt(result$finalError, best_energy_path[1])
-  }
-})
+all_opts <- list_simlr_optimizers()
+for (opt in all_opts) {
+  test_label <- paste("simlr maintains monotonic best-energy decrease (regression) for optimizer:", opt)
+  test_that(test_label, {
+    set.seed(42)
+    n <- 40; p1 <- 15; p2 <- 15; k <- 2
+    U_true <- matrix(rnorm(n * k), n, k)
+    X1 <- U_true %*% matrix(rnorm(k * p1), k, p1) + matrix(rnorm(n * p1, sd = 0.1), n, p1)
+    X2 <- U_true %*% matrix(rnorm(k * p2), k, p2) + matrix(rnorm(n * p2, sd = 0.1), n, p2)
+    matlist <- list(X1 = X1, X2 = X2)
+    
+    result <- simlr(matlist, initialUMatrix = k, 
+                    optimizationStyle = opt,
+                    energyType = "regression",
+                    constraint = "none", 
+                    iterations = 15, 
+                    verbose = FALSE)
+    
+    mean_energy <- result$energyPath %>% 
+      dplyr::group_by(iteration) %>% 
+      dplyr::summarize(mean_e = mean(total_energy)) %>% 
+      dplyr::pull(mean_e)
+    
+    if (length(mean_energy) > 2) {
+      decreasing_part <- mean_energy[2:length(mean_energy)]
+      best_energy_path <- cummin(decreasing_part)
+      expect_true(all(diff(best_energy_path) <= 1e-10), 
+                  info = paste("Best-known energy was not monotonically non-increasing for optimizer:", opt))
+      # Final error should be better than iteration 2
+      expect_lt(result$finalError, best_energy_path[1])
+    }
+  })
+}
 
 test_that("simlr lookahead with complex constraints converges (Issue 5/User case)", {
   set.seed(1500)

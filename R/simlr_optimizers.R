@@ -712,42 +712,6 @@ step.bidirectional_armijo_gradient <- function(optimizer, i, V_current, descent_
   }
 }
 
-#' @export
-step.ranger <- function(optimizer, i, V_current, descent_gradient, ...) {
-  # Rectified Adam step (warmup for first 2n iters)
-  descent_gradient = descent_gradient * (-1.0)
-  state <- optimizer$state[[i]]
-  params <- optimizer$params
-  myit <- params$myit %||% 1
-  n <- length(descent_gradient)  # Flatten for simplicity
-  beta1 <- params$beta1 %||% 0.9
-  beta2 <- params$beta2 %||% 0.999
-  # RAdam rectification
-  rho_inf <- 2 / (1 - beta2) - 1
-  rho_t <- rho_inf - 2 * myit * beta2^myit / (1 - beta2^myit)
-  state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
-  state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)
-  m_hat <- state$m / (1 - beta1^myit)
-  v_hat <- state$v / (1 - beta2^myit)
-  # Rectify if rho_t < 5*n (warmup)
-  r_t <- if (rho_t > 5 * n) sqrt((rho_t - 4) / (rho_inf - 4) * (1 - beta2^myit) / (1 - beta2)) else sqrt(rho_t / (1 - beta2) * (1 - beta2^myit))
-  update_direction <- m_hat / (r_t * (sqrt(v_hat) + 1e-8))
-  V_radam <- V_current - params$learning_rate * update_direction
-  # Lookahead (from your step.lookahead)
-  state$V_slow <- state$V_slow %||% V_current
-  alpha <- params$alpha %||% 0.5
-  k <- params$k %||% 5
-  state$step <- state$step %||% 0
-  state$step <- state$step + 1
-  if (state$step %% k == 0) {
-    state$V_slow <- state$V_slow + alpha * (V_radam - state$V_slow)
-    V_radam <- state$V_slow
-  }
-  optimizer$state[[i]] <- state
-  params$myit <- myit + 1
-  return(list(updated_V = V_radam, optimizer = optimizer))
-}
-
 
 #' @export
 step.vsgd <- function(optimizer, i, V_current, descent_gradient, ...) {
@@ -772,6 +736,8 @@ step.riemannian_adam <- function(optimizer, i, V_current, descent_gradient, ...)
   descent_gradient = descent_gradient * (-1.0)
   state <- optimizer$state[[i]]
   params <- optimizer$params
+  args <- list(...)
+  learning_rate <- args$learning_rate %||% params$learning_rate %||% 0.001
   myit <- params$myit %||% 1
   beta1 <- params$beta1 %||% 0.9
   beta2 <- params$beta2 %||% 0.999
@@ -786,7 +752,7 @@ step.riemannian_adam <- function(optimizer, i, V_current, descent_gradient, ...)
   delta <- update_tangent
   sym_term <- symm(crossprod(V_current, delta))
   transported_update <- delta - V_current %*% sym_term
-  updated_V <- V_current + params$learning_rate * transported_update
+  updated_V <- V_current + learning_rate * transported_update
   optimizer$state[[i]] <- state
   params$myit <- myit + 1
   return(list(updated_V = updated_V, optimizer = optimizer))
