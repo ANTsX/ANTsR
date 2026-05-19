@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
       </span>
     </div>
 
@@ -181,37 +181,37 @@ data frame.</p></dd>
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">outimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="makeImage.html">makeImage</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">10</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">outimg</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] -0.96099359 -0.30032444 -0.69096220  0.91093612 -0.95677853  2.12311649</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7]  0.34172055 -0.25484389  0.22985964 -0.04085563  1.06048501 -0.39797214</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13]  1.62504327 -1.92195845 -0.15906735  0.08398134 -0.55064505  1.57599723</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19]  0.74689448 -0.92066246</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  1.82218885 -1.02234733  0.60613024 -0.08893057 -0.26083225  0.46409124</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7] -1.02040064 -1.31345093 -0.49448088  1.75175714  0.05576478  0.33143440</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] -0.18984663  0.47049272 -0.95167953  1.15791047  0.58470523 -0.80645281</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19]  0.05455324  0.71633160</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">outimg</span>, mask <span class="op">=</span> <span class="va">outimg</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.123116 1.060485 1.625043 1.575997</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.822189 1.751757 1.157910</span>
 <span class="r-in"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_error</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">outimg</span>, mask <span class="op">=</span> <span class="va">outimg</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">outimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="makeImage.html">makeImage</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">10</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">outimg</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]       [,2]      [,3]        [,4]       [,5]       [,6]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.1366883 -2.5645521 0.9889268 -0.71223885 -1.1417960 -0.9158762</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.2306299 -0.5665988 0.9768021 -0.03440945 -0.1617971  0.5499247</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,7]       [,8]         [,9]     [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -1.2639136  1.4907143  0.386502832 -1.136740</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.4699224 -0.3104614 -0.000321537  2.212425</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          [,1]       [,2]       [,3]       [,4]        [,5]     [,6]       [,7]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.557731 -0.6129878  1.0365480 -0.9759267  0.45778695 1.779103 -0.3719449</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 1.481934  1.1161367 -0.1624831 -1.0891452 -0.07112674 0.535138 -1.0255423</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,8]       [,9]      [,10]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -0.5824017 -0.4509346 -0.3343380</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  0.3428884  0.5142301 -0.1055599</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">outimg</span>, mask <span class="op">=</span> <span class="va">outimg</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.490714 2.212425</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.481934 1.116137 1.036548 1.779103</span>
 <span class="r-in"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_error</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">outimg</span>, mask <span class="op">=</span> <span class="va">outimg</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">outimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="makeImage.html">makeImage</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_error</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">outimg</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">outimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="makeImage.html">makeImage</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">10</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">outimg</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]       [,2]      [,3]       [,4]      [,5]       [,6]       [,7]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -0.3208976  1.1854870 1.1604930 -1.3056164  1.217325 -1.3474029 -0.7582543</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  1.3644823 -0.1991657 0.6013874  0.5827531 -2.323928 -0.4284526 -0.1101401</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            [,8]       [,9]     [,10]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.1467668 -0.4058298  1.152695</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.2312729  0.1547399 -1.098783</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,1]      [,2]       [,3]        [,4]       [,5]       [,6]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -2.0054579 -1.436843 -0.1907034  3.18404436 -0.4437493 -1.5684246</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] -0.6431948  1.395313 -0.5246712 -0.05003727  0.2998652  0.4903027</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            [,7]       [,8]       [,9]    [,10]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] -0.0961632 -0.9823706 -0.6934147 1.299050</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  0.4685251 -1.0229838 -0.7679896 1.579146</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">outimg</span>, mask <span class="op">=</span> <span class="va">outimg</span> <span class="op">&gt;</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.364482 1.185487 1.160493 1.217325 1.152695</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.395313 3.184044 1.299050 1.579146</span>
 <span class="r-in"><span><span class="va">outimg</span> <span class="op">&lt;-</span> <span class="fu"><a href="makeImage.html">makeImage</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">10</span>, <span class="fl">2</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_error</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">outimg</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">img</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="fu"><a href="getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -2060,7 +2060,7 @@ data frame.</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Brian B Avants.</p>
+  <p></p><p>Developed by Brian B. Avants.</p>
 </div>
 
 <div class="pkgdown">

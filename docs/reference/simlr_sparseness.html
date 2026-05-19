@@ -18,7 +18,7 @@ followed by optional L1 feature normalization depending on the energy type."><!-
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
       </span>
     </div>
 
@@ -73,7 +73,7 @@ followed by optional L1 feature normalization depending on the energy type.</p>
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simlr_sparseness</span><span class="op">(</span></span>
 <span>  <span class="va">v</span>,</span>
-<span>  constraint_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Stiefel"</span>, <span class="st">"Grassmann"</span>, <span class="st">"none"</span>, <span class="st">"ortho"</span><span class="op">)</span>,</span>
+<span>  constraint_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Stiefel"</span>, <span class="st">"Grassmann"</span>, <span class="st">"none"</span>, <span class="st">"ortho"</span>, <span class="st">"nsaflow"</span><span class="op">)</span>,</span>
 <span>  smoothing_matrix <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  positivity <span class="op">=</span> <span class="st">"positive"</span>,</span>
 <span>  sparseness_quantile <span class="op">=</span> <span class="fl">0.8</span>,</span>
@@ -139,7 +139,7 @@ then the returned matrix is normalized using <code>l1_normalize_features</code>.
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Brian B Avants.</p>
+  <p></p><p>Developed by Brian B. Avants.</p>
 </div>
 
 <div class="pkgdown">

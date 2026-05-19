@@ -6,7 +6,7 @@
 \usage{
 simlr.perm(
   data_matrices,
-  smoothingMatrices,
+  smoothingMatrices = NULL,
   iterations = 10,
   sparsenessQuantiles = NULL,
   positivities = NULL,

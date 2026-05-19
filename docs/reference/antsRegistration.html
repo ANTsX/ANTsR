@@ -18,7 +18,7 @@ to the ANTs registration method."><!-- mathjax --><script src="https://cdnjs.clo
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
       </span>
     </div>
 
@@ -381,11 +381,13 @@ of points sampled to be controlled in low-dimensional metric estimation.</p></dd
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>,</span></span>
 <span class="r-in"><span>  typeofTransform <span class="op">=</span> <span class="st">"Rigid"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Rigid is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy.</span>
 <span class="r-in"><span><span class="va">trans</span> <span class="op">&lt;-</span> <span class="fu"><a href="readAntsrTransform.html">readAntsrTransform</a></span><span class="op">(</span><span class="va">rig</span><span class="op">$</span><span class="va">fwdtransforms</span>, <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">postrig</span> <span class="op">&lt;-</span> <span class="fu">antsRegistration</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>,</span></span>
 <span class="r-in"><span>  typeofTransform <span class="op">=</span> <span class="st">"Affine"</span>, initialTransform <span class="op">=</span> <span class="va">trans</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Affine is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy.</span>
 <span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">itype</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AffineFast"</span>, <span class="st">"BOLDAffine"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">itype</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="va">mytx2</span> <span class="op">&lt;-</span> <span class="fu">antsRegistration</span><span class="op">(</span></span></span>
@@ -394,31 +396,38 @@ of points sampled to be controlled in low-dimensional metric estimation.</p></dd
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "AffineFast"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Affine is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "BOLDAffine"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Affine is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy.</span>
 <span class="r-in"><span><span class="va">mytx2</span> <span class="op">&lt;-</span> <span class="fu">antsRegistration</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>,</span></span>
 <span class="r-in"><span>  typeofTransform <span class="op">=</span> <span class="st">"SyNOnly"</span>,</span></span>
 <span class="r-in"><span>  multivariateExtras <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"MeanSquares"</span>, <span class="va">fi</span>, <span class="va">mi</span>, <span class="fl">0.5</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> SyNOnly is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy.</span>
 <span class="r-in"><span><span class="fu">testthat</span><span class="fu">::</span><span class="fu"><a href="https://testthat.r-lib.org/reference/expect_error.html" class="external-link">expect_error</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu">antsRegistration</span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>, typeofTransform <span class="op">=</span> <span class="st">"sdf"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">bad</span> <span class="op">&lt;-</span> <span class="fu">antsRegistration</span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>, regIterations <span class="op">=</span> <span class="fl">40</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> SyN is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy.</span>
 <span class="r-in"><span><span class="va">affIterations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mytx2</span> <span class="op">&lt;-</span> <span class="fu">antsRegistration</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>,</span></span>
 <span class="r-in"><span>  affIterations <span class="op">=</span> <span class="va">affIterations</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> SyN is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy.</span>
 <span class="r-in"><span><span class="va">fi</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="fu"><a href="getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mi</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsImageRead.html">antsImageRead</a></span><span class="op">(</span><span class="fu"><a href="getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r64"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fi</span> <span class="op">&lt;-</span> <span class="fu"><a href="resampleImage.html">resampleImage</a></span><span class="op">(</span><span class="va">fi</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">60</span>, <span class="fl">60</span><span class="op">)</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mi</span> <span class="op">&lt;-</span> <span class="fu"><a href="resampleImage.html">resampleImage</a></span><span class="op">(</span><span class="va">mi</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">50</span><span class="op">)</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span> <span class="co"># speed up</span></span></span>
 <span class="r-in"><span><span class="va">mytx</span> <span class="op">&lt;-</span> <span class="fu">antsRegistration</span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>, typeofTransform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SyN"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> SyN is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy.</span>
 <span class="r-in"><span><span class="va">mywarpedimage</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsApplyTransforms.html">antsApplyTransforms</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>,</span></span>
 <span class="r-in"><span>  transformlist <span class="op">=</span> <span class="va">mytx</span><span class="op">$</span><span class="va">fwdtransforms</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mytx2</span> <span class="op">&lt;-</span> <span class="fu">antsRegistration</span><span class="op">(</span>fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>, typeofTransform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SyN"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> SyN is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy.</span>
 <span class="r-in"><span><span class="va">mywarpedimage2</span> <span class="op">&lt;-</span> <span class="fu"><a href="antsApplyTransforms.html">antsApplyTransforms</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  fixed <span class="op">=</span> <span class="va">fi</span>, moving <span class="op">=</span> <span class="va">mi</span>,</span></span>
 <span class="r-in"><span>  transformlist <span class="op">=</span> <span class="va">mytx2</span><span class="op">$</span><span class="va">fwdtransforms</span></span></span>
@@ -457,7 +466,7 @@ of points sampled to be controlled in low-dimensional metric estimation.</p></dd
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Brian B Avants.</p>
+  <p></p><p>Developed by Brian B. Avants.</p>
 </div>
 
 <div class="pkgdown">

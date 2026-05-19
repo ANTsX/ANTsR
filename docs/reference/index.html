@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
       </span>
     </div>
 
@@ -70,6 +70,14 @@
           <p><code><a href="DesikanKillianyTourville.html">DesikanKillianyTourville</a></code> </p>
         </td>
         <td><p>DesikanKillianyTourville</p></td>
+      </tr><tr><td>
+          <p><code><a href="NNHEmbed.html">NNHEmbed()</a></code> </p>
+        </td>
+        <td><p>Perform SiMLR Analysis on Multimodal ANTsPyMM Data</p></td>
+      </tr><tr><td>
+          <p><code><a href="NNHEmbed_update_residuals.html">NNHEmbed_update_residuals()</a></code> </p>
+        </td>
+        <td><p>Update Residuals for SiMLR</p></td>
       </tr><tr><td>
           <p><code><a href="aal.html">aal</a></code> </p>
         </td>
@@ -295,14 +303,6 @@
         </td>
         <td><p>Get Quality Control (QC) Metric Names</p></td>
       </tr><tr><td>
-          <p><code><a href="antspymm_simlr.html">antspymm_simlr()</a></code> </p>
-        </td>
-        <td><p>Perform SiMLR Analysis on Multimodal ANTsPyMM Data</p></td>
-      </tr><tr><td>
-          <p><code><a href="antspymm_simlr_update_residuals.html">antspymm_simlr_update_residuals()</a></code> </p>
-        </td>
-        <td><p>Update Residuals for SiMLR</p></td>
-      </tr><tr><td>
           <p><code><a href="antspymm_vartype.html">antspymm_vartype()</a></code> </p>
         </td>
         <td><p>Determine the Variable Type Based on Its Name</p></td>
@@ -391,6 +391,10 @@
         </td>
         <td><p>Render an image volume with or without overlay.</p></td>
       </tr><tr><td>
+          <p><code><a href="antsr_mcca_features.html">antsr_mcca_features()</a></code> </p>
+        </td>
+        <td><p>Generate Multi-view CCA-based Feature Projections for a List of Matrices</p></td>
+      </tr><tr><td>
           <p><code><a href="antsr_pca_features.html">antsr_pca_features()</a></code> </p>
         </td>
         <td><p>Generate PCA-based feature projections for a list of voxel matrices</p></td>
@@ -398,6 +402,14 @@
           <p><code><a href="antsr_random_features.html">antsr_random_features()</a></code> </p>
         </td>
         <td><p>Generate reproducible random feature projections for a list of voxel matrices</p></td>
+      </tr><tr><td>
+          <p><code><a href="antsr_rgcca_baseline.html">antsr_rgcca_baseline()</a></code> </p>
+        </td>
+        <td><p>Multi-view Regularized CCA baseline using RGCCA</p></td>
+      </tr><tr><td>
+          <p><code><a href="antsr_rgcca_sparse.html">antsr_rgcca_sparse()</a></code> </p>
+        </td>
+        <td><p>Sparse Multi-view CCA Baseline using RGCCA (version-safe)</p></td>
       </tr><tr><td>
           <p><code><a href="antsr_spca_features.html">antsr_spca_features()</a></code> </p>
         </td>
@@ -429,11 +441,15 @@
       </tr><tr><td>
           <p><code><a href="apply_simlr_matrices.html">apply_simlr_matrices()</a></code> </p>
         </td>
-        <td><p>Apply simlr matrices to an existing data frame and combine the results</p></td>
+        <td><p>Apply SIMLR projection matrices with r01.1-style versioning</p></td>
       </tr><tr><td>
           <p><code><a href="apply_simlr_matrices_dtfix.html">apply_simlr_matrices_dtfix()</a></code> </p>
         </td>
         <td><p>Apply simlr matrices to an existing data frame and combine the results with DTI naming fix.</p></td>
+      </tr><tr><td>
+          <p><code><a href="apply_transform_matrix.html">apply_transform_matrix()</a></code> </p>
+        </td>
+        <td><p>Apply a learned transform to a new matrix</p></td>
       </tr><tr><td>
           <p><code><a href="as.antsImage.html">as.antsImage()</a></code> </p>
         </td>
@@ -469,7 +485,7 @@
       </tr><tr><td>
           <p><code><a href="ba_svd.html">ba_svd()</a></code> </p>
         </td>
-        <td><p>No fail SVD function that switches to rsvd if svd fails</p></td>
+        <td><p>Robust SVD with Automatic rsvd Fallback</p></td>
       </tr><tr><td>
           <p><code><a href="basicInPaint.html">basicInPaint()</a></code> </p>
         </td>
@@ -571,6 +587,14 @@
         </td>
         <td><p>computeDVARSspatialMap</p></td>
       </tr><tr><td>
+          <p><code><a href="compute_communalities.html">compute_communalities()</a></code> </p>
+        </td>
+        <td><p>Compute Communalities from Factor Scores</p></td>
+      </tr><tr><td>
+          <p><code><a href="compute_variance_explained_per_factor.html">compute_variance_explained_per_factor()</a></code> </p>
+        </td>
+        <td><p>Compute Variance Explained per Factor</p></td>
+      </tr><tr><td>
           <p><code><a href="construct_sim_names.html">construct_sim_names()</a></code> </p>
         </td>
         <td><p>Construct SiMLR Feature Names</p></td>
@@ -606,6 +630,10 @@
           <p><code><a href="cropImageCenter.html">cropImageCenter()</a></code> </p>
         </td>
         <td><p>Crop the center of an image.</p></td>
+      </tr><tr><td>
+          <p><code><a href="cropImageFromCenterPoint.html">cropImageFromCenterPoint()</a></code> </p>
+        </td>
+        <td><p>Crop a patch from an image around a center point</p></td>
       </tr><tr><td>
           <p><code><a href="cropIndices.html">cropIndices()</a></code> </p>
         </td>
@@ -687,6 +715,10 @@
         </td>
         <td><p>Estimate the Joint Rank of a Multi-View Dataset via Parallel Analysis</p></td>
       </tr><tr><td>
+          <p><code><a href="estimate_learning_rate_nsa.html">estimate_learning_rate_nsa()</a></code> </p>
+        </td>
+        <td><p>Estimate Robust Learning Rate for NSA-Flow</p></td>
+      </tr><tr><td>
           <p><code><a href="estimate_rank_by_permutation_rv.html">estimate_rank_by_permutation_rv()</a></code> </p>
         </td>
         <td><p>Estimate Joint Rank via Cross-View RV Analysis</p></td>
@@ -702,6 +734,10 @@
           <p><code><a href="exploratory_visualization.html">exploratory_visualization()</a></code> </p>
         </td>
         <td><p>Exploratory Clustering and Visualization</p></td>
+      </tr><tr><td>
+          <p><code><a href="extend_simlr_embedding_with_new_modalities.html">extend_simlr_embedding_with_new_modalities()</a></code> </p>
+        </td>
+        <td><p>Extend an existing SIMLR embedding with new modality blocks</p></td>
       </tr><tr><td>
           <p><code><a href="extractImagePatchCoordinates.html">extractImagePatchCoordinates()</a></code> </p>
         </td>
@@ -754,6 +790,10 @@
           <p><code><a href="frequencyFilterfMRI.html">frequencyFilterfMRI()</a></code> </p>
         </td>
         <td><p>Band pass filtering for BOLD image.</p></td>
+      </tr><tr><td>
+          <p><code><a href="frob.html">frob()</a></code> </p>
+        </td>
+        <td><p>Frobenius Norm of a Matrix</p></td>
       </tr><tr><td>
           <p><code><a href="fsl2antsrTransform.html">fsl2antsrTransform()</a></code> </p>
         </td>
@@ -974,6 +1014,10 @@
           <p><code><a href="interpret_simlr_vector2.html">interpret_simlr_vector2()</a></code> </p>
         </td>
         <td><p>Interpret SiMLR Vector</p></td>
+      </tr><tr><td>
+          <p><code><a href="inv_sqrt_sym.html">inv_sqrt_sym()</a></code> </p>
+        </td>
+        <td><p>Inverse Square Root of a Symmetric Matrix</p></td>
       </tr><tr><td>
           <p><code><a href="invariant_orthogonality_defect.html">invariant_orthogonality_defect()</a></code> </p>
         </td>
@@ -1211,9 +1255,57 @@
         </td>
         <td><p>N4 bias field correction</p></td>
       </tr><tr><td>
+          <p><code><a href="neg_violation.html">neg_violation()</a></code> </p>
+        </td>
+        <td><p>Nonnegativity Violation</p></td>
+      </tr><tr><td>
           <p><code><a href="networkEiganat.html">networkEiganat()</a></code> </p>
         </td>
         <td><p>Convenience wrapper for eigenanatomy decomposition.</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow.html">nsa_flow()</a></code> </p>
+        </td>
+        <td><p>NSA-Flow Optimization</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_autograd.html">nsa_flow_autograd()</a></code> </p>
+        </td>
+        <td><p>NSA-Flow Optimization via PyTorch AutoGrad (R wrapper)</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_fa_diagram.html">nsa_flow_fa_diagram()</a></code> </p>
+        </td>
+        <td><p>Generate NSA-Flow FA Flowchart Diagram</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_flowchart.html">nsa_flow_flowchart()</a></code> </p>
+        </td>
+        <td><p>NSA-Flow Algorithm Flowchart</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_pca.html">nsa_flow_pca()</a></code> </p>
+        </td>
+        <td><p>NSA-Flow Sparse PCA (stable + efficient)</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_pca_fa.html">nsa_flow_pca_fa()</a></code> </p>
+        </td>
+        <td><p>NSA-Flow Sparse PCA or FA</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_pca_fa_2.html">nsa_flow_pca_fa_2()</a></code> </p>
+        </td>
+        <td><p>Perform Proximal Gradient Optimization for PCA or Factor Analysis</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_retract.html">nsa_flow_retract()</a></code> </p>
+        </td>
+        <td><p>Retraction onto the Stiefel Manifold</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_retract_auto.html">nsa_flow_retract_auto()</a></code> </p>
+        </td>
+        <td><p>Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_torch.html">nsa_flow_torch()</a></code> </p>
+        </td>
+        <td><p>NSA-Flow Optimization via PyTorch</p></td>
+      </tr><tr><td>
+          <p><code><a href="nsa_flow_torch_ag.html">nsa_flow_torch_ag()</a></code> </p>
+        </td>
+        <td><p>NSA-Flow Optimization via PyTorch AutoGrad</p></td>
       </tr><tr><td>
           <p><code><a href="oneHotToSegmentation.html">oneHotToSegmentation()</a></code> </p>
         </td>
@@ -1226,6 +1318,10 @@
           <p><code><a href="optimize_indicator_matrix.html">optimize_indicator_matrix()</a></code> </p>
         </td>
         <td><p>Optimize Binary Indicator Matrix with Row Uniformity</p></td>
+      </tr><tr><td>
+          <p><code><a href="orth_residual.html">orth_residual()</a></code> </p>
+        </td>
+        <td><p>Orthogonality Residual</p></td>
       </tr><tr><td>
           <p><code><a href="orthogonalizeAndQSparsify.html">orthogonalizeAndQSparsify()</a></code> </p>
         </td>
@@ -1286,6 +1382,10 @@
           <p><code><a href="plot_features.html">plot_features()</a></code> </p>
         </td>
         <td><p>Plot Features</p></td>
+      </tr><tr><td>
+          <p><code><a href="posthoc_fa_summary.html">posthoc_fa_summary()</a></code> </p>
+        </td>
+        <td><p>Post-hoc Factor Analysis Summary: Scores, Communalities, and Variance Explained</p></td>
       </tr><tr><td>
           <p><code><a href="powers_areal_mni_itk.html">powers_areal_mni_itk</a></code> </p>
         </td>
@@ -1663,6 +1763,10 @@
         </td>
         <td><p>Sum preserving matrix partition</p></td>
       </tr><tr><td>
+          <p><code><a href="symm.html">symm()</a></code> </p>
+        </td>
+        <td><p>Symmetrize a Matrix</p></td>
+      </tr><tr><td>
           <p><code><a href="take_abs_unsigned.html">take_abs_unsigned()</a></code> </p>
         </td>
         <td><p>Take Absolute Value of Unsigned Columns</p></td>
@@ -1699,6 +1803,10 @@
         </td>
         <td><p>tracts</p></td>
       </tr><tr><td>
+          <p><code><a href="transform_matrix.html">transform_matrix()</a></code> </p>
+        </td>
+        <td><p>Transform a matrix by standard preprocessing</p></td>
+      </tr><tr><td>
           <p><code><a href="transform_prior_rows_to_uncorrelated.html">transform_prior_rows_to_uncorrelated()</a></code> </p>
         </td>
         <td><p>Transform prior rows to (approximately) uncorrelated representative rows</p></td>
@@ -1706,6 +1814,10 @@
           <p><code><a href="trapz.html">trapz()</a></code> </p>
         </td>
         <td><p>Calculate the area under a sampled curve (or set of curves).</p></td>
+      </tr><tr><td>
+          <p><code><a href="undo_transform_matrix.html">undo_transform_matrix()</a></code> </p>
+        </td>
+        <td><p>Undo a previously applied matrix transform</p></td>
       </tr><tr><td>
           <p><code><a href="unique.html">unique(<i>&lt;antsImage&gt;</i>)</a></code> </p>
         </td>
@@ -1779,7 +1891,7 @@
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Brian B Avants.</p>
+  <p></p><p>Developed by Brian B. Avants.</p>
 </div>
 
 <div class="pkgdown">

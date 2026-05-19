@@ -4697,7 +4697,7 @@ optimal_simlr_initializer <- function(data_matrices,
 #' @export simlr
 simlr <- function(
     data_matrices,
-    smoothingMatrices,
+    smoothingMatrices = NULL,
     iterations = 500,
     sparsenessQuantiles = NULL,
     positivities = NULL,
@@ -4711,7 +4711,7 @@ simlr <- function(
     energyType = c("cca", "regression", "normalized", "ucca", "lowRank", "lowRankRegression",'normalized_correlation','acc','nc','dat', 'lrr', 'reconorm', 'logcosh', 'exp', 'kurtosis', 'gauss'),
     vmats = NULL,
     connectors = NULL,
-    optimizationStyle = c("bidirectional_lookahead", "armijo_gradient","lookahead","bidirectional_armijo_gradient" ),
+    optimizationStyle = c( "armijo_gradient", "bidirectional_lookahead", "lookahead","bidirectional_armijo_gradient" ),
     scale = c("center",  "eigenvalue" ),
     expBeta = 0.9,
     jointInitialization = TRUE,
@@ -4780,7 +4780,7 @@ simlr <- function(
   }
   mixAlg <- match.arg(mixAlg)
   # 0.0 adjust length of input data
-  if (missing(positivities)) {
+  if (missing(positivities) || is.null(positivities)) {
     positivities <- rep("positive", nModalities)
   }
   if (any((positivities %in% c("positive", "negative", "either")) == FALSE)) {
@@ -4794,7 +4794,7 @@ simlr <- function(
     p[i] <- ncol(data_matrices[[i]])
   }
   n <- nrow(data_matrices[[1]])
-  if (missing(sparsenessQuantiles)) {
+  if (missing(sparsenessQuantiles) || is.null(sparsenessQuantiles)) {
     sparsenessQuantiles <- rep(0.5, nModalities)
   }
   
@@ -4875,7 +4875,7 @@ simlr <- function(
   }
   
   # 3.0 setup regularization
-  if (missing(smoothingMatrices)) {
+  if (missing(smoothingMatrices) || is.null(smoothingMatrices)) {
     smoothingMatrices <- list()
     for (i in 1:nModalities) {
       smoothingMatrices[[i]] <- diag(ncol(data_matrices[[i]]))
@@ -5045,15 +5045,74 @@ u_initial = initialUMatrix
   v_prev <- vmats
   stagnation_counter <- 0
   # --- 2. Main Optimization Loop ---
+  energy_fns <- list()
+  for (i in 1:nModalities) {
+    energy_fns[[i]] <- (function(mod_idx) {
+      function(V, U = NULL, return_raw = FALSE, track = FALSE) {
+        if (is.null(U)) U <- initialUMatrix[[mod_idx]]
+        # We DO NOT call take_abs_unsigned(V) here because it strips matrix attributes,
+        # which breaks the idempotency guard in simlr_sparseness.
+        # simlr_sparseness already applies positivity constraints internally.
+        V_sp <- simlr_sparseness(
+          V,
+          constraint_type = constraint_type,
+          smoothing_matrix = smoothingMatrices[[mod_idx]],
+          positivity = positivities[mod_idx],
+          sparseness_quantile = sparsenessQuantiles[mod_idx],
+          constraint_iterations = constraint_iterations,
+          constraint_weight = constraint_weight,
+          sparseness_alg = sparsenessAlg
+        )
+
+        # --- User-chosen energy ---
+        sim_e <- calculate_simlr_energy(
+          V_sp, data_matrices[[mod_idx]], U,
+          energyType
+        ) * normalizing_weights[mod_idx]
+
+        # --- Domain energy (only if lambda > 0) ---
+        dom_e <- dom_e_raw <- 0
+        if (!is.null(domainMatrices) && !is.null(domainLambdas)) {
+          lam <- domainLambdas[mod_idx]
+          if (lam > 0) {
+            dom_e_raw <- calculate_simlr_energy(
+              V_sp, data_matrices[[mod_idx]], U,
+              "dat", lambda = lam, prior_matrix = domainMatrices[[mod_idx]]
+            )
+            dom_e <- dom_e_raw * domain_weights[mod_idx] # Scale
+          }
+        }
+        orth_e <- 0
+        if (constraint_type == "ortho") {
+          orth_e <- invariant_orthogonality_defect(V_sp) * constraint_weight * orth_weights[mod_idx]
+        }
+
+        total_e <- sim_e + dom_e + orth_e
+        # --- Track values only if requested ---
+        if (track) {
+          all_sim_energy[[mod_idx]] <<- c(all_sim_energy[[mod_idx]], sim_e)
+          all_dom_energy[[mod_idx]] <<- c(all_dom_energy[[mod_idx]], dom_e)
+          all_ort_energy[[mod_idx]] <<- c(all_ort_energy[[mod_idx]], orth_e)
+          all_dom_energy_raw[[mod_idx]] <<- c(all_dom_energy_raw[[mod_idx]], dom_e_raw)
+          all_total_energy[[mod_idx]] <<- c(all_total_energy[[mod_idx]], total_e)
+        }
+        if (return_raw) {
+          return(sim_e)
+        } # raw similarity+domain only
+        return(total_e)
+      }
+    })(i)
+  }
+
   for (myit in 1:iterations) { # Begin main optimization loop
     # --- Calculate dynamic learning rate for non-line-search methods ---
-    if ( myit <= 2 ) {
-      vmats = v_initial
-      initialUMatrix = u_initial
+    if (myit <= 2) {
+      vmats <- v_initial
+      initialUMatrix <- u_initial
     }
     decay_progress <- (myit - 1) / max(1, iterations - 1)
     current_learning_rate <- final_learning_rate + 0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
-    
+
     # Track if any matrix changed in this iteration
     v_diff <- 0
     for (kk in 1:nModalities) {
@@ -5065,252 +5124,293 @@ u_initial = initialUMatrix
       stagnation_counter <- 0
     }
     v_prev <- vmats
-    
+
     if (stagnation_counter >= 10) {
       if (verbose) message("~~Parameter stagnation detected. Breaking loop.")
       break
     }
-    
+
     # --- A. Update each V_i matrix ---
-  for (i in 1:nModalities) {
-    ##############################################################
-    # first define the local versions of the energy and gradient #
-    ##############################################################
-    smooth_cost <- function(V, return_raw = FALSE) {
-      if (positivities[i] == 'positive') V <- take_abs_unsigned(V)
-      V_sp <- simlr_sparseness(
-        V,
-        constraint_type = constraint_type,
-        smoothing_matrix = smoothingMatrices[[i]],
-        positivity = positivities[i],
-        sparseness_quantile = sparsenessQuantiles[i],
-        constraint_iterations = constraint_iterations,
-        constraint_weight = constraint_weight,
-        sparseness_alg = sparsenessAlg
-      )
-      
-      # --- User-chosen energy ---
-      sim_e <- calculate_simlr_energy(
-        V_sp, data_matrices[[i]], initialUMatrix[[i]],
-        energyType
-      ) * normalizing_weights[i]
+    energy_before_V <- 0
+    for (i in 1:nModalities) energy_before_V <- energy_before_V + energy_fns[[i]](vmats[[i]], track=FALSE)
+    energy_before_V <- energy_before_V / nModalities
 
-      # --- Domain energy (only if lambda > 0) ---
-      dom_e <- dom_e_raw <- 0
-      if (!is.null(domainMatrices) && !is.null(domainLambdas)) {
-        lam <- domainLambdas[i]
-        if (lam > 0) {
-          dom_e_raw <- calculate_simlr_energy(
-            V_sp, data_matrices[[i]], initialUMatrix[[i]],
-            "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
-          )
-          dom_e <- dom_e_raw * domain_weights[i]    # Scale
+    for (i in 1:nModalities) {
+      ############################
+      smooth_grad <- function(V) {
+        if (positivities[i] == "positive") V <- take_abs_unsigned(V)
+
+        # --- User-chosen gradient ---
+        sim_grad <- calculate_simlr_gradient(
+          V, data_matrices[[i]], initialUMatrix[[i]],
+          energyType
+        ) * normalizing_weights[i]
+
+        # --- Domain gradient (only if lambda > 0) ---
+        dom_grad <- 0
+        if (!is.null(domainMatrices) && !is.null(domainLambdas)) {
+          lam <- domainLambdas[i]
+          if (lam > 0) {
+            dom_grad <- calculate_simlr_gradient(
+              V, data_matrices[[i]], initialUMatrix[[i]],
+              "dat",
+              lambda = lam, prior_matrix = domainMatrices[[i]]
+            ) * domain_weights[i]
+          }
         }
-      }
-      orth_e <- 0
-      if (constraint_type == "ortho") {
-        orth_e <- invariant_orthogonality_defect(V_sp) * constraint_weight * orth_weights[i]
-      }
 
-      total_e <- sim_e + dom_e + orth_e
-      # --- Track values ---
-      all_sim_energy[[i]] <<- c(all_sim_energy[[i]], sim_e)
-      all_dom_energy[[i]] <<- c(all_dom_energy[[i]], dom_e)
-      all_ort_energy[[i]] <<- c( all_ort_energy[[i]], orth_e )
-      all_dom_energy_raw[[i]] <<- c(all_dom_energy_raw[[i]], dom_e_raw)
-      all_total_energy[[i]] <<- c(all_total_energy[[i]], total_e)
-      if (return_raw) return(sim_e) # raw similarity+domain only
-      return(total_e)
-    }
-    ############################
-    smooth_grad <- function(V) {
-      if (positivities[i] == 'positive') V <- take_abs_unsigned(V)
-
-      # --- User-chosen gradient ---
-      sim_grad <- calculate_simlr_gradient(
-        V, data_matrices[[i]], initialUMatrix[[i]],
-        energyType
-      ) * normalizing_weights[i]
-
-      # --- Domain gradient (only if lambda > 0) ---
-      dom_grad <- 0
-      if (!is.null(domainMatrices) && !is.null(domainLambdas)) {
-        lam <- domainLambdas[i]
-        if (lam > 0) {
-          dom_grad <- calculate_simlr_gradient(
-            V, data_matrices[[i]], initialUMatrix[[i]],
-            "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
-          ) * domain_weights[i]
-        }
-      }
-
-      orth_grad <- 0
-      if (constraint_type == "ortho" & FALSE) {
-        orth_grad <- constraint_weight * orth_weights[i] *
-          gradient_invariant_orthogonality_defect(V_sp)
-      }
+        orth_grad <- 0
+        # if (constraint_type == "ortho" & FALSE) {
+        #   orth_grad <- constraint_weight * orth_weights[i] *
+        #     gradient_invariant_orthogonality_defect(V_sp)
+        # }
 
 
-      g <- sim_grad + dom_grad - orth_grad
-      g <- clip_gradient_by_quantile( 
-        constrainG(as.matrix(g), i, constraint_type), clipper)
-      g <- simlr_sparseness(
-        g,
-        constraint_type = constraint_type,
-        smoothing_matrix = smoothingMatrices[[i]],
-        positivity = positivities[i],
-        sparseness_quantile = sparsenessQuantiles[i],
-        constraint_iterations = constraint_iterations,
-        constraint_weight = constraint_weight,
-        sparseness_alg = sparsenessAlg
-      )
-
-      return(g)
-    }      
-    
-    riemannian_descent_grad = smooth_grad(vmats[[i]])
-    step_result <- step(
-          optimizer = optimizer_object_l[[i]],
-          i = i,
-          V_current = vmats[[i]],
-          descent_gradient = riemannian_descent_grad,
-          # Pass arguments needed by the specific step method
-          full_energy_function = smooth_cost, # For hybrid methods
-          learning_rate = current_learning_rate,       # For non-hybrid methods
-          myit = myit                                  # For Adam bias correction
+        g <- sim_grad + dom_grad - orth_grad
+        g <- clip_gradient_by_quantile(
+          constrainG(as.matrix(g), i, constraint_type), clipper
         )
 
- # Update the parameter and the optimizer object with their new states
-    V_updated <- step_result$updated_V
-    optimizer_object_l[[i]] <- step_result$optimizer
-    # print(step_result)
-    # 5. Apply the final non-smooth projection (sparsity and retraction)
-    vmats[[i]] <- simlr_sparseness(
-      V_updated,
-      constraint_type = constraint_type,
-      smoothing_matrix = smoothingMatrices[[i]],
-      positivity = positivities[i],
-      sparseness_quantile = sparsenessQuantiles[i],
-      constraint_weight = constraint_weight,
-      sparseness_alg = sparsenessAlg
-    )
+        # For the gradient, we should only apply smoothing if requested.
+        # We MUST NOT apply manifold projections or positivity constraints
+        # directly to the gradient direction.
+        if (!is.null(smoothingMatrices[[i]])) {
+          g <- as.matrix(smoothingMatrices[[i]] %*% g)
+        }
 
+        return(g)
+      }
+
+      riemannian_descent_grad <- smooth_grad(vmats[[i]])
+      step_result <- step(
+        optimizer = optimizer_object_l[[i]],
+        i = i,
+        V_current = vmats[[i]],
+        descent_gradient = riemannian_descent_grad,
+        # Pass arguments needed by the specific step method
+        full_energy_function = energy_fns[[i]], # For hybrid methods
+        learning_rate = current_learning_rate, # For non-hybrid methods
+        myit = myit # For Adam bias correction
+      )
+
+      # Update the parameter and the optimizer object with their new states
+      V_updated <- step_result$updated_V
+      optimizer_object_l[[i]] <- step_result$optimizer
+      # print(step_result)
+      # 5. Apply the final non-smooth projection (sparsity and retraction)
+      vmats[[i]] <- simlr_sparseness(
+        V_updated,
+        constraint_type = constraint_type,
+        smoothing_matrix = smoothingMatrices[[i]],
+        positivity = positivities[i],
+        sparseness_quantile = sparsenessQuantiles[i],
+        constraint_weight = constraint_weight,
+        sparseness_alg = sparsenessAlg
+      )
     } # End V_i update loop
 
+    energy_after_V <- 0
+    for (i in 1:nModalities) energy_after_V <- energy_after_V + energy_fns[[i]](vmats[[i]], track=FALSE)
+    energy_after_V <- energy_after_V / nModalities
+
     # --- B. Update each U_i matrix (logic is unchanged from original simlr) ---
-    if ( !(energyType %in% c('regression','reg')) ) {
-        tempU <- lapply(1:nModalities, function(j) scale(data_matrices[[j]] %*% vmats[[j]], TRUE, FALSE))
-      } else {
-        tempU <- lapply(1:nModalities, function(j) data_matrices[[j]] %*% vmats[[j]])
-      }
-    updated_Us <- simlrU(tempU, mixAlg, initialUMatrix,
-                   orthogonalize = orthogonalizeU,
-                   connectors = connectors,
-                   expBeta = expBeta)
+    if (!(energyType %in% c("regression", "reg"))) {
+      tempU <- lapply(1:nModalities, function(j) scale(data_matrices[[j]] %*% vmats[[j]], TRUE, FALSE))
+    } else {
+      tempU <- lapply(1:nModalities, function(j) data_matrices[[j]] %*% vmats[[j]])
+    }
+    updated_Us <- simlrU(tempU, mixAlg, myw,
+      orthogonalize = orthogonalizeU,
+      connectors = connectors,
+      expBeta = expBeta
+    )
     # Apply Gram-Schmidt orthogonalization (localGS)
-    initialUMatrix <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalizeU))
+    candidate_U <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalizeU))
+
+    # --- Energy-Aware U Update ---
+    old_U <- initialUMatrix
+    
+    # Evaluate with new U
+    initialUMatrix <- candidate_U
+    candidate_energy_sum <- 0
+    for (i in seq_len(nModalities)) {
+      candidate_energy_sum <- candidate_energy_sum + energy_fns[[i]](vmats[[i]], track = FALSE)
+    }
+    
+    # Evaluate with old U
+    initialUMatrix <- old_U
+    old_energy_sum <- 0
+    for (i in seq_len(nModalities)) {
+      old_energy_sum <- old_energy_sum + energy_fns[[i]](vmats[[i]], track = FALSE)
+    }
+    
+    if (is.finite(candidate_energy_sum) && candidate_energy_sum <= old_energy_sum + 1e-9) {
+      initialUMatrix <- candidate_U
+    } else {
+      # Reject U update
+      initialUMatrix <- old_U
+      if (verbose > 2) message(sprintf("   -> U update rejected: energy increased (%.4f > %.4f)", candidate_energy_sum / nModalities, old_energy_sum / nModalities))
+    }
     #   cat(paste("<o><o><o><o><o><o><o><o><o><o>\n"))
     # --- C. Evaluate, Track, and Report Convergence ---
-    
+
     # Calculate energies and orthogonality for each modality at the end of the iteration
     iter_results_list <- list()
 
     for (i in seq_len(nModalities)) {
-      if ( is.na(orth_weights[i])) orth_weights[i]=1.0
+      if (is.na(orth_weights[i])) orth_weights[i] <- 1.0
       V_current <- vmats[[i]]
-      sim_e <- smooth_cost(V_current, return_raw=TRUE )
-      tot_e <- smooth_cost(V_current  )
-      orth_e <- invariant_orthogonality_defect(V_current)
+      # Call energy_fns[[i]] once with track=TRUE to update all_total_energy etc.
+      tot_e <- energy_fns[[i]](V_current, track = TRUE)
+
+      # Retrieve the tracked values for the current iteration
+      sim_e <- all_sim_energy[[i]][length(all_sim_energy[[i]])]
+      orth_e_defect <- invariant_orthogonality_defect(V_current)
+
       iter_results_list[[i]] <- tibble::tibble(
-        iteration = i, 
+        iteration = myit,
         modality = names(data_matrices)[i],
         total_energy = all_total_energy[[i]][length(all_total_energy[[i]])],
-        similarity_energy = all_sim_energy[[i]][length(all_sim_energy[[i]])],
-        domain_energy_raw = all_dom_energy_raw[[i]][length(all_dom_energy_raw[[i]])],  
+        similarity_energy = sim_e,
+        domain_energy_raw = all_dom_energy_raw[[i]][length(all_dom_energy_raw[[i]])],
         domain_energy = all_dom_energy[[i]][length(all_dom_energy[[i]])],
         feature_orthogonality = all_ort_energy[[i]][length(all_ort_energy[[i]])],
         similarity_energy_w = sim_e * normalizing_weights[i],
-        feature_orthogonality_w = orth_e * orth_weights[i] * constraint_weight
+        feature_orthogonality_w = orth_e_defect * orth_weights[i] * constraint_weight
       )
     }
 
-    iter_results <- do.call(dplyr::bind_rows, iter_results_list)    
+    iter_results <- do.call(dplyr::bind_rows, iter_results_list)
     iter_results$iteration <- myit
-    convergence_df <- dplyr::bind_rows(convergence_df, iter_results)
-#    print(data.frame(iter_results))
+
     # --- Adaptive Weighting: Set weights ONLY at the end of the first iteration ---
-  if ( myit <= 1 ) {
-    if (verbose) {
-      message("Setting adaptive orthogonality/energy weights based on first few iterations...")
-      print("Setting adaptive orthogonality/energy weights based on first few iterations...")
+    if (myit <= 1) {
+      if (verbose) {
+        message("Setting adaptive orthogonality/energy weights based on first few iterations...")
       }
-    for (i in 1:nModalities) {
-      # Get the results for this modality from the table we just built
-      mod_results <- iter_results[i, ]
-      normalizing_weights[i]=1.0/ ( abs(mod_results$similarity_energy) * nModalities )
-      # The weight is the ratio of the absolute similarity energy to the orthogonality penalty
-      if ( !is.na(mod_results$feature_orthogonality)) {
-        if (mod_results$feature_orthogonality > 1e-10 ) {
-          orth_weights[i] <- abs(mod_results$similarity_energy) *normalizing_weights[i] / mod_results$feature_orthogonality
-        } else {
-          orth_weights[i] <- 0.0 # Default to 1 if orthogonality is already perfect
+      for (i in 1:nModalities) {
+        # Get the results for this modality from the table we just built
+        mod_results <- iter_results[i, ]
+        normalizing_weights[i] <- 1.0 / (abs(mod_results$similarity_energy) * nModalities)
+        # The weight is the ratio of the absolute similarity energy to the orthogonality penalty
+        if (!is.na(mod_results$feature_orthogonality)) {
+          if (mod_results$feature_orthogonality > 1e-10) {
+            orth_weights[i] <- abs(mod_results$similarity_energy) * normalizing_weights[i] / mod_results$feature_orthogonality
+          } else {
+            orth_weights[i] <- 0.0 # Default to 1 if orthogonality is already perfect
+          }
+          if (is.na(orth_weights[i]) | is.infinite(orth_weights[i])) {
+            orth_weights[i] <- 1.0
+          }
         }
-        if ( is.na(orth_weights[i]) | is.infinite(orth_weights[i]) ) {
-          orth_weights[i] <- 1.0
+        # After setting normalizing_weights and orth_weights
+        if (mod_results$domain_energy_raw != 0 & !is.na(mod_results$domain_energy_raw)) { # Use raw
+          if (abs(mod_results$domain_energy_raw) > 1e-10) {
+            domain_weights[i] <- abs(mod_results$similarity_energy * normalizing_weights[i]) / abs(mod_results$domain_energy_raw)
+          } else {
+            domain_weights[i] <- 1.0
+          }
+          if (is.na(domain_weights[i]) | is.infinite(domain_weights[i])) domain_weights[i] <- 1.0
+        }
+        if (verbose & i == nModalities) message("Domain Weights: ", paste(round(domain_weights, 2), collapse = ", "))
+
+        # Issue 3 fix: Reset step size after weight tuning
+        if (!is.null(optimizer_object_l[[i]]$state[[i]]$last_step_size)) {
+            optimizer_object_l[[i]]$state[[i]]$last_step_size <- 1.0
         }
       }
-      # After setting normalizing_weights and orth_weights
-      if (mod_results$domain_energy_raw != 0 & !is.na(mod_results$domain_energy_raw)) {  # Use raw
-        if (abs(mod_results$domain_energy_raw) > 1e-10) {
-          domain_weights[i] <- abs(mod_results$similarity_energy * normalizing_weights[i]) / abs(mod_results$domain_energy_raw)
-        } else {
-          domain_weights[i] <- 1.0
-        }
-        if (is.na(domain_weights[i]) | is.infinite(domain_weights[i])) domain_weights[i] <- 1.0
-      }
-      if (verbose & i == nModalities ) message("Domain Weights: ", paste(round(domain_weights, 2), collapse=", "))      
-    }
-    if (verbose) {
-      print(normalizing_weights)
-      message("Norm Weights: ", paste(round(normalizing_weights, 3), collapse=", "))
-      message("Orth Weights: ", paste(round(orth_weights, 2), collapse=", "))
-    }
-  }
-  
-  # Update the "best" solution found so far based on mean total energy
-  mean_current_energy <- mean(iter_results$total_energy, na.rm = TRUE)
-  printit=FALSE
-  if (is.finite(mean_current_energy) && mean_current_energy < bestTot & myit >= 2 ) {
-    lastBest = bestTot
-    bestTot <- mean_current_energy
-    bestRow <- myit
-    bestU <- initialUMatrix
-    bestV <- vmats
-    printit=TRUE
-    converged=myit
-    pct_reduction_less_than <- function(old_val, new_val, threshold_pct) {
-      if (!is.numeric(old_val) || !is.numeric(new_val)) {
-        stop("Values must be numeric")
-      }
-      if (old_val == 0) {
-        stop("Old value cannot be zero for percentage reduction calculation")
+      if (verbose) {
+        message("Norm Weights: ", paste(round(normalizing_weights, 3), collapse = ", "))
+        message("Orth Weights: ", paste(round(orth_weights, 2), collapse = ", "))
       }
       
-      pct_change <- abs((old_val - new_val) / old_val) * 100
-      return( c(pct_change < threshold_pct, pct_change ) )
-    }
-    if ( myit > 5 ) {
-      change_detector = pct_reduction_less_than( bestTot, lastBest, 0.01 )
-      if (  change_detector[1] & verbose > 0 ) {
-        if (verbose) message(paste("~~Small.delt: E ", round(bestTot,4), " E-1 ", round(lastBest, 4),"E / E-1 ",round(change_detector[2],4)))
-        break # Properly exit the loop
+      # Re-calculate energies for iteration 1 now that weights are set
+      # So that Iteration 1 is comparable to future iterations in the energy path.
+      for (i in seq_len(nModalities)) {
+        sim_e <- all_sim_energy[[i]][length(all_sim_energy[[i]])]
+        dom_e_raw <- all_dom_energy_raw[[i]][length(all_dom_energy_raw[[i]])]
+        orth_e_defect <- invariant_orthogonality_defect(vmats[[i]])
+        
+        sim_e_w <- sim_e * normalizing_weights[i]
+        dom_e_w <- dom_e_raw * domain_weights[i]
+        orth_e_w <- orth_e_defect * orth_weights[i] * constraint_weight
+        
+        # Overwrite tracked values
+        all_total_energy[[i]][length(all_total_energy[[i]])] <- sim_e_w + dom_e_w + orth_e_w
+        all_dom_energy[[i]][length(all_dom_energy[[i]])] <- dom_e_w
+        all_ort_energy[[i]][length(all_ort_energy[[i]])] <- orth_e_w
+        
+        iter_results$total_energy[i] <- sim_e_w + dom_e_w + orth_e_w
+        iter_results$domain_energy[i] <- dom_e_w
+        iter_results$feature_orthogonality[i] <- orth_e_w
+        iter_results$similarity_energy_w[i] <- sim_e_w
+        iter_results$feature_orthogonality_w[i] <- orth_e_w
       }
     }
-  } else {
-    # Lack of improvement - reduce learning rate
-    initial_learning_rate = initial_learning_rate * 0.5
-    final_learning_rate = final_learning_rate * 0.9
-  }
+
+    convergence_df <- dplyr::bind_rows(convergence_df, iter_results)
+
+    # Update the "best" solution found so far based on mean total energy
+    mean_current_energy <- mean(iter_results$total_energy, na.rm = TRUE)
+    
+    # Initialize bestTot accurately at myit == 1 using the newly-scaled energies
+    if (myit == 1) {
+      bestTot <- mean_current_energy
+      lastBest <- bestTot
+      bestRow <- 1
+      bestU <- initialUMatrix
+      bestV <- vmats
+    }
+    
+    printit <- FALSE
+    if (is.finite(mean_current_energy) && mean_current_energy < bestTot & myit >= 2) {
+      lastBest <- bestTot
+      bestTot <- mean_current_energy
+      bestRow <- myit
+      bestU <- initialUMatrix
+      bestV <- vmats
+      printit <- TRUE
+      converged <- myit
+      pct_reduction_less_than <- function(old_val, new_val, threshold_pct) {
+        if (!is.numeric(old_val) || !is.numeric(new_val)) {
+          stop("Values must be numeric")
+        }
+        if (old_val == 0) {
+          stop("Old value cannot be zero for percentage reduction calculation")
+        }
+
+        pct_change <- abs((old_val - new_val) / old_val) * 100
+        return(c(pct_change < threshold_pct, pct_change))
+      }
+      if (myit > 5) {
+        change_detector <- pct_reduction_less_than(bestTot, lastBest, 0.01)
+        if (change_detector[1] & verbose > 0) {
+          if (verbose) message(paste("~~Small.delt: E ", round(bestTot, 4), " E-1 ", round(lastBest, 4), "E / E-1 ", round(change_detector[2], 4)))
+          break # Properly exit the loop
+        }
+      }
+    } else if (myit >= 2) {
+      # Issue 5: Lack of improvement
+      initial_learning_rate <- initial_learning_rate * 0.5
+      final_learning_rate <- final_learning_rate * 0.5
+
+      # Bulletproof fallback for all optimizers:
+      # If the energy increased, revert to best known state and clear momentum
+      vmats <- bestV
+      initialUMatrix <- bestU
+      
+      for (k in 1:nModalities) {
+         if (!is.null(optimizer_object_l[[k]]$state[[k]]$last_step_size)) {
+           optimizer_object_l[[k]]$state[[k]]$last_step_size <- optimizer_object_l[[k]]$state[[k]]$last_step_size * 0.5
+         }
+         optimizer_object_l[[k]]$state[[k]]$m <- vmats[[k]] * 0
+         optimizer_object_l[[k]]$state[[k]]$v <- vmats[[k]] * 0
+         optimizer_object_l[[k]]$state[[k]]$v_max <- vmats[[k]] * 0
+         optimizer_object_l[[k]]$state[[k]]$momentum <- vmats[[k]] * 0
+         optimizer_object_l[[k]]$state[[k]]$V_slow <- bestV[[k]]
+      }
+      if (verbose > 2) message(sprintf("   -> Iteration increased energy (%.4f > %.4f); reverting to best state and clearing momentum.", mean_current_energy, bestTot))
+    }
   
   if (verbose & printit | verbose > 1 ) {
     # Report the mean orthogonality across all modalities for this iteration
@@ -5775,10 +5875,9 @@ simlrU <- function(
 #' @param FUN function for summarizing variance explained 
 #' @return A data frame containing p-values for each permutation.
 #' @export
-simlr.perm <- function(data_matrices, 
-  smoothingMatrices, 
-  iterations = 10, 
-  sparsenessQuantiles = NULL, 
+simlr.perm <- function(data_matrices,
+  smoothingMatrices = NULL,
+  iterations = 10,  sparsenessQuantiles = NULL, 
   positivities = NULL, 
   initialUMatrix = NULL, 
   mixAlg = c("svd", "ica", "avg","rrpca-l", "rrpca-s", "pca", "stochastic"), 
@@ -8727,15 +8826,34 @@ orthogonalize_feature_space <- function(matrix_list,
 #'
 #' @return A numeric matrix of the same dimensions as \code{v}, with applied smoothing, sparsity, and optional normalization.
 #' @export
-simlr_sparseness <- function(v, 
+simlr_sparseness <- function(v,
                              constraint_type = c("Stiefel", "Grassmann", "none", "ortho", "nsaflow"),
                              smoothing_matrix = NULL,
-                             positivity = 'positive',
+                             positivity = "positive",
                              sparseness_quantile = 0.8,
                              constraint_weight = NA,
                              constraint_iterations = 1,
-                             sparseness_alg = 'soft',
-                             energy_type = 'acc') {
+                             sparseness_alg = "soft",
+                             energy_type = "acc") {
+  # --- Path #3: Idempotency Guard ---
+  # If the matrix is already projected with the same parameters, skip to avoid drift.
+  # We check the 'simlr_projected' attribute, the parameters, and the data sum.
+  v_attr <- attributes(v)
+  v_sum <- sum(v, na.rm = TRUE)
+  params_list <- list(
+    constraint_type = constraint_type,
+    positivity = positivity,
+    sparseness_quantile = sparseness_quantile,
+    constraint_weight = constraint_weight,
+    constraint_iterations = constraint_iterations,
+    sparseness_alg = sparseness_alg
+  )
+  if (isTRUE(v_attr$simlr_projected) &&
+    identical(v_attr$simlr_params, params_list) &&
+    identical(v_attr$simlr_sum, v_sum)) {
+    return(v)
+  }
+
   v <- as.matrix(v)
   constraint_type <- match.arg(constraint_type)
   if ( is.na(sparseness_alg) ) sparseness_alg='soft'
@@ -8802,7 +8920,11 @@ simlr_sparseness <- function(v,
     v <- l1_normalize_features(v)
   }
 
-  return( as.matrix( v ) )
+  v <- as.matrix(v)
+  attr(v, "simlr_projected") <- TRUE
+  attr(v, "simlr_params") <- params_list
+  attr(v, "simlr_sum") <- sum(v, na.rm = TRUE)
+  return(v)
 }
 
 

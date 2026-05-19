@@ -6,7 +6,7 @@
 \usage{
 simlr(
   data_matrices,
-  smoothingMatrices,
+  smoothingMatrices = NULL,
   iterations = 500,
   sparsenessQuantiles = NULL,
   positivities = NULL,

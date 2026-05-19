@@ -102,7 +102,7 @@ step.hybrid_adam <- function(optimizer, i, V_current, descent_gradient, full_ene
   search_direction <- state$m / (sqrt(state$v_max) + epsilon)
   
   # Perform line search along this descent direction
-  optimal_step_size <- .backtracking_linesearch(
+  optimal_step_size <- .robust_backtracking_linesearch(
     V_current = V_current,
     descent_direction = search_direction,
     ascent_gradient = -descent_gradient, # The ascent grad is needed for the slope term
@@ -191,7 +191,7 @@ step.random_gradient <- function(optimizer, i, V_current, descent_gradient,
   search_direction <- rand_grad
   
   # Perform line search along this direction
-  optimal_step_size <- .backtracking_linesearch(
+  optimal_step_size <- .robust_backtracking_linesearch(
     V_current = V_current,
     descent_direction = search_direction,
     ascent_gradient = -rand_grad, # slope term consistency
@@ -333,40 +333,6 @@ step.sgd_momentum <- function(optimizer, i, V_current, descent_gradient, ...) {
 }
 
 
-# --- Internal Helper for Line Search ---
-
-#' @keywords internal
-.backtracking_linesearch <- function(V_current, descent_direction, ascent_gradient,
-                                     energy_function, initial_step_size = 1.0,
-                                     alpha = 0.3, beta = 0.8, max_iter = 10) {
-  step_size <- initial_step_size
-  initial_energy <- energy_function(V_current)
-  
-  # The slope for the Armijo condition is <grad(E), d>.
-  # We have grad(E) (ascent_gradient) and d (descent_direction).
-  slope_term <- sum(ascent_gradient * descent_direction)
-  
-  # This should be negative for a valid descent direction.
-  if (slope_term >= 0) {
-      warning("Line search given a non-descent direction. Stopping search.")
-      return(0)
-  }
-  
-  for (i in 1:max_iter) {
-    V_candidate <- V_current + step_size * descent_direction
-    new_energy <- tryCatch(energy_function(V_candidate), error = function(e) Inf)
-    
-    # Armijo sufficient decrease condition:
-    # E(V + step*d) <= E(V) + alpha * step * <grad(E), d>
-    if (new_energy <= initial_energy + alpha * step_size * slope_term) {
-      return(step_size)
-    }
-    step_size <- beta * step_size
-  }
-  
-  warning("Line search backtracking failed to find a suitable step size.")
-  return(0)
-}
 
 #' @export
 step.ls_adam <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
@@ -884,7 +850,8 @@ step.armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full
     energy_function = full_energy_function,
     initial_step_size = state$last_step_size # Warm start from history
   )
-  # Update last_step_size: expand if successful, reset if failed/tiny
+  
+  # state$last_step_size <- if (optimal_step_size > 1e-10) optimal_step_size * 1.5 else 1.0
   state$last_step_size <- if (optimal_step_size > 1e-10) optimal_step_size * 1.5 else 1.0
   optimizer$state[[i]] <- state
   # Apply the step
@@ -961,27 +928,51 @@ step.nadam <- function(optimizer, i, V_current, descent_gradient, ...) {
                                             energy_function, initial_step_size = 1.0,
                                             alpha = 1e-4, beta = 0.5, min_step = 1e-12) {
   step_size <- initial_step_size
-  initial_energy <- tryCatch(energy_function(V_current), error = function(e) Inf)
-  
+  initial_energy <- tryCatch(energy_function(V_current), error = function(e) {
+    warning(paste("Error in initial_energy evaluation:", e$message))
+    Inf
+  })
+
   # Slope term: <grad(E), d> (should be negative for descent)
   slope_term <- sum(ascent_gradient * descent_direction)
   if (!is.finite(slope_term) || slope_term >= 0) {
     # Silently return 0 step size if it's not a descent direction (e.g. flat gradient at convergence)
     return(0)
   }
-  
+
+  # --- Optional Expansion Phase ---
+  # If the initial_step_size satisfies Armijo, try to expand it slightly to escape scale-traps.
+  V_init_test <- V_current + step_size * descent_direction
+  init_test_energy <- tryCatch(energy_function(V_init_test), error = function(e) Inf)
+
+  # Only accept if initial_energy is valid
+  if (is.finite(initial_energy) && is.finite(init_test_energy) && init_test_energy <= initial_energy + alpha * step_size * slope_term) {
+    # It works! Try to expand.
+    for (exp_it in 1:3) {
+      bigger_step <- step_size / beta # beta is usually 0.5, so this doubles the step
+      V_bigger <- V_current + bigger_step * descent_direction
+      bigger_energy <- tryCatch(energy_function(V_bigger), error = function(e) Inf)
+      if (is.finite(bigger_energy) && bigger_energy <= initial_energy + alpha * bigger_step * slope_term) {
+        step_size <- bigger_step
+      } else {
+        break
+      }
+    }
+    return(step_size)
+  }
+
   # Backtrack until Armijo satisfied or step too small
   while (step_size > min_step) {
     V_candidate <- V_current + step_size * descent_direction
     new_energy <- tryCatch(energy_function(V_candidate), error = function(e) Inf)
-    
+
     # Armijo condition
-    if (is.finite(new_energy) && new_energy <= initial_energy + alpha * step_size * slope_term) {
+    if (is.finite(initial_energy) && is.finite(new_energy) && new_energy <= initial_energy + alpha * step_size * slope_term) {
       return(step_size)
     }
     step_size <- beta * step_size
   }
-  
+
   # Return 0 without warning to gracefully handle local minima/flat manifolds
   return(0)
 }

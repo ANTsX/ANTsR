@@ -32,7 +32,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
       </span>
     </div>
 
@@ -87,7 +87,7 @@ for images in R</h1>
                         <h4 data-toc-skip class="author">Brian B.
 Avants</h4>
             
-            <h4 data-toc-skip class="date">2025-09-28</h4>
+            <h4 data-toc-skip class="date">2026-05-19</h4>
       
 
       <div class="hidden name"><code>ANTsR.Rmd</code></div>
@@ -393,7 +393,8 @@ shape or example, i.e. an atlas. Or to another individual.
 ANTs<em>R</em> provides a simple wrapper for SyN image registration
 <span class="citation">(Tustison and Avants 2013)</span>,</p>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">mi</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r64"</span><span class="op">)</span> ,<span class="fl">2</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">fi</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r16"</span><span class="op">)</span> <span class="op">)</span></span>
+<span><span class="va">mi</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsImageRead.html">antsImageRead</a></span><span class="op">(</span> <span class="fu"><a href="../reference/getANTsRData.html">getANTsRData</a></span><span class="op">(</span><span class="st">"r64"</span><span class="op">)</span> <span class="op">)</span></span>
 <span><span class="va">mytx</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/antsRegistration.html">antsRegistration</a></span><span class="op">(</span>fixed<span class="op">=</span><span class="va">fi</span> , moving<span class="op">=</span><span class="va">mi</span> ,</span>
 <span>    typeofTransform <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'SyN'</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">regresult</span><span class="op">&lt;-</span><span class="fu"><a href="../reference/iMath.html">iMath</a></span><span class="op">(</span><span class="va">mytx</span><span class="op">$</span><span class="va">warpedmovout</span>,<span class="st">"Normalize"</span><span class="op">)</span></span>
@@ -743,7 +744,7 @@ Source Implementation.”</span> <em>Front Neuroinform</em> 7: 27. <a href="http
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Brian B Avants.</p>
+<p>Developed by Brian B. Avants.</p>
 </div>
 
 <div class="pkgdown">

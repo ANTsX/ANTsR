@@ -19,7 +19,7 @@ The user then only chooses nvecs and optional regularization parameters."><!-- m
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
       </span>
     </div>
 
@@ -115,7 +115,29 @@ alternatively, this can be an antsImage which contains labeled regions.</p></dd>
 <span class="r-in"><span><span class="va">svdv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd</a></span><span class="op">(</span><span class="va">mat</span>, nu <span class="op">=</span> <span class="fl">0</span>, nv <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">$</span><span class="va">v</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ilist</span> <span class="op">&lt;-</span> <span class="fu"><a href="matrixToImages.html">matrixToImages</a></span><span class="op">(</span><span class="va">svdv</span>, <span class="va">initdf</span><span class="op">$</span><span class="va">mask</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">eseg</span> <span class="op">&lt;-</span> <span class="fu"><a href="eigSeg.html">eigSeg</a></span><span class="op">(</span><span class="va">initdf</span><span class="op">$</span><span class="va">mask</span>, <span class="va">ilist</span>, <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   |                                                                              |                                                                      |   0%  |                                                                              |=======                                                               |  10%  |                                                                              |==============                                                        |  20%  |                                                                              |=====================                                                 |  30%  |                                                                              |============================                                          |  40%  |                                                                              |===================================                                   |  50%  |                                                                              |==========================================                            |  60%  |                                                                              |=================================================                     |  70%  |                                                                              |========================================================              |  80%  |                                                                              |===============================================================       |  90%  |                                                                              |======================================================================| 100%</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |=======                                                               |  10%
+  |                                                                            
+  |==============                                                        |  20%
+  |                                                                            
+  |=====================                                                 |  30%
+  |                                                                            
+  |============================                                          |  40%
+  |                                                                            
+  |===================================                                   |  50%
+  |                                                                            
+  |==========================================                            |  60%
+  |                                                                            
+  |=================================================                     |  70%
+  |                                                                            
+  |========================================================              |  80%
+  |                                                                            
+  |===============================================================       |  90%
+  |                                                                            
+  |======================================================================| 100%</span>
 <span class="r-in"><span><span class="va">eanat</span> <span class="op">&lt;-</span> <span class="fu"><a href="sparseDecom.html">sparseDecom</a></span><span class="op">(</span><span class="va">dmat</span>,</span></span>
 <span class="r-in"><span>  inmask <span class="op">=</span> <span class="va">initdf</span><span class="op">$</span><span class="va">mask</span>,</span></span>
 <span class="r-in"><span>  sparseness <span class="op">=</span> <span class="fl">0</span>, smooth <span class="op">=</span> <span class="fl">0</span>,</span></span>
@@ -161,7 +183,7 @@ alternatively, this can be an antsImage which contains labeled regions.</p></dd>
 
 
       <footer><div class="copyright">
-  <p></p><p>Developed by Brian B Avants.</p>
+  <p></p><p>Developed by Brian B. Avants.</p>
 </div>
 
 <div class="pkgdown">

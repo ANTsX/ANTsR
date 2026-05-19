@@ -7,7 +7,7 @@ doc:
 
 test:
 	R CMD INSTALL --install-tests .
-	R --slave -e 'Sys.setenv(NOT_CRAN="true"); library(testthat); setwd(file.path(.libPaths()[1], "subtyper", "tests")); system.time(test_check("subtyper", filter="${file}", reporter=ifelse(nchar("${r}"), "${r}", "summary")))'
+	R --slave -e 'Sys.setenv(NOT_CRAN="true"); library(testthat); setwd(file.path(.libPaths()[1], "ANTsR", "tests")); system.time(test_check("ANTsR", filter="${file}", reporter=ifelse(nchar("${r}"), "${r}", "summary")))'
 
 deps:
 	R --slave -e 'install.packages(c("codetools", "testthat", "devtools", "roxygen2", "knitr"), repo="http://cran.at.r-project.org", lib=ifelse(nchar(Sys.getenv("R_LIB")), Sys.getenv("R_LIB"), .libPaths()[1]))'
@@ -16,8 +16,8 @@ build: doc
 	R CMD build .
 
 check: build
-	-export _R_CHECK_CRAN_INCOMING_REMOTE_=FALSE && R CMD check --as-cran subtyper_$(VERSION).tar.gz
-	rm -rf subtyper.Rcheck/
+	-export _R_CHECK_CRAN_INCOMING_REMOTE_=FALSE && R CMD check --as-cran ANTsR_$(VERSION).tar.gz
+	rm -rf ANTsR.Rcheck/
 
 man: doc
 	R CMD Rd2pdf man/ --force

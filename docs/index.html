@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><meta property="og:title" content="ANTs in R: Quantification Tools for Biomedical Images">
-<meta property="og:description" content="ANTsR interfaces state of the art image processing with R statistical methods. The project grew out of the need, at University of Pennsylvania, to develop large-scale analytics pipelines that track provenance from scanner to scientific study. ANTsR wraps an ANTs and ITK C++ core via Rcpp to access these frameworks from within R and support reproducible analyses. Specialized functionality in ANTsR includes image segmentation and registration along imaging specific variations of principal component and canonical correlation analysis.">
+<meta property="og:description" content="Quantification tools for biomedical images that interface state of the art image processing with R statistical methods. The project grew out of the need, at University of Pennsylvania, to develop large-scale analytics pipelines that track provenance from scanner to scientific study. ANTsR wraps an ANTs and ITK C++ core via Rcpp to access these frameworks from within R and support reproducible analyses. Specialized functionality in ANTsR includes image segmentation and registration along imaging specific variations of principal component and canonical correlation analysis.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ANTsR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.6.6</span>
       </span>
     </div>
 
@@ -146,27 +146,27 @@ R CMD INSTALL ANTsR_*.tgz</code></pre>
 <p><a href="https://antsx.github.io/ANTsR/articles/" class="external-link">Vignettes</a>:</p>
 <p>Wiki: <a href="https://github.com/ANTsX/ANTsR/wiki" class="external-link">Notes and work in progress examples</a></p>
 <p>Package source: <a href="https://github.com/ANTsX/ANTsR/zipball/master" class="external-link">from github</a></p>
-<p>Binaries: <a href="http://github.com/ANTsX/ANTsR/releases/" class="external-link">here</a></p>
+<p>Binaries: <a href="https://github.com/ANTsX/ANTsR/releases/" class="external-link">here</a></p>
 <p><em>Windows</em> installation option <a href="https://github.com/ANTsX/ANTsR/wiki/Installing-ANTsR-on-Windows-10-(using-WSL2)" class="external-link">here</a></p>
-<p><strong>Suggested packages</strong> <a href="https://github.com/stnava/ANTsRDocker/blob/master/install.R" class="external-link">https://github.com/stnava/ANTsRDocker/blob/master/install.R</a></p>
+<p><strong>Suggested packages</strong> can be installed via <code>install.packages</code> or <code><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">remotes::install_github</a></code>.</p>
 <p><br></p>
 </div>
 <div class="section level2">
 <h2 id="research-using-antsr">Research using ANTsR<a class="anchor" aria-label="anchor" href="#research-using-antsr"></a>
 </h2>
 <ul>
-<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25449745" class="external-link">Inter-modality inference</a> yet to be added RIPMMARC</p></li>
-<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25448483" class="external-link">Eigenanatomy for multiple modality population studies</a> function <code>sparseDecom</code></p></li>
-<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25433513" class="external-link">Tumor segmentation</a> function <code>mrvnrfs</code> (not exactly the same but close)</p></li>
-<li><p><a href="http://www.nature.com/articles/sdata20153" class="external-link">Multiple modality pediatric template and population study</a> employs several aspects of ANTsR</p></li>
-<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/25320792" class="external-link">Structural networks from subject-level data</a> function <code>makeGraph</code> plus yet to be added RIPMMARC</p></li>
-<li><p><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3911786/" class="external-link">SCCAN relating neuroimaging and cognitive batteries</a> function <code>sparseDecom2</code></p></li>
-<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24683960" class="external-link">Sparse regression with manifold smoothness constraints</a> function <code>sparseRegression</code></p></li>
-<li><p><a href="http://www.ncbi.nlm.nih.gov/pubmed/24852460" class="external-link">Prior-based eigenanatomy</a> function <code>sparseDecom</code></p></li>
-<li><p><a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3049832/" class="external-link">Corrective learning for segmentation</a> functions <code>segmentationRefinement.train</code> and <code>segmentationRefinement.predict</code>.</p></li>
-<li><p><a href="https://www.ncbi.nlm.nih.gov/pubmed/26756101" class="external-link">LINDA: automated segmentation of stroke lesions</a> function <code>mrvnrfs</code>.</p></li>
-<li><p><a href="https://www.ncbi.nlm.nih.gov/pubmed/28882479" class="external-link">LESYMAP: lesion to symptom mapping</a> function <code>sparseDecom2</code>.</p></li>
-<li><p><a href="https://github.com/ntustison/ANTsRNet" class="external-link">ANTsRNet</a> A growing collection of well-known deep learning architectures ported to the R language. _ Image segmentation _ U-Net (2-D) _ V-Net (3-D) _ Image classification _ AlexNet (2-D, 3-D) _ Vgg16/Vgg19 (2-D, 3-D) _ ResNet/ResNeXt (2-D, 3-D) _ GoogLeNet (2-D) _ DenseNet (2-D, 3-D) _ Object detection * Single Shot MultiBox Detector (2-D, 3-D)</p></li>
+<li><p><a href="https://pubmed.ncbi.nlm.nih.gov/25449745" class="external-link">Inter-modality inference</a> yet to be added RIPMMARC</p></li>
+<li><p><a href="https://pubmed.ncbi.nlm.nih.gov/25448483" class="external-link">Eigenanatomy for multiple modality population studies</a> function <code>sparseDecom</code></p></li>
+<li><p><a href="https://pubmed.ncbi.nlm.nih.gov/25433513" class="external-link">Tumor segmentation</a> function <code>mrvnrfs</code> (not exactly the same but close)</p></li>
+<li><p><a href="https://www.nature.com/articles/sdata20153" class="external-link">Multiple modality pediatric template and population study</a> employs several aspects of ANTsR</p></li>
+<li><p><a href="https://pubmed.ncbi.nlm.nih.gov/25320792" class="external-link">Structural networks from subject-level data</a> function <code>makeGraph</code> plus yet to be added RIPMMARC</p></li>
+<li><p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3911786/" class="external-link">SCCAN relating neuroimaging and cognitive batteries</a> function <code>sparseDecom2</code></p></li>
+<li><p><a href="https://pubmed.ncbi.nlm.nih.gov/24683960" class="external-link">Sparse regression with manifold smoothness constraints</a> function <code>sparseRegression</code></p></li>
+<li><p><a href="https://pubmed.ncbi.nlm.nih.gov/24852460" class="external-link">Prior-based eigenanatomy</a> function <code>sparseDecom</code></p></li>
+<li><p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3049832/" class="external-link">Corrective learning for segmentation</a> functions <code>segmentationRefinement.train</code> and <code>segmentationRefinement.predict</code>.</p></li>
+<li><p><a href="https://pubmed.ncbi.nlm.nih.gov/26756101" class="external-link">LINDA: automated segmentation of stroke lesions</a> function <code>mrvnrfs</code>.</p></li>
+<li><p><a href="https://pubmed.ncbi.nlm.nih.gov/28882479" class="external-link">LESYMAP: lesion to symptom mapping</a> function <code>sparseDecom2</code>.</p></li>
+<li><p><a href="https://github.com/ntustison/ANTsRNetExamples" class="external-link">ANTsRNet</a> A growing collection of well-known deep learning architectures ported to the R language. _ Image segmentation _ U-Net (2-D) _ V-Net (3-D) _ Image classification _ AlexNet (2-D, 3-D) _ Vgg16/Vgg19 (2-D, 3-D) _ ResNet/ResNeXt (2-D, 3-D) _ GoogLeNet (2-D) _ DenseNet (2-D, 3-D) _ Object detection * Single Shot MultiBox Detector (2-D, 3-D)</p></li>
 </ul>
 <p><br></p>
 </div>
@@ -182,7 +182,8 @@ R CMD INSTALL ANTsR_*.tgz</code></pre>
     <div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li>Apache-2.0</li>
+<li>Apache License (== 2.0) | file <a href="LICENSE-text.html">LICENSE</a>
+</li>
 </ul>
 </div>
 
@@ -203,7 +204,7 @@ R CMD INSTALL ANTsR_*.tgz</code></pre>
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Brian B Avants <br><small class="roles"> Author, maintainer </small>   </li>
+<li>Brian B. Avants <br><small class="roles"> Author, maintainer </small>   </li>
 <li><a href="authors.html">More about authors...</a></li>
 </ul>
 </div>
@@ -216,7 +217,7 @@ R CMD INSTALL ANTsR_*.tgz</code></pre>
 
       <footer><div class="copyright">
   <p></p>
-<p>Developed by Brian B Avants.</p>
+<p>Developed by Brian B. Avants.</p>
 </div>
 
 <div class="pkgdown">
