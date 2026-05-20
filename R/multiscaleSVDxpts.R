@@ -4959,15 +4959,17 @@ simlr <- function(
     vmats <- list()
     for (i in 1:nModalities) {
       vmats[[i]] <- t(data_matrices[[i]]) %*% initialUMatrix[[i]]
-      vmats[[i]] <- vmats[[i]] / norm(vmats[[i]], "F")
+      # Add noise to break initial scale-symmetry and avoid immediate stagnation
+      noise <- matrix(rnorm(length(vmats[[i]]), sd = 1e-3), nrow = nrow(vmats[[i]]))
+      vmats[[i]] <- (vmats[[i]] + noise) / norm(vmats[[i]], "F")
     }
   }
   
   nc <- ncol(initialUMatrix[[1]])
   myw <- matrix(rnorm(nc^2), nc, nc) # initialization for fastICA
 
-  energyPath <- matrix(Inf, nrow = iterations, ncol = nModalities)
-  orthPath = matrix(Inf, nrow = iterations, ncol = nModalities)
+  bestTot <- Inf
+  bestRow <- 1
   bestU <- initialUMatrix
   bestV <- vmats
   domain_knowledge=0
@@ -5034,13 +5036,16 @@ all_dom_energy_raw<-vector("list", nModalities)
 all_total_energy <- vector("list", nModalities)
 
 for (j in 1:nModalities) {
+
   all_sim_energy[[j]]   <- numeric()
   all_ort_energy[[j]]   <- numeric()
   all_dom_energy[[j]]   <- numeric()
   all_dom_energy_raw[[j]] <- numeric()
   all_total_energy[[j]] <- numeric()
 }
+
 v_initial = vmats
+
 u_initial = initialUMatrix
   v_prev <- vmats
   stagnation_counter <- 0
@@ -5048,21 +5053,30 @@ u_initial = initialUMatrix
   energy_fns <- list()
   for (i in 1:nModalities) {
     energy_fns[[i]] <- (function(mod_idx) {
+      last_V <- NULL
+      last_V_sp <- NULL
       function(V, U = NULL, return_raw = FALSE, track = FALSE) {
+        if (is.null(V)) stop(paste("energy_fns modality", mod_idx, "passed V=NULL"))
         if (is.null(U)) U <- initialUMatrix[[mod_idx]]
-        # We DO NOT call take_abs_unsigned(V) here because it strips matrix attributes,
-        # which breaks the idempotency guard in simlr_sparseness.
-        # simlr_sparseness already applies positivity constraints internally.
-        V_sp <- simlr_sparseness(
-          V,
-          constraint_type = constraint_type,
-          smoothing_matrix = smoothingMatrices[[mod_idx]],
-          positivity = positivities[mod_idx],
-          sparseness_quantile = sparsenessQuantiles[mod_idx],
-          constraint_iterations = constraint_iterations,
-          constraint_weight = constraint_weight,
-          sparseness_alg = sparsenessAlg
-        )
+        if (is.null(U)) stop(paste("energy_fns modality", mod_idx, "U is NULL"))
+        
+        # Issue 4 fix: Cache the projected matrix V_sp
+        if (is.null(last_V) || !identical(V, last_V)) {
+          V_sp <- simlr_sparseness(
+            V,
+            constraint_type = constraint_type,
+            smoothing_matrix = smoothingMatrices[[mod_idx]],
+            positivity = positivities[mod_idx],
+            sparseness_quantile = sparsenessQuantiles[mod_idx],
+            constraint_iterations = constraint_iterations,
+            constraint_weight = constraint_weight,
+            sparseness_alg = sparsenessAlg
+          )
+          last_V <<- V
+          last_V_sp <<- V_sp
+        } else {
+          V_sp <- last_V_sp
+        }
 
         # --- User-chosen energy ---
         sim_e <- calculate_simlr_energy(
@@ -5109,6 +5123,13 @@ u_initial = initialUMatrix
     if (myit <= 2) {
       vmats <- v_initial
       initialUMatrix <- u_initial
+      # Issue 3 fix: Reset optimizer state for all modalities at the start of iteration 2
+      # This ensures the "real" optimization doesn't inherit momentum from the tuning iteration.
+      if (myit == 2) {
+        for (k in 1:nModalities) {
+          optimizer_object_l[[k]] <- reset_optimizer_state(optimizer_object_l[[k]], vmats)
+        }
+      }
     }
     decay_progress <- (myit - 1) / max(1, iterations - 1)
     current_learning_rate <- final_learning_rate + 0.5 * (initial_learning_rate - final_learning_rate) * (1 + cos(pi * decay_progress))
@@ -5204,10 +5225,10 @@ u_initial = initialUMatrix
         smoothing_matrix = smoothingMatrices[[i]],
         positivity = positivities[i],
         sparseness_quantile = sparsenessQuantiles[i],
+        constraint_iterations = constraint_iterations,
         constraint_weight = constraint_weight,
         sparseness_alg = sparsenessAlg
-      )
-    } # End V_i update loop
+      )    } # End V_i update loop
 
     energy_after_V <- 0
     for (i in 1:nModalities) energy_after_V <- energy_after_V + energy_fns[[i]](vmats[[i]], track=FALSE)
@@ -5225,7 +5246,7 @@ u_initial = initialUMatrix
       expBeta = expBeta
     )
     # Apply Gram-Schmidt orthogonalization (localGS)
-    candidate_U <- lapply(updated_Us, function(u) localGS(u, orthogonalize = orthogonalizeU))
+    candidate_U <- lapply(updated_Us, function(u) localGS(u, orthogonalizeU = orthogonalizeU))
 
     # --- Energy-Aware U Update ---
     old_U <- initialUMatrix
@@ -5291,7 +5312,10 @@ u_initial = initialUMatrix
       for (i in 1:nModalities) {
         # Get the results for this modality from the table we just built
         mod_results <- iter_results[i, ]
-        normalizing_weights[i] <- 1.0 / (abs(mod_results$similarity_energy) * nModalities)
+        # Issue 6 fix: add safeguard against zero similarity energy
+        sim_e_abs <- abs(mod_results$similarity_energy)
+        if (sim_e_abs < 1e-10) sim_e_abs <- 1.0 
+        normalizing_weights[i] <- 1.0 / (sim_e_abs * nModalities)
         # The weight is the ratio of the absolute similarity energy to the orthogonality penalty
         if (!is.na(mod_results$feature_orthogonality)) {
           if (mod_results$feature_orthogonality > 1e-10) {
@@ -5400,13 +5424,11 @@ u_initial = initialUMatrix
       initialUMatrix <- bestU
       
       for (k in 1:nModalities) {
-         if (!is.null(optimizer_object_l[[k]]$state[[k]]$last_step_size)) {
-           optimizer_object_l[[k]]$state[[k]]$last_step_size <- optimizer_object_l[[k]]$state[[k]]$last_step_size * 0.5
+         old_last_step <- optimizer_object_l[[k]]$state[[k]]$last_step_size
+         optimizer_object_l[[k]] <- reset_optimizer_state(optimizer_object_l[[k]], vmats)
+         if (!is.null(old_last_step)) {
+           optimizer_object_l[[k]]$state[[k]]$last_step_size <- old_last_step * 0.5
          }
-         optimizer_object_l[[k]]$state[[k]]$m <- vmats[[k]] * 0
-         optimizer_object_l[[k]]$state[[k]]$v <- vmats[[k]] * 0
-         optimizer_object_l[[k]]$state[[k]]$v_max <- vmats[[k]] * 0
-         optimizer_object_l[[k]]$state[[k]]$momentum <- vmats[[k]] * 0
          optimizer_object_l[[k]]$state[[k]]$V_slow <- bestV[[k]]
       }
       if (verbose > 2) message(sprintf("   -> Iteration increased energy (%.4f > %.4f); reverting to best state and clearing momentum.", mean_current_energy, bestTot))
@@ -5445,7 +5467,6 @@ for ( v in 1:length(bestV)) {
   }
 }
 
-energyPath <- na.omit(energyPath)
 rlist=    list(
       u = bestU,
       v = bestV,
@@ -5458,7 +5479,7 @@ rlist=    list(
       optimizationStyle = optimizationStyle,
       converged_at = converged,
       sim_energy = all_sim_energy,
-      domain_energy = all_dom_energy_raw,
+      domain_energy = all_dom_energy,
       orth_energy = all_ort_energy,
       total_energy = all_total_energy,
       constraint = constraint

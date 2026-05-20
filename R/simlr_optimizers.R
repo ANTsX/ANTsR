@@ -61,6 +61,31 @@ create_optimizer <- function(optimizer_type = "hybrid_adam", vmats, ...) {
 }
 
 
+#' Reset Optimizer State
+#'
+#' Resets the internal state (momentum, second moments, etc.) of an optimizer.
+#' Useful when the optimization needs to restart from a previous best state.
+#'
+#' @param optimizer The optimizer object.
+#' @param vmats The current V matrices to get the correct dimensions.
+#' @return The optimizer object with reset state.
+#' @export
+reset_optimizer_state <- function(optimizer, vmats) {
+  for (k in seq_along(optimizer$state)) {
+    v_zero <- vmats[[k]] * 0
+    optimizer$state[[k]]$m <- v_zero
+    optimizer$state[[k]]$v <- v_zero
+    optimizer$state[[k]]$v_max <- v_zero
+    optimizer$state[[k]]$vhat <- v_zero
+    optimizer$state[[k]]$momentum <- v_zero
+    optimizer$state[[k]]$g_sum_sq <- v_zero
+    optimizer$state[[k]]$Eg2 <- v_zero
+    optimizer$state[[k]]$Edx2 <- v_zero
+    optimizer$state[[k]]$last_step_size <- 1.0
+  }
+  return(optimizer)
+}
+
 #' Take One Optimization Step
 #'
 #' This is a generic S3 function that dispatches to the correct update rule
@@ -216,8 +241,10 @@ step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
   beta1 <- params$beta1 %||% 0.9
   beta2 <- params$beta2 %||% 0.999
   epsilon <- params$epsilon %||% 1e-8
-  learning_rate <- params$learning_rate %||% 0.001
-  myit <- params$myit %||% 1  # Current iter for bias correction
+  
+  args <- list(...)
+  learning_rate <- args$learning_rate %||% params$learning_rate %||% 0.001
+  myit <- args$myit %||% params$myit %||% 1  # Current iter for bias correction
   # Update moments
   state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
   state$v <- beta2 * state$v + (1 - beta2) * (descent_gradient^2)  # Standard v, no v_max
@@ -235,23 +262,26 @@ step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
 #' @export
 step.gd <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Naive gradient descent with exponential learning rate decay
-  # update: V_{t+1} = V_t - η_t * ∇f(V_t)
-  descent_gradient = descent_gradient * (-1.0)
+  # update: V_{t+1} = V_t + η_t * d
   state <- optimizer$state[[i]]
   params <- optimizer$params
   
-  learning_rate <- params$learning_rate %||% 1e-6
+  args <- list(...)
+  learning_rate <- args$learning_rate %||% params$learning_rate %||% 1e-6
   decay_rate    <- params$decay_rate %||% 1e-3
   
   # Track iteration count in state
   state$iter <- (state$iter %||% 0) + 1
-  
+
   # Exponential decay schedule
   effective_lr <- learning_rate * exp(-decay_rate * state$iter)
-  
+
+  # Normalize gradient to ensure stable steps even when objective is sharp
+  g_norm <- sqrt(sum(descent_gradient^2))
+  if (g_norm > 1e-12) descent_gradient <- descent_gradient / g_norm
+
   # Compute update
-  updated_V <- V_current - effective_lr * descent_gradient
-  
+  updated_V <- V_current + effective_lr * descent_gradient
   # Update state
   optimizer$state[[i]] <- state
   
@@ -323,10 +353,14 @@ step.sgd_momentum <- function(optimizer, i, V_current, descent_gradient, ...) {
 
   # Update momentum with the descent gradient
   state$momentum <- beta * state$momentum + (1 - beta) * descent_gradient
-  
+
+  # Normalize update direction for stability
+  m_norm <- sqrt(sum(state$momentum^2))
+  update_dir <- state$momentum
+  if (m_norm > 1e-12) update_dir <- update_dir / m_norm
+
   # Update parameter by taking a step ALONG the momentum descent direction
-  updated_V <- V_current + learning_rate * state$momentum
-  
+  updated_V <- V_current + learning_rate * update_dir
   optimizer$state[[i]] <- state
   
   return(list(updated_V = updated_V, optimizer = optimizer))
@@ -506,19 +540,20 @@ step.ls_nadam <- function(optimizer, i, V_current, descent_gradient, full_energy
 #' @export
 step.amsgrad <- function(optimizer, i, V_current, descent_gradient, ...) {
   # AMSGrad optimizer
-  descent_gradient = descent_gradient * (-1.0)
   state <- optimizer$state[[i]]
   params <- optimizer$params
   beta1 <- params$beta1 %||% 0.9
   beta2 <- params$beta2 %||% 0.999
   epsilon <- params$epsilon %||% 1e-8
-  lr <- params$learning_rate %||% 0.001
-  t <- params$myit %||% 1
+  
+  args <- list(...)
+  learning_rate <- args$learning_rate %||% params$learning_rate %||% 0.001
+  myit <- args$myit %||% params$myit %||% 1
   
   # Init state
-  state$m <- state$m %||% 0
-  state$v <- state$v %||% 0
-  state$vhat <- state$vhat %||% 0
+  state$m <- state$m %||% (V_current * 0)
+  state$v <- state$v %||% (V_current * 0)
+  state$vhat <- state$vhat %||% (V_current * 0)
   
   # Update biased moments
   state$m <- beta1 * state$m + (1 - beta1) * descent_gradient
@@ -528,12 +563,11 @@ step.amsgrad <- function(optimizer, i, V_current, descent_gradient, ...) {
   state$vhat <- pmax(state$vhat, state$v)
   
   # Bias correction
-  m_hat <- state$m / (1 - beta1^t)
+  m_hat <- state$m / (1 - beta1^myit)
   
   # Update step
-  updated_V <- V_current - lr * m_hat / (sqrt(state$vhat) + epsilon)
+  updated_V <- V_current + learning_rate * m_hat / (sqrt(state$vhat) + epsilon)
   
-  state$iter <- t + 1
   optimizer$state[[i]] <- state
   return(list(updated_V = updated_V, optimizer = optimizer))
 }
@@ -541,7 +575,7 @@ step.amsgrad <- function(optimizer, i, V_current, descent_gradient, ...) {
 #' @export
 step.adadelta <- function(optimizer, i, V_current, descent_gradient, ...) {
   # AdaDelta update rule
-  descent_gradient = descent_gradient * (-1.0)
+  # Using descent_gradient (d = -g), so the update is + (RMS_dx/RMS_g) * d
   
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -549,16 +583,20 @@ step.adadelta <- function(optimizer, i, V_current, descent_gradient, ...) {
   epsilon <- params$epsilon %||% 1e-6
   
   # Init state if missing
-  state$Eg2 <- state$Eg2 %||% 0
-  state$Edx2 <- state$Edx2 %||% 0
+  state$Eg2 <- state$Eg2 %||% (V_current * 0)
+  state$Edx2 <- state$Edx2 %||% (V_current * 0)
   
-  # Accumulate gradient squared
+  # Accumulate descent_gradient squared (equivalent to gradient squared)
   state$Eg2 <- rho * state$Eg2 + (1 - rho) * (descent_gradient^2)
   
   # Compute update
   RMS_dx <- sqrt(state$Edx2 + epsilon)
   RMS_g  <- sqrt(state$Eg2 + epsilon)
-  delta_x <- -(RMS_dx / RMS_g) * descent_gradient
+  
+  args <- list(...)
+  learning_rate <- args$learning_rate %||% params$learning_rate %||% 1.0
+  
+  delta_x <- learning_rate * (RMS_dx / RMS_g) * descent_gradient
   
   # Update parameters
   updated_V <- V_current + delta_x
@@ -700,31 +738,36 @@ step.bidirectional_armijo_gradient <- function(optimizer, i, V_current, descent_
     beta = beta,
     min_step = min_step
   )
-  
+
   # Select the direction with the larger step size
   if (pos_result >= neg_result && pos_result > 0) {
     return(list(step_size = pos_result, direction = descent_direction))
   } else if (neg_result > 0) {
     return(list(step_size = neg_result, direction = -descent_direction))
   } else {
-    warning("Bidirectional line search failed to find a suitable step size in either direction.")
+    # Silently return 0 step size - the caller (main loop) will handle reversion
     return(list(step_size = 0, direction = descent_direction))
   }
-}
-
+  }
 
 #' @export
 step.vsgd <- function(optimizer, i, V_current, descent_gradient, ...) {
-  descent_gradient = descent_gradient * (-1.0)  
   state <- optimizer$state[[i]]
   params <- optimizer$params
-  learning_rate <- params$learning_rate %||% 0.001
+  args <- list(...)
+  learning_rate <- args$learning_rate %||% params$learning_rate %||% 0.001
   sigma <- params$sigma %||% 0.1  # Variational noise scale
-  # Variational sample: grad + Gaussian noise ~ N(0, sigma^2 * I)
-  var_grad <- descent_gradient + matrix(rnorm(length(descent_gradient), sd = sigma), nrow(V_current), ncol(V_current))
-  # SGD with momentum on variational grad
-  state$m <- 0.9 * state$m + 0.1 * var_grad
-  updated_V <- V_current - learning_rate * state$m
+  # Variational sample: descent_gradient + Gaussian noise ~ N(0, sigma^2 * I)
+  var_desc <- descent_gradient + matrix(rnorm(length(descent_gradient), sd = sigma), nrow(V_current), ncol(V_current))
+  # SGD with momentum on variational descent_gradient
+  state$m <- 0.9 * (state$m %||% (V_current * 0)) + 0.1 * var_desc
+
+  # Normalize update direction for stability
+  m_norm <- sqrt(sum(state$m^2))
+  update_dir <- state$m
+  if (m_norm > 1e-12) update_dir <- update_dir / m_norm
+
+  updated_V <- V_current + learning_rate * update_dir
   optimizer$state[[i]] <- state
   return(list(updated_V = updated_V, optimizer = optimizer))
 }

@@ -6,7 +6,7 @@
 \usage{
 simlr(
   data_matrices,
-  smoothingMatrices = NULL,
+  smoothingMatrices,
   iterations = 500,
   sparsenessQuantiles = NULL,
   positivities = NULL,
@@ -23,7 +23,7 @@ simlr(
     "logcosh", "exp", "kurtosis", "gauss"),
   vmats = NULL,
   connectors = NULL,
-  optimizationStyle = c("armijo_gradient", "bidirectional_lookahead", "lookahead",
+  optimizationStyle = c("bidirectional_lookahead", "armijo_gradient", "lookahead",
     "bidirectional_armijo_gradient"),
   scale = c("center", "eigenvalue"),
   expBeta = 0.9,
@@ -32,6 +32,7 @@ simlr(
   orthogonalizeU = FALSE,
   domainMatrices = NULL,
   domainLambdas = NULL,
+  gradientClipper = 0.95,
   verbose = FALSE
 )
 }
