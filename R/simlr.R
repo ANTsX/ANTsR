@@ -1183,7 +1183,7 @@ simlrU <- function(
     if (mixAlg == "avg") {
       avgU <- projectionsU[[1]] * 0.0
       for (j in wtobind) {
-        avgU <- avgU + projectionsU[[j]] / (nmodalities - 1)
+        avgU <- avgU + projectionsU[[j]] / length(wtobind)
       }
       basis <- avgU
     } else if (mixAlg == "stochastic") { # FIXME
@@ -1218,77 +1218,57 @@ simlrU <- function(
         }
       } else if (mixAlg == "newton-schulz") {
         # This is a fast way to get an orthogonal basis from the averaged projections
-        n_mod_minus_1 <- length(wtobind)
+        n_mod <- length(wtobind)
         M <- matrix(0, nrow(avgU), nc)
-        for (idx in seq_len(n_mod_minus_1)) {
+        for (idx in seq_len(n_mod)) {
           start_col <- (idx - 1) * nc + 1
           end_col <- idx * nc
           M <- M + avgU[, start_col:end_col]
         }
-        M <- M / n_mod_minus_1
-        
-        if (expBeta > 0 && !is.null(previousU)) {
-          # Exponential moving average blending
-          M <- (1 - expBeta) * M + expBeta * previousU
-          # Single Newton-Schulz iteration step for symmetric decorrelation
-          MtM <- t(M) %*% M
-          # We use a single NS step logic: W_{k+1} = 0.5 * W_k * (3I - W_k^T W_k)
-          # But we must ensure it's still a valid approximation.
-          # Alternatively, use inv_sqrt_sym_newton with max_iter=1
-          inv_sqrt_MtM <- inv_sqrt_sym_newton(MtM, max_iter = 1L)
-          basis <- M %*% inv_sqrt_MtM
-        } else {
-          # Standard full convergence
-          MtM <- t(M) %*% M
-          inv_sqrt_MtM <- inv_sqrt_sym_newton(MtM)
-          basis <- M %*% inv_sqrt_MtM
-        }
+        M <- M / n_mod
+        MtM <- t(M) %*% M
+        inv_sqrt_MtM <- inv_sqrt_sym_newton(MtM)
+        basis <- M %*% inv_sqrt_MtM
       } else if (mixAlg == "ica-newton") {
         # FastICA-style update with Newton-Schulz symmetric decorrelation
-        n_mod_minus_1 <- length(wtobind)
+        n_mod <- length(wtobind)
         M <- matrix(0, nrow(avgU), nc)
-        for (idx in seq_len(n_mod_minus_1)) {
+        for (idx in seq_len(n_mod)) {
           start_col <- (idx - 1) * nc + 1
           end_col <- idx * nc
           M <- M + avgU[, start_col:end_col]
         }
-        M <- M / n_mod_minus_1
-        
-        if (expBeta > 0 && !is.null(previousU)) {
-          # 1. Blend current average with previous state
-          M_blended <- (1 - expBeta) * M + expBeta * previousU
-          # 2. Whiten blended (single step)
-          MtM <- t(M_blended) %*% M_blended
-          M_whitened <- M_blended %*% inv_sqrt_sym_newton(MtM, max_iter = 1L)
-          # 3. Single FastICA fixed-point step
-          tanhM <- tanh(M_whitened)
-          E1 <- t(M_whitened) %*% tanhM / nrow(M_whitened)
-          E2 <- colMeans(1 - tanhM^2)
-          basis <- M_whitened %*% (E1 - diag(E2))
-          # 4. Single NS decorrelation step
-          BtB <- t(basis) %*% basis
-          basis <- basis %*% inv_sqrt_sym_newton(BtB, max_iter = 1L)
-        } else {
-          # Standard full convergence (initial step or no EMA)
-          MtM <- t(M) %*% M
-          M <- M %*% inv_sqrt_sym_newton(MtM)
-          tanhM <- tanh(M)
-          E1 <- t(M) %*% tanhM / nrow(M)
-          E2 <- colMeans(1 - tanhM^2)
-          basis <- M %*% (E1 - diag(E2))
-          BtB <- t(basis) %*% basis
-          basis <- basis %*% inv_sqrt_sym_newton(BtB)
-        }
+        M <- M / n_mod
+        # Standard full convergence (initial step or no EMA)
+        MtM <- t(M) %*% M
+        M <- M %*% inv_sqrt_sym_newton(MtM)
+        tanhM <- tanh(M)
+        E1 <- t(M) %*% tanhM / nrow(M)
+        E2 <- colMeans(1 - tanhM^2)
+        basis <- M %*% (E1 - diag(E2))
+        BtB <- t(basis) %*% basis
+        basis <- basis %*% inv_sqrt_sym_newton(BtB)
       } else {
         basis <- (ba_svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
       }
     }
 
-    if (expBeta > 0 && !is.null(previousU) && !(mixAlg %in% c("newton-schulz", "ica-newton"))) {
-       basis <- (1 - expBeta) * basis + expBeta * previousU
+    if (ncol(basis) < nc) {
+       needed <- nc - ncol(basis)
+       if (!is.null(previousU) && ncol(previousU) == nc) {
+           pad <- previousU[, (ncol(basis) + 1):nc, drop = FALSE]
+       } else {
+           pad <- matrix(rnorm(nrow(basis) * needed), nrow = nrow(basis), ncol = needed)
+       }
+       basis <- cbind(basis, pad)
+    }
+
+    if (expBeta > 0 && !is.null(previousU) ) {
+       basis <- nsa_flow( Y0 = basis, X0 = previousU, w = expBeta, retraction = "soft_polar", 
+        max_iter=10, apply_nonneg=FALSE )$Y
        # Single Newton-Schulz iteration step for symmetric decorrelation
-       BtB <- t(basis) %*% basis
-       basis <- basis %*% inv_sqrt_sym_newton(BtB, max_iter = 1L)
+#       BtB <- t(basis) %*% basis
+#       basis <- basis %*% inv_sqrt_sym_newton(BtB, max_iter = 1L)
     }
     colnames(basis)=paste0("PC",1:nc)
     if (!orthogonalize) {

@@ -25,13 +25,15 @@ source("R/simlr.R")
 cat("Running SIMLR Recent Version (simlrZZ)...\n")
 start_time <- Sys.time()
 mix='newton-schulz'
-# mix='ica'
+mix='ica'
 # mix='ica-newton'
-mix='pca'
-oppter='armijo_gradient'
+# mix='svd'
+ebber=0.9
+oppter='adam'
+mye='regression'
 res_recent <- simlr( matlist, initialUMatrix = 3, iterations = 100,
-                   sparse_gradient = TRUE, energyType = "acc",  mixAlg=mix,
-                   expBeta=0,
+                   sparse_gradient = TRUE, energyType = mye,  mixAlg=mix,
+                   expBeta=ebber,
                    optimizationStyle = oppter, verbose=2)
 end_time <- Sys.time()
 time_recent <- as.numeric(difftime(end_time, start_time, units = "secs"))
@@ -40,8 +42,8 @@ time_recent <- as.numeric(difftime(end_time, start_time, units = "secs"))
 cat("\nRunning SIMLR Reference Version (simlr)...\n")
 start_time <- Sys.time()
 res_ref <- backup_simlr(matlist, initialUMatrix = 3, iterations = 100, 
-                energyType = "acc",  mixAlg=mix,
-                                   expBeta=0,
+                energyType = mye,  mixAlg=mix,
+                expBeta=ebber,
                 optimizationStyle = oppter, verbose=2 )
 end_time <- Sys.time()
 time_ref <- as.numeric(difftime(end_time, start_time, units = "secs"))
