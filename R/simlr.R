@@ -304,6 +304,33 @@ simlr <- function(
     domainLambdas  = NULL,
     sparse_gradient = TRUE,
     verbose = FALSE) {
+
+  # Capture provenance at the start
+  prov_nsimlr <- if (is.matrix(initialUMatrix)) ncol(initialUMatrix) else if (is.numeric(initialUMatrix)) initialUMatrix else NA
+  prov_prescaling <- if (missing(scale)) "centerAndScale" else scale
+  prov_objectiver <- if (missing(energyType)) "acc" else energyType
+  prov_mixer <- if (missing(mixAlg)) "pca" else mixAlg
+  prov_constraint <- constraint[1]
+  prov_sparval <- if (missing(sparsenessQuantiles)) 0.5 else sparsenessQuantiles
+  prov_ebber <- expBeta
+  prov_pizzer <- if (missing(positivities)) "positive" else positivities
+  prov_optimus <- if (missing(optimizationStyle)) "bidirectional_lookahead" else optimizationStyle
+  prov_sparsenessAlg <- sparsenessAlg
+
+  provenance <- data.frame(
+    nsimlr = prov_nsimlr,
+    objectiver = prov_objectiver,
+    mixer = prov_mixer,
+    ebber = prov_ebber,
+    optimus = prov_optimus,
+    constraint = prov_constraint,
+    sparsenessAlg = prov_sparsenessAlg,
+    stringsAsFactors = FALSE
+  )
+  provenance <- cbind(provenance, vector_to_df(prov_prescaling, "prescaling"))
+  provenance <- cbind(provenance, vector_to_df(prov_sparval, "sparval"))
+  provenance <- cbind(provenance, vector_to_df(prov_pizzer, "positivity"))
+
   if ( length( optimizationStyle ) > 1 ) optimizationStyle=optimizationStyle[1]
   parse_constraint <- function(x) {
     num1=num2=NA
@@ -934,7 +961,8 @@ rlist=    list(
       domain_energy = all_dom_energy_raw,
       orth_energy = all_ort_energy,
       total_energy = all_total_energy,
-      constraint = constraint
+      constraint = constraint,
+      provenance = provenance
     )
 if ( ! is.null( domainLambdas ) ) {
   rlist$domainLambdas = domainLambdas
@@ -2033,24 +2061,12 @@ simlr.search <- function(
     if (nperms > 4) {
       wtest <- which(simlrX$significance$perm == "ttest")
     }
-    finalE <- mean(as.numeric(simlrX$significance[wtest, -c(1:2)]), na.rm = TRUE)
+    finalE <- mean(as.matrix(simlrX$significance[wtest, -c(1:2)]), na.rm = TRUE)
     if (is.na(finalE)) finalE <- -Inf
     
-    parameters <- data.frame(
-      nsimlr = nsimlr,
-      objectiver = objectiver,
-      mixer = mixer,
-      ebber = ebber,
-      optimus = optimus,
-      constraint = constraint,
-      final_energy = as.numeric(finalE)
-    )
-    
-    prescaling <- vector_to_df(prescaling, "prescaling")
-    sparval <- vector_to_df(sparval, "sparval")
-    pizzer <- vector_to_df(pizzer, "positivity")
-    
-    parameters <- cbind(parameters, prescaling, sparval, pizzer, simlrX$significance[1, -1])
+    parameters <- simlrX$simlr_result$provenance
+    parameters$final_energy <- as.numeric(finalE)
+    parameters <- cbind(parameters, simlrX$significance[1, -1])
     
     list(
       simlr_result = simlrX$simlr_result,

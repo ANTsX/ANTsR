@@ -381,7 +381,8 @@ sparseDistanceMatrix <- function(
   kmatSparse <- Matrix::sparseMatrix(
     i = myijmat[, 1],
     j = myijmat[, 2],
-    x = myijmat[, 3], symmetric = TRUE
+    x = myijmat[, 3], symmetric = TRUE,
+    dims = c(ncol(x), ncol(x))
   )
   if (kmetric == "gaussian") diag(kmatSparse) <- 1
   if (cometric) {
@@ -3957,6 +3958,7 @@ nsa_flow <- function(
   stopifnot(is.matrix(Y0), is.numeric(Y0))
   stopifnot(is.null(X0) || (is.matrix(X0) && is.numeric(X0)))
   stopifnot(is.numeric(w), w >= 0, w <= 1)
+  if ( is.na( max_iter ) ) max_iter = 1
   stopifnot(is.integer(max_iter) || max_iter == as.integer(max_iter), max_iter > 0)
   stopifnot(is.numeric(tol), tol > 0)
   stopifnot(is.logical(verbose))
