@@ -4602,6 +4602,7 @@ simlr_sparseness <- function(v,
                              constraint_iterations = 1,
                              sparseness_alg = "soft",
                              energy_type = "acc") {
+
   v <- as.matrix(v)
   if ( positivity == 'positive') v=take_abs_unsigned(v)
   na2f.loc <- function (x) {
