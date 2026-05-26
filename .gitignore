@@ -6,6 +6,7 @@ Meta
 *.o
 
 # things to ignore in directory ANTsR/src
+data/*.csv
 src/Makevars
 extdata/
 src/*.o
