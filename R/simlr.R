@@ -311,9 +311,9 @@ simlr <- function(
   prov_objectiver <- if (missing(energyType)) "acc" else energyType
   prov_mixer <- if (missing(mixAlg)) "pca" else mixAlg
   prov_constraint <- constraint[1]
-  prov_sparval <- if (missing(sparsenessQuantiles)) 0.5 else sparsenessQuantiles
+  prov_sparval <- if (is.null(sparsenessQuantiles)) 0 else sparsenessQuantiles
   prov_ebber <- expBeta
-  prov_pizzer <- if (missing(positivities)) "positive" else positivities
+  prov_pizzer <- if (is.null(positivities)) "positive" else positivities
   prov_optimus <- if (missing(optimizationStyle)) "bidirectional_lookahead" else optimizationStyle
   prov_sparsenessAlg <- sparsenessAlg
 
@@ -379,7 +379,7 @@ simlr <- function(
   }
   mixAlg <- match.arg(mixAlg)
   # 0.0 adjust length of input data
-  if (missing(positivities)) {
+  if (is.null(positivities)) {
     positivities <- rep("positive", nModalities)
   }
   if (any((positivities %in% c("positive", "negative", "either")) == FALSE)) {
@@ -393,8 +393,12 @@ simlr <- function(
     p[i] <- ncol(data_matrices[[i]])
   }
   n <- nrow(data_matrices[[1]])
-  if (missing(sparsenessQuantiles)) {
+  if (is.null(sparsenessQuantiles)) {
     sparsenessQuantiles <- rep(0.5, nModalities)
+  }
+  
+  if (length(sparsenessQuantiles) == 1) {
+    sparsenessQuantiles <- rep(sparsenessQuantiles[1], nModalities)
   }
   
   lrbasis = length( data_matrices )
@@ -480,7 +484,7 @@ simlr <- function(
       smoothingMatrices[[i]] <- diag(ncol(data_matrices[[i]]))
     }
   }
-  for (i in 1:length(smoothingMatrices)) {
+  for (i in seq_along(smoothingMatrices)) {
     if (any(is.null(smoothingMatrices[[i]])) | any(is.na(smoothingMatrices[[i]]))) {
       stop(paste("smoothing-matrix", i, "is null or NA."))
     }
@@ -1893,7 +1897,9 @@ simlr_path_models <- function(n, type = 0) {
 #' vector_to_df(1:10, "nm")
 #' @export
 vector_to_df <- function(vector, column_name) {
-  df <- data.frame(t(vector))
+  if (is.null(vector)) vector <- NA
+  if (is.list(vector)) vector <- unlist(vector)
+  df <- data.frame(matrix(vector, nrow = 1))
   names(df) <- paste0(column_name, 1:length(vector))
   return(df)
 }
@@ -2877,6 +2883,238 @@ shorten_pymm_names <-function(x){
   return(xx)
 }
 
+.anatomical_map_cache <- new.env(parent = emptyenv())
+
+#' Decode ANTsPyMM technical shorthand to legible anatomical names
+#'
+#' This function uses consolidated atlas data (AAL, DKT, CIT168, JHU, etc.) to
+#' translate technical shorthand strings into their original, legible anatomical
+#' descriptions. It performs normalization to handle variations in dots, underscores,
+#' and case.
+#'
+#' @param x A character vector of shorthand names to decode.
+#' @return A character vector of legible anatomical names.
+#' @examples
+#' decode_pymm_names("cit168.bn.str.pu.left")
+#' decode_pymm_names("dti.fa.thalamus.left.jhu.icbm.labels.1mm")
+#' @export
+decode_pymm_names <- function(x) {
+  if (is.null(.anatomical_map_cache$map)) {
+    .build_anatomical_map()
+  }
+  
+  # Strip common prefixes
+  prefixes <- c("^dti\\.fa\\.", "^dti\\.md\\.", "^rsf\\.", "^cbf\\.", "^vol\\.", "^t1\\.", "^nm\\.", "^pypet\\.", "^cit168\\.", "^aal\\.", "^dkt\\.", "^labels\\.")
+  x_clean <- x
+  for (p in prefixes) x_clean <- gsub(p, "", x_clean)
+  
+  # Strip common suffixes/metrics
+  suffixes <- c("\\.jhu\\.icbm\\.labels\\.1mm$", "\\.cit168$", "\\.aal$", "\\.dkt$", 
+                "\\.fa$", "\\.md$", "\\.mean$", "\\.avg$", "\\.iavg$", "\\.isum$", "\\.vol$")
+  x_clean_no_metrics <- x_clean
+  for (s in suffixes) x_clean_no_metrics <- gsub(s, "", x_clean_no_metrics)
+  
+  # Normalize for lookup
+  normalize_str <- function(s) gsub("[._-]", "", tolower(s))
+  x_norm <- normalize_str(x_clean_no_metrics)
+  
+  # Lookup
+  map <- .anatomical_map_cache$map
+  decoded <- sapply(x_norm, function(val) {
+    if (val == "") return(NULL)
+    match_idx <- match(val, map$norm)
+    if (!is.na(match_idx)) return(map$orig[match_idx])
+    return(NULL)
+  })
+  
+  # Handle results and apply humanization
+  results <- x
+  for (i in seq_along(x)) {
+    if (!is.null(decoded[[i]])) {
+       results[i] <- humanize_anatomical_name(decoded[[i]])
+    } else {
+       results[i] <- humanize_anatomical_name(shorten_pymm_names(x_clean[i]))
+    }
+  }
+  
+  return(results)
+}
+
+#' Humanize anatomical names by expanding abbreviations and reordering
+#'
+#' @param x character string
+#' @return humanized character string
+#' @export
+humanize_anatomical_name <- function(x) {
+  if (is.na(x) || x == "") return(x)
+  
+  # 0. Strip modality markers, long parentheticals, and technical noise
+  # e.g. "FA-Posterior_thalamic_radiation", "(include optic radiation)"
+  x <- gsub("^(FA|MD|vol|cbf)-", "", x, ignore.case = TRUE)
+  x <- gsub("\\s*\\([^)]*\\)", "", x)
+  x <- gsub("include\\..*", "", x, ignore.case = TRUE)
+  x <- gsub("part\\.of\\..*", "", x, ignore.case = TRUE)
+  x <- gsub("\\.jhu\\.icbm\\.labels\\.1mm", "", x, ignore.case = TRUE)
+
+  # 1. Expansion Map
+  expansions <- list(
+    BN = "Basal Nuclei",
+    STR = "Striatum",
+    Pu = "Putamen",
+    Ca = "Caudate",
+    NAC = "Nuc Accumbens",
+    GP = "Globus Pallidus",
+    GPe = "GP Externus",
+    GPi = "GP Internus",
+    VeP = "Ventral Pallidum",
+    SN = "Substantia Nigra",
+    SNc = "SN Compacta",
+    SNr = "SN Reticulata",
+    RN = "Red Nucleus",
+    VTR = "Ventral Tegmental",
+    VTA = "Ventral Tegmental Area",
+    PBP = "Parabrachial Pigmented",
+    ETH = "Epithalamus",
+    HN = "Habenular",
+    Die = "Diencephalon",
+    HTH = "Hypothalamus",
+    MN = "Mammillary Nucleus",
+    STH = "Subthalamic",
+    EXA = "Extended Amygdala",
+    MTg = "Midbrain Tegmentum",
+    aLEC = "Ant Lat Entorhinal",
+    pMEC = "Post Med Entorhinal",
+    IPL = "Inf Parietal",
+    ST = "Sup Temporal",
+    PHC = "Parahippocampal",
+    RSC = "Retrosplenial",
+    PFCd = "Dorsal PFC",
+    PFCl = "Lateral PFC",
+    PFCv = "Ventral PFC",
+    PFCm = "Medial PFC",
+    pCun = "Precuneus",
+    FrOper = "Frontal Operculum",
+    ParOper = "Parietal Operculum",
+    PrCd = "Dorsal Precentral",
+    PrCv = "Ventral Precentral",
+    Sup = "Superior",
+    "Inf" = "Inferior",
+    Mid = "Middle",
+    Orb = "Orbital",
+    Oper = "Opercular",
+    Tri = "Triangular",
+    Med = "Medial",
+    Medial = "Medial",
+    Lat = "Lateral",
+    Lateral = "Lateral",
+    Ant = "Anterior",
+    Post = "Posterior",
+    Gyr = "Gyrus",
+    Robule = "Lobule",
+    Thal = "Thalamus",
+    Cing = "Cingulum",
+    Cereb = "Cerebellum",
+    Vent = "Ventricle"
+  )
+  
+  # 2. Split and Tokenize
+  tokens <- unlist(strsplit(x, "[._ -]"))
+  tokens <- tokens[tokens != ""]
+  
+  # 3. Identify Side (L/R) and remove from tokens
+  side <- ""
+  side_indices <- which(tolower(tokens) %in% c("l", "r", "left", "right"))
+  if (length(side_indices) > 0) {
+    side_token <- tolower(tokens[side_indices[1]])
+    side <- if (side_token %in% c("l", "left")) "L" else "R"
+    tokens <- tokens[-side_indices]
+  }
+  
+  # 4. Expand tokens
+  expanded_tokens <- sapply(tokens, function(t) {
+    match_idx <- match(tolower(t), tolower(names(expansions)))
+    if (!is.na(match_idx)) return(expansions[[match_idx]])
+    # Default: Title case the token if it's not expanded
+    return(tools::toTitleCase(tolower(t)))
+  })
+  
+  # 5. Clean up redundant hierarchy
+  if (length(expanded_tokens) > 1) {
+     # Remove "Basal Nuclei" if it's a prefix to Striatum or GP
+     if (expanded_tokens[1] == "Basal Nuclei" && any(c("Striatum", "Globus Pallidus") %in% expanded_tokens)) {
+       expanded_tokens <- expanded_tokens[-1]
+     }
+     # Remove "Striatum" if it's followed by Putamen, Caudate, or Nuc Accumbens
+     if (expanded_tokens[1] == "Striatum" && any(c("Putamen", "Caudate", "Nuc Accumbens") %in% expanded_tokens)) {
+       expanded_tokens <- expanded_tokens[-1]
+     }
+  }
+  
+  # 6. Reassemble: Side first
+  humanized <- paste(c(side, expanded_tokens), collapse = " ")
+  humanized <- trimws(humanized)
+  
+  return(humanized)
+}
+
+
+
+.build_anatomical_map <- function() {
+  datasets <- c(
+    "aal", "DesikanKillianyTourville", "cit168_reinf_learn", "cit168_brainstem",
+    "jhu_fa_labels", "jhu_md_labels", "lobes_brainstem", "basal_forebrain",
+    "cerebellum_labels", "dkt_labels", "dkt_cit_labels", "lobes", "mtl_labels",
+    "nbm3_labels", "tissues", "wm_major_tracts", "ppmi_yeo_labels"
+  )
+  
+  consolidated_orig <- c()
+  
+  for (ds in datasets) {
+    d <- tryCatch({
+      # Load data object. In some environments (like devtools), data() doesn't
+      # always put it where we expect, so we try multiple strategies.
+      tmp_env <- new.env()
+      utils::data(list = ds, package = "ANTsR", envir = tmp_env)
+      if (exists(ds, envir = tmp_env)) {
+        get(ds, envir = tmp_env)
+      } else if (exists(ds)) {
+        get(ds)
+      } else {
+        NULL
+      }
+    }, error = function(e) NULL)
+    
+    if (is.null(d)) {
+      # message(paste("Could not load dataset:", ds))
+      next
+    }
+    
+    # Identify the description column
+    desc_col <- intersect(colnames(d), c("Description", "label_name", "AAL", "Anatomy"))[1]
+    if (!is.na(desc_col)) {
+      # message(paste("Loaded", ds, "with column", desc_col))
+      consolidated_orig <- c(consolidated_orig, as.character(d[[desc_col]]))
+    }
+  }
+  
+  if (length(consolidated_orig) == 0) {
+    consolidated_orig <- c("Background", "CSF", "GM", "WM")
+  }
+
+  consolidated_orig <- unique(na.omit(consolidated_orig))
+  normalize_str <- function(s) gsub("[._-]", "", tolower(s))
+  consolidated_norm <- normalize_str(consolidated_orig)
+  
+  .anatomical_map_cache$map <- data.frame(
+    norm = consolidated_norm,
+    orig = consolidated_orig,
+    stringsAsFactors = FALSE
+  )
+}
+
+
+
+
 
 
 #' Interpret SiMLR Vector
@@ -3566,7 +3804,7 @@ interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2sho
   nmslist=list()
   if ( shortnames ) {
     for ( k in 1:length(simlrMats) ) 
-      nmslist[[names(simlrMats)[k]]]=shorten_pymm_names(colnames(simlrMats[[k]]))
+      nmslist[[names(simlrMats)[k]]]=decode_pymm_names(colnames(simlrMats[[k]]))
   } else {
     for ( k in 1:length(simlrMats) ) 
       nmslist[[names(simlrMats)[k]]]=colnames(simlrMats[[k]])
@@ -6899,7 +7137,7 @@ backup_simlr <- function(
   }
   mixAlg <- match.arg(mixAlg)
   # 0.0 adjust length of input data
-  if (missing(positivities)) {
+  if (is.null(positivities)) {
     positivities <- rep("positive", nModalities)
   }
   if (any((positivities %in% c("positive", "negative", "either")) == FALSE)) {
@@ -6913,8 +7151,12 @@ backup_simlr <- function(
     p[i] <- ncol(data_matrices[[i]])
   }
   n <- nrow(data_matrices[[1]])
-  if (missing(sparsenessQuantiles)) {
+  if (is.null(sparsenessQuantiles)) {
     sparsenessQuantiles <- rep(0.5, nModalities)
+  }
+  
+  if (length(sparsenessQuantiles) == 1) {
+    sparsenessQuantiles <- rep(sparsenessQuantiles[1], nModalities)
   }
   
   lrbasis = length( data_matrices )
@@ -7000,7 +7242,7 @@ backup_simlr <- function(
       smoothingMatrices[[i]] <- diag(ncol(data_matrices[[i]]))
     }
   }
-  for (i in 1:length(smoothingMatrices)) {
+  for (i in seq_along(smoothingMatrices)) {
     if (any(is.null(smoothingMatrices[[i]])) | any(is.na(smoothingMatrices[[i]]))) {
       stop(paste("smoothing-matrix", i, "is null or NA."))
     }

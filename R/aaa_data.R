@@ -144,3 +144,100 @@
 #' @examples data(antsrVersions)
 #' @keywords datasets
 NULL
+
+#' @title cit168_reinf_learn
+#' @docType data
+#' @description A data frame label numbers and names for the CIT168 reinforcement learning atlas.
+#' @format A data frame with columns: Label, Description.
+"cit168_reinf_learn"
+
+#' @title cit168_brainstem
+#' @docType data
+#' @description A data frame label numbers and names for the CIT168 brainstem atlas.
+#' @format A data frame with columns: Label, Description, Side.
+"cit168_brainstem"
+
+#' @title jhu_fa_labels
+#' @docType data
+#' @description A data frame label numbers and names for the JHU FA white matter labels.
+#' @format A data frame with columns: Label, Description.
+"jhu_fa_labels"
+
+#' @title jhu_md_labels
+#' @docType data
+#' @description A data frame label numbers and names for the JHU MD white matter labels.
+#' @format A data frame with columns: Label, Description.
+"jhu_md_labels"
+
+#' @title lobes_brainstem
+#' @docType data
+#' @description A data frame label numbers and names for lobes and brainstem regions.
+#' @format A data frame with columns: Label, Description, Side.
+"lobes_brainstem"
+
+#' @title basal_forebrain
+#' @docType data
+#' @description A data frame label numbers and names for basal forebrain regions.
+#' @format A data frame with columns: Label, Description, Side.
+"basal_forebrain"
+
+#' @title cerebellum_labels
+#' @docType data
+#' @description A data frame label numbers and names for cerebellum regions.
+#' @format A data frame with columns: Label, Description.
+"cerebellum_labels"
+
+#' @title dkt_labels
+#' @docType data
+#' @description A data frame label numbers and names for DKT cortical labels.
+#' @format A data frame with columns: Label, Description, type.
+"dkt_labels"
+
+#' @title dkt_cit_labels
+#' @docType data
+#' @description A data frame label numbers and names for consolidated DKT and CIT labels.
+#' @format A data frame with columns: Label, Description.
+"dkt_cit_labels"
+
+#' @title lobes
+#' @docType data
+#' @description A data frame label numbers and names for brain lobes.
+#' @format A data frame with columns: Label, Description, Side, SideNumber.
+"lobes"
+
+#' @title mtl_labels
+#' @docType data
+#' @description A data frame label numbers and names for medial temporal lobe regions.
+#' @format A data frame with columns: Label, Description.
+"mtl_labels"
+
+#' @title nbm3_labels
+#' @docType data
+#' @description A data frame label numbers and names for NBM3 regions.
+#' @format A data frame with columns: Label, Description, Side.
+"nbm3_labels"
+
+#' @title tissues
+#' @docType data
+#' @description A data frame label numbers and names for tissue types.
+#' @format A data frame with columns: Label, Description, ProbabilityNumber.
+"tissues"
+
+#' @title wm_major_tracts
+#' @docType data
+#' @description A data frame label numbers and names for major white matter tracts.
+#' @format A data frame with columns: Label, Description, side.
+"wm_major_tracts"
+
+#' @title wmh_evidence
+#' @docType data
+#' @description A data frame describing WMH evidence features.
+#' @format A data frame with columns: Value, Description.
+"wmh_evidence"
+
+#' @title ppmi_yeo_labels
+#' @docType data
+#' @description A data frame providing coordinates and names for the PPMI 500 parcels Yeo atlas.
+#' @format A data frame with columns: x, y, z, ROI, SystemName, AAL.
+"ppmi_yeo_labels"
+

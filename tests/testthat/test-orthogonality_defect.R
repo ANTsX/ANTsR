@@ -24,7 +24,7 @@ test_that("Gradient descent successfully minimizes orthogonality defect", {
   # --- b. Gradient Descent Loop ---
   
   A_current <- A_initial
-  learning_rate <- 0.1
+  learning_rate <- 0.001
   num_iterations <- 100
   
   # Calculate the starting error
