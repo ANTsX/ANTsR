@@ -40,7 +40,8 @@ Imports:
     tibble,
     utils,
     rsvd,
-    GPArotation
+    GPArotation,
+    glmnet
 Suggests:
     colormap,
     magic,

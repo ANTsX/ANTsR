@@ -1,0 +1,77 @@
+# Unit tests for the fusedRidge function
+# Verifies dimensional consistency, edge cases, and statistical behaviors.
+
+test_that("fusedRidge dimensional consistency", {
+  set.seed(42)
+  N <- 50
+  M <- 10
+  J <- 5
+  
+  # Generate random data
+  X_pcs <- matrix(rnorm(N * M), nrow = N, ncol = M)
+  colnames(X_pcs) <- paste0("PC", 1:M)
+  y_raw <- rnorm(N)
+  thresholds <- seq(-1, 1, length.out = J)
+  covariates <- matrix(rnorm(N * 2), nrow = N, ncol = 2)
+  colnames(covariates) <- c("Cov1", "Cov2")
+  
+  # Run model
+  res <- fusedRidge(X_pcs, y_raw, thresholds, covariates = covariates, lambda1 = 0.5, lambda2 = 0.5)
+  
+  # Check output structures
+  expect_equal(dim(res$coefs_full), c(M, J))
+  expect_equal(dim(res$coefs_covs), c(2, J))
+  expect_equal(res$family, "binomial")
+  expect_s3_class(res, "fusedRidge")
+})
+
+test_that("fusedRidge handles null covariates", {
+  set.seed(42)
+  N <- 40
+  M <- 8
+  J <- 3
+  
+  X_pcs <- matrix(rnorm(N * M), nrow = N, ncol = M)
+  y_raw <- rnorm(N)
+  thresholds <- c(-0.5, 0, 0.5)
+  
+  # Run model with no covariates
+  res <- fusedRidge(X_pcs, y_raw, thresholds, covariates = NULL, lambda1 = 0.5, lambda2 = 0.5)
+  
+  expect_equal(dim(res$coefs_full), c(M, J))
+  expect_equal(dim(res$coefs_covs), c(1, J)) # Only intercept/dummy spacer
+})
+
+test_that("fusedRidge error handling on dimension mismatch", {
+  N <- 30
+  M <- 5
+  J <- 2
+  
+  X_pcs <- matrix(rnorm(N * M), nrow = N, ncol = M)
+  y_raw_bad <- rnorm(N + 5) # Mismatch
+  thresholds <- c(0, 0.5)
+  
+  expect_error(fusedRidge(X_pcs, y_raw_bad, thresholds), "Length of y_raw must match")
+  
+  y_raw_good <- rnorm(N)
+  covariates_bad <- matrix(rnorm((N - 5) * 2), nrow = N - 5, ncol = 2) # Mismatch
+  expect_error(fusedRidge(X_pcs, y_raw_good, thresholds, covariates = covariates_bad), "Number of rows in covariates must match")
+})
+
+test_that("fusedRidge behaves correctly when lambda2 = 0 (independent ridge equivalence)", {
+  set.seed(42)
+  N <- 50
+  M <- 5
+  J <- 3
+  
+  X_pcs <- matrix(rnorm(N * M), nrow = N, ncol = M)
+  y_raw <- rnorm(N)
+  thresholds <- c(-0.5, 0, 0.5)
+  
+  # Fit fusedRidge with lambda2 = 0
+  res_fused <- fusedRidge(X_pcs, y_raw, thresholds, lambda1 = 1.0, lambda2 = 0)
+  
+  # Check H is identity matrix (since lambda1=1.0 and lambda2=0)
+  expect_equal(res_fused$H, diag(J))
+  expect_equal(dim(res_fused$coefs_full), c(M, J))
+})
