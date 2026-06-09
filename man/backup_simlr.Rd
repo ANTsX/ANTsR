@@ -36,6 +36,67 @@ backup_simlr(
   verbose = FALSE
 )
 }
+\arguments{
+\item{data_matrices}{A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.}
+
+\item{smoothingMatrices}{list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.}
+
+\item{iterations}{number of gradient descent iterations}
+
+\item{sparsenessQuantiles}{vector of quantiles to control sparseness - higher is sparser}
+
+\item{positivities}{vector that sets for each matrix if we restrict to positive or negative solution (beta) weights.
+choices are positive, negative or either as expressed as a string.}
+
+\item{initialUMatrix}{list of initialization matrix size \code{n} by \code{k} for each modality.  Otherwise, pass a single scalar to control the
+number of basis functions in which case random initialization occurs. One
+may also pass a single initialization matrix to be used for all matrices.
+If this is set to a scalar, or is missing, a random matrix will be used.}
+
+\item{mixAlg}{'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz', 'ica-newton' or 'avg' denotes the algorithm employed when estimating the mixed modality bases}
+
+\item{repeatedMeasures}{list of repeated measurement identifiers. this will
+allow estimates of per identifier intercept.}
+
+\item{lineSearchRange}{lower and upper limit used in \code{optimize}}
+
+\item{lineSearchTolerance}{tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data}
+
+\item{randomSeed}{controls repeatability of ica-based decomposition}
+
+\item{constraint}{one of none, Grassmann, GrassmannInv or Stiefel}
+
+\item{energyType}{one of regression, normalized, lowRank, cca or ucca}
+
+\item{vmats}{optional initial \code{v} matrix list}
+
+\item{connectors}{a list ( length of projections or number of modalities )
+that indicates which modalities should be paired with current modality}
+
+\item{optimizationStyle}{the simlr optimizer}
+
+\item{scale}{options to standardize each matrix. e.g. divide by the square root
+of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
+by the number of variables or center or center and scale or ... (see code).
+can be a vector which will apply each strategy in order.}
+
+\item{expBeta}{if greater than zero, use exponential moving average on gradient and mixing (default 0.9).}
+
+\item{jointInitialization}{boolean for initialization options, default TRUE}
+
+\item{sparsenessAlg}{NA is default otherwise basic, spmp or orthorank}
+
+\item{orthogonalizeU}{boolean controlling whether we orthogonalize the U matrices}
+
+\item{domainMatrices}{matrices containing domain knowledge length of \code{data_matrices} with number of columns also equal to each corresponding data matrix}
+
+\item{domainLambdas}{weights for domain knowledge term length of \code{data_matrices}}
+
+\item{sparse_gradient}{boolean default TRUE}
+
+\item{verbose}{boolean to control verbosity of output - set to level \code{2}
+in order to see more output, specifically the gradient descent parameters.}
+}
 \description{
 backup simlr implementation
 }

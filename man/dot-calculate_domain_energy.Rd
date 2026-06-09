@@ -14,10 +14,6 @@
 \item{Z}{A prior matrix [z x p].}
 
 \item{lambda}{Domain alignment strength (non-negative scalar).}
-
-\item{X}{A centered data matrix for a single modality [n x p].}
-
-\item{U}{The current shared basis matrix [n x k], with orthonormal columns.}
 }
 \value{
 A matrix [p x k] representing the gradient of the objective.

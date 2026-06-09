@@ -81,6 +81,8 @@ simlr.perm(
 \item{nperms}{Number of permutations for significance testing. Default is 50.}
 
 \item{FUN}{function for summarizing variance explained}
+
+\item{cores}{number of cores to use}
 }
 \value{
 A data frame containing p-values for each permutation.

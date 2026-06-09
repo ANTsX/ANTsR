@@ -25,6 +25,8 @@ be 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'pca', 'stochastic' or 'avg'.}
 
 \item{connectors}{a list ( length of projections or number of modalities )
 that indicates which modalities should be paired with current modality}
+
+\item{expBeta}{exponential moving average beta}
 }
 \value{
 u matrix for modality i

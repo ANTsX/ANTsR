@@ -30,3 +30,6 @@ Dockerfile
 code_of_conduct.md
 ^data-raw$
 ^Makefile$
+^\.gemini$
+^check_output.*\.txt$
+^check_results\.rds$

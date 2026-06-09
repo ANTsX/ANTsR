@@ -2,7 +2,8 @@
 % Please edit documentation in R/multiscaleSVDxpts.R, R/simlr_energy.R
 \name{optimal_simlr_initializer}
 \alias{optimal_simlr_initializer}
-\title{Calculate SiMLR energy for optimization}
+\title{Calculate SiMLR energy for optimization
+Find Optimal SiMLR Initializer}
 \usage{
 optimal_simlr_initializer(
   data_matrices,
@@ -42,24 +43,14 @@ optimal_simlr_initializer(
 \item{verbose}{Logical, whether to print progress.}
 
 \item{seed}{Optional numeric seed for reproducibility (default = NULL, no seed set).}
-
-\item{V}{Matrix V in the SiMLR decomposition.}
-
-\item{X}{Data matrix for the modality.}
-
-\item{U}{Matrix U in the SiMLR decomposition.}
-
-\item{energy_type}{Character string specifying the energy type. Supports partial
-matching (e.g., "reg" for "regression", "cca" for "cca" or "acc").
-Valid options: regression, reconorm, lowRankRegression, lrr, cca, acc,
-logcosh, kurtosis, exp, gauss, normalized_correlation, dat.}
-
-\item{lambda}{Numeric, weight for domain energy (default = 1.0).}
-
-\item{prior_matrix}{Optional prior matrix for domain energy (used with "dat").}
 }
 \value{
-Numeric energy value (negative for maximization objectives).
+A list with elements:
+  \describe{
+    \item{bestU}{List of U matrices (one per modality) for the best initialization.}
+    \item{bestV}{List of corresponding V matrices.}
+    \item{bestEnergy}{Mean energy for the selected initialization.}
+  }
 
 A list with elements:
   \describe{
@@ -69,9 +60,9 @@ A list with elements:
   }
 }
 \description{
-Computes the energy for SiMLR based on the specified energy type, with partial
-matching for energy_type. Returns negative values for maximization objectives
-to align with minimization goals.
+This function generates multiple random candidate U matrices, evaluates their
+associated energy (without gradient descent), and returns the best-scoring
+initialization. A seed parameter ensures reproducibility across runs.
 
 This function generates multiple random candidate U matrices, evaluates their
 associated energy (without gradient descent), and returns the best-scoring

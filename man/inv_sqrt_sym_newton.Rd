@@ -12,6 +12,17 @@ inv_sqrt_sym_newton(
   verbose = FALSE
 )
 }
+\arguments{
+\item{A}{symmetric matrix}
+
+\item{epsilon}{small value for stability}
+
+\item{max_iter}{maximum number of iterations}
+
+\item{tol}{tolerance for convergence}
+
+\item{verbose}{boolean for verbosity}
+}
 \description{
 Inverse square root of a symmetric matrix via Newton-Schulz
 }

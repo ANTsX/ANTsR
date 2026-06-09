@@ -4,6 +4,7 @@
 # Removed redundant l1_normalize_features
 
 #' Calculate the invariant orthogonality defect
+#' @param A input matrix
 #' @export
 invariant_orthogonality_defect <- function( A ) 
 {
@@ -30,6 +31,11 @@ gradient_invariant_orthogonality_defect <- function(A) {
 # Removed redundant pairwise_matrix_similarity and safe_pca
 
 #' Inverse square root of a symmetric matrix via Newton-Schulz
+#' @param A symmetric matrix
+#' @param epsilon small value for stability
+#' @param max_iter maximum number of iterations
+#' @param tol tolerance for convergence
+#' @param verbose boolean for verbosity
 #' @export
 inv_sqrt_sym_newton <- function(A, epsilon = 1e-10, max_iter = 10L, tol = 1e-6, verbose = FALSE) {
   # Implementation from multiscaleSVDxpts.R L10713
@@ -1144,6 +1150,7 @@ safe_pca <- function(X, nc = min(dim(X)), center = TRUE, scale = TRUE) {
 #' @param orthogonalize boolean
 #' @param connectors a list ( length of projections or number of modalities )
 #' that indicates which modalities should be paired with current modality
+#' @param expBeta exponential moving average beta
 #' @return u matrix for modality i
 #' @author BB Avants.
 #' @examples
@@ -1362,7 +1369,8 @@ simlrU <- function(
 #' @param sparsenessAlg Sparseness algorithm. Default is NA.
 #' @param verbose Logical indicating whether to print verbose output. Default is FALSE. values > 1 lead to more verbosity
 #' @param nperms Number of permutations for significance testing. Default is 50.
-#' @param FUN function for summarizing variance explained 
+#' @param FUN function for summarizing variance explained
+#' @param cores number of cores to use
 #' @return A data frame containing p-values for each permutation.
 #' @export
 simlr.perm <- function(data_matrices,
@@ -2623,7 +2631,6 @@ exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
 #'
 #' @importFrom tibble tibble
 #' @importFrom rsvd rsvd
-#' @importFrom dplyr filter
 #' @importFrom magrittr %>%
 antspymm_predictors <- function( demog, doasym=FALSE, return_colnames=FALSE ) {
   badcaud=getNamesFromDataframe("bn_str_ca",demog)
@@ -5050,11 +5057,11 @@ select_joint_k <- function(mat_list = NULL,
   }
   
   # 4. Create Visualization and Return Results
-  plot <- ggplot2::ggplot(joint_variance_curve, aes(x = k, y = joint_var)) +
+  plot <- ggplot2::ggplot(joint_variance_curve, ggplot2::aes(x = k, y = joint_var)) +
     ggplot2::geom_line(linewidth = 1.2, color = "royalblue") +
     ggplot2::geom_point(size = 3, color = "royalblue") +
     ggplot2::geom_vline(xintercept = optimal_k, linetype = "dashed", color = "firebrick", linewidth = 1) +
-    ggplot2::geom_text(aes(x = optimal_k, y = min(joint_var),
+    ggplot2::geom_text(ggplot2::aes(x = optimal_k, y = min(joint_var),
                            label = paste("Optimal k =", optimal_k)),
                        color = "firebrick", hjust = -0.1, vjust = 0, size = 4.5) +
     ggplot2::labs(
@@ -5256,7 +5263,7 @@ estimate_joint_rank <- function(mat_list,
     eigenvalue = eigenvalues_real[1:k_max_plot],
     type = "Real Data"
   ) %>%
-  bind_rows(tibble::tibble(
+  dplyr::bind_rows(tibble::tibble(
     k = 1:k_max_plot,
     eigenvalue = eigenvalues_permuted_mean[1:k_max_plot],
     type = "Permuted Data (Null)"
@@ -5265,21 +5272,21 @@ estimate_joint_rank <- function(mat_list,
   # Create the scree plot for visualization
   scree_plot <- NULL
   if (plot_scree) {
-    scree_plot <- ggplot(results_df, aes(x = k, y = eigenvalue, color = type, group = type)) +
-      geom_line(linewidth = 1.2) +
-      geom_point(size = 3) +
-      geom_vline(xintercept = optimal_k, linetype = "dashed", color = "firebrick", linewidth = 1) +
+    scree_plot <- ggplot2::ggplot(results_df, ggplot2::aes(x = k, y = eigenvalue, color = type, group = type)) +
+      ggplot2::geom_line(linewidth = 1.2) +
+      ggplot2::geom_point(size = 3) +
+      ggplot2::geom_vline(xintercept = optimal_k, linetype = "dashed", color = "firebrick", linewidth = 1) +
       ggrepel::geom_text_repel(data = ~subset(., k == optimal_k & type == "Real Data"),
-                               aes(label = paste("Optimal k =", optimal_k)),
+                               ggplot2::aes(label = paste("Optimal k =", optimal_k)),
                                color = "firebrick", nudge_y = 0.5, nudge_x = 5) +
-      scale_y_log10(labels = scales::scientific) + # Log scale is essential for scree plots
-      labs(
+      ggplot2::scale_y_log10(labels = scales::scientific) + # Log scale is essential for scree plots
+      ggplot2::labs(
         title = "Parallel Analysis Scree Plot",
         subtitle = "Comparing eigenvalues of real vs. permuted data",
         x = "Component Number (k)",
         y = "Eigenvalue (Variance Explained, Log Scale)"
       ) +
-      theme_minimal(base_size = 14)
+      ggplot2::theme_minimal(base_size = 14)
   }
   
   return(list(
@@ -7063,6 +7070,41 @@ extend_simlr_embedding_with_new_modalities <- function(
 
 
 #' backup simlr implementation
+#' @param data_matrices A list that contains the named matrices.  Note: the optimization will likely perform much more smoothly if the input matrices are each scaled to zero mean unit variance e.g. by the \code{scale} function.
+#' @param smoothingMatrices list of (sparse) matrices that allow parameter smoothing/regularization.  These should be square and same order and size of input matrices.
+#' @param iterations number of gradient descent iterations
+#' @param sparsenessQuantiles vector of quantiles to control sparseness - higher is sparser
+#' @param positivities vector that sets for each matrix if we restrict to positive or negative solution (beta) weights.
+#' choices are positive, negative or either as expressed as a string.
+#' @param initialUMatrix list of initialization matrix size \code{n} by \code{k} for each modality.  Otherwise, pass a single scalar to control the
+#' number of basis functions in which case random initialization occurs. One
+#' may also pass a single initialization matrix to be used for all matrices.
+#' If this is set to a scalar, or is missing, a random matrix will be used.
+#' @param mixAlg 'svd', 'ica', 'rrpca-l', 'rrpca-s', 'stochastic', 'pca', 'newton-schulz', 'ica-newton' or 'avg' denotes the algorithm employed when estimating the mixed modality bases
+#' @param repeatedMeasures list of repeated measurement identifiers. this will
+#' allow estimates of per identifier intercept.
+#' @param lineSearchRange lower and upper limit used in \code{optimize}
+#' @param lineSearchTolerance tolerance used in \code{optimize}, will be multiplied by each matrix norm such that it scales appropriately with input data
+#' @param randomSeed controls repeatability of ica-based decomposition
+#' @param constraint one of none, Grassmann, GrassmannInv or Stiefel
+#' @param energyType one of regression, normalized, lowRank, cca or ucca
+#' @param vmats optional initial \code{v} matrix list
+#' @param connectors a list ( length of projections or number of modalities )
+#' that indicates which modalities should be paired with current modality
+#' @param optimizationStyle the simlr optimizer
+#' @param scale options to standardize each matrix. e.g. divide by the square root
+#' of its number of variables (Westerhuis, Kourti, and MacGregor 1998), divide
+#' by the number of variables or center or center and scale or ... (see code).
+#' can be a vector which will apply each strategy in order.
+#' @param expBeta if greater than zero, use exponential moving average on gradient and mixing (default 0.9).
+#' @param jointInitialization boolean for initialization options, default TRUE
+#' @param sparsenessAlg NA is default otherwise basic, spmp or orthorank
+#' @param orthogonalizeU boolean controlling whether we orthogonalize the U matrices
+#' @param domainMatrices matrices containing domain knowledge length of \code{data_matrices} with number of columns also equal to each corresponding data matrix
+#' @param domainLambdas weights for domain knowledge term length of \code{data_matrices}
+#' @param sparse_gradient boolean default TRUE
+#' @param verbose boolean to control verbosity of output - set to level \code{2}
+#' in order to see more output, specifically the gradient descent parameters.
 #' @export
 backup_simlr <- function(
     data_matrices,

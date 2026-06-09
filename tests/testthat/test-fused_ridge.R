@@ -151,9 +151,13 @@ test_that("fusedRidge fits correctly with topK option (two-pass refitting)", {
   selected <- res_top3$selected_features
   expect_true(length(selected) >= 3 && length(selected) <= 3 * J)
   
+  # Check theta_matrix dimensions and mapping
+  expect_equal(dim(res_top3$theta_matrix), c(M, J))
+  
   non_selected <- setdiff(seq_len(M), selected)
   if (length(non_selected) > 0) {
     expect_true(all(res_top3$coefs_full[non_selected, ] == 0))
+    expect_true(all(res_top3$theta_matrix[non_selected, ] == 0))
   }
   
   # Error handling: invalid topK parameter in fit

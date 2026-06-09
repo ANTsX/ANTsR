@@ -1,0 +1,222 @@
+---
+title: "Fused Ridge Regression on High-Dimensional (Wide) Data"
+author: "ANTsR Team"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Fused Ridge Regression on High-Dimensional (Wide) Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+library(ANTsR)
+library(glmnet)
+library(ggplot2)
+library(reshape2)
+```
+
+## Introduction
+
+In neuroimaging, we often encounter "wide" datasets where the number of predictors $M$ (voxels, vertices, or brain signatures) exceeds the number of observations $N$. Furthermore, the response variable is often a continuous clinical score that we wish to model across various severity thresholds.
+
+This vignette demonstrates how to use `fusedRidge` to handle high-dimensional data by:
+1.  Smoothing coefficients across thresholds using a Graph Laplacian (Fusion).
+2.  Employing a two-stage "Sparse Refit" to identify a robust subset of features.
+3.  Avoiding "Data Leakage" using **Nested Cross-Validation**.
+
+## The Problem: Data Leakage in Two-Stage Models
+
+A common pitfall in two-stage modeling (Select -> Refit) is selecting features using the *entire* dataset and then reporting the cross-validation performance of the second stage. This is **Data Leakage**. Because the features were chosen with knowledge of the test samples, the resulting AUC will be optimistically biased.
+
+**The Best Solution:** Perform the entire two-stage procedure (including feature selection) inside an outer cross-validation loop.
+
+## Realistic Synthetic Experiment
+
+### 1. Data Generation
+
+We simulate $N=100$ subjects and $M=500$ features. Only 20 features have a true signal. The signal varies smoothly across 5 binarization thresholds.
+
+```{r data_gen}
+set.seed(42)
+N <- 100
+M <- 500
+J <- 5 # Number of thresholds
+
+# Generate features with some correlation
+X <- matrix(rnorm(N * M), N, M)
+# Add some structure: features 1-50 are correlated
+X[, 1:50] <- X[, 1:50] + 0.5 * rnorm(N)
+
+# Define true coefficients: Sparse and Smooth across thresholds
+# Features 10-29 are active
+beta_true <- matrix(0, M, J)
+for (j in 1:J) {
+  # Effect grows and then shrinks across thresholds
+  effect_size <- sin(seq(0.5, 2.5, length.out = J))[j]
+  beta_true[10:29, j] <- effect_size * seq(1, 0.5, length.out = 20)
+}
+
+# Generate latent continuous outcome
+y_cont <- X %*% beta_true[, floor(J/2)] + rnorm(N, sd = 0.5)
+thresholds <- quantile(y_cont, probs = seq(0.2, 0.8, length.out = J))
+
+# Helper to calculate AUC
+get_auc <- function(prob, actual) {
+  if (length(unique(actual)) < 2) return(NA)
+  p_obj <- pROC::roc(actual, prob, quiet = TRUE)
+  return(as.numeric(pROC::auc(p_obj)))
+}
+```
+
+### 2. Nested Cross-Validation (The "No Leakage" Approach)
+
+We compare three models:
+1.  **Standard Ridge:** No fusion ($\lambda_2 = 0$), no sparsity.
+2.  **Fused Ridge (Dense):** Fusion ($\lambda_2 = 0.5$), no sparsity.
+3.  **Fused Ridge (Sparse):** Fusion + Two-stage `topK=20` refit.
+
+```{r nested_cv}
+n_folds <- 5
+folds <- sample(rep(1:n_folds, length.out = N))
+results_list <- list()
+
+for (f in 1:n_folds) {
+  train_idx <- which(folds != f)
+  test_idx <- which(folds == f)
+  
+  X_train <- X[train_idx, ]
+  y_train <- y_cont[train_idx]
+  X_test <- X[test_idx, ]
+  y_test_cont <- y_cont[test_idx]
+  
+  # binarize test labels
+  y_test_mat <- matrix(0, length(test_idx), J)
+  for (j in 1:J) y_test_mat[,j] <- ifelse(y_test_cont >= thresholds[j], 1, 0)
+  
+  # 1. Standard Ridge (Independent per threshold)
+  fit_ridge <- fusedRidge(X_train, y_train, thresholds, lambda2 = 0)
+  pred_ridge <- predict(fit_ridge, X_test, type = "response")
+  
+  # 2. Fused Ridge (Dense)
+  fit_fused <- fusedRidge(X_train, y_train, thresholds, lambda1 = 0.5, lambda2 = 0.5)
+  pred_fused <- predict(fit_fused, X_test, type = "response")
+  
+# 3. Fused Ridge (Sparse/Two-Stage) - Compare different topK values
+  for (tk in c(5, 10, 25, 50)) {
+    fit_sparse <- fusedRidge(X_train, y_train, thresholds, lambda1 = 0.5, lambda2 = 0.5, topK = tk)
+    pred_sparse <- predict(fit_sparse, X_test, type = "response")
+    
+    auc_tk <- sapply(1:J, function(j) get_auc(pred_sparse[,j], y_test_mat[,j]))
+    results_list[[length(results_list) + 1]] <- data.frame(
+      Threshold = 1:J,
+      Method = paste0("Fused-Sparse (topK=", tk, ")"),
+      AUC = auc_tk,
+      Fold = f
+    )
+  }
+  
+  # Calculate AUCs for standard methods
+  results_list[[length(results_list) + 1]] <- data.frame(
+    Threshold = 1:J,
+    Method = "Ridge (Independent)",
+    AUC = sapply(1:J, function(j) get_auc(pred_ridge[,j], y_test_mat[,j])),
+    Fold = f
+  )
+  results_list[[length(results_list) + 1]] <- data.frame(
+    Threshold = 1:J,
+    Method = "Fused-Dense",
+    AUC = sapply(1:J, function(j) get_auc(pred_fused[,j], y_test_mat[,j])),
+    Fold = f
+  )
+}
+
+results_df <- do.call(rbind, results_list)
+summary_df <- aggregate(AUC ~ Threshold + Method, data = results_df, FUN = mean)
+```
+
+## Results and Visualization
+
+### 1. Predictive Performance (AUC)
+
+We plot the mean AUC across thresholds. This allows us to see the "Goldilocks" effect of sparsity: too few features (`topK=5`) may lose signal, while too many (`topK=50` or Dense) may introduce noise in this $N=100$ regime.
+
+```{r plot_auc}
+# Order methods for better plotting
+summary_df$Method <- factor(summary_df$Method, levels = c(
+  "Ridge (Independent)", "Fused-Dense", 
+  "Fused-Sparse (topK=5)", "Fused-Sparse (topK=10)", 
+  "Fused-Sparse (topK=25)", "Fused-Sparse (topK=50)"
+))
+
+ggplot(summary_df, aes(x = Threshold, y = AUC, color = Method, group = Method)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  theme_minimal() +
+  scale_color_viridis_d(option = "plasma") +
+  labs(title = "Unbiased AUC Comparison (Nested CV)",
+       subtitle = "Exploring Sparsity Levels (topK) on Wide Data",
+       y = "Mean Out-of-Fold AUC") +
+  ylim(0.5, 1)
+```
+
+### 2. Coefficient Trajectories
+
+To avoid the "spaghetti" effect of overlapping lines, we use a heatmap to visualize the coefficients of the selected features across thresholds. This clearly shows both the **sparsity** (which features were selected) and the **smoothness** (how weights change across thresholds).
+
+```{r plot_coefs_heatmap}
+# Fit on full data for visualization
+final_fit <- fusedRidge(X, y_cont, thresholds, lambda1 = 0.5, lambda2 = 0.5, topK = 25)
+
+# Extract and melt the coefficients for the selected features
+selected_idx <- final_fit$selected_features
+coefs_selected <- final_fit$coefs_full[selected_idx, ]
+colnames(coefs_selected) <- paste0("Threshold ", 1:J)
+rownames(coefs_selected) <- paste0("Feature ", selected_idx)
+
+coefs_melted <- melt(coefs_selected)
+colnames(coefs_melted) <- c("Feature", "Threshold", "Weight")
+
+# 1. Heatmap Visualization
+ggplot(coefs_melted, aes(x = Threshold, y = Feature, fill = Weight)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +
+  theme_minimal() +
+  labs(title = "Coefficient Heatmap (Top 25 Features)",
+       subtitle = "Smooth transitions across thresholds visible horizontally",
+       x = "", y = "") +
+  theme(axis.text.y = element_text(size = 6))
+```
+
+For a more detailed look at the individual trajectories of the top 9 most influential features, we use a faceted line plot.
+
+```{r plot_coefs_faceted}
+# Identify top 9 features by average absolute weight
+avg_weight <- rowMeans(abs(coefs_selected))
+top9_idx <- order(avg_weight, decreasing = TRUE)[1:9]
+top9_coefs <- coefs_selected[top9_idx, ]
+
+top9_melted <- melt(top9_coefs)
+colnames(top9_melted) <- c("Feature", "Threshold", "Weight")
+
+ggplot(top9_melted, aes(x = Threshold, y = Weight, group = Feature)) +
+  geom_line(color = "steelblue", size = 1) +
+  geom_point(color = "steelblue", size = 2) +
+  facet_wrap(~Feature, scales = "free_y") +
+  theme_bw() +
+  labs(title = "Individual Trajectories (Top 9 Features)",
+       subtitle = "Faceted view eliminates line crossing and 'spaghetti' mess",
+       x = "Binarization Threshold",
+       y = "Coefficient Weight") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Conclusion
+
+By using **Nested Cross-Validation**, we have shown that `fusedRidge` provides superior predictive performance on high-dimensional data compared to standard independent ridge regression. The fusion penalty successfully leverages the shared information across thresholds, while the two-stage `topK` approach identifies a robust, interpretable subset of features without suffering from data leakage.

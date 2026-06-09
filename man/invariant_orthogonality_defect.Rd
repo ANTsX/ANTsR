@@ -6,6 +6,9 @@
 \usage{
 invariant_orthogonality_defect(A)
 }
+\arguments{
+\item{A}{input matrix}
+}
 \description{
 Calculate the invariant orthogonality defect
 }

@@ -3206,9 +3206,9 @@ gradient_invariant_orthogonality_salad<- function(A) {
 #' The returned gradient is an ascent direction for J, which is a descent
 #' direction for the energy E = -J, suitable for use in the simlr optimizer.
 #'
-#' @param X A centered data matrix for a single modality [n x p].
-#' @param U The current shared basis matrix [n x k], with orthonormal columns.
 #' @param V The current loading matrix for the modality [p x k].
+#' @param Z Prior matrix
+#' @param lambda weight
 #'
 #' @return A matrix [p x k] representing the gradient of the objective.
 #'
@@ -3297,23 +3297,27 @@ clip_gradient_norm <- function(gradient, threshold = 1.0) {
 
 
 #' Calculate SiMLR energy for optimization
+#' Find Optimal SiMLR Initializer
 #'
-#' Computes the energy for SiMLR based on the specified energy type, with partial
-#' matching for energy_type. Returns negative values for maximization objectives
-#' to align with minimization goals.
+#' This function generates multiple random candidate U matrices, evaluates their
+#' associated energy (without gradient descent), and returns the best-scoring
+#' initialization. A seed parameter ensures reproducibility across runs.
 #'
-#' @param V Matrix V in the SiMLR decomposition.
-#' @param X Data matrix for the modality.
-#' @param U Matrix U in the SiMLR decomposition.
-#' @param energy_type Character string specifying the energy type. Supports partial
-#'   matching (e.g., "reg" for "regression", "cca" for "cca" or "acc").
-#'   Valid options: regression, reconorm, lowRankRegression, lrr, cca, acc,
-#'   logcosh, kurtosis, exp, gauss, normalized_correlation, dat.
-#' @param lambda Numeric, weight for domain energy (default = 1.0).
-#' @param prior_matrix Optional prior matrix for domain energy (used with "dat").
-#' @param verbose Integer, verbosity level: 0 (none), 1 (log matched energy_type) (default = 0).
+#' @param data_matrices A list of modality-specific data matrices.
+#' @param n_init Number of random initializations to try (default = 10).
+#' @param basisK Number of basis components (columns in U).
+#' @param energyType Energy function to evaluate.
+#' @param domainMatrices Optional list of domain priors (same length as data_matrices).
+#' @param domainLambdas Optional vector of domain weights.
+#' @param verbose Logical, whether to print progress.
+#' @param seed Optional numeric seed for reproducibility (default = NULL, no seed set).
 #'
-#' @return Numeric energy value (negative for maximization objectives).
+#' @return A list with elements:
+#'   \describe{
+#'     \item{bestU}{List of U matrices (one per modality) for the best initialization.}
+#'     \item{bestV}{List of corresponding V matrices.}
+#'     \item{bestEnergy}{Mean energy for the selected initialization.}
+#'   }
 #' @export
 optimal_simlr_initializer <- function(data_matrices,
                                      n_init = 10,

@@ -241,3 +241,93 @@ NULL
 #' @format A data frame with columns: x, y, z, ROI, SystemName, AAL.
 "ppmi_yeo_labels"
 
+
+#' CIT168 reinforcement learning atlas label descriptions
+#' @docType data
+#' @name CIT168_Reinf_Learn_v1_label_descriptions_pad
+NULL
+
+#' CIT168 T1w 700um pad adni brainstem
+#' @docType data
+#' @name CIT168_T1w_700um_pad_adni_brainstem
+NULL
+
+#' FA JHU labels edited
+#' @docType data
+#' @name FA_JHU_labels_edited
+NULL
+
+#' MD JHU labels edited
+#' @docType data
+#' @name MD_JHU_labels_edited
+NULL
+
+#' T template0 LobesBstem
+#' @docType data
+#' @name T_template0_LobesBstem
+NULL
+
+#' cerebellum
+#' @docType data
+#' @name cerebellum
+NULL
+
+#' dkt
+#' @docType data
+#' @name dkt
+NULL
+
+#' dkt cortex cit deep brain
+#' @docType data
+#' @name dkt_cortex_cit_deep_brain
+NULL
+
+#' dlbs
+#' @docType data
+#' @name dlbs
+NULL
+
+#' hemisphere
+#' @docType data
+#' @name hemisphere
+NULL
+
+#' mtl description
+#' @docType data
+#' @name mtl_description
+NULL
+
+#' nbm3CH13
+#' @docType data
+#' @name nbm3CH13
+NULL
+
+#' powers mni itk
+#' @docType data
+#' @name powers_mni_itk
+NULL
+
+#' ppmi template 500Parcels Yeo2011 17Networks 2023 homotopic
+#' @docType data
+#' @name ppmi_template_500Parcels_Yeo2011_17Networks_2023_homotopic
+NULL
+
+#' refbasis brain
+#' @docType data
+#' @name refbasis_brain
+NULL
+
+#' refbasis head
+#' @docType data
+#' @name refbasis_head
+NULL
+
+#' reference basis
+#' @docType data
+#' @name reference_basis
+NULL
+
+#' softwareVersions
+#' @docType data
+#' @name softwareVersions
+NULL
