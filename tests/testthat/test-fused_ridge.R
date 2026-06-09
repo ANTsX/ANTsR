@@ -75,3 +75,48 @@ test_that("fusedRidge behaves correctly when lambda2 = 0 (independent ridge equi
   expect_equal(res_fused$H, diag(J))
   expect_equal(dim(res_fused$coefs_full), c(M, J))
 })
+
+test_that("predict.fusedRidge works correctly", {
+  set.seed(42)
+  N <- 30
+  M <- 4
+  J <- 3
+  
+  X_pcs <- matrix(rnorm(N * M), nrow = N, ncol = M)
+  colnames(X_pcs) <- paste0("PC", 1:M)
+  y_raw <- rnorm(N)
+  thresholds <- c(-0.5, 0, 0.5)
+  covariates <- matrix(rnorm(N * 2), nrow = N, ncol = 2)
+  colnames(covariates) <- c("Cov1", "Cov2")
+  
+  # 1. Model with covariates
+  res <- fusedRidge(X_pcs, y_raw, thresholds, covariates = covariates, lambda1 = 0.5, lambda2 = 0.5)
+  
+  # New test data
+  newx <- matrix(rnorm(10 * M), nrow = 10, ncol = M)
+  colnames(newx) <- colnames(X_pcs)
+  newcovs <- matrix(rnorm(10 * 2), nrow = 10, ncol = 2)
+  colnames(newcovs) <- colnames(covariates)
+  
+  # Predict link
+  pred_link <- predict(res, newx, newcovs = newcovs, type = "link")
+  expect_equal(dim(pred_link), c(10, J))
+  
+  # Predict response
+  pred_resp <- predict(res, newx, newcovs = newcovs, type = "response")
+  expect_equal(dim(pred_resp), c(10, J))
+  expect_true(all(pred_resp >= 0 & pred_resp <= 1))
+  
+  # Error handling: missing covariates
+  expect_error(predict(res, newx, newcovs = NULL), "newcovs must be provided")
+  
+  # 2. Model with NULL covariates
+  res_nocov <- fusedRidge(X_pcs, y_raw, thresholds, covariates = NULL, lambda1 = 0.5, lambda2 = 0.5)
+  
+  # Predict without covariates
+  pred_nocov_link <- predict(res_nocov, newx, type = "link")
+  expect_equal(dim(pred_nocov_link), c(10, J))
+  
+  # Warning when newcovs is provided but model had none
+  expect_warning(predict(res_nocov, newx, newcovs = newcovs), "newcovs was provided but the model was trained without covariates")
+})

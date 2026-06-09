@@ -62,16 +62,26 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
     if (nrow(X_covs) != N) {
       stop("Number of rows in covariates must match X_pcs")
     }
+    covs_names <- colnames(X_covs)
+    if (is.null(covs_names)) {
+      covs_names <- paste0("Cov", seq_len(ncol(X_covs)))
+      colnames(X_covs) <- covs_names
+    }
   } else {
     X_covs <- matrix(1, nrow = N, ncol = 1) # Dummy intercept spacer
+    covs_names <- NULL
   }
   K <- ncol(X_covs)
   
   # Standardize predictors if requested
   if (standardize) {
     X_pcs_std <- scale(X_pcs)
+    mean_X <- attr(X_pcs_std, "scaled:center")
+    sd_X <- attr(X_pcs_std, "scaled:scale")
   } else {
     X_pcs_std <- X_pcs
+    mean_X <- NULL
+    sd_X <- NULL
   }
   
   # Construct 1D Graph Laplacian L (J x J)
@@ -162,8 +172,72 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
     H = H,
     thresholds = thresholds,
     family = family,
-    y_matrix = y_matrix
+    y_matrix = y_matrix,
+    mean_X = mean_X,
+    sd_X = sd_X,
+    covs_names = covs_names
   )
   class(results) <- "fusedRidge"
   return(results)
+}
+
+#' Predict Method for Fused Ridge Regression
+#'
+#' Obtains predictions from a fitted \code{fusedRidge} object on new data.
+#'
+#' @param object A fitted \code{fusedRidge} object.
+#' @param newx Matrix of new predictor variables.
+#' @param newcovs Optional matrix or data frame of new covariates. Must be provided if the model was trained with covariates.
+#' @param type Type of prediction. \code{"link"} returns the linear predictor, and \code{"response"} returns the fitted probabilities (only relevant for \code{family = "binomial"}).
+#' @param ... Additional arguments (not used).
+#' @return A matrix of predictions with dimensions \code{nrow(newx) x length(thresholds)}.
+#' @method predict fusedRidge
+#' @export
+predict.fusedRidge <- function(object, newx, newcovs = NULL, type = c("link", "response"), ...) {
+  type <- match.arg(type)
+  
+  newx <- as.matrix(newx)
+  N_new <- nrow(newx)
+  
+  # Standardize newx using training scale parameters
+  if (!is.null(object$mean_X) && !is.null(object$sd_X)) {
+    newx_std <- scale(newx, center = object$mean_X, scale = object$sd_X)
+  } else {
+    newx_std <- newx
+  }
+  
+  # Check/process covariates
+  if (is.null(object$covs_names)) {
+    if (!is.null(newcovs)) {
+      warning("newcovs was provided but the model was trained without covariates. Ignoring newcovs.")
+    }
+    X_covs_new <- matrix(1, nrow = N_new, ncol = 1)
+  } else {
+    if (is.null(newcovs)) {
+      stop("newcovs must be provided as the model was trained with covariates.")
+    }
+    X_covs_new <- as.matrix(newcovs)
+    if (nrow(X_covs_new) != N_new) {
+      stop("Number of rows in newcovs must match newx")
+    }
+    if (!all(object$covs_names %in% colnames(X_covs_new))) {
+      if (ncol(X_covs_new) != length(object$covs_names)) {
+        stop("newcovs columns do not match the covariates used in training.")
+      }
+    } else {
+      # Reorder columns to match training order
+      X_covs_new <- X_covs_new[, object$covs_names, drop = FALSE]
+    }
+  }
+  
+  # Compute linear predictor: eta = a0 + X_covs_new %*% object$coefs_covs + newx_std %*% object$coefs_full
+  eta <- object$a0 + X_covs_new %*% object$coefs_covs + newx_std %*% object$coefs_full
+  
+  if (type == "response") {
+    if (object$family == "binomial") {
+      return(1 / (1 + exp(-eta)))
+    }
+  }
+  
+  return(eta)
 }
