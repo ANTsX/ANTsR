@@ -129,3 +129,34 @@ test_that("predict.fusedRidge works correctly", {
   expect_error(predict(res, newx, newcovs = newcovs, topK = -1), "topK must be a positive integer")
   expect_error(predict(res, newx, newcovs = newcovs, topK = "two"), "topK must be a positive integer")
 })
+
+test_that("fusedRidge fits correctly with topK option (two-pass refitting)", {
+  set.seed(42)
+  N <- 50
+  M <- 10
+  J <- 3
+  
+  X_pcs <- matrix(rnorm(N * M), nrow = N, ncol = M)
+  colnames(X_pcs) <- paste0("PC", 1:M)
+  y_raw <- rnorm(N)
+  thresholds <- c(-0.5, 0, 0.5)
+  
+  # Fit with topK = 3
+  res_top3 <- fusedRidge(X_pcs, y_raw, thresholds, covariates = NULL, lambda1 = 0.5, lambda2 = 0.5, topK = 3)
+  
+  # Check dimensions of coefficients
+  expect_equal(dim(res_top3$coefs_full), c(M, J))
+  
+  # Ensure only the selected features have non-zero coefficients across all thresholds
+  selected <- res_top3$selected_features
+  expect_true(length(selected) >= 3 && length(selected) <= 3 * J)
+  
+  non_selected <- setdiff(seq_len(M), selected)
+  if (length(non_selected) > 0) {
+    expect_true(all(res_top3$coefs_full[non_selected, ] == 0))
+  }
+  
+  # Error handling: invalid topK parameter in fit
+  expect_error(fusedRidge(X_pcs, y_raw, thresholds, topK = -1), "topK must be a positive integer")
+  expect_error(fusedRidge(X_pcs, y_raw, thresholds, topK = "two"), "topK must be a positive integer")
+})

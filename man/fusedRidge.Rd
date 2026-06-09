@@ -13,7 +13,8 @@ fusedRidge(
   lambda2 = 0.5,
   family = "binomial",
   standardize = TRUE,
-  foldid = NULL
+  foldid = NULL,
+  topK = NULL
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ fusedRidge(
 \item{standardize}{Boolean indicating whether to scale the predictor matrix. Defaults to TRUE.}
 
 \item{foldid}{Optional fold IDs for group-structured cross-validation.}
+
+\item{topK}{Optional integer. If provided, fits a first pass model, selects the union of the \code{topK} largest absolute feature weights across all thresholds, and refits the model using only those features (enables sparsity control via two-pass refitting).}
 }
 \value{
 A list containing the fitted glmnet model, cross-validation results, optimal lambda,

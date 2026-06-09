@@ -18,6 +18,7 @@
 #' @param family Model family, passed to glmnet. Defaults to "binomial".
 #' @param standardize Boolean indicating whether to scale the predictor matrix. Defaults to TRUE.
 #' @param foldid Optional fold IDs for group-structured cross-validation.
+#' @param topK Optional integer. If provided, fits a first pass model, selects the union of the \code{topK} largest absolute feature weights across all thresholds, and refits the model using only those features (enables sparsity control via two-pass refitting).
 #' @details
 #' Fits a joint Fused Ridge regression model across multiple binarized thresholds of a continuous response variable,
 #' smoothing the coefficient trajectories using a 1D Graph Laplacian.
@@ -38,7 +39,7 @@
 #' @export
 fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
                        lambda1 = 0.5, lambda2 = 0.5, family = "binomial",
-                       standardize = TRUE, foldid = NULL) {
+                       standardize = TRUE, foldid = NULL, topK = NULL) {
   # Input validation
   X_pcs <- as.matrix(X_pcs)
   N <- nrow(X_pcs)
@@ -159,6 +160,51 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   coefs_full <- theta_matrix %*% H
   rownames(coefs_full) <- colnames(X_pcs)
   colnames(coefs_full) <- paste0("T", seq_len(J))
+  
+  if (!is.null(topK)) {
+    if (!is.numeric(topK) || length(topK) != 1 || topK <= 0) {
+      stop("topK must be a positive integer.")
+    }
+    topK <- as.integer(topK)
+    # Identify the topK features per threshold
+    selected_features <- c()
+    for (j in seq_len(J)) {
+      vals <- abs(coefs_full[, j])
+      keep_idx <- order(vals, decreasing = TRUE)[1:min(topK, M)]
+      selected_features <- union(selected_features, keep_idx)
+    }
+    # Sort selected features for consistency
+    selected_features <- sort(selected_features)
+    
+    # Re-fit using only selected features
+    X_pcs_selected <- X_pcs[, selected_features, drop = FALSE]
+    results_selected <- fusedRidge(
+      X_pcs = X_pcs_selected,
+      y_raw = y_raw,
+      thresholds = thresholds,
+      covariates = covariates,
+      lambda1 = lambda1,
+      lambda2 = lambda2,
+      family = family,
+      standardize = standardize,
+      foldid = foldid,
+      topK = NULL # Prevent infinite recursion
+    )
+    
+    # Map coefficients back to full feature space
+    coefs_full_new <- matrix(0, nrow = M, ncol = J)
+    if (!is.null(colnames(X_pcs))) {
+      rownames(coefs_full_new) <- colnames(X_pcs)
+    }
+    colnames(coefs_full_new) <- colnames(results_selected$coefs_full)
+    coefs_full_new[selected_features, ] <- results_selected$coefs_full
+    
+    results_selected$coefs_full <- coefs_full_new
+    results_selected$selected_features <- selected_features
+    results_selected$mean_X <- mean_X
+    results_selected$sd_X <- sd_X
+    return(results_selected)
+  }
   
   # Return structured results
   results <- list(
