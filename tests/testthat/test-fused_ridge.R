@@ -20,7 +20,7 @@ test_that("fusedRidge dimensional consistency", {
   
   # Check output structures
   expect_equal(dim(res$coefs_full), c(M, J))
-  expect_equal(dim(res$coefs_covs), c(2, J))
+  expect_equal(dim(res$coefs_covs), c(3, J)) # Intercept + 2 covariates
   expect_equal(res$family, "binomial")
   expect_s3_class(res, "fusedRidge")
 })
@@ -117,8 +117,9 @@ test_that("predict.fusedRidge works correctly", {
   pred_nocov_link <- predict(res_nocov, newx, type = "link")
   expect_equal(dim(pred_nocov_link), c(10, J))
   
-  # Warning when newcovs is provided but model had none
-  expect_warning(predict(res_nocov, newx, newcovs = newcovs), "newcovs was provided but the model was trained without covariates")
+  # Predict with newcovs (should ignore them but use its own intercept)
+  pred_nocov_extra <- predict(res_nocov, newx, newcovs = newcovs)
+  expect_equal(dim(pred_nocov_extra), c(10, J))
   
   # 3. topK sparsity control tests
   # Predict with topK = 2 (model has M = 4 features)

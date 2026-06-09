@@ -15,17 +15,20 @@ fusedRidge(
   standardize = TRUE,
   foldid = NULL,
   topK = NULL,
-  thresh = 1e-04
+  thresh = 1e-04,
+  nlambda = 100,
+  nfolds = 10,
+  ...
 )
 }
 \arguments{
-\item{X_pcs}{Matrix of predictor variables (e.g., brain signatures).}
+\item{X_pcs}{Matrix of predictor variables. For high-dimensional data (e.g., voxels), it is recommended to use dimensionality reduction (e.g., PCA) first, as the internal Kronecker product can be memory-intensive.}
 
 \item{y_raw}{Vector of continuous exposure or response variable.}
 
 \item{thresholds}{Vector of thresholds at which to binarize y_raw.}
 
-\item{covariates}{Optional matrix or data frame of covariates to adjust for. Covariates are unpenalized.}
+\item{covariates}{Optional matrix or data frame of covariates to adjust for. Covariates are unpenalized. An intercept is automatically added if not present.}
 
 \item{lambda1}{Ridge penalty weight (defaults to 0.5).}
 
@@ -40,6 +43,12 @@ fusedRidge(
 \item{topK}{Optional integer. If provided, fits a first pass model, selects the union of the \code{topK} largest absolute feature weights across all thresholds, and refits the model using only those features (enables sparsity control via two-pass refitting).}
 
 \item{thresh}{Convergence threshold for \code{glmnet}.}
+
+\item{nlambda}{Number of lambda values to use in \code{glmnet} (defaults to 100).}
+
+\item{nfolds}{Number of folds for cross-validation (defaults to 10).}
+
+\item{...}{Additional arguments passed to \code{glmnet::cv.glmnet} and \code{glmnet::glmnet}.}
 }
 \value{
 A list containing the fitted glmnet model, cross-validation results, optimal lambda,

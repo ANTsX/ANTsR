@@ -122,11 +122,30 @@ for (f in 1:n_folds) {
     )
   }
   
-  # Calculate AUCs for standard methods
+# 4. Independent Lasso (Sparsity without Fusion)
+  pred_lasso_mat <- matrix(0, length(test_idx), J)
+  for (j in 1:J) {
+    y_train_j <- ifelse(y_train >= thresholds[j], 1, 0)
+    # Check if we have both classes
+    if (length(unique(y_train_j)) > 1) {
+      cv_lasso <- glmnet::cv.glmnet(X_train, y_train_j, family = "binomial", alpha = 1)
+      pred_lasso_mat[, j] <- as.vector(predict(cv_lasso, X_test, s = "lambda.min", type = "response"))
+    } else {
+      pred_lasso_mat[, j] <- mean(y_train_j)
+    }
+  }
+  
+  # Calculate AUCs for all methods
   results_list[[length(results_list) + 1]] <- data.frame(
     Threshold = 1:J,
     Method = "Ridge (Independent)",
     AUC = sapply(1:J, function(j) get_auc(pred_ridge[,j], y_test_mat[,j])),
+    Fold = f
+  )
+  results_list[[length(results_list) + 1]] <- data.frame(
+    Threshold = 1:J,
+    Method = "Lasso (Independent)",
+    AUC = sapply(1:J, function(j) get_auc(pred_lasso_mat[,j], y_test_mat[,j])),
     Fold = f
   )
   results_list[[length(results_list) + 1]] <- data.frame(
@@ -145,12 +164,12 @@ summary_df <- aggregate(AUC ~ Threshold + Method, data = results_df, FUN = mean)
 
 ### 1. Predictive Performance (AUC)
 
-We plot the mean AUC across thresholds. This allows us to see the "Goldilocks" effect of sparsity: too few features (`topK=5`) may lose signal, while too many (`topK=50` or Dense) may introduce noise in this $N=100$ regime.
+We plot the mean AUC across thresholds. This allows us to see how **Fusion** (sharing information across thresholds) and **Sparsity** (feature selection) interact. Note how **Lasso (Independent)** may select features, but because it treats each threshold in isolation, it often suffers from higher variance and lower AUC compared to the **Fused** models.
 
 ```{r plot_auc}
 # Order methods for better plotting
 summary_df$Method <- factor(summary_df$Method, levels = c(
-  "Ridge (Independent)", "Fused-Dense", 
+  "Ridge (Independent)", "Lasso (Independent)", "Fused-Dense", 
   "Fused-Sparse (topK=5)", "Fused-Sparse (topK=10)", 
   "Fused-Sparse (topK=25)", "Fused-Sparse (topK=50)"
 ))
@@ -161,7 +180,7 @@ ggplot(summary_df, aes(x = Threshold, y = AUC, color = Method, group = Method)) 
   theme_minimal() +
   scale_color_viridis_d(option = "plasma") +
   labs(title = "Unbiased AUC Comparison (Nested CV)",
-       subtitle = "Exploring Sparsity Levels (topK) on Wide Data",
+       subtitle = "Fusion vs. Independent Selection vs. Ridge",
        y = "Mean Out-of-Fold AUC") +
   ylim(0.5, 1)
 ```
@@ -215,6 +234,289 @@ ggplot(top9_melted, aes(x = Threshold, y = Weight, group = Feature)) +
        x = "Binarization Threshold",
        y = "Coefficient Weight") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Anatomically-Grounded Example: Predicting Cognitive Decline
+
+In this section, we use the anatomical labels from the **AAL (Automated Anatomical Labeling)** atlas to simulate a more realistic neuroimaging scenario. We assume that a "Cognitive Decline" score is driven by specific brain circuits (e.g., Frontal and Hippocampal regions) and that this signal evolves across the disease spectrum.
+
+### 1. Data Preparation with Anatomical Context
+
+We generate $N=120$ subjects with $M=116$ brain regions.
+
+```{r aal_setup}
+data(aal, package = "ANTsR")
+region_names <- aal$label_name
+M_aal <- length(region_names)
+
+set.seed(88)
+N_aal <- 120
+X_aal <- matrix(rnorm(N_aal * M_aal), N_aal, M_aal)
+colnames(X_aal) <- region_names
+
+# Define signal in specific circuits:
+# 1. Hippocampus (Memory)
+hippo_idx <- grep("Hippocampus", region_names)
+# 2. Frontal Sup (Executive)
+frontal_idx <- grep("Frontal_Sup", region_names)
+# 3. Temporal Pole
+temporal_idx <- grep("Temporal_Pole", region_names)
+
+active_aal <- c(hippo_idx, frontal_idx, temporal_idx)
+
+# Simulate smooth effect across 4 thresholds
+J_aal <- 4
+beta_aal <- matrix(0, M_aal, J_aal)
+for (j in 1:J_aal) {
+  # Signal intensifies at higher severity thresholds
+  strength <- j * 0.4
+  beta_aal[hippo_idx, j] <- strength
+  beta_aal[frontal_idx, j] <- strength * 0.8
+  beta_aal[temporal_idx, j] <- strength * 0.6
+}
+
+# Generate outcome
+y_aal_cont <- X_aal %*% beta_aal[, 2] + rnorm(N_aal, sd = 0.3)
+thresholds_aal <- quantile(y_aal_cont, probs = c(0.2, 0.4, 0.6, 0.8))
+```
+
+### 2. The Power of Sparse Selection
+
+We fit the `fusedRidge` model with `topK = 15`. This forces the model to select a small subset of regions that consistently contribute across the thresholds.
+
+```{r aal_fit}
+# Fit sparse model
+fit_aal <- fusedRidge(X_aal, y_aal_cont, thresholds_aal, 
+                     lambda1 = 0.5, lambda2 = 1.0, topK = 15)
+
+# Which regions were recovered?
+recovered_regions <- region_names[fit_aal$selected_features]
+print("Top 15 Recovered Regions:")
+print(recovered_regions)
+
+# Check if we found our simulated signal
+overlap <- intersect(fit_aal$selected_features, active_aal)
+cat("\nSuccessfully recovered", length(overlap), "out of", length(active_aal), "true signal regions.\n")
+```
+
+### 3. Evaluating Actual Predictions
+
+To see how the sparse model generalizes, we perform a simple train/test split (80/20) and examine the **Actual vs. Predicted** results for the AAL regions.
+
+```{r aal_eval}
+# Train/Test Split
+train_idx_aal <- sample(1:N_aal, size = 0.8 * N_aal)
+test_idx_aal <- setdiff(1:N_aal, train_idx_aal)
+
+# Fit sparse model on training data
+fit_aal_train <- fusedRidge(X_aal[train_idx_aal,], y_aal_cont[train_idx_aal], 
+                           thresholds_aal, lambda1 = 0.5, lambda2 = 1.0, topK = 15)
+
+# Get actual binarized labels for test set
+y_test_mat_aal <- matrix(0, length(test_idx_aal), J_aal)
+for (j in 1:J_aal) y_test_mat_aal[,j] <- ifelse(y_aal_cont[test_idx_aal] >= thresholds_aal[j], 1, 0)
+
+# Get predicted probabilities
+pred_probs_aal <- predict(fit_aal_train, X_aal[test_idx_aal,], type = "response")
+
+# Calculate AUC per threshold for the test set
+test_aucs_aal <- sapply(1:J_aal, function(j) get_auc(pred_probs_aal[,j], y_test_mat_aal[,j]))
+
+# Visualize Prediction Distribution
+pred_df_aal <- data.frame(
+  Actual = as.factor(as.vector(y_test_mat_aal)),
+  Probability = as.vector(pred_probs_aal),
+  Threshold = rep(paste0("T", 1:J_aal), each = length(test_idx_aal))
+)
+
+ggplot(pred_df_aal, aes(x = Actual, y = Probability, fill = Actual)) +
+  geom_boxplot(alpha = 0.7) +
+  facet_wrap(~Threshold) +
+  theme_minimal() +
+  labs(title = "AAL Model: Actual vs. Predicted Probabilities",
+       subtitle = paste0("Mean Test AUC: ", round(mean(test_aucs_aal), 3)),
+       y = "Predicted Probability of 'High' Decline")
+```
+
+### 4. Visualizing Anatomical Patterns
+...
+We group the recovered coefficients by brain lobe to see if the sparse selection captures the "circuit" structure of the simulated decline.
+
+```{r aal_plot}
+# Map regions to lobes for grouping
+aal_subset <- aal[fit_aal$selected_features, ]
+coefs_aal <- fit_aal$coefs_full[fit_aal$selected_features, ]
+colnames(coefs_aal) <- paste0("T", 1:J_aal)
+rownames(coefs_aal) <- aal_subset$label_name
+
+# Add lobe information for visualization
+aal_subset$Lobe <- "Other"
+if("frontal" %in% colnames(aal)) aal_subset$Lobe[aal_subset$frontal == 1] <- "Frontal"
+if("temporal" %in% colnames(aal)) aal_subset$Lobe[aal_subset$temporal == 1] <- "Temporal"
+if("limbic" %in% colnames(aal)) aal_subset$Lobe[aal_subset$limbic == 1] <- "Limbic"
+if("parietal" %in% colnames(aal)) aal_subset$Lobe[aal_subset$parietal == 1] <- "Parietal"
+
+aal_melted <- melt(coefs_aal)
+colnames(aal_melted) <- c("Region", "Threshold", "Weight")
+# Join lobe info
+aal_melted$Lobe <- aal_subset$Lobe[match(aal_melted$Region, aal_subset$label_name)]
+
+ggplot(aal_melted, aes(x = Threshold, y = Region, fill = Weight)) +
+  geom_tile() +
+  facet_grid(Lobe ~ ., scales = "free_y", space = "free_y") +
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
+  theme_minimal() +
+  labs(title = "Anatomical Signature of Cognitive Decline",
+       subtitle = "Sparse Fused Ridge groups features by functional Lobe",
+       x = "Disease Severity Threshold",
+       y = "AAL Region") +
+  theme(strip.text.y = element_text(angle = 0))
+```
+
+## Real-World Application: Blood-Brain Barrier (BBB) Permeability
+
+In this final section, we use the **Blood-Brain Barrier** dataset from the `caret` package. This dataset contains 134 molecular descriptors for 208 compounds. The goal is to predict the log concentration ratio of the compound in the brain vs. blood (`logBBB`). 
+
+This is a classic "real-world" problem where we want to identify which molecular properties consistently determine brain permeability across different "penetration" thresholds.
+
+### 1. Data Preparation
+
+```{r bbb_setup}
+if (requireNamespace("caret", quietly = TRUE)) {
+  data(BloodBrain, package = "caret")
+  # bbbDescr contains 134 predictors, logBBB is the response
+  X_bbb <- as.matrix(bbbDescr)
+  y_bbb <- logBBB
+  
+  # Remove near-zero variance predictors to keep the model stable
+  nzv <- caret::nearZeroVar(X_bbb)
+  X_bbb <- X_bbb[, -nzv]
+  
+  M_bbb <- ncol(X_bbb)
+  N_bbb <- nrow(X_bbb)
+  
+  # Define thresholds for 'High' vs 'Low' permeability
+  thresholds_bbb <- quantile(y_bbb, probs = c(0.25, 0.5, 0.75))
+  J_bbb <- length(thresholds_bbb)
+  
+  cat("Dataset loaded:", N_bbb, "compounds,", M_bbb, "molecular descriptors.\n")
+} else {
+  cat("The 'caret' package is required for this section but is not installed.\n")
+}
+```
+
+### 2. Identifying Stable Molecular Signatures
+
+We fit a fused ridge model with `topK = 10` to find the 10 most influential molecular descriptors across the permeability spectrum.
+
+```{r bbb_fit}
+if (requireNamespace("caret", quietly = TRUE)) {
+  # Fit the model
+  fit_bbb <- fusedRidge(X_bbb, y_bbb, thresholds_bbb, 
+                       lambda1 = 0.1, lambda2 = 0.5, topK = 10)
+  
+  # Reconstruct the "Permeability Signature"
+  coefs_bbb <- fit_bbb$coefs_full[fit_bbb$selected_features, ]
+  colnames(coefs_bbb) <- paste0("T", 1:J_bbb)
+  
+  # Sort by overall influence
+  imp_order <- order(rowMeans(abs(coefs_bbb)), decreasing = TRUE)
+  coefs_bbb_sorted <- coefs_bbb[imp_order, ]
+  
+  print("Top Molecular Predictors of BBB Permeability:")
+  print(rownames(coefs_bbb_sorted))
+}
+```
+
+### 3. Evaluating Actual Predictions
+
+We evaluate the BBB model by looking at the separation between predicted probabilities for compounds that actually crossed vs. those that did not, using a hold-out test set.
+
+```{r bbb_eval}
+if (requireNamespace("caret", quietly = TRUE)) {
+  # Train/Test Split
+  train_idx_bbb <- sample(1:N_bbb, size = 0.7 * N_bbb)
+  test_idx_bbb <- setdiff(1:N_bbb, train_idx_bbb)
+  
+  # Fit sparse model
+  fit_bbb_train <- fusedRidge(X_bbb[train_idx_bbb,], y_bbb[train_idx_bbb], 
+                             thresholds_bbb, lambda1 = 0.1, lambda2 = 0.5, topK = 10)
+  
+  # Predict on test set
+  pred_probs_bbb <- predict(fit_bbb_train, X_bbb[test_idx_bbb,], type = "response")
+  
+  # Independent Lasso Comparison
+  pred_probs_lasso_bbb <- matrix(0, length(test_idx_bbb), J_bbb)
+  for (j in 1:J_bbb) {
+    y_train_j <- ifelse(y_bbb[train_idx_bbb] >= thresholds_bbb[j], 1, 0)
+    cv_lasso <- glmnet::cv.glmnet(X_bbb[train_idx_bbb,], y_train_j, family = "binomial", alpha = 1)
+    pred_probs_lasso_bbb[, j] <- as.vector(predict(cv_lasso, X_bbb[test_idx_bbb,], s = "lambda.min", type = "response"))
+  }
+  
+  # Binarize test labels
+  y_test_mat_bbb <- matrix(0, length(test_idx_bbb), J_bbb)
+  for (j in 1:J_bbb) y_test_mat_bbb[,j] <- ifelse(y_bbb[test_idx_bbb] >= thresholds_bbb[j], 1, 0)
+  
+  # Summary Results
+  test_aucs_bbb <- sapply(1:J_bbb, function(j) get_auc(pred_probs_bbb[,j], y_test_mat_bbb[,j]))
+  test_aucs_lasso_bbb <- sapply(1:J_bbb, function(j) get_auc(pred_probs_lasso_bbb[,j], y_test_mat_bbb[,j]))
+  
+  # Prepare for Plotting
+  pred_df_bbb <- data.frame(
+    Actual = as.factor(as.vector(y_test_mat_bbb)),
+    Probability = as.vector(pred_probs_bbb),
+    Threshold = rep(paste0("Q", 1:J_bbb), each = length(test_idx_bbb))
+  )
+  
+  # AUC Comparison Data
+  auc_comp_bbb <- data.frame(
+    Threshold = rep(paste0("Q", 1:J_bbb), 2),
+    Method = rep(c("Fused Ridge", "Independent Lasso"), each = J_bbb),
+    AUC = c(test_aucs_bbb, test_aucs_lasso_bbb)
+  )
+  
+  # Density Plot
+  p1_bbb <- ggplot(pred_df_bbb, aes(x = Probability, fill = Actual)) +
+    geom_density(alpha = 0.5) +
+    facet_wrap(~Threshold) +
+    theme_minimal() +
+    labs(title = "BBB Model: Separation of Predicted Probabilities",
+         subtitle = paste0("Fused Ridge Mean Test AUC: ", round(mean(test_aucs_bbb), 3)),
+         x = "Predicted Probability of Brain Penetration",
+         y = "Density")
+  
+  # AUC Comparison Plot
+  p2_bbb <- ggplot(auc_comp_bbb, aes(x = Threshold, y = AUC, fill = Method)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    theme_minimal() +
+    coord_cartesian(ylim = c(0.5, 1)) +
+    labs(title = "BBB Model: AUC Comparison",
+         subtitle = "Fused Ridge vs. Independent Lasso across Permeability Quantiles",
+         y = "Test AUC")
+  
+  print(p1_bbb)
+  print(p2_bbb)
+}
+```
+
+### 4. Visualizing the Molecular Signature
+
+The heatmap below reveals which molecular properties (like surface area, hydrogen bond donors, or polarizability) consistently predict crossing the blood-brain barrier.
+
+```{r bbb_plot}
+if (requireNamespace("caret", quietly = TRUE)) {
+  bbb_melted <- melt(coefs_bbb_sorted)
+  colnames(bbb_melted) <- c("Descriptor", "Threshold", "Weight")
+  
+  ggplot(bbb_melted, aes(x = Threshold, y = Descriptor, fill = Weight)) +
+    geom_tile() +
+    scale_fill_gradient2(low = "darkgreen", mid = "white", high = "purple") +
+    theme_minimal() +
+    labs(title = "Molecular Signature of BBB Permeability",
+         subtitle = "Fused Ridge identifies descriptors that persist across penetration levels",
+         x = "Permeability Quantile Threshold",
+         y = "Molecular Descriptor")
+}
 ```
 
 ## Conclusion

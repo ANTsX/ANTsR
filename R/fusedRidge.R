@@ -9,10 +9,10 @@
 #' Fits a joint Fused Ridge regression model across multiple binarized thresholds,
 #' smoothing the coefficient trajectories using a 1D Graph Laplacian.
 #'
-#' @param X_pcs Matrix of predictor variables (e.g., brain signatures).
+#' @param X_pcs Matrix of predictor variables. For high-dimensional data (e.g., voxels), it is recommended to use dimensionality reduction (e.g., PCA) first, as the internal Kronecker product can be memory-intensive.
 #' @param y_raw Vector of continuous exposure or response variable.
 #' @param thresholds Vector of thresholds at which to binarize y_raw.
-#' @param covariates Optional matrix or data frame of covariates to adjust for. Covariates are unpenalized.
+#' @param covariates Optional matrix or data frame of covariates to adjust for. Covariates are unpenalized. An intercept is automatically added if not present.
 #' @param lambda1 Ridge penalty weight (defaults to 0.5).
 #' @param lambda2 Fusion penalty weight (defaults to 0.5).
 #' @param family Model family, passed to glmnet. Defaults to "binomial".
@@ -20,6 +20,9 @@
 #' @param foldid Optional fold IDs for group-structured cross-validation.
 #' @param topK Optional integer. If provided, fits a first pass model, selects the union of the \code{topK} largest absolute feature weights across all thresholds, and refits the model using only those features (enables sparsity control via two-pass refitting).
 #' @param thresh Convergence threshold for \code{glmnet}.
+#' @param nlambda Number of lambda values to use in \code{glmnet} (defaults to 100).
+#' @param nfolds Number of folds for cross-validation (defaults to 10).
+#' @param ... Additional arguments passed to \code{glmnet::cv.glmnet} and \code{glmnet::glmnet}.
 #' @details
 #' Fits a joint Fused Ridge regression model across multiple binarized thresholds of a continuous response variable,
 #' smoothing the coefficient trajectories using a 1D Graph Laplacian.
@@ -41,7 +44,7 @@
 fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
                        lambda1 = 0.5, lambda2 = 0.5, family = "binomial",
                        standardize = TRUE, foldid = NULL, topK = NULL,
-                       thresh = 1e-04) {
+                       thresh = 1e-04, nlambda = 100, nfolds = 10, ...) {
   # Input validation
   X_pcs <- as.matrix(X_pcs)
   N <- nrow(X_pcs)
@@ -61,18 +64,29 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   
   # Preprocess covariates
   if (!is.null(covariates)) {
-    X_covs <- as.matrix(covariates)
-    if (nrow(X_covs) != N) {
+    X_covs_raw <- as.matrix(covariates)
+    if (nrow(X_covs_raw) != N) {
       stop("Number of rows in covariates must match X_pcs")
     }
+    
+    # Ensure an intercept column is present to allow per-threshold intercepts
+    is_intercept <- apply(X_covs_raw, 2, function(x) all(x == 1))
+    if (any(is_intercept)) {
+      X_covs <- X_covs_raw
+    } else {
+      X_covs <- cbind(1, X_covs_raw)
+      colnames(X_covs)[1] <- "(Intercept)"
+    }
+    
     covs_names <- colnames(X_covs)
     if (is.null(covs_names)) {
       covs_names <- paste0("Cov", seq_len(ncol(X_covs)))
       colnames(X_covs) <- covs_names
     }
   } else {
-    X_covs <- matrix(1, nrow = N, ncol = 1) # Dummy intercept spacer
-    covs_names <- NULL
+    X_covs <- matrix(1, nrow = N, ncol = 1) # Per-threshold intercept
+    colnames(X_covs) <- "(Intercept)"
+    covs_names <- "(Intercept)"
   }
   K <- ncol(X_covs)
   
@@ -123,8 +137,8 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   
   # Setup foldid for group-structured CV if not provided
   if (is.null(foldid)) {
-    # Default to 10 folds grouped by subject
-    subject_folds <- sample(rep(seq_len(10), length.out = N))
+    # Default to nfolds folds grouped by subject
+    subject_folds <- sample(rep(seq_len(nfolds), length.out = N))
     foldid <- rep(subject_folds, J)
   } else {
     if (length(foldid) == N) {
@@ -135,25 +149,28 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   }
   
   # Run cross-validation to select optimal Ridge lambda
+  # Set intercept = FALSE because we provide per-threshold intercepts in X_covs_stacked
   cv_ridge <- glmnet::cv.glmnet(X_stacked, y_stacked, family = family,
                                penalty.factor = p_factor, alpha = 0,
                                foldid = foldid, keep = TRUE, thresh = thresh,
-                               standardize = FALSE)
+                               standardize = FALSE, intercept = FALSE,
+                               nlambda = nlambda, ...)
   
   # Fit final model using optimal lambda
   fit_ridge <- glmnet::glmnet(X_stacked, y_stacked, family = family,
                              penalty.factor = p_factor, alpha = 0,
                              lambda = cv_ridge$lambda.min, thresh = thresh,
-                             standardize = FALSE)
+                             standardize = FALSE, intercept = FALSE,
+                             nlambda = nlambda, ...)
   
   # Extract stacked coefficients and reconstruct original spaces
   coef_stacked <- as.matrix(coef(fit_ridge))
-  a0 <- coef_stacked[1, 1]
+  a0_global <- coef_stacked[1, 1] # Should be 0 since intercept = FALSE
   
   # Grab covariates coefficients
   coef_covs_stacked <- coef_stacked[2:(n_covs_stacked + 1), 1]
   coef_covs_matrix <- matrix(coef_covs_stacked, nrow = K, ncol = J)
-  rownames(coef_covs_matrix) <- colnames(X_covs)
+  rownames(coef_covs_matrix) <- covs_names
   colnames(coef_covs_matrix) <- paste0("T", seq_len(J))
   
   # Grab brain signature coefficients (in transformed space)
@@ -193,7 +210,10 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
       standardize = standardize,
       foldid = foldid,
       topK = NULL, # Prevent infinite recursion
-      thresh = thresh
+      thresh = thresh,
+      nlambda = nlambda,
+      nfolds = nfolds,
+      ...
     )
     
     # Map coefficients back to full feature space
@@ -222,7 +242,7 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
     fit = fit_ridge,
     cv = cv_ridge,
     optimal_lambda = cv_ridge$lambda.min,
-    a0 = a0,
+    a0 = a0_global,
     coefs_covs = coef_covs_matrix,
     coefs_full = coefs_full,
     theta_matrix = theta_matrix,
@@ -265,27 +285,38 @@ predict.fusedRidge <- function(object, newx, newcovs = NULL, type = c("link", "r
   }
   
   # Check/process covariates
-  if (is.null(object$covs_names)) {
-    if (!is.null(newcovs)) {
-      warning("newcovs was provided but the model was trained without covariates. Ignoring newcovs.")
-    }
-    X_covs_new <- matrix(1, nrow = N_new, ncol = 1)
-  } else {
+  if (!is.null(object$covs_names)) {
     if (is.null(newcovs)) {
-      stop("newcovs must be provided as the model was trained with covariates.")
-    }
-    X_covs_new <- as.matrix(newcovs)
-    if (nrow(X_covs_new) != N_new) {
-      stop("Number of rows in newcovs must match newx")
-    }
-    if (!all(object$covs_names %in% colnames(X_covs_new))) {
-      if (ncol(X_covs_new) != length(object$covs_names)) {
-        stop("newcovs columns do not match the covariates used in training.")
+      # Handle case where only intercept was used
+      if (length(object$covs_names) == 1 && object$covs_names == "(Intercept)") {
+        X_covs_new <- matrix(1, nrow = N_new, ncol = 1)
+        colnames(X_covs_new) <- "(Intercept)"
+      } else {
+        stop("newcovs must be provided as the model was trained with covariates.")
       }
     } else {
+      X_covs_new_raw <- as.matrix(newcovs)
+      if (nrow(X_covs_new_raw) != N_new) {
+        stop("Number of rows in newcovs must match newx")
+      }
+      
+      # Ensure (Intercept) is present if it was in training
+      if ("(Intercept)" %in% object$covs_names && !("(Intercept)" %in% colnames(X_covs_new_raw))) {
+        X_covs_new <- cbind(1, X_covs_new_raw)
+        colnames(X_covs_new)[1] <- "(Intercept)"
+      } else {
+        X_covs_new <- X_covs_new_raw
+      }
+      
+      if (!all(object$covs_names %in% colnames(X_covs_new))) {
+        stop("newcovs columns do not match the covariates used in training.")
+      }
       # Reorder columns to match training order
       X_covs_new <- X_covs_new[, object$covs_names, drop = FALSE]
     }
+  } else {
+    # No covariates (including intercept) - fallback
+    X_covs_new <- matrix(0, nrow = N_new, ncol = 0)
   }
   
   # Sparse feature weights selection (topK largest absolute coefficients per threshold)
@@ -307,11 +338,16 @@ predict.fusedRidge <- function(object, newx, newcovs = NULL, type = c("link", "r
   }
   
   # Compute linear predictor: eta = a0 + X_covs_new %*% object$coefs_covs + newx_std %*% B_full
+  # a0 will be 0 if the model was trained with my update (intercept=FALSE)
   eta <- object$a0 + X_covs_new %*% object$coefs_covs + newx_std %*% B_full
   
   if (type == "response") {
     if (object$family == "binomial") {
       return(1 / (1 + exp(-eta)))
+    } else if (object$family == "gaussian") {
+      return(eta)
+    } else if (object$family == "poisson") {
+      return(exp(eta))
     }
   }
   
