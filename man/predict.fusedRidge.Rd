@@ -4,7 +4,14 @@
 \alias{predict.fusedRidge}
 \title{Predict Method for Fused Ridge Regression}
 \usage{
-\method{predict}{fusedRidge}(object, newx, newcovs = NULL, type = c("link", "response"), ...)
+\method{predict}{fusedRidge}(
+  object,
+  newx,
+  newcovs = NULL,
+  type = c("link", "response"),
+  topK = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{A fitted \code{fusedRidge} object.}
@@ -14,6 +21,8 @@
 \item{newcovs}{Optional matrix or data frame of new covariates. Must be provided if the model was trained with covariates.}
 
 \item{type}{Type of prediction. \code{"link"} returns the linear predictor, and \code{"response"} returns the fitted probabilities (only relevant for \code{family = "binomial"}).}
+
+\item{topK}{Optional integer. If provided, keeps only the \code{topK} absolute largest feature weights for prediction, zeroing out all others (enables sparsity control).}
 
 \item{...}{Additional arguments (not used).}
 }

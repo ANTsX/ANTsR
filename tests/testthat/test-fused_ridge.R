@@ -119,4 +119,13 @@ test_that("predict.fusedRidge works correctly", {
   
   # Warning when newcovs is provided but model had none
   expect_warning(predict(res_nocov, newx, newcovs = newcovs), "newcovs was provided but the model was trained without covariates")
+  
+  # 3. topK sparsity control tests
+  # Predict with topK = 2 (model has M = 4 features)
+  pred_top2 <- predict(res, newx, newcovs = newcovs, type = "link", topK = 2)
+  expect_equal(dim(pred_top2), c(10, J))
+  
+  # Check invalid topK inputs throw error
+  expect_error(predict(res, newx, newcovs = newcovs, topK = -1), "topK must be a positive integer")
+  expect_error(predict(res, newx, newcovs = newcovs, topK = "two"), "topK must be a positive integer")
 })

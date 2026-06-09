@@ -189,11 +189,12 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
 #' @param newx Matrix of new predictor variables.
 #' @param newcovs Optional matrix or data frame of new covariates. Must be provided if the model was trained with covariates.
 #' @param type Type of prediction. \code{"link"} returns the linear predictor, and \code{"response"} returns the fitted probabilities (only relevant for \code{family = "binomial"}).
+#' @param topK Optional integer. If provided, keeps only the \code{topK} absolute largest feature weights for prediction, zeroing out all others (enables sparsity control).
 #' @param ... Additional arguments (not used).
 #' @return A matrix of predictions with dimensions \code{nrow(newx) x length(thresholds)}.
 #' @method predict fusedRidge
 #' @export
-predict.fusedRidge <- function(object, newx, newcovs = NULL, type = c("link", "response"), ...) {
+predict.fusedRidge <- function(object, newx, newcovs = NULL, type = c("link", "response"), topK = NULL, ...) {
   type <- match.arg(type)
   
   newx <- as.matrix(newx)
@@ -230,8 +231,26 @@ predict.fusedRidge <- function(object, newx, newcovs = NULL, type = c("link", "r
     }
   }
   
-  # Compute linear predictor: eta = a0 + X_covs_new %*% object$coefs_covs + newx_std %*% object$coefs_full
-  eta <- object$a0 + X_covs_new %*% object$coefs_covs + newx_std %*% object$coefs_full
+  # Sparse feature weights selection (topK largest absolute coefficients per threshold)
+  B_full <- object$coefs_full
+  if (!is.null(topK)) {
+    if (!is.numeric(topK) || length(topK) != 1 || topK <= 0) {
+      stop("topK must be a positive integer.")
+    }
+    topK <- as.integer(topK)
+    M <- nrow(B_full)
+    if (topK < M) {
+      for (j in seq_len(ncol(B_full))) {
+        vals <- abs(B_full[, j])
+        keep_idx <- order(vals, decreasing = TRUE)[1:topK]
+        set_zero_idx <- setdiff(seq_len(M), keep_idx)
+        B_full[set_zero_idx, j] <- 0
+      }
+    }
+  }
+  
+  # Compute linear predictor: eta = a0 + X_covs_new %*% object$coefs_covs + newx_std %*% B_full
+  eta <- object$a0 + X_covs_new %*% object$coefs_covs + newx_std %*% B_full
   
   if (type == "response") {
     if (object$family == "binomial") {
