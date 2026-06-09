@@ -14,7 +14,8 @@ fusedRidge(
   family = "binomial",
   standardize = TRUE,
   foldid = NULL,
-  topK = NULL
+  topK = NULL,
+  thresh = 1e-04
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ fusedRidge(
 \item{foldid}{Optional fold IDs for group-structured cross-validation.}
 
 \item{topK}{Optional integer. If provided, fits a first pass model, selects the union of the \code{topK} largest absolute feature weights across all thresholds, and refits the model using only those features (enables sparsity control via two-pass refitting).}
+
+\item{thresh}{Convergence threshold for \code{glmnet}.}
 }
 \value{
 A list containing the fitted glmnet model, cross-validation results, optimal lambda,

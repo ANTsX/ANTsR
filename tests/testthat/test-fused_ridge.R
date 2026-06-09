@@ -160,3 +160,22 @@ test_that("fusedRidge fits correctly with topK option (two-pass refitting)", {
   expect_error(fusedRidge(X_pcs, y_raw, thresholds, topK = -1), "topK must be a positive integer")
   expect_error(fusedRidge(X_pcs, y_raw, thresholds, topK = "two"), "topK must be a positive integer")
 })
+
+test_that("fusedRidge handles 'thresh' parameter", {
+  set.seed(42)
+  N <- 50
+  M <- 10
+  J <- 3
+  
+  X_pcs <- matrix(rnorm(N * M), nrow = N, ncol = M)
+  y_raw <- rnorm(N)
+  thresholds <- c(-0.5, 0, 0.5)
+  
+  # Run model with a custom thresh
+  res <- fusedRidge(X_pcs, y_raw, thresholds, thresh = 1e-4)
+  expect_s3_class(res, "fusedRidge")
+  
+  # Ensure it is passed to the recursive call if topK is used
+  res_topK <- fusedRidge(X_pcs, y_raw, thresholds, topK = 5, thresh = 1e-4)
+  expect_s3_class(res_topK, "fusedRidge")
+})

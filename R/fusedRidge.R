@@ -19,6 +19,7 @@
 #' @param standardize Boolean indicating whether to scale the predictor matrix. Defaults to TRUE.
 #' @param foldid Optional fold IDs for group-structured cross-validation.
 #' @param topK Optional integer. If provided, fits a first pass model, selects the union of the \code{topK} largest absolute feature weights across all thresholds, and refits the model using only those features (enables sparsity control via two-pass refitting).
+#' @param thresh Convergence threshold for \code{glmnet}.
 #' @details
 #' Fits a joint Fused Ridge regression model across multiple binarized thresholds of a continuous response variable,
 #' smoothing the coefficient trajectories using a 1D Graph Laplacian.
@@ -39,7 +40,8 @@
 #' @export
 fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
                        lambda1 = 0.5, lambda2 = 0.5, family = "binomial",
-                       standardize = TRUE, foldid = NULL, topK = NULL) {
+                       standardize = TRUE, foldid = NULL, topK = NULL,
+                       thresh = 1e-04) {
   # Input validation
   X_pcs <- as.matrix(X_pcs)
   N <- nrow(X_pcs)
@@ -135,12 +137,12 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   # Run cross-validation to select optimal Ridge lambda
   cv_ridge <- glmnet::cv.glmnet(X_stacked, y_stacked, family = family,
                                penalty.factor = p_factor, alpha = 0,
-                               foldid = foldid, keep = TRUE)
+                               foldid = foldid, keep = TRUE, thresh = thresh)
   
   # Fit final model using optimal lambda
   fit_ridge <- glmnet::glmnet(X_stacked, y_stacked, family = family,
                              penalty.factor = p_factor, alpha = 0,
-                             lambda = cv_ridge$lambda.min)
+                             lambda = cv_ridge$lambda.min, thresh = thresh)
   
   # Extract stacked coefficients and reconstruct original spaces
   coef_stacked <- as.matrix(coef(fit_ridge))
@@ -188,7 +190,8 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
       family = family,
       standardize = standardize,
       foldid = foldid,
-      topK = NULL # Prevent infinite recursion
+      topK = NULL, # Prevent infinite recursion
+      thresh = thresh
     )
     
     # Map coefficients back to full feature space
