@@ -16,8 +16,9 @@ fusedRidgeDirect(
   foldid = NULL,
   topK = NULL,
   thresh = 1e-04,
-  nlambda = 100,
+  nlambda = 20,
   nfolds = 10,
+  cv = TRUE,
   optim_control = list(maxit = 200),
   ...
 )
@@ -39,15 +40,17 @@ fusedRidgeDirect(
 
 \item{standardize}{Boolean indicating whether to scale the predictor matrix. Defaults to TRUE.}
 
-\item{foldid}{Optional fold IDs. Ignored (provided for compatibility with \code{fusedRidge}).}
+\item{foldid}{Optional fold IDs. If \code{cv = TRUE}, used for group-structured cross-validation.}
 
 \item{topK}{Optional integer. If provided, fits a first pass model, selects the union of the \code{topK} largest absolute feature weights across all thresholds, and refits the model using only those features.}
 
 \item{thresh}{Convergence threshold. Ignored (provided for compatibility with \code{fusedRidge}).}
 
-\item{nlambda}{Number of lambda values. Ignored (provided for compatibility with \code{fusedRidge}).}
+\item{nlambda}{Number of lambda values to use in the cross-validation grid. Defaults to 20.}
 
-\item{nfolds}{Number of folds. Ignored (provided for compatibility with \code{fusedRidge}).}
+\item{nfolds}{Number of folds for cross-validation (defaults to 10).}
+
+\item{cv}{Boolean indicating whether to perform pathwise group-structured cross-validation to select the optimal overall regularization scale. Defaults to TRUE.}
 
 \item{optim_control}{Optional list of control parameters passed to \code{optim}. Defaults to \code{list(maxit = 200)}.}
 
@@ -55,9 +58,9 @@ fusedRidgeDirect(
 }
 \value{
 A list of class \code{c("fusedRidgeDirect", "fusedRidge")} containing:
-        \item{fit}{The raw optim fit object.}
-        \item{cv}{NULL (placeholder).}
-        \item{optimal_lambda}{NA (placeholder).}
+        \item{fit}{The final fitted optim object (or list of options).}
+        \item{cv}{Cross-validation details including grid values, mean validation errors, and standard deviations.}
+        \item{optimal_lambda}{Optimal lambda multiplier selected by cross-validation (or NA if cv = FALSE).}
         \item{a0}{0 (intercepts are included in \code{coefs_covs}).}
         \item{coefs_covs}{Reconstructed covariate coefficients matrix.}
         \item{coefs_full}{Reconstructed full coefficient matrix.}
@@ -81,4 +84,7 @@ Fits a joint Fused Ridge regression model across multiple binarized thresholds o
 smoothing the coefficient trajectories using a 1D Graph Laplacian. Unlike \code{fusedRidge}, which transforms the
 design matrix using a Kronecker product expansion, \code{fusedRidgeDirect} optimizes the loss function directly
 using R's built-in \code{optim} function with the \code{"L-BFGS-B"} method and analytical gradients.
+
+If \code{cv = TRUE}, it performs pathwise group-structured cross-validation (with warm starts) to select the optimal
+overall scale multiplier for the penalties, matching the cross-validation behavior of \code{fusedRidge}.
 }
