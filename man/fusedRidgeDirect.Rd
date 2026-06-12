@@ -21,6 +21,7 @@ fusedRidgeDirect(
   cv = TRUE,
   ncores = 1,
   optim_control = list(maxit = 200),
+  lambda = NULL,
   ...
 )
 }
@@ -56,6 +57,8 @@ fusedRidgeDirect(
 \item{ncores}{Number of CPU cores to use for cross-validation. Defaults to \code{1} (sequential processing). Ignored on Windows.}
 
 \item{optim_control}{Optional list of control parameters passed to \code{optim}. Defaults to \code{list(maxit = 200)}.}
+
+\item{lambda}{Optional numeric value. If provided, CV is skipped and the model is fit directly using the specified lambda value.}
 
 \item{...}{Additional arguments passed to \code{optim}.}
 }

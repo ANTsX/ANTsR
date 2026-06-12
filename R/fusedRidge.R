@@ -393,6 +393,7 @@ predict.fusedRidge <- function(object, newx, newcovs = NULL, type = c("link", "r
 #' @param cv Boolean indicating whether to perform pathwise group-structured cross-validation to select the optimal overall regularization scale. Defaults to TRUE.
 #' @param ncores Number of CPU cores to use for cross-validation. Defaults to \code{1} (sequential processing). Ignored on Windows.
 #' @param optim_control Optional list of control parameters passed to \code{optim}. Defaults to \code{list(maxit = 200)}.
+#' @param lambda Optional numeric value. If provided, CV is skipped and the model is fit directly using the specified lambda value.
 #' @param ... Additional arguments passed to \code{optim}.
 #'
 #' @details
@@ -424,7 +425,8 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
                              lambda1 = 0.5, lambda2 = 0.5, family = "binomial",
                              standardize = TRUE, foldid = NULL, topK = NULL,
                              thresh = 1e-04, nlambda = 20, nfolds = 10,
-                             cv = TRUE, ncores = 1, optim_control = list(maxit = 200), ...) {
+                             cv = TRUE, ncores = 1, optim_control = list(maxit = 200),
+                             lambda = NULL, ...) {
   # Setup optim_control defaults using thresh
   if (is.null(optim_control)) {
     optim_control <- list()
@@ -600,7 +602,14 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   }
   
   # Cross-validation logic
-  if (cv) {
+  if (!is.null(lambda)) {
+    # Fit directly using scaled lambda1 and lambda2
+    l1_final <- lambda1 * lambda
+    l2_final <- lambda2 * lambda
+    opt_final <- fit_direct_model(X_pcs_std, y_matrix, X_covs, l1_final, l2_final, rep(0, J * (M + K)), control_opt = optim_control)
+    cv_obj <- NULL
+    optimal_lambda_val <- lambda
+  } else if (cv) {
     if (is.null(foldid)) {
       subject_folds <- sample(rep(seq_len(nfolds), length.out = N))
     } else {

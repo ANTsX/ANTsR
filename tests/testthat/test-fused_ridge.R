@@ -619,3 +619,18 @@ test_that("fusedRidge implementations parity and scaling consistency", {
   expect_equal(res_torch_cv2$coefs_full, res_torch_cv1$coefs_full, tolerance = 1e-4)
   expect_equal(res_torch_cv2$optimal_lambda * 10, res_torch_cv1$optimal_lambda, tolerance = 1e-4)
 })
+
+test_that("fusedRidgeDirect supports explicit lambda parameter", {
+  set.seed(42)
+  N <- 30
+  M <- 5
+  J <- 3
+  X_pcs <- matrix(rnorm(N * M), nrow = N, ncol = M)
+  y_raw <- rnorm(N)
+  thresholds <- c(-0.5, 0, 0.5)
+  
+  res <- fusedRidgeDirect(X_pcs, y_raw, thresholds, lambda1 = 0.5, lambda2 = 0.5, lambda = 0.2, cv = FALSE)
+  expect_equal(res$optimal_lambda, 0.2)
+  expect_true(is.null(res$cv))
+})
+
