@@ -45,7 +45,7 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
                        lambda1 = 0.5, lambda2 = 0.5, family = "binomial",
                        standardize = TRUE, foldid = NULL, topK = NULL,
                        thresh = 1e-04, nlambda = 100, nfolds = 10,
-                       cv = TRUE, ...) {
+                       cv = TRUE, lambda = NULL, ...) {
   # Input validation
   X_pcs <- as.matrix(X_pcs)
   N <- nrow(X_pcs)
@@ -153,7 +153,10 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
     }
   }
   
-  if (cv) {
+  if (!is.null(lambda)) {
+    cv_ridge <- NULL
+    optimal_lambda <- lambda
+  } else if (cv) {
     # Run cross-validation to select optimal Ridge lambda
     # Set intercept = FALSE because we provide per-threshold intercepts in X_covs_stacked
     cv_ridge <- glmnet::cv.glmnet(X_stacked, y_stacked, family = family,
@@ -225,6 +228,7 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
       nlambda = nlambda,
       nfolds = nfolds,
       cv = cv,
+      lambda = lambda,
       ...
     )
     
@@ -253,7 +257,7 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   results <- list(
     fit = fit_ridge,
     cv = cv_ridge,
-    optimal_lambda = if (cv) optimal_lambda else NA,
+    optimal_lambda = if (!is.null(lambda)) optimal_lambda else (if (cv) optimal_lambda else NA),
     a0 = a0_global,
     coefs_covs = coef_covs_matrix,
     coefs_full = coefs_full,
@@ -866,7 +870,7 @@ fusedRidgeTorch <- function(X_pcs, y_raw, thresholds, covariates = NULL,
                             standardize = TRUE, foldid = NULL, topK = NULL,
                             thresh = 1e-04, nlambda = 20, nfolds = 10,
                             cv = TRUE, device = "cpu", optim_control = list(maxit = 200),
-                            alpha = 0, sparsity_thresh = 1e-4, ...) {
+                            alpha = 0, sparsity_thresh = 1e-4, lambda = NULL, ...) {
   # Setup optim_control defaults using thresh
   if (is.null(optim_control)) {
     optim_control <- list()
@@ -1047,7 +1051,14 @@ fusedRidgeTorch <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   }
   
   # Cross-validation logic
-  if (cv) {
+  if (!is.null(lambda)) {
+    # Fit directly using scaled lambda1 and lambda2
+    l1_final <- lambda1 * lambda
+    l2_final <- lambda2 * lambda
+    opt_final <- fit_torch_model(X_pcs_std, y_matrix, X_covs, l1_final, l2_final, NULL, control_opt = optim_control)
+    cv_obj <- NULL
+    optimal_lambda_val <- lambda
+  } else if (cv) {
     if (is.null(foldid)) {
       subject_folds <- sample(rep(seq_len(nfolds), length.out = N))
     } else {

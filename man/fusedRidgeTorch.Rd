@@ -23,6 +23,7 @@ fusedRidgeTorch(
   optim_control = list(maxit = 200),
   alpha = 0,
   sparsity_thresh = 1e-04,
+  lambda = NULL,
   ...
 )
 }

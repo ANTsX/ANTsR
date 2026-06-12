@@ -19,6 +19,7 @@ fusedRidge(
   nlambda = 100,
   nfolds = 10,
   cv = TRUE,
+  lambda = NULL,
   ...
 )
 }
