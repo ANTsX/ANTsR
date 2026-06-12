@@ -18,6 +18,7 @@ fusedRidge(
   thresh = 1e-04,
   nlambda = 100,
   nfolds = 10,
+  cv = TRUE,
   ...
 )
 }

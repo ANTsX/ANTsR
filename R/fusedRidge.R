@@ -44,7 +44,8 @@
 fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
                        lambda1 = 0.5, lambda2 = 0.5, family = "binomial",
                        standardize = TRUE, foldid = NULL, topK = NULL,
-                       thresh = 1e-04, nlambda = 100, nfolds = 10, ...) {
+                       thresh = 1e-04, nlambda = 100, nfolds = 10,
+                       cv = TRUE, ...) {
   # Input validation
   X_pcs <- as.matrix(X_pcs)
   N <- nrow(X_pcs)
@@ -152,18 +153,24 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
     }
   }
   
-  # Run cross-validation to select optimal Ridge lambda
-  # Set intercept = FALSE because we provide per-threshold intercepts in X_covs_stacked
-  cv_ridge <- glmnet::cv.glmnet(X_stacked, y_stacked, family = family,
-                               penalty.factor = p_factor, alpha = 0,
-                               foldid = foldid, keep = TRUE, thresh = thresh,
-                               standardize = FALSE, intercept = FALSE,
-                               nlambda = nlambda, ...)
+  if (cv) {
+    # Run cross-validation to select optimal Ridge lambda
+    # Set intercept = FALSE because we provide per-threshold intercepts in X_covs_stacked
+    cv_ridge <- glmnet::cv.glmnet(X_stacked, y_stacked, family = family,
+                                 penalty.factor = p_factor, alpha = 0,
+                                 foldid = foldid, keep = TRUE, thresh = thresh,
+                                 standardize = FALSE, intercept = FALSE,
+                                 nlambda = nlambda, ...)
+    optimal_lambda <- cv_ridge$lambda.min
+  } else {
+    cv_ridge <- NULL
+    optimal_lambda <- 1.0
+  }
   
   # Fit final model using optimal lambda
   fit_ridge <- glmnet::glmnet(X_stacked, y_stacked, family = family,
                              penalty.factor = p_factor, alpha = 0,
-                             lambda = cv_ridge$lambda.min, thresh = thresh,
+                             lambda = optimal_lambda, thresh = thresh,
                              standardize = FALSE, intercept = FALSE,
                              nlambda = nlambda, ...)
   
@@ -217,6 +224,7 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
       thresh = thresh,
       nlambda = nlambda,
       nfolds = nfolds,
+      cv = cv,
       ...
     )
     
@@ -245,7 +253,7 @@ fusedRidge <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   results <- list(
     fit = fit_ridge,
     cv = cv_ridge,
-    optimal_lambda = cv_ridge$lambda.min,
+    optimal_lambda = if (cv) optimal_lambda else NA,
     a0 = a0_global,
     coefs_covs = coef_covs_matrix,
     coefs_full = coefs_full,
@@ -379,6 +387,7 @@ predict.fusedRidge <- function(object, newx, newcovs = NULL, type = c("link", "r
 #' @param nlambda Number of lambda values to use in the cross-validation grid. Defaults to 20.
 #' @param nfolds Number of folds for cross-validation (defaults to 10).
 #' @param cv Boolean indicating whether to perform pathwise group-structured cross-validation to select the optimal overall regularization scale. Defaults to TRUE.
+#' @param ncores Number of CPU cores to use for cross-validation. Defaults to \code{1} (sequential processing). Ignored on Windows.
 #' @param optim_control Optional list of control parameters passed to \code{optim}. Defaults to \code{list(maxit = 200)}.
 #' @param ... Additional arguments passed to \code{optim}.
 #'
@@ -411,7 +420,14 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
                              lambda1 = 0.5, lambda2 = 0.5, family = "binomial",
                              standardize = TRUE, foldid = NULL, topK = NULL,
                              thresh = 1e-04, nlambda = 20, nfolds = 10,
-                             cv = TRUE, optim_control = list(maxit = 200), ...) {
+                             cv = TRUE, ncores = 1, optim_control = list(maxit = 200), ...) {
+  # Setup optim_control defaults using thresh
+  if (is.null(optim_control)) {
+    optim_control <- list()
+  }
+  if (is.null(optim_control$maxit)) optim_control$maxit <- 200
+  if (is.null(optim_control$pgtol)) optim_control$pgtol <- thresh
+
   # Input validation
   X_pcs <- as.matrix(X_pcs)
   N <- nrow(X_pcs)
@@ -474,7 +490,7 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
   }
   
   # Core fit function helper
-  fit_direct_model <- function(X_tr, Y_tr, C_tr, l1, l2, par_start) {
+  fit_direct_model <- function(X_tr, Y_tr, C_tr, l1, l2, par_start, control_opt = optim_control) {
     N_tr <- nrow(X_tr)
     
     loss_fn <- function(par) {
@@ -548,7 +564,7 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
       fn = loss_fn,
       gr = grad_fn,
       method = "L-BFGS-B",
-      control = optim_control,
+      control = control_opt,
       ...
     )
     return(opt)
@@ -594,16 +610,49 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
       nfolds <- length(unique(subject_folds))
     }
     
-    # Grid of overall scale multiplier
-    lambda_grid <- 10^seq(1, -4, length.out = nlambda)
-    cv_matrix <- matrix(0, nrow = nfolds, ncol = nlambda)
+    # Compute data-dependent lambda_max to scale lambda_grid
+    P0 <- matrix(0, nrow = N, ncol = J)
+    for (j in seq_len(J)) {
+      yj <- y_matrix[, j]
+      fitted_val <- tryCatch({
+        if (family == "binomial") {
+          fit <- glm.fit(X_covs, yj, family = binomial())
+          fit$fitted.values
+        } else if (family == "gaussian") {
+          fit <- lm.fit(X_covs, yj)
+          fit$fitted.values
+        } else if (family == "poisson") {
+          fit <- glm.fit(X_covs, yj, family = poisson())
+          fit$fitted.values
+        }
+      }, error = function(e) {
+        rep(mean(yj), N)
+      })
+      P0[, j] <- fitted_val
+    }
+    G0 <- (P0 - y_matrix) / (N * J)
+    g_max <- max(abs(t(G0) %*% X_pcs_std))
+    sum_lambdas <- lambda1 + lambda2
+    if (sum_lambdas < 1e-9) sum_lambdas <- 1e-9
+    lambda_max <- g_max / sum_lambdas
+    if (lambda_max < 1e-6) lambda_max <- 1e-6
     
-    for (f in 1:nfolds) {
+    # Grid of overall scale multiplier
+    lambda_grid <- lambda_max * 10^seq(1, -4, length.out = nlambda)
+    
+    # CV-specific optimization controls for speed
+    cv_control <- optim_control
+    if (is.null(cv_control$maxit)) cv_control$maxit <- 50 else cv_control$maxit <- min(cv_control$maxit, 50)
+    if (is.null(cv_control$pgtol)) cv_control$pgtol <- max(thresh, 1e-3)
+    
+    # Define single fold execution helper
+    run_fold <- function(f) {
       train_idx <- which(subject_folds != f)
       val_idx <- which(subject_folds == f)
       
-      # Handle empty fold case if foldid is non-consecutive
-      if (length(val_idx) == 0 || length(train_idx) == 0) next
+      if (length(val_idx) == 0 || length(train_idx) == 0) {
+        return(rep(NA, length(lambda_grid)))
+      }
       
       X_tr <- X_pcs_std[train_idx, , drop = FALSE]
       Y_tr <- y_matrix[train_idx, , drop = FALSE]
@@ -614,15 +663,28 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
       C_val <- X_covs[val_idx, , drop = FALSE]
       
       par_current <- rep(0, J * (M + K))
+      fold_errors <- numeric(length(lambda_grid))
       
       # Pathwise warm start optimization
       for (l_idx in seq_along(lambda_grid)) {
         l <- lambda_grid[l_idx]
-        opt_fold <- fit_direct_model(X_tr, Y_tr, C_tr, l * lambda1, l * lambda2, par_current)
-        cv_matrix[f, l_idx] <- eval_error_loss(opt_fold$par, X_val, Y_val, C_val)
+        opt_fold <- fit_direct_model(X_tr, Y_tr, C_tr, l * lambda1, l * lambda2, par_current, control_opt = cv_control)
+        fold_errors[l_idx] <- eval_error_loss(opt_fold$par, X_val, Y_val, C_val)
         par_current <- opt_fold$par
       }
+      return(fold_errors)
     }
+    
+    # Run folds sequentially or in parallel
+    if (ncores > 1 && .Platform$OS.type != "windows") {
+      fold_results <- parallel::mclapply(seq_len(nfolds), run_fold, mc.cores = ncores)
+    } else {
+      fold_results <- lapply(seq_len(nfolds), run_fold)
+    }
+    
+    cv_matrix <- do.call(rbind, fold_results)
+    cv_matrix <- cv_matrix[complete.cases(cv_matrix), , drop = FALSE]
+    nfolds_actual <- nrow(cv_matrix)
     
     mean_cv_err <- colMeans(cv_matrix)
     opt_idx <- which.min(mean_cv_err)
@@ -635,7 +697,7 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
     # Pathwise warm start to optimal lambda on full dataset
     par_current <- rep(0, J * (M + K))
     for (l in lambda_grid[1:opt_idx]) {
-      opt_final <- fit_direct_model(X_pcs_std, y_matrix, X_covs, l * lambda1, l * lambda2, par_current)
+      opt_final <- fit_direct_model(X_pcs_std, y_matrix, X_covs, l * lambda1, l * lambda2, par_current, control_opt = optim_control)
       par_current <- opt_final$par
     }
     
@@ -648,7 +710,7 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
     )
   } else {
     # No CV: fit directly using original lambda1 and lambda2
-    opt_final <- fit_direct_model(X_pcs_std, y_matrix, X_covs, lambda1, lambda2, rep(0, J * (M + K)))
+    opt_final <- fit_direct_model(X_pcs_std, y_matrix, X_covs, lambda1, lambda2, rep(0, J * (M + K)), control_opt = optim_control)
     cv_obj <- NULL
     optimal_lambda_val <- NA
     l1_final <- lambda1
@@ -753,5 +815,458 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
 #' @export
 predict.fusedRidgeDirect <- function(object, newx, newcovs = NULL, type = c("link", "response"), topK = NULL, ...) {
   # Direct mapping to predict.fusedRidge since structures are identical
+  predict.fusedRidge(object = object, newx = newx, newcovs = newcovs, type = type, topK = topK, ...)
+}
+
+#' PyTorch-Based Manifold-Regularized Fused Ridge Regression
+#'
+#' Fits a joint Fused Ridge regression model across multiple binarized thresholds of a
+#' continuous response variable using PyTorch L-BFGS and automatic differentiation. This avoids
+#' the memory-intensive Kronecker product design matrix expansion, and leverages PyTorch's
+#' highly optimized solvers and potential hardware acceleration (MPS/CUDA).
+#'
+#' @param X_pcs Matrix of predictor variables.
+#' @param y_raw Vector of continuous exposure or response variable.
+#' @param thresholds Vector of thresholds at which to binarize y_raw.
+#' @param covariates Optional matrix or data frame of covariates to adjust for. Covariates are unpenalized. An intercept is automatically added if not present.
+#' @param lambda1 Ridge penalty weight (defaults to 0.5).
+#' @param lambda2 Fusion penalty weight (defaults to 0.5).
+#' @param family Model family. Supported values are \code{"binomial"}, \code{"gaussian"}, and \code{"poisson"}. Defaults to \code{"binomial"}.
+#' @param standardize Boolean indicating whether to scale the predictor matrix. Defaults to TRUE.
+#' @param foldid Optional fold IDs. If \code{cv = TRUE}, used for group-structured cross-validation.
+#' @param topK Optional integer. If provided, fits a first pass model, selects the union of the \code{topK} largest absolute feature weights across all thresholds, and refits the model using only those features.
+#' @param thresh Convergence threshold.
+#' @param nlambda Number of lambda values to use in the cross-validation grid. Defaults to 20.
+#' @param nfolds Number of folds for cross-validation (defaults to 10).
+#' @param cv Boolean indicating whether to perform pathwise group-structured cross-validation to select the optimal overall regularization scale. Defaults to TRUE.
+#' @param device PyTorch device. Can be \code{"cpu"}, \code{"cuda"}, \code{"mps"}, or \code{"auto"} (which detects CUDA or MPS availability). Defaults to \code{"cpu"}.
+#' @param optim_control Optional list of control parameters passed to the PyTorch optimizer. Defaults to \code{list(maxit = 200)}.
+#' @param alpha Elastic net mixing parameter between 0 and 1. \code{alpha = 0} is pure ridge, \code{alpha = 1} is pure lasso. Defaults to 0.
+#' @param sparsity_thresh Hard threshold for sparsity post-optimization. Any coefficient smaller in absolute value is zeroed out. Defaults to 1e-4.
+#' @param ... Additional arguments (currently ignored).
+#'
+#' @return A list of class \code{c("fusedRidgeTorch", "fusedRidgeDirect", "fusedRidge")} containing:
+#'         \item{fit}{Details from the final PyTorch fit.}
+#'         \item{cv}{Cross-validation details including grid values, mean validation errors, and standard deviations.}
+#'         \item{optimal_lambda}{Optimal lambda multiplier selected by cross-validation (or NA if cv = FALSE).}
+#'         \item{a0}{0 (intercepts are included in \code{coefs_covs}).}
+#'         \item{coefs_covs}{Reconstructed covariate coefficients matrix.}
+#'         \item{coefs_full}{Reconstructed full coefficient matrix.}
+#'         \item{theta_matrix}{Coefficients in the original space.}
+#'         \item{H}{Identity matrix placeholder.}
+#'         \item{thresholds}{Input thresholds vector.}
+#'         \item{family}{Model family.}
+#'         \item{y_matrix}{Binarized target matrix.}
+#'         \item{mean_X}{Scaling center parameters.}
+#'         \item{sd_X}{Scaling scale parameters.}
+#'         \item{covs_names}{Names of covariates.}
+#' @export
+fusedRidgeTorch <- function(X_pcs, y_raw, thresholds, covariates = NULL,
+                            lambda1 = 0.5, lambda2 = 0.5, family = "binomial",
+                            standardize = TRUE, foldid = NULL, topK = NULL,
+                            thresh = 1e-04, nlambda = 20, nfolds = 10,
+                            cv = TRUE, device = "cpu", optim_control = list(maxit = 200),
+                            alpha = 0, sparsity_thresh = 1e-4, ...) {
+  # Setup optim_control defaults using thresh
+  if (is.null(optim_control)) {
+    optim_control <- list()
+  }
+  if (is.null(optim_control$maxit)) optim_control$maxit <- 200
+  if (is.null(optim_control$tolerance_grad)) optim_control$tolerance_grad <- thresh
+
+  # Input validation
+  X_pcs <- as.matrix(X_pcs)
+  N <- nrow(X_pcs)
+  M <- ncol(X_pcs)
+  J <- length(thresholds)
+  
+  if (length(y_raw) != N) {
+    stop("Length of y_raw must match the number of rows in X_pcs")
+  }
+  
+  family <- match.arg(family, c("binomial", "gaussian", "poisson"))
+  
+  # Binarize response
+  y_matrix <- matrix(0, nrow = N, ncol = J)
+  for (j in seq_len(J)) {
+    y_matrix[, j] <- ifelse(y_raw >= thresholds[j], 1, 0)
+  }
+  
+  # Preprocess covariates
+  if (!is.null(covariates)) {
+    X_covs_raw <- as.matrix(covariates)
+    if (nrow(X_covs_raw) != N) {
+      stop("Number of rows in covariates must match X_pcs")
+    }
+    
+    # Ensure raw covariates have column names
+    if (is.null(colnames(X_covs_raw))) {
+      colnames_raw <- paste0("Cov", seq_len(ncol(X_covs_raw)))
+    } else {
+      colnames_raw <- colnames(X_covs_raw)
+    }
+    
+    # Ensure an intercept column is present to allow per-threshold intercepts
+    is_intercept <- apply(X_covs_raw, 2, function(x) all(x == 1))
+    if (any(is_intercept)) {
+      X_covs <- X_covs_raw
+      colnames(X_covs) <- colnames_raw
+    } else {
+      X_covs <- cbind(1, X_covs_raw)
+      colnames(X_covs) <- c("(Intercept)", colnames_raw)
+    }
+    
+    covs_names <- colnames(X_covs)
+  } else {
+    X_covs <- matrix(1, nrow = N, ncol = 1) # Per-threshold intercept
+    colnames(X_covs) <- "(Intercept)"
+    covs_names <- "(Intercept)"
+  }
+  K <- ncol(X_covs)
+  
+  # Standardize predictors if requested
+  if (standardize) {
+    X_pcs_std <- scale(X_pcs)
+    mean_X <- attr(X_pcs_std, "scaled:center")
+    sd_X <- attr(X_pcs_std, "scaled:scale")
+  } else {
+    X_pcs_std <- X_pcs
+    mean_X <- NULL
+    sd_X <- NULL
+  }
+  
+  # PyTorch initialization
+  torch <- reticulate::import("torch", convert = FALSE)
+  
+  # Device selection
+  if (device == "auto") {
+    if (reticulate::py_to_r(torch$cuda$is_available())) {
+      device_obj <- torch$device("cuda")
+    } else if (reticulate::py_to_r(torch$backends$mps$is_available())) {
+      device_obj <- torch$device("mps")
+    } else {
+      device_obj <- torch$device("cpu")
+    }
+  } else {
+    device_obj <- torch$device(device)
+  }
+  
+  # Core fit function helper using PyTorch
+  fit_torch_model <- function(X_tr, Y_tr, C_tr, l1, l2, par_start = NULL, control_opt = optim_control) {
+    N_tr <- nrow(X_tr)
+    
+    # Move training data to PyTorch tensors on the selected device and make them contiguous
+    X_t <- torch$tensor(X_tr, dtype = torch$float32, device = device_obj)$contiguous()
+    Y_t <- torch$tensor(Y_tr, dtype = torch$float32, device = device_obj)$contiguous()
+    C_t <- torch$tensor(C_tr, dtype = torch$float32, device = device_obj)$contiguous()
+    
+    if (!is.null(par_start)) {
+      W_np <- par_start$W
+      V_np <- par_start$V
+    } else {
+      W_np <- matrix(0, nrow = J, ncol = M)
+      V_np <- matrix(0, nrow = J, ncol = K)
+    }
+    
+    W <- torch$tensor(W_np, dtype = torch$float32, device = device_obj)$contiguous()$requires_grad_(TRUE)
+    V <- torch$tensor(V_np, dtype = torch$float32, device = device_obj)$contiguous()$requires_grad_(TRUE)
+    
+    maxit <- if (!is.null(control_opt$maxit)) as.integer(control_opt$maxit) else 200L
+    tol_grad <- if (!is.null(control_opt$tolerance_grad)) as.numeric(control_opt$tolerance_grad) else as.numeric(thresh)
+    tol_change <- if (!is.null(control_opt$tolerance_change)) as.numeric(control_opt$tolerance_change) else 1e-9
+    
+    optimizer <- torch$optim$LBFGS(
+      list(W, V),
+      lr = 1.0,
+      max_iter = maxit,
+      tolerance_grad = tol_grad,
+      tolerance_change = tol_change,
+      line_search_fn = "strong_wolfe"
+    )
+    
+    closure <- function() {
+      optimizer$zero_grad()
+      Z <- X_t$matmul(W$t()) + C_t$matmul(V$t())
+      
+      if (family == "binomial") {
+        error_loss <- torch$nn$functional$binary_cross_entropy_with_logits(Z, Y_t, reduction = "sum") / (N_tr * J)
+      } else if (family == "gaussian") {
+        error_loss <- 0.5 * torch$sum((Z - Y_t)^2) / (N_tr * J)
+      } else if (family == "poisson") {
+        error_loss <- torch$sum(torch$exp(Z) - Y_t * Z) / (N_tr * J)
+      }
+      
+      # Penalties
+      # Ridge: (1 - alpha) * l1 * sum(W^2)
+      # Lasso: alpha * l1 * sum(sqrt(W^2 + 1e-5))
+      l1_pen <- (1.0 - alpha) * l1 * torch$sum(W$pow(2))
+      if (alpha > 0) {
+        l1_pen <- l1_pen + alpha * l1 * torch$sum(torch$sqrt(W$pow(2) + 1e-5))
+      }
+      
+      l2_pen <- 0
+      if (J > 1) {
+        W_diff <- W$narrow(0L, 1L, J - 1L) - W$narrow(0L, 0L, J - 1L)
+        l2_pen <- l2 * torch$sum(W_diff$pow(2))
+      }
+      
+      loss <- error_loss + l1_pen + l2_pen
+      loss$backward()
+      return(loss)
+    }
+    
+    optimizer$step(closure)
+    
+    W_opt <- reticulate::py_to_r(W$detach()$cpu()$numpy())
+    V_opt <- reticulate::py_to_r(V$detach()$cpu()$numpy())
+    final_loss <- reticulate::py_to_r(closure()$item())
+    
+    return(list(W = W_opt, V = V_opt, loss = final_loss))
+  }
+  
+  eval_error_loss <- function(W_opt, V_opt, X_val, Y_val, C_val) {
+    N_val <- nrow(X_val)
+    Z <- X_val %*% t(W_opt) + C_val %*% t(V_opt)
+    
+    if (family == "binomial") {
+      log_P <- plogis(Z, log.p = TRUE)
+      log_1_P <- plogis(Z, lower.tail = FALSE, log.p = TRUE)
+      
+      term1 <- Y_val * log_P
+      term1[Y_val == 0] <- 0
+      term2 <- (1 - Y_val) * log_1_P
+      term2[Y_val == 1] <- 0
+      
+      return(-sum(term1 + term2) / (N_val * J))
+    } else if (family == "gaussian") {
+      return(0.5 * sum((Z - Y_val)^2) / (N_val * J))
+    } else if (family == "poisson") {
+      P <- exp(pmin(Z, 50))
+      return(sum(P - Y_val * Z) / (N_val * J))
+    }
+  }
+  
+  # Cross-validation logic
+  if (cv) {
+    if (is.null(foldid)) {
+      subject_folds <- sample(rep(seq_len(nfolds), length.out = N))
+    } else {
+      if (length(foldid) == N) {
+        subject_folds <- foldid
+      } else if (length(foldid) == N * J) {
+        subject_folds <- foldid[1:N]
+      } else {
+        stop("Length of foldid must be either N or N * J")
+      }
+      nfolds <- length(unique(subject_folds))
+    }
+    
+    # Compute data-dependent lambda_max to scale lambda_grid
+    P0 <- matrix(0, nrow = N, ncol = J)
+    for (j in seq_len(J)) {
+      yj <- y_matrix[, j]
+      fitted_val <- tryCatch({
+        if (family == "binomial") {
+          fit <- glm.fit(X_covs, yj, family = binomial())
+          fit$fitted.values
+        } else if (family == "gaussian") {
+          fit <- lm.fit(X_covs, yj)
+          fit$fitted.values
+        } else if (family == "poisson") {
+          fit <- glm.fit(X_covs, yj, family = poisson())
+          fit$fitted.values
+        }
+      }, error = function(e) {
+        rep(mean(yj), N)
+      })
+      P0[, j] <- fitted_val
+    }
+    G0 <- (P0 - y_matrix) / (N * J)
+    g_max <- max(abs(t(G0) %*% X_pcs_std))
+    sum_lambdas <- lambda1 + lambda2
+    if (sum_lambdas < 1e-9) sum_lambdas <- 1e-9
+    lambda_max <- g_max / sum_lambdas
+    if (lambda_max < 1e-6) lambda_max <- 1e-6
+    
+    # Grid of overall scale multiplier
+    lambda_grid <- lambda_max * 10^seq(1, -4, length.out = nlambda)
+    
+    # CV-specific optimization controls for speed
+    cv_control <- optim_control
+    if (is.null(cv_control$maxit)) cv_control$maxit <- 50 else cv_control$maxit <- min(cv_control$maxit, 50)
+    if (is.null(cv_control$tolerance_grad)) cv_control$tolerance_grad <- max(thresh, 1e-3)
+    
+    # Define single fold execution helper
+    run_fold <- function(f) {
+      train_idx <- which(subject_folds != f)
+      val_idx <- which(subject_folds == f)
+      
+      if (length(val_idx) == 0 || length(train_idx) == 0) {
+        return(rep(NA, length(lambda_grid)))
+      }
+      
+      X_tr <- X_pcs_std[train_idx, , drop = FALSE]
+      Y_tr <- y_matrix[train_idx, , drop = FALSE]
+      C_tr <- X_covs[train_idx, , drop = FALSE]
+      
+      X_val <- X_pcs_std[val_idx, , drop = FALSE]
+      Y_val <- y_matrix[val_idx, , drop = FALSE]
+      C_val <- X_covs[val_idx, , drop = FALSE]
+      
+      par_current <- NULL
+      fold_errors <- numeric(length(lambda_grid))
+      
+      # Pathwise warm start optimization
+      for (l_idx in seq_along(lambda_grid)) {
+        l <- lambda_grid[l_idx]
+        opt_fold <- fit_torch_model(X_tr, Y_tr, C_tr, l * lambda1, l * lambda2, par_current, control_opt = cv_control)
+        fold_errors[l_idx] <- eval_error_loss(opt_fold$W, opt_fold$V, X_val, Y_val, C_val)
+        par_current <- list(W = opt_fold$W, V = opt_fold$V)
+      }
+      return(fold_errors)
+    }
+    
+    fold_results <- lapply(seq_len(nfolds), run_fold)
+    
+    cv_matrix <- do.call(rbind, fold_results)
+    cv_matrix <- cv_matrix[complete.cases(cv_matrix), , drop = FALSE]
+    nfolds_actual <- nrow(cv_matrix)
+    
+    mean_cv_err <- colMeans(cv_matrix)
+    opt_idx <- which.min(mean_cv_err)
+    optimal_lambda_val <- lambda_grid[opt_idx]
+    
+    # Fit final model with optimal weights
+    l1_final <- optimal_lambda_val * lambda1
+    l2_final <- optimal_lambda_val * lambda2
+    
+    # Pathwise warm start to optimal lambda on full dataset
+    par_current <- NULL
+    for (l in lambda_grid[1:opt_idx]) {
+      opt_final <- fit_torch_model(X_pcs_std, y_matrix, X_covs, l * lambda1, l * lambda2, par_current, control_opt = optim_control)
+      par_current <- list(W = opt_final$W, V = opt_final$V)
+    }
+    
+    cv_obj <- list(
+      lambda = lambda_grid,
+      cvm = mean_cv_err,
+      cvsd = apply(cv_matrix, 2, sd) / sqrt(nfolds),
+      cvraw = cv_matrix,
+      lambda.min = optimal_lambda_val
+    )
+  } else {
+    # No CV: fit directly using original lambda1 and lambda2
+    opt_final <- fit_torch_model(X_pcs_std, y_matrix, X_covs, lambda1, lambda2, NULL, control_opt = optim_control)
+    cv_obj <- NULL
+    optimal_lambda_val <- NA
+    l1_final <- lambda1
+    l2_final <- lambda2
+  }
+  
+  # Extract optimized parameters
+  coef_W <- opt_final$W
+  coef_V <- opt_final$V
+  
+  # Apply post-optimization zeroing threshold if sparsity_thresh > 0
+  if (sparsity_thresh > 0) {
+    coef_W[abs(coef_W) < sparsity_thresh] <- 0
+  }
+  
+  coef_covs_matrix <- t(coef_V)
+  rownames(coef_covs_matrix) <- covs_names
+  colnames(coef_covs_matrix) <- paste0("T", seq_len(J))
+  
+  coefs_full <- t(coef_W)
+  if (!is.null(colnames(X_pcs))) {
+    rownames(coefs_full) <- colnames(X_pcs)
+  }
+  colnames(coefs_full) <- paste0("T", seq_len(J))
+  
+  # Two-pass refitting with sparsity control (topK largest feature weights)
+  if (!is.null(topK)) {
+    if (!is.numeric(topK) || length(topK) != 1 || topK <= 0) {
+      stop("topK must be a positive integer.")
+    }
+    topK <- as.integer(topK)
+    selected_features <- c()
+    for (j in seq_len(J)) {
+      vals <- abs(coefs_full[, j])
+      keep_idx <- order(vals, decreasing = TRUE)[1:min(topK, M)]
+      selected_features <- union(selected_features, keep_idx)
+    }
+    selected_features <- sort(selected_features)
+    
+    X_pcs_selected <- X_pcs[, selected_features, drop = FALSE]
+    results_selected <- fusedRidgeTorch(
+      X_pcs = X_pcs_selected,
+      y_raw = y_raw,
+      thresholds = thresholds,
+      covariates = covariates,
+      lambda1 = lambda1,
+      lambda2 = lambda2,
+      family = family,
+      standardize = standardize,
+      foldid = foldid,
+      topK = NULL,
+      thresh = thresh,
+      nlambda = nlambda,
+      nfolds = nfolds,
+      cv = cv,
+      device = device,
+      optim_control = optim_control,
+      alpha = alpha,
+      sparsity_thresh = sparsity_thresh,
+      ...
+    )
+    
+    coefs_full_new <- matrix(0, nrow = M, ncol = J)
+    if (!is.null(colnames(X_pcs))) {
+      rownames(coefs_full_new) <- colnames(X_pcs)
+    }
+    colnames(coefs_full_new) <- colnames(results_selected$coefs_full)
+    coefs_full_new[selected_features, ] <- results_selected$coefs_full
+    
+    results_selected$coefs_full <- coefs_full_new
+    results_selected$selected_features <- selected_features
+    results_selected$mean_X <- mean_X
+    results_selected$sd_X <- sd_X
+    return(results_selected)
+  }
+  
+  # Return structured results
+  results <- list(
+    fit = opt_final,
+    cv = cv_obj,
+    optimal_lambda = optimal_lambda_val,
+    a0 = 0,
+    coefs_covs = coef_covs_matrix,
+    coefs_full = coefs_full,
+    theta_matrix = t(coef_W),
+    H = diag(J),
+    thresholds = thresholds,
+    family = family,
+    y_matrix = y_matrix,
+    mean_X = mean_X,
+    sd_X = sd_X,
+    covs_names = covs_names
+  )
+  class(results) <- c("fusedRidgeTorch", "fusedRidgeDirect", "fusedRidge")
+  return(results)
+}
+
+#' Predict Method for PyTorch Fused Ridge Regression
+#'
+#' Obtains predictions from a fitted \code{fusedRidgeTorch} object on new data.
+#'
+#' @param object A fitted \code{fusedRidgeTorch} object.
+#' @param newx Matrix of new predictor variables.
+#' @param newcovs Optional matrix or data frame of new covariates. Must be provided if the model was trained with covariates.
+#' @param type Type of prediction. \code{"link"} returns the linear predictor, and \code{"response"} returns the fitted probabilities.
+#' @param topK Optional integer. If provided, keeps only the \code{topK} absolute largest feature weights for prediction, zeroing out all others (enables sparsity control).
+#' @param ... Additional arguments (passed to \code{predict.fusedRidge}).
+#' @return A matrix of predictions with dimensions \code{nrow(newx) x length(thresholds)}.
+#' @method predict fusedRidgeTorch
+#' @export
+predict.fusedRidgeTorch <- function(object, newx, newcovs = NULL, type = c("link", "response"), topK = NULL, ...) {
   predict.fusedRidge(object = object, newx = newx, newcovs = newcovs, type = type, topK = topK, ...)
 }
