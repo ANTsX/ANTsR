@@ -775,6 +775,7 @@ fusedRidgeDirect <- function(X_pcs, y_raw, thresholds, covariates = NULL,
       nfolds = nfolds,
       cv = cv,
       optim_control = optim_control,
+      lambda = if (!is.null(lambda)) lambda else optimal_lambda_val,
       ...
     )
     
@@ -1236,6 +1237,7 @@ fusedRidgeTorch <- function(X_pcs, y_raw, thresholds, covariates = NULL,
       optim_control = optim_control,
       alpha = alpha,
       sparsity_thresh = sparsity_thresh,
+      lambda = if (!is.null(lambda)) lambda else optimal_lambda_val,
       ...
     )
     
