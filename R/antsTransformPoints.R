@@ -20,7 +20,7 @@ antsTransformIndexToPhysicalPoint <- function(x, index) {
     stop("index must be of class 'numeric' or 'matrix'")
   }
 
-  if (is.numeric(index)) {
+  if (is.null(dim(index))) {
     index <- t(as.matrix(index))
   }
 
@@ -66,7 +66,7 @@ antsTransformPhysicalPointToIndex <- function(x, point) {
     stop("point must be of class 'numeric' or 'matrix'")
   }
 
-  if (is.numeric(point)) {
+  if (is.null(dim(point))) {
     point <- t(as.matrix(point))
   }
 
