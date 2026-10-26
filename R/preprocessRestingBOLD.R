@@ -119,7 +119,7 @@ preprocessRestingBOLD <- function(
 
       if (!denseFramewise) {
         # pick a point 10 voxels from the center
-        samplePoint <- data.matrix(matrix(rep(10, 3), ncol = 1))
+        samplePoint <- matrix(rep(10, 3), nrow = 1)
         samplePoint <- antsTransformIndexToPhysicalPoint(meanBoldFixedImageForMotionCorrection, samplePoint)
 
         # calculate the transformed point at time point i and ( i - 1 )
