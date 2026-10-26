@@ -45,11 +45,6 @@ multiLabelMorphology <- function(labelsIn, operation, radius,
     labelList <- sort(unique(labelsIn[labelsIn > 0]))
   }
 
-  # All labels, whether to be processed or not
-  labelsInBinary <- antsImageClone(labelsIn)
-
-  labelsInBinary[labelsInBinary > 1] <- 1
-
   # Erosion / opening is simply a case of looping over the input labels
   if (operation == "ME" || operation == "MO") {
     output <- antsImageClone(labelsIn)
@@ -77,18 +72,19 @@ multiLabelMorphology <- function(labelsIn, operation, radius,
     # This is binary, no longer has intensity currentLabel
     currentLabelRegion <- thresholdImage(labelsIn, currentLabel, currentLabel)
 
-    # Other labels, don't dilate into these
-    otherLabels <- output - currentLabelRegion
+    # Voxels not yet labeled (by any label, including the current one and
+    # labels already dilated / closed in previous iterations); only these
+    # may be filled, so existing labels are never overwritten or added to
+    unlabeled <- thresholdImage(output, 0, 0)
 
     # Dilated or closed
     cLabBinaryMorphed <- iMath(currentLabelRegion, operation, radius, 1)
 
     # Mask probably useful only for dilation
     if (operation == "MD" && !is.null(dilationMask)) {
-      # This must be formulated so that it works whether the dilation mask includes currentLabelRegion or not
-      cLabBinaryMorphedNoOverlap <- thresholdImage(currentLabelRegion + dilationMask * cLabBinaryMorphed - otherLabels, 1, 2)
+      cLabBinaryMorphedNoOverlap <- cLabBinaryMorphed * dilationMask * unlabeled
     } else {
-      cLabBinaryMorphedNoOverlap <- thresholdImage(cLabBinaryMorphed - otherLabels, 1, 1)
+      cLabBinaryMorphedNoOverlap <- cLabBinaryMorphed * unlabeled
     }
 
     output <- output + cLabBinaryMorphedNoOverlap * currentLabel
