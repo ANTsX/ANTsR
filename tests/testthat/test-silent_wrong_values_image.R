@@ -343,3 +343,19 @@ test_that("resampleImageToTarget passes ... to antsApplyTransforms", {
   expected[expected == 7] <- 0
   expect_equal(as.array(resampleImageToTarget(img, tgt)), expected)
 })
+
+test_that("iMath errors clearly for listed but unsupported operations", {
+  img <- as.antsImage(matrix(1:16, 4, 4))
+  roi <- as.antsImage(matrix(rep(1:2, each = 8), 4, 4))
+  expect_error(iMath(img, "LabelStats", roi), "not currently supported")
+})
+
+test_that("antsImageRead keeps components when dimension is given", {
+  vec <- as.antsImage(array(rnorm(2 * 4 * 5), c(2, 4, 5)), components = TRUE)
+  f <- tempfile(fileext = ".nii.gz")
+  antsImageWrite(vec, f)
+  img <- antsImageRead(f, dimension = 2)
+  expect_equal(img@components, 2)
+  expect_equal(as.array(img), as.array(vec), tolerance = 1e-6)
+  expect_equal(antsImageRead(f)@components, 2)
+})
