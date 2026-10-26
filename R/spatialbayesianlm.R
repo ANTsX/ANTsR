@@ -77,7 +77,7 @@ spatialbayesianlm <- function(
   invcov <- solve(covmat + diag(ncol(covmat)) * 1e-06)
   betaideal <- rep(0, ncol(ymat))
   blmX <- model.matrix(mylm)
-  betamatrix <- ymat[1:(ncol(blmX) - 1), ] * 0
+  betamatrix <- ymat[1:(ncol(blmX) - 1), , drop = FALSE] * 0
   posteriorI <- rep(0, ncol(ymat))
   for (v in 1:ncol(ymat)) {
     parammat <- nmatimgs[[1]][, v]
