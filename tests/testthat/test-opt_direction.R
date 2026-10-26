@@ -30,7 +30,7 @@ for ( optim in list_simlr_optimizers() ) {
   initial_energy <- nsa_energy(Y, it)
 
   # Perform optimization step
-  step_result <- step(
+  step_result <- optimizer_step(
     opt,
     i = 1,
     V_current = Y,

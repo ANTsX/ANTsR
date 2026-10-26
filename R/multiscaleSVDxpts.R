@@ -3939,7 +3939,7 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
 #' Y0 <- matrix(runif(20), 5, 4)
 #' X0 <- matrix(runif(20), 5, 4)
 #' # The original function relies on helper functions not shown here, such as:
-#' # create_optimizer, step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
+#' # create_optimizer, optimizer_step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
 #' # The following example is conceptual:
 #' # result <- nsa_flow(Y0, X0, w = 0.0, max_iter = 10, verbose = TRUE, plot = TRUE)
 #' # print(result$plot)
@@ -4154,7 +4154,7 @@ nsa_flow <- function(
     }
 
     # --- Optimizer step ---
-    step_result <- step(
+    step_result <- optimizer_step(
       opt, i = 1, V_current = Y,
       descent_gradient = rgrad,
       learning_rate = lr,

@@ -7,7 +7,7 @@
 #
 # Main functions:
 #   - create_optimizer(): Constructor to initialize a chosen optimizer.
-#   - step(): Generic function to perform one optimization step.
+#   - optimizer_step(): Generic function to perform one optimization step.
 # ==============================================================================
 
 #' Create and Initialize a SIMLR Optimizer
@@ -91,6 +91,10 @@ reset_optimizer_state <- function(optimizer, vmats) {
 #' This is a generic S3 function that dispatches to the correct update rule
 #' based on the optimizer's class.
 #'
+#' This generic was previously called `step()`. It was renamed because an
+#' exported `step()` generic masked [stats::step()] (stepwise model selection)
+#' whenever ANTsR was attached. Methods are now named `optimizer_step.<type>`.
+#'
 #' @param optimizer The optimizer object from `create_optimizer()`.
 #' @param i The index of the modality currently being updated.
 #' @param V_current The current V matrix for modality `i`.
@@ -100,13 +104,13 @@ reset_optimizer_state <- function(optimizer, vmats) {
 #'
 #' @return A list containing `updated_V` and the updated `optimizer` object.
 #' @export
-step <- function(optimizer, i, V_current, descent_gradient, ...) {
-  UseMethod("step")
+optimizer_step <- function(optimizer, i, V_current, descent_gradient, ...) {
+  UseMethod("optimizer_step")
 }
 
 
 #' @export
-step.hybrid_adam <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+optimizer_step.hybrid_adam <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
   # This method uses Adam to find a direction and a backtracking line search
   # to find the optimal step size. It is robust and parameter-free.
   
@@ -148,7 +152,7 @@ step.hybrid_adam <- function(optimizer, i, V_current, descent_gradient, full_ene
 }
 
 #' @export
-step.random_search <- function(optimizer, i, V_current, descent_gradient,
+optimizer_step.random_search <- function(optimizer, i, V_current, descent_gradient,
                                full_energy_function, ...) {
   # This optimizer performs random search around V_current.
   # It proposes n_trials random perturbations and picks the candidate
@@ -195,7 +199,7 @@ step.random_search <- function(optimizer, i, V_current, descent_gradient,
 }
 
 #' @export
-step.random_gradient <- function(optimizer, i, V_current, descent_gradient,
+optimizer_step.random_gradient <- function(optimizer, i, V_current, descent_gradient,
                                  full_energy_function, ...) {
   # This optimizer ignores the actual gradient and generates a random one.
   # It then uses backtracking line search to find an acceptable step size.
@@ -234,7 +238,7 @@ step.random_gradient <- function(optimizer, i, V_current, descent_gradient,
 }
 
 #' @export
-step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Standard Adam: momentum + adaptive RMSprop, no cumulative max
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -260,7 +264,7 @@ step.adam <- function(optimizer, i, V_current, descent_gradient, ...) {
 }
 
 #' @export
-step.gd <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.gd <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Naive gradient descent with exponential learning rate decay
   # update: V_{t+1} = V_t + η_t * d
   state <- optimizer$state[[i]]
@@ -291,7 +295,7 @@ step.gd <- function(optimizer, i, V_current, descent_gradient, ...) {
 
 
 #' @export
-step.rmsprop <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.rmsprop <- function(optimizer, i, V_current, descent_gradient, ...) {
   # RMSprop: Root Mean Square Propagation
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -311,7 +315,7 @@ step.rmsprop <- function(optimizer, i, V_current, descent_gradient, ...) {
 }
 
 #' @export
-step.adagrad <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.adagrad <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Adagrad: Adaptive Gradient Algorithm
   # This optimizer is particularly effective for sparse data as it adapts the
   # learning rate for each parameter based on the history of its gradients.
@@ -343,7 +347,7 @@ step.adagrad <- function(optimizer, i, V_current, descent_gradient, ...) {
 }
 
 #' @export
-step.sgd_momentum <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.sgd_momentum <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Classic SGD with momentum and a learning rate.
   
   state <- optimizer$state[[i]]
@@ -369,7 +373,7 @@ step.sgd_momentum <- function(optimizer, i, V_current, descent_gradient, ...) {
 
 
 #' @export
-step.ls_adam <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+optimizer_step.ls_adam <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
   # This method uses standard Adam to determine the search direction and R's
   # `optimize` function to perform a line search for the step size.
   
@@ -425,7 +429,7 @@ step.ls_adam <- function(optimizer, i, V_current, descent_gradient, full_energy_
 }
 
 #' @export
-step.ls_rmsprop <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+optimizer_step.ls_rmsprop <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
   # This method uses RMSprop to determine the search direction and R's
   # `optimize` function to perform a line search for the step size.
   
@@ -477,7 +481,7 @@ step.ls_rmsprop <- function(optimizer, i, V_current, descent_gradient, full_ener
 #           NEW OPTIMIZER: Nadam Direction with `optimize` Line Search
 # ==============================================================================
 #' @export
-step.ls_nadam <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+optimizer_step.ls_nadam <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
   # This method uses Nadam to determine the search direction and R's built-in
   # `optimize` function to perform a high-precision line search for the step size.
   
@@ -538,7 +542,7 @@ step.ls_nadam <- function(optimizer, i, V_current, descent_gradient, full_energy
 
 
 #' @export
-step.amsgrad <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.amsgrad <- function(optimizer, i, V_current, descent_gradient, ...) {
   # AMSGrad optimizer
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -573,7 +577,7 @@ step.amsgrad <- function(optimizer, i, V_current, descent_gradient, ...) {
 }
 
 #' @export
-step.adadelta <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.adadelta <- function(optimizer, i, V_current, descent_gradient, ...) {
   # AdaDelta update rule
   # Using descent_gradient (d = -g), so the update is + (RMS_dx/RMS_g) * d
   
@@ -610,7 +614,7 @@ step.adadelta <- function(optimizer, i, V_current, descent_gradient, ...) {
 
 
 #' @export
-step.lbfgs <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.lbfgs <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Naive memory-1 L-BFGS optimizer, works for vector or matrix parameters
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -666,7 +670,7 @@ step.lbfgs <- function(optimizer, i, V_current, descent_gradient, ...) {
 #           NEW OPTIMIZER: Bidirectional Armijo Gradient
 # ==============================================================================
 #' @export
-step.bidirectional_armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+optimizer_step.bidirectional_armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
   # This method tries both the provided descent_gradient and its negation, using a robust
   # Armijo backtracking line search to find an energy-reducing step. It is maximally robust
   # to incorrect gradient directions and guarantees an energy-reducing step if possible.
@@ -751,7 +755,7 @@ step.bidirectional_armijo_gradient <- function(optimizer, i, V_current, descent_
   }
 
 #' @export
-step.vsgd <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.vsgd <- function(optimizer, i, V_current, descent_gradient, ...) {
   state <- optimizer$state[[i]]
   params <- optimizer$params
   args <- list(...)
@@ -774,7 +778,7 @@ step.vsgd <- function(optimizer, i, V_current, descent_gradient, ...) {
 
 
 #' @export
-step.riemannian_adam <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.riemannian_adam <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Wraps your Adam, but transports update via retraction/projection
   descent_gradient = descent_gradient * (-1.0)
   state <- optimizer$state[[i]]
@@ -802,7 +806,7 @@ step.riemannian_adam <- function(optimizer, i, V_current, descent_gradient, ...)
 }
 
 #' @export
-step.lars <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.lars <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Base SGD + layer-wise scaling (adapt to columns)
   descent_gradient = descent_gradient * (-1.0)
   params <- optimizer$params
@@ -817,7 +821,7 @@ step.lars <- function(optimizer, i, V_current, descent_gradient, ...) {
 }
 
 #' @export
-step.psgd <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.psgd <- function(optimizer, i, V_current, descent_gradient, ...) {
   descent_gradient = descent_gradient * (-1.0)
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -835,7 +839,7 @@ step.psgd <- function(optimizer, i, V_current, descent_gradient, ...) {
 }
 
 #' @export
-step.armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+optimizer_step.armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
   # Updated: Added momentum (0.9 decay) for faster convergence; capped backtracks at 20, min alpha=1e-10.
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -872,7 +876,7 @@ step.armijo_gradient <- function(optimizer, i, V_current, descent_gradient, full
 # UPDATED OPTIMIZER: Lookahead with Projection
 # ==============================================================================
 #' @export
-step.lookahead <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.lookahead <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Updated: Added manifold projection after blending (using symm/crossprod); adaptive k = max(5, myit/10).
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -883,7 +887,7 @@ step.lookahead <- function(optimizer, i, V_current, descent_gradient, ...) {
   state$V_slow <- state$V_slow %||% V_current
   state$step <- state$step %||% 0
   # Use Adam as default base optimizer
-  base_result <- step.adam(optimizer, i, V_current, descent_gradient, ...)
+  base_result <- optimizer_step.adam(optimizer, i, V_current, descent_gradient, ...)
   V_fast <- base_result$updated_V
   optimizer <- base_result$optimizer
   # Update lookahead step
@@ -904,7 +908,7 @@ step.lookahead <- function(optimizer, i, V_current, descent_gradient, ...) {
 # UPDATED OPTIMIZER: Nadam (Standard Forgetful + Full Bias Correction)
 # ==============================================================================
 #' @export
-step.nadam <- function(optimizer, i, V_current, descent_gradient, ...) {
+optimizer_step.nadam <- function(optimizer, i, V_current, descent_gradient, ...) {
   # Updated: Dropped v_max (use forgetful v_hat); full Nesterov bias correction; increment myit.
   state <- optimizer$state[[i]]
   params <- optimizer$params
@@ -991,7 +995,7 @@ step.nadam <- function(optimizer, i, V_current, descent_gradient, ...) {
 #           NEW OPTIMIZER: Bidirectional Lookahead
 # ==============================================================================
 #' @export
-step.bidirectional_lookahead <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
+optimizer_step.bidirectional_lookahead <- function(optimizer, i, V_current, descent_gradient, full_energy_function, ...) {
   # This method combines lookahead with a bidirectional line search on the Adam-proposed direction.
   # It computes the Adam descent direction, then performs a bidirectional Armijo backtracking line
   # search (trying both the direction and its negation) to find a robust energy-reducing step.
@@ -1068,13 +1072,13 @@ step.bidirectional_lookahead <- function(optimizer, i, V_current, descent_gradie
 
 #' List Available SIMLR Optimizers
 #'
-#' Dynamically returns the names of all optimizer types with registered `step.*` methods.
+#' Dynamically returns the names of all optimizer types with registered `optimizer_step.*` methods.
 #' @param torch Logical; if TRUE, returns a predefined list of optimizers compatible with torch.
 #' @return A character vector of optimizer names (e.g., "adam", "nadam", etc.)
 #' @export
 list_simlr_optimizers <- function( torch = FALSE ) {
-  methods_vec <- as.character(methods("step"))
-  optimizers <- gsub("^step\\.|\\*$", "", methods_vec)
+  methods_vec <- as.character(methods("optimizer_step"))
+  optimizers <- gsub("^optimizer_step\\.|\\*$", "", methods_vec)
   optimizers=optimizers[ !(optimizers %in% c("lbfgs", "random_search", "random_gradient"))]
   if ( torch  ) {
     return( c('adabound', 'adagrad', 'adam', 'adamax', 'adamp', 'adamw', 'asgd', 'lars', 'lbfgs', 'lookahead', 'nadam', 'padam', 'pid', 'qhadam', 'qhm', 'radam', 'rmsprop', 'rprop', 'sgd', 'sgd_nesterov', 'sgdp', 'yogi' ) )
