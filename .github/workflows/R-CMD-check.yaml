@@ -18,6 +18,8 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          # ubuntu-latest (26.04, GCC 15) fails building ITKR from source until
+          # ANTsX/ITKR picks up ITK 4f275769e3; ubuntu-24.04 (GCC 13) builds.
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-24.04,    r: 'release'}
           - {os: macos-latest,    r: 'release'}
@@ -27,6 +29,7 @@ jobs:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
       R_KEEP_PKG_SOURCE: yes
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      ITKR_RELEASE_ASSET: ITKR-release.zip
 
     steps:
       - uses: actions/checkout@v4
@@ -37,18 +40,55 @@ jobs:
         with:
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            any::rcmdcheck
-            any::ANTsRCore
-            any::ITKR
-          needs: check
-
-      - name: Build HDF5 - LINUX
+      # hdf5r needs libhdf5, and building ITKR from source needs cmake
+      - name: Install system dependencies - LINUX
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get update
           sudo apt-get install -y libhdf5-dev cmake
+
+      # ITKR (and so ANTsRCore) can't be built from source on Windows here,
+      # so install the ITKR release binary and point Remotes at it, as
+      # ANTsRCore's CI does. ANTsRCore is then built from source against it.
+      - name: Install ITKR binary - WINDOWS
+        if: runner.os == 'Windows'
+        shell: Rscript {0}
+        run: |
+          asset <- Sys.getenv("ITKR_RELEASE_ASSET")
+          url <- sprintf("https://github.com/ANTsX/ITKR/releases/latest/download/%s", asset)
+          dest <- file.path(tempdir(), asset)
+          unpack <- file.path(tempdir(), "ITKR_unpack")
+          dir.create(unpack, recursive = TRUE, showWarnings = FALSE)
+          download.file(url, dest, mode = "wb", quiet = TRUE)
+          unzip(dest, exdir = unpack)
+
+          desc <- list.files(unpack, pattern = "^DESCRIPTION$", recursive = TRUE, full.names = TRUE)[1]
+          if (is.na(desc)) stop(sprintf("Could not find DESCRIPTION inside %s", asset))
+          dcf <- read.dcf(desc)
+          fields <- intersect(c("Depends", "Imports", "LinkingTo"), colnames(dcf))
+          deps <- setdiff(names(tools:::.split_dependencies(dcf[1, fields])), c("R", rownames(installed.packages(priority = "base"))))
+          if (length(deps)) install.packages(deps)
+
+          # re-zip the package folder so it installs as a standard win.binary
+          pkgdir <- dirname(desc)
+          ver <- dcf[1, "Version"]
+          itkr_zip <- normalizePath(file.path(getwd(), paste0("ITKR_", ver, ".zip")), winslash = "/", mustWork = FALSE)
+          owd <- setwd(dirname(pkgdir))
+          zip(itkr_zip, files = list.files(basename(pkgdir), recursive = TRUE, full.names = TRUE))
+          setwd(owd)
+          install.packages(itkr_zip, repos = NULL, type = "win.binary")
+          if (!requireNamespace("ITKR", quietly = TRUE)) stop("ITKR binary did not install")
+
+          lines <- readLines("DESCRIPTION", warn = FALSE)
+          rem <- grepl("^Remotes:", lines) | grepl("^\\s+ANTsX/ITKR", lines)
+          lines[rem] <- sub("ANTsX/ITKR", paste0("ITKR=local::", itkr_zip), lines[rem], fixed = TRUE)
+          writeLines(lines, "DESCRIPTION")
+
+      # ANTsRCore and ITKR aren't on CRAN; they come from DESCRIPTION Remotes
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
 
       - uses: r-lib/actions/check-r-package@v2
         with:
