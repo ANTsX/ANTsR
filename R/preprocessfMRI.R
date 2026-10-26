@@ -112,7 +112,9 @@ preprocessfMRI <- function(
         translationAtTime1
       transformedPointAtTime2 <- data.matrix(rotationMatrixAtTime2) %*% samplePoint +
         translationAtTime2
-      framewiseDisplacement[i] <- dist(rbind(transformedPointAtTime2, transformedPointAtTime1))[[1]]
+      # euclidean distance between the two 3x1 points (rbind() of the column
+      # vectors gave a 6x1 matrix, so dist()[[1]] compared coordinates)
+      framewiseDisplacement[i] <- sqrt(sum((transformedPointAtTime2 - transformedPointAtTime1)^2))
     }
     framewiseDisplacement[1] <- mean(framewiseDisplacement[2:numberOfTimePoints])
 
@@ -158,7 +160,7 @@ preprocessfMRI <- function(
     boldMatrix <- residuals(lm(boldMatrix ~ scale(nuisanceVariables)))
   }
   # replace boldMatrix in place with frequency filtered version
-  if (!is.na(frequencyHighThreshold) & !is.na(frequencyHighThreshold) & (frequencyLowThreshold !=
+  if (!is.na(frequencyLowThreshold) & !is.na(frequencyHighThreshold) & (frequencyLowThreshold !=
     frequencyHighThreshold)) {
     boldMatrix <- frequencyFilterfMRI(boldMatrix,
       tr = antsGetSpacing(boldImage)[4],
