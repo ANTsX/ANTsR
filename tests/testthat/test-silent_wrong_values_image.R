@@ -165,3 +165,15 @@ test_that("antsApplyTransformsToPoints honors whichtoinvert", {
   out <- antsApplyTransformsToPoints(2, pts, c(f1, f2))
   expect_equal(as.matrix(out), as.matrix(pts) + d1 + d2, ignore_attr = TRUE)
 })
+
+test_that("cropImageFromCenterPoint centers the patch on the point", {
+  # voxel value = x index (1-based); spacing 1, origin 0
+  ramp <- as.antsImage(matrix(rep(1:20, 20), 20, 20))
+  center <- c(9, 9) # physical point of index (10, 10)
+  p <- as.array(cropImageFromCenterPoint(ramp, center, c(5, 5)))
+  expect_equal(p[, 3], 8:12)
+  p <- as.array(cropImageFromCenterPoint(ramp, center, c(3, 3)))
+  expect_equal(p[, 2], 9:11)
+  p <- as.array(cropImageFromCenterPoint(ramp, center, c(7, 7)))
+  expect_equal(p[, 4], 7:13)
+})
