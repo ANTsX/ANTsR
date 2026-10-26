@@ -16,6 +16,13 @@
   `sd(c(1, 2, NA, 4), na.rm = TRUE)` returned `NA` once ANTsR was attached.
   It now matches `stats::sd()`.
 
+* FIX: `nsa_flow()` no longer resets the global random number stream or
+  changes `RNGkind()` on every call. Its `seed` (default 42) is now applied
+  locally and the caller's `.Random.seed` / `RNGkind()` are restored on exit;
+  `seed = NULL` uses the ambient stream. The same applies to the fixed
+  initialisation seeds in `nsa_flow_pca()` / `nsa_flow_pca_fa()` and to
+  `antsr_random_features()`.
+
 ## 0.4.0
 
 * ENH: better compilation and release style.

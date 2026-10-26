@@ -3614,6 +3614,35 @@ apply_transform_matrix <- function(Xnew, params) {
 
 
 
+#' Seed the RNG locally
+#'
+#' Sets the random seed (and optionally the RNG kind) and returns a function
+#' that restores the caller's \code{.Random.seed} and \code{RNGkind()}.
+#' Use as \code{restore <- .local_rng_seed(seed); on.exit(restore(), add = TRUE)}.
+#'
+#' @param seed integer seed passed to \code{set.seed}.
+#' @param kind,normal.kind passed to \code{set.seed}.
+#' @return a function with no arguments that restores the previous RNG state.
+#' @keywords internal
+#' @noRd
+.local_rng_seed <- function(seed, kind = NULL, normal.kind = NULL) {
+  genv <- globalenv()
+  had_seed <- exists(".Random.seed", envir = genv, inherits = FALSE)
+  old_seed <- if (had_seed) get(".Random.seed", envir = genv, inherits = FALSE) else NULL
+  old_kind <- RNGkind()
+  set.seed(seed, kind = kind, normal.kind = normal.kind)
+  function() {
+    suppressWarnings(RNGkind(old_kind[1], old_kind[2], old_kind[3]))
+    if (had_seed) {
+      assign(".Random.seed", old_seed, envir = genv)
+    } else if (exists(".Random.seed", envir = genv, inherits = FALSE)) {
+      rm(".Random.seed", envir = genv)
+    }
+    invisible(NULL)
+  }
+}
+
+
 #' Estimate Robust Learning Rate for NSA-Flow
 #'
 #' @description
@@ -3890,8 +3919,12 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
 #' @param tol Numeric, tolerance for convergence based on relative gradient norm
 #'   and energy stability. Default is 1e-6.
 #' @param verbose Logical, if \code{TRUE}, prints iteration details. Default is \code{FALSE}.
-#' @param seed Integer, random seed for reproducibility. If \code{NULL}, no seed is set.
-#'   Default is 42.
+#' @param seed Integer, random seed for reproducibility. Randomness is only used
+#'   to perturb \code{Y0} when \code{X0} is \code{NULL} and by stochastic
+#'   optimizers. The seed is applied locally: the caller's random number stream
+#'   (\code{.Random.seed}) and \code{RNGkind()} are restored on exit. If
+#'   \code{NULL}, the ambient random number stream is used. Default is 42, so
+#'   the result is a deterministic function of the inputs.
 #' @param apply_nonneg Logical, if \code{TRUE}, enforces non-negativity on the solution
 #'   after retraction. Default is \code{TRUE}.
 #' @param optimizer Character string, optimization algorithm to use. The "fast" option 
@@ -4028,9 +4061,12 @@ nsa_flow <- function(
   symm <- function(A) (A + t(A)) / 2
 
   # --- Reproducibility ---
+  # Seed locally: the caller's .Random.seed and RNGkind() are restored on exit,
+  # so repeated calls (e.g. from simlr_sparseness inside every energy/gradient
+  # evaluation) neither reset the global stream nor change the RNG kind.
   if (!is.null(seed)) {
-    set.seed(seed)
-    RNGkind("Mersenne-Twister", "Inversion")
+    restore_rng <- .local_rng_seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion")
+    on.exit(restore_rng(), add = TRUE)
   }
   p <- nrow(Y0)
   k <- ncol(Y0)
@@ -4525,7 +4561,9 @@ nsa_flow_pca <- function(X, k,
   if (!is.finite(total_var) || total_var <= 0) stop("Input matrix X has zero or non-finite variance")
 
   # --- SVD init: Y is p x k ---
-  set.seed(1234)
+  # fixed seed for a reproducible init, without clobbering the caller's RNG
+  restore_rng <- .local_rng_seed(1234)
+  on.exit(restore_rng(), add = TRUE)
   Y = matrix(rnorm(p * k), nrow = p, ncol = k)
 #  sv <- svd(Xc, nu = 0, nv = k)
 #  Y <- sv$v
@@ -4789,7 +4827,9 @@ nsa_flow_pca_fa <- function(
   # sample covariance/correlation matrix used for FA objective
   Rmat <- XtX / n
   # --- initialization -------------------------------------------------------
-  set.seed(1234)
+  # fixed seed for a reproducible init, without clobbering the caller's RNG
+  restore_rng <- .local_rng_seed(1234)
+  on.exit(restore_rng(), add = TRUE)
   Y <- matrix(rnorm(p * k, sd = 0.1), nrow = p, ncol = k)
   energy_trace <- numeric(max_iter)
   best_Y <- Y

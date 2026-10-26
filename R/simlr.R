@@ -4057,7 +4057,8 @@ multiview_pca <- function(views, n_components, sparse = 0.5, max_iter = 100, spa
 antsr_random_features <- function(data_matrices, k, seed = 42) {
   stopifnot(is.list(data_matrices))
   stopifnot(all(sapply(data_matrices, is.matrix)))
-  set.seed(seed)
+  restore_rng <- .local_rng_seed(seed)
+  on.exit(restore_rng(), add = TRUE)
   plist = lapply(data_matrices, function(m) {
     nvox <- ncol(m)
     projection_matrix <- 

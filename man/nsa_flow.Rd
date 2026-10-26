@@ -42,8 +42,12 @@ and energy stability. Default is 1e-6.}
 
 \item{verbose}{Logical, if \code{TRUE}, prints iteration details. Default is \code{FALSE}.}
 
-\item{seed}{Integer, random seed for reproducibility. If \code{NULL}, no seed is set.
-Default is 42.}
+\item{seed}{Integer, random seed for reproducibility. Randomness is only used
+to perturb \code{Y0} when \code{X0} is \code{NULL} and by stochastic
+optimizers. The seed is applied locally: the caller's random number stream
+(\code{.Random.seed}) and \code{RNGkind()} are restored on exit. If
+\code{NULL}, the ambient random number stream is used. Default is 42, so
+the result is a deterministic function of the inputs.}
 
 \item{apply_nonneg}{Logical, if \code{TRUE}, enforces non-negativity on the solution
 after retraction. Default is \code{TRUE}.}
