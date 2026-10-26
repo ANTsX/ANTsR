@@ -1,6 +1,5 @@
 test_that("nsa_flow_torch recovers the target", {
-  skip_if_not_installed("reticulate")
-  skip_if_not(reticulate::py_module_available("torch"), "Python torch is not available")
+  skip_if_no_torch()
   set.seed(1)
   Y <- matrix(rnorm(1000), 100, 10)
   Xc <- matrix(rnorm(1000), 100, 10)
