@@ -76,6 +76,10 @@ preprocessRestingBOLD <- function(
   # do motion correction https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/
   framewiseDisplacement <- rep(0, numberOfTimePoints)
 
+  if (doMotionCorrection && denseFramewise) {
+    warning("denseFramewise = TRUE is not implemented; using the single-point framewise displacement")
+    denseFramewise <- FALSE
+  }
   if (doMotionCorrection) {
     # Reference image for motion correction
     motionCorrectionResults <- NA
@@ -91,6 +95,11 @@ preprocessRestingBOLD <- function(
         fixed = meanBoldFixedImageForMotionCorrection,
         moreaccurate = motionCorrectionAccuracyLevel
       )
+      # refine the reference with the motion-corrected average; otherwise
+      # every iteration repeats exactly the same registration
+      if (iter < motionCorrectionIterations) {
+        meanBoldFixedImageForMotionCorrection <- motionCorrectionResults$moco_avg_img
+      }
     }
 
     # Store motion correction parameters
@@ -127,9 +136,10 @@ preprocessRestingBOLD <- function(
           translationAtTime1
         transformedPointAtTime2 <- data.matrix(rotationMatrixAtTime2) %*% t(samplePoint) +
           translationAtTime2
-        framewiseDisplacement[i] <- dist(rbind(transformedPointAtTime2, transformedPointAtTime1))[[1]]
-      } else {
-
+        # euclidean distance between the two 3x1 points (rbind() of the
+        # column vectors gave a 6x1 matrix, so dist()[[1]] compared
+        # coordinates)
+        framewiseDisplacement[i] <- sqrt(sum((transformedPointAtTime2 - transformedPointAtTime1)^2))
       }
     }
     framewiseDisplacement[1] <- mean(framewiseDisplacement[2:numberOfTimePoints])
