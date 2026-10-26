@@ -54,6 +54,12 @@ for (dimension in c(2, 3)) {
       img <- make_test_image(dimension)
       index <- index_sets[[as.character(dimension)]][[nm]]
       expected <- manual_physical(img, index)
+      expectedIndex <- matrix(index, ncol = dimension)
+      # as in ANTsPy, a single point (vector) gives a vector
+      if (is.null(dim(index))) {
+        expected <- as.numeric(expected)
+        expectedIndex <- as.numeric(expectedIndex)
+      }
 
       pt <- antsTransformIndexToPhysicalPoint(img, index)
       expect_equal(dim(pt), dim(expected))
@@ -61,10 +67,25 @@ for (dimension in c(2, 3)) {
 
       back <- antsTransformPhysicalPointToIndex(img, pt)
       expect_equal(dim(back), dim(expected))
-      expect_equal(unname(back), matrix(index, ncol = dimension), tolerance = 1e-5)
+      expect_equal(unname(back), expectedIndex, tolerance = 1e-5)
     })
   }
 }
+
+test_that("single points match ANTsPy (0-based index + 1, vector output)", {
+  img <- make_test_image(3)
+  # ants.transform_index_to_physical_point(img, [1, 2, 3]) with the same
+  # origin, spacing and direction (0-based index in ANTsPy)
+  pyPoint <- c(-4.200962066650391, 12.080126762390137, 4.25)
+  pt <- antsTransformIndexToPhysicalPoint(img, c(1, 2, 3) + 1)
+  expect_null(dim(pt))
+  expect_equal(pt, pyPoint, tolerance = 1e-6)
+  # ants.transform_physical_point_to_index(img, pt + 0.3) (continuous, 0-based)
+  pyIndex <- c(1.273205041885376, 2.0439231395721436, 3.4000000953674316)
+  idx <- antsTransformPhysicalPointToIndex(img, pyPoint + 0.3)
+  expect_null(dim(idx))
+  expect_equal(idx - 1, pyIndex, tolerance = 1e-6)
+})
 
 test_that("index/point functions validate their input", {
   img <- make_test_image(2)
