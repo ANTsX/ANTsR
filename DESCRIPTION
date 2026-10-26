@@ -102,9 +102,7 @@ Suggests:
     DT,
     clue,
     progress,
-    forcats,
-    entropy,
-    spls
+    forcats
 LazyData: TRUE
 Additional_repositories: https://antsx.github.io/drat
 VignetteBuilder: knitr
