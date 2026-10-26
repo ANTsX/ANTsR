@@ -105,15 +105,21 @@ test_that("[] sets correct value", {
 })
 
 test_that("antsSetSpacing works", {
-  expect_true(antsSetSpacing(img, c(2, 3)) == 0)
+  # the setters modify the image in place and return NULL
+  antsSetSpacing(img, c(2, 3))
+  expect_equal(antsGetSpacing(img), c(2, 3))
 })
 
 test_that("antsSetOrigin works", {
-  expect_true(antsSetOrigin(img, c(4, 5)) == 0)
+  # the setters modify the image in place and return NULL
+  antsSetOrigin(img, c(4, 5))
+  expect_equal(antsGetOrigin(img), c(4, 5))
 })
 
 test_that("antsSetDirection works", {
-  expect_true(antsSetDirection(img, -diag(2)) == 0)
+  # the setters modify the image in place and return NULL
+  antsSetDirection(img, -diag(2))
+  expect_equal(antsGetDirection(img), -diag(2))
 })
 
 test_that("antsGetSpacing works", {
@@ -285,15 +291,21 @@ test_that("[] returns correct value", {
 })
 
 test_that("antsSetSpacing works on multichannel", {
-  expect_true(antsSetSpacing(mimg, c(2, 3)) == 0)
+  # the setters modify the image in place and return NULL
+  antsSetSpacing(mimg, c(2, 3))
+  expect_equal(antsGetSpacing(mimg), c(2, 3))
 })
 
 test_that("antsSetOrigin works on multichannel", {
-  expect_true(antsSetOrigin(mimg, c(4, 5)) == 0)
+  # the setters modify the image in place and return NULL
+  antsSetOrigin(mimg, c(4, 5))
+  expect_equal(antsGetOrigin(mimg), c(4, 5))
 })
 
 test_that("antsSetDirection works on multichannel", {
-  expect_true(antsSetDirection(mimg, -diag(2)) == 0)
+  # the setters modify the image in place and return NULL
+  antsSetDirection(mimg, -diag(2))
+  expect_equal(antsGetDirection(mimg), -diag(2))
 })
 
 test_that("antsGetSpacing works on multichannel", {
