@@ -3988,6 +3988,11 @@ nsa_flow <- function(
             cat(paste("Estimated initial learning rate:", initial_learning_rate, "\n"))
     }
   opt <- create_optimizer( optimizer, vmats = list(Y), learning_rate = lr )
+  # Start the best-energy tracker at the energy of the initial point so that
+  # the backtracking below also guards the first step (with best = Inf the
+  # first step was accepted unconditionally, however large).
+  best_total_energy <- nsa_energy(Y)
+  best_Y_iteration <- 0
   for (it in seq_len(max_iter)) {
     # --- Fidelity descent dir ---
     grad_fid <- fid_eta * (Y - X0) * (-1.0)

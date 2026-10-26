@@ -176,3 +176,14 @@ test_that("estimate_learning_rate_nsa searches along the descent direction", {
                                    plot = FALSE)$estimated_learning_rate
   expect_gt(lr, 1e-6)
 })
+
+test_that("nsa_flow never returns a point worse than its start", {
+  set.seed(8)
+  for (trial in 1:5) {
+    Y0 <- matrix(rnorm(100), 20, 5)
+    X0 <- pmax(Y0 + matrix(rnorm(100, sd = 0.05), 20, 5), 0)
+    e0 <- 0.5 * sum((pmax(Y0, 0) - X0)^2)
+    r <- nsa_flow(Y0, X0, w = 0, max_iter = 1)
+    expect_lte(0.5 * sum((r$Y - X0)^2), e0 + 1e-12)
+  }
+})
