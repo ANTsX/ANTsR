@@ -163,7 +163,7 @@ setMethod(
 setMethod(
   "==", signature(e1 = "antsImage", e2 = "array"),
   function(e1, e2) {
-    e2 <- as.antsImage(e2, reference = e1)
+    e2 <- .as_antsImage_keep_values(e2, reference = e1)
     res <- e1 == e2
     return(res)
   }
@@ -174,7 +174,7 @@ setMethod(
 setMethod(
   "==", signature(e1 = "array", e2 = "antsImage"),
   function(e1, e2) {
-    i1 <- as.antsImage(e1, reference = e2)
+    i1 <- .as_antsImage_keep_values(e1, reference = e2)
     return(i1 == e2)
   }
 )
@@ -252,7 +252,7 @@ setMethod(
 setMethod(
   ">", signature(e1 = "antsImage", e2 = "array"),
   function(e1, e2) {
-    e2 <- as.antsImage(e2, reference = e1)
+    e2 <- .as_antsImage_keep_values(e2, reference = e1)
     res <- e1 > e2
     return(res)
   }
@@ -263,7 +263,7 @@ setMethod(
 setMethod(
   ">", signature(e1 = "array", e2 = "antsImage"),
   function(e1, e2) {
-    i1 <- as.antsImage(e1, reference = e2)
+    i1 <- .as_antsImage_keep_values(e1, reference = e2)
     return(i1 > e2)
   }
 )
@@ -341,7 +341,7 @@ setMethod(
 setMethod(
   "<", signature(e1 = "antsImage", e2 = "array"),
   function(e1, e2) {
-    e2 <- as.antsImage(e2, reference = e1)
+    e2 <- .as_antsImage_keep_values(e2, reference = e1)
     res <- e1 < e2
     return(res)
   }
@@ -352,7 +352,7 @@ setMethod(
 setMethod(
   "<", signature(e1 = "array", e2 = "antsImage"),
   function(e1, e2) {
-    i1 <- as.antsImage(e1, reference = e2)
+    i1 <- .as_antsImage_keep_values(e1, reference = e2)
     return(i1 < e2)
   }
 )
@@ -430,7 +430,7 @@ setMethod(
 setMethod(
   "!=", signature(e1 = "antsImage", e2 = "array"),
   function(e1, e2) {
-    e2 <- as.antsImage(e2, reference = e1)
+    e2 <- .as_antsImage_keep_values(e2, reference = e1)
     res <- e1 != e2
     return(res)
   }
@@ -441,7 +441,7 @@ setMethod(
 setMethod(
   "!=", signature(e1 = "array", e2 = "antsImage"),
   function(e1, e2) {
-    i1 <- as.antsImage(e1, reference = e2)
+    i1 <- .as_antsImage_keep_values(e1, reference = e2)
     return(i1 != e2)
   }
 )
@@ -519,7 +519,7 @@ setMethod(
 setMethod(
   "<=", signature(e1 = "antsImage", e2 = "array"),
   function(e1, e2) {
-    e2 <- as.antsImage(e2, reference = e1)
+    e2 <- .as_antsImage_keep_values(e2, reference = e1)
     res <- e1 <= e2
     return(res)
   }
@@ -530,7 +530,7 @@ setMethod(
 setMethod(
   "<=", signature(e1 = "array", e2 = "antsImage"),
   function(e1, e2) {
-    i1 <- as.antsImage(e1, reference = e2)
+    i1 <- .as_antsImage_keep_values(e1, reference = e2)
     return(i1 <= e2)
   }
 )
@@ -608,7 +608,7 @@ setMethod(
 setMethod(
   ">=", signature(e1 = "antsImage", e2 = "array"),
   function(e1, e2) {
-    e2 <- as.antsImage(e2, reference = e1)
+    e2 <- .as_antsImage_keep_values(e2, reference = e1)
     res <- e1 >= e2
     return(res)
   }
@@ -619,7 +619,7 @@ setMethod(
 setMethod(
   ">=", signature(e1 = "array", e2 = "antsImage"),
   function(e1, e2) {
-    i1 <- as.antsImage(e1, reference = e2)
+    i1 <- .as_antsImage_keep_values(e1, reference = e2)
     return(i1 >= e2)
   }
 )

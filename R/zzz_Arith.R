@@ -295,7 +295,8 @@ setMethod(
     a1 <- as.array(e1)
 
     res <- callGeneric(a1)
-    res <- as.antsImage(res, reference = e1)
+    # keep values such as -1 representable (unsigned types would wrap)
+    res <- .as_antsImage_keep_values(res, reference = e1)
     return(res)
   }
 )
@@ -347,7 +348,7 @@ setMethod(
 setMethod(
   "Arith", signature(e1 = "antsImage", e2 = "array"),
   function(e1, e2) {
-    e2 <- as.antsImage(e2, reference = e1)
+    e2 <- .as_antsImage_keep_values(e2, reference = e1)
     res <- callGeneric(e1, e2)
     return(res)
   }
@@ -358,7 +359,7 @@ setMethod(
 setMethod(
   "Arith", signature(e1 = "array", e2 = "antsImage"),
   function(e1, e2) {
-    e1 <- as.antsImage(e1, reference = e2)
+    e1 <- .as_antsImage_keep_values(e1, reference = e2)
     res <- callGeneric(e1, e2)
     return(res)
   }
@@ -385,3 +386,19 @@ setMethod(
     stop("antsRegions not done yet!")
   }
 )
+
+# Convert an array to an antsImage sharing the header of `reference` while
+# keeping the array's values: unlike as.antsImage(x, reference = reference),
+# the reference pixeltype is not adopted (that truncates, e.g. 0.5 -> 0 for an
+# unsigned char reference); double stays double, everything else is float.
+.as_antsImage_keep_values <- function(object, reference) {
+  pixeltype <- if (reference@pixeltype == "double") "double" else "float"
+  ndim <- length(dim(object))
+  return(ANTsRCore::antsImage_asantsImage(
+    object, pixeltype,
+    antsGetSpacing(reference)[seq_len(ndim)],
+    antsGetOrigin(reference)[seq_len(ndim)],
+    antsGetDirection(reference),
+    (reference@components > 1)
+  ))
+}
