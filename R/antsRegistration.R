@@ -272,7 +272,7 @@ antsRegistration <- function(
   args <- list(fixed, moving, typeofTransform, outprefix, ...)
   myfAff <- "6x4x2x1"
   mysAff <- "3x2x1x0"
-  metsam <- 0.2
+  metsam <- samplingPercentage
   myiterations <- "2100x1200x1200x10"
   if (!missing(affIterations)) {
     myiterations <- paste0(affIterations, collapse = "x")
@@ -304,7 +304,9 @@ antsRegistration <- function(
   }
   if (typeofTransform == "DenseRigid") {
     typeofTransform <- "Rigid"
-    metsam <- 0.8
+    if (missing(samplingPercentage)) {
+      metsam <- 0.8
+    }
   }
   if (typeofTransform == "BOLDRigid") {
     typeofTransform <- "Rigid"
@@ -884,7 +886,7 @@ antsRegistration <- function(
 
         if (doQuick == TRUE && doRepro == TRUE) {
           synConvergence <- "[100x70x50x0,1e-6,10]"
-          synMetric <- paste0("CC[", f, ",", m, ",1", metricParameter, "]")
+          synMetric <- paste0("CC[", f, ",", m, ",1,", metricParameter, "]")
         }
 
         rigidStage <- list(
@@ -896,7 +898,7 @@ antsRegistration <- function(
         )
 
         affineStage <- list(
-          "--transform", "Affine[", linearGradientStep, "]",
+          "--transform", paste0("Affine[", linearGradientStep, "]"),
           "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", samplingPercentage, "]"),
           "--convergence", affineConvergence,
           "--shrink-factors", affineShrinkFactors,
