@@ -268,6 +268,33 @@ test_that("extractImagePatches -> reconstructImageFromPatches round-trips", {
   }
 })
 
+test_that("reconstructImageFromPatches averages overlaps with a mask domain", {
+  set.seed(5)
+  for (sz in list(c(8, 9), c(7, 6, 5))) {
+    ps <- rep(3, length(sz))
+    img <- as.antsImage(array(rnorm(prod(sz)), sz))
+    patches <- extractImagePatches(img, ps, "all", 1)
+    # stride-1 overlaps are averaged (as ANTsPy's count_array), not summed
+    full <- as.antsImage(array(1, sz))
+    recon <- reconstructImageFromPatches(patches, full, 1, domainImageIsMask = TRUE)
+    expect_equal(as.array(recon), as.array(img), tolerance = 1e-5)
+
+    # only patches whose middle voxel is in the mask are supplied
+    maskArray <- array(0, sz)
+    if (length(sz) == 2) maskArray[3:6, 2:5] <- 1 else maskArray[3:5, 2:4, 2:3] <- 1
+    # patch start indices in extraction order (last index fastest)
+    starts <- as.matrix(rev(expand.grid(lapply(rev(sz - ps + 1), seq_len))))
+    mid <- starts + matrix(round(ps / 2) - 1, nrow(starts), length(sz), byrow = TRUE)
+    keep <- maskArray[mid] == 1
+    recon <- reconstructImageFromPatches(patches[keep], as.antsImage(maskArray), 1,
+      domainImageIsMask = TRUE
+    )
+    covered <- as.array(recon) != 0
+    expect_equal(as.array(recon)[covered], as.array(img)[covered], tolerance = 1e-5)
+    expect_true(all(covered[maskArray == 1]))
+  }
+})
+
 test_that("labelImageRegistration uses every label of every pair", {
   makeLabels <- function(shift) {
     a <- matrix(0, 16, 16)

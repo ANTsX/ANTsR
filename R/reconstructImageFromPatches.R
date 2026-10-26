@@ -77,6 +77,9 @@ reconstructImageFromPatches <- function( patches, domainImage,
     maskArray[maskArray != 0] <- 1
     }
 
+  # number of patches added at each voxel (cf. count_array in ANTsPy)
+  countArray <- array( 0, dim = imageSize )
+
   count <- 1
   if( dimensionality == 2 )
     {
@@ -122,28 +125,13 @@ reconstructImageFromPatches <- function( patches, domainImage,
             imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],] <-
               imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],, drop = FALSE] +
               patch
+            countArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2]] <-
+              countArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2]] + 1
             count <- count + 1
             }
           }
         }
-      if( !domainImageIsMask )
-        {
-        for( i in seq_len( imageSize[1] ) )
-          {
-          for( j in seq_len( imageSize[2] ) )
-            {
-            # number of patches covering voxel (i, j)
-            factor <- min( i, patchSize[1], imageSize[1] - i + 1,
-                imageSize[1] - patchSize[1] + 1 ) *
-              min( j, patchSize[2], imageSize[2] - j + 1,
-                imageSize[2] - patchSize[2] + 1 )
-
-            imageArray[i, j,] <- imageArray[i, j,] / factor
-            }
-          }
-        }
       } else {
-      countArray <- array( 0, dim = dim( imageArray )[1:dimensionality] )
       for( i in seq.int( from = 1, to = imageSize[1] - patchSize[1] + 1,
         by = strideLengthVector[1] ) )
         {
@@ -180,11 +168,11 @@ reconstructImageFromPatches <- function( patches, domainImage,
           count <- count + 1
           }
         }
-      countArray[which( countArray == 0 )] <- 1
-      for( i in seq_len( numberOfImageComponents ) )
-        {
-        imageArray[,, i] <- imageArray[,, i] / countArray
-        }
+      }
+    countArray[which( countArray == 0 )] <- 1
+    for( i in seq_len( numberOfImageComponents ) )
+      {
+      imageArray[,, i] <- imageArray[,, i] / countArray
       }
     } else {
     if( all( strideLengthVector == 1 ) )
@@ -233,35 +221,16 @@ reconstructImageFromPatches <- function( patches, domainImage,
                 imageArray[startIndex[1]:endIndex[1],
                   startIndex[2]:endIndex[2], startIndex[3]:endIndex[3],, drop = FALSE] +
                 patch
+              countArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],
+                startIndex[3]:endIndex[3]] <-
+                countArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],
+                  startIndex[3]:endIndex[3]] + 1
               count <- count + 1
               }
             }
           }
         }
-
-      if( !domainImageIsMask )
-        {
-        for( i in seq_len( imageSize[1] ) )
-          {
-          for( j in seq_len( imageSize[2] ) )
-            {
-            for( k in seq_len( imageSize[3] ) )
-              {
-              # number of patches covering voxel (i, j, k)
-              factor <- min( i, patchSize[1], imageSize[1] - i + 1,
-                  imageSize[1] - patchSize[1] + 1 ) *
-                min( j, patchSize[2], imageSize[2] - j + 1,
-                  imageSize[2] - patchSize[2] + 1 ) *
-                min( k, patchSize[3], imageSize[3] - k + 1,
-                  imageSize[3] - patchSize[3] + 1 )
-
-              imageArray[i, j, k,] <- imageArray[i, j, k,] / factor
-              }
-            }
-          }
-        }
       } else {
-      countArray <- array( 0, dim = dim( imageArray )[1:dimensionality] )
       for( i in seq.int( from = 1, to = imageSize[1] - patchSize[1] + 1,
         by = strideLengthVector[1] ) )
         {
@@ -304,11 +273,11 @@ reconstructImageFromPatches <- function( patches, domainImage,
             }
           }
         }
-      countArray[which( countArray == 0 )] <- 1
-      for( i in seq_len( numberOfImageComponents ) )
-        {
-        imageArray[,,, i] <- imageArray[,,, i] / countArray
-        }
+      }
+    countArray[which( countArray == 0 )] <- 1
+    for( i in seq_len( numberOfImageComponents ) )
+      {
+      imageArray[,,, i] <- imageArray[,,, i] / countArray
       }
     }
 
