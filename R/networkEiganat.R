@@ -176,7 +176,7 @@ networkEiganat <- function(
   myrecon <- (u %*% t(v))
   b <- apply(X, FUN = mean, MARGIN = 1) - apply(myrecon, FUN = mean, MARGIN = 1)
   imglist <- list()
-  if (!is.na(mask)) {
+  if (inherits(mask, "antsImage")) {
     for (j in 1:ncol(v)) {
       img <- antsImageClone(mask)
       img[mask > 0.5] <- v[, j]
@@ -245,7 +245,7 @@ lowrankRowMatrix <- function(A, k = 2, faster = FALSE) {
   }
   v <- vin
   v <- v * sign(.eanatcolMaxs(v))
-  if (inherits(v, "antsImage") & !is.na(mask)) {
+  if (inherits(v, "antsImage") && inherits(mask, "antsImage")) {
     v <- as.matrix(vin[mask > 1e-05])
   }
   v <- as.matrix(v)
@@ -286,7 +286,7 @@ lowrankRowMatrix <- function(A, k = 2, faster = FALSE) {
     if (verbose) {
       print(paste(sparsev))
     }
-    if (!is.na(mask)) {
+    if (inherits(mask, "antsImage")) {
       vecimg <- antsImageClone(mask)
       vecimg[mask > 0] <- sparsev
       temp <- antsImageClone(mask)
