@@ -386,8 +386,8 @@ generateAifMaskImage <- function(
     count <- count + 1
   }
 
-  deletedColumns <- seq.int(from = count, to = nrow(fittingResults), by = 1)
-  fittingResults <- fittingResults[-deletedColumns, ]
+  # keep only the filled rows (seq.int(count, nrow) errors when all survive)
+  fittingResults <- fittingResults[seq_len(count - 1), , drop = FALSE]
 
   if (nrow(fittingResults) == 0) {
     warning("Empty results.  No voxels survived criteria.")
@@ -396,7 +396,9 @@ generateAifMaskImage <- function(
 
   # We sort the remaining voxels by the scale of the fitted model and
   # choose the voxel with the highest scale.
-  fittingResults <- fittingResults[order(fittingResults$GaussianFitScale), ]
+  fittingResults <- fittingResults[order(fittingResults$GaussianFitScale,
+    decreasing = TRUE
+  ), ]
 
   aifMatrix <- matrix(voiPerfusionMatrix[1, ], nrow = 1) * 0
   aifMatrix[1, fittingResults$Index[1]] <- 1
