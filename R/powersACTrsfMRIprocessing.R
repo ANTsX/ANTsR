@@ -301,7 +301,7 @@ fMRINormalization <- function(
   dvars <- computeDVARS(timeseries2matrix(fusedImg, mask))
 
   ## ----badtimes,message=FALSE,warnings=FALSE, fig.width=7, fig.height=3----
-  goodtimes <- (1:nrow(moco$moco_img))
+  goodtimes <- (1:dim(moco$moco_img)[4]) # time is the 4th dimension
   badtimes <- which(moco$fd$MeanDisplacement > fdthresh)
   haveBadTimes <- FALSE
   if (length(badtimes) > 0) {
