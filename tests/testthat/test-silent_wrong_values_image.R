@@ -215,3 +215,13 @@ test_that("rfSegmentation returns label values, not factor codes", {
   pred <- rfSegmentationPredict(rf$rfModel, fmat, mask)
   expect_equal(as.array(pred), lab)
 })
+
+test_that("sparseDecom verbose does not overwrite varex", {
+  set.seed(1)
+  mat <- replicate(30, rnorm(20))
+  quiet <- sparseDecom(mat, nvecs = 2)
+  capture.output(loud <- sparseDecom(mat, nvecs = 2, verbose = TRUE))
+  expect_equal(length(loud$varex), length(quiet$varex))
+  expect_true("meanReconstructionCorrelation" %in% names(loud))
+  expect_true("Reconstruction" %in% names(loud))
+})
