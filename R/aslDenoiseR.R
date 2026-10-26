@@ -216,15 +216,18 @@ aslDenoiseR <- function(
     scl <- 1.05
   }
   mxt <- scl * max(R2summary, na.rm = T)
-  bestn <- maxnoisepreds[which(R2summary > mxt)[1]]
+  # R2summary / R2perNoiseLevel are indexed by position in maxnoisepreds,
+  # not by the number of noise predictors
+  bestind <- which(R2summary > mxt)[1]
+  bestn <- maxnoisepreds[bestind]
   if (ct == 2) {
     R2final <- R2perNoiseLevel
   }
   if (ct > 2) {
-    R2final <- R2perNoiseLevel[, bestn - min(maxnoisepreds) + 1]
+    R2final <- R2perNoiseLevel[, bestind]
   }
   return(list(
-    n = bestn, R2atBestN = R2summary[bestn], noisepool = noisepool, R2base = R2base,
+    n = bestn, R2atBestN = R2summary[bestind], noisepool = noisepool, R2base = R2base,
     R2final = R2final, noiseu = noiseu[, 1:bestn],
     covariates = covariates
   ))
