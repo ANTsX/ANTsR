@@ -91,7 +91,7 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
       if (is.na(compose)) {
         args <- list(
           d = fixed@dimension, i = m, o = wmo,
-          r = f, n = interpolator, unlist(mytx)
+          r = f, n = interpolator, unlist(mytx), ...
         )
       }
       tfn <- paste(compose, "comptx.nii.gz", sep = "")
@@ -99,7 +99,7 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
         mycompo <- paste("[", tfn, ",1]", sep = "")
         args <- list(
           d = fixed@dimension, i = m, o = mycompo,
-          r = f, n = interpolator, unlist(mytx)
+          r = f, n = interpolator, unlist(mytx), ...
         )
       }
       myargs <- .int_antsProcessArguments(c(args))

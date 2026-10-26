@@ -333,3 +333,13 @@ test_that("jointLabelFusion honors usecor and needs >= 2 atlases", {
     "at least 2 atlases"
   )
 })
+
+test_that("resampleImageToTarget passes ... to antsApplyTransforms", {
+  img <- as.antsImage(matrix(1, 4, 4))
+  tgt <- as.antsImage(matrix(0, 8, 8))
+  expected <- matrix(7, 8, 8)
+  expected[1:4, 1:4] <- 1
+  expect_equal(as.array(resampleImageToTarget(img, tgt, f = 7)), expected)
+  expected[expected == 7] <- 0
+  expect_equal(as.array(resampleImageToTarget(img, tgt)), expected)
+})
