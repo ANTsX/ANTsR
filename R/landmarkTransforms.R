@@ -84,9 +84,10 @@ fitTransformToPairedPoints <- function(
     P <- svdX$u %*% diag(svdX$d) %*% t(svdX$u)
     Z <- svdX$u %*% t(svdX$v)
     if (det(Z) < 0) {
-      D <- diag(nrow(X))
-      D[1, 1] <- -1.0
-      Z <- Z %*% D
+      # as ANTsPy: flip the last (smallest singular value) column of U
+      uPrime <- svdX$u
+      uPrime[, ncol(uPrime)] <- -uPrime[, ncol(uPrime)]
+      Z <- uPrime %*% t(svdX$v)
     }
     return(list(P = P, Z = Z, Xtilde = P %*% Z))
   }

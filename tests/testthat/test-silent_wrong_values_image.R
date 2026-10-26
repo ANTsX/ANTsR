@@ -122,16 +122,57 @@ test_that("rigid landmark fit handles reflections (Kabsch)", {
   expect_lte(residual(A), residual(kabsch) + 1e-4)
 })
 
-test_that("time-varying landmark fit returns a non-identity inverse", {
-  tx <- createAntsrTransform(type = "AffineTransform", dimension = 2)
+test_that("affine landmark fit flips the smallest singular direction (ANTsPy)", {
+  set.seed(1)
+  x <- matrix(rnorm(60), 20, 3)
+  y <- x %*% diag(c(1, 1, -1)) + matrix(rnorm(60, sd = 0.05), 20, 3)
+  xfrm <- fitTransformToPairedPoints(y, x, transformType = "affine")
+  A <- matrix(getAntsrTransformParameters(xfrm)[1:9], 3, 3, byrow = TRUE)
+  # ants.polar_decomposition: Xtilde = U diag(d) diag(1, 1, -1) V^T
+  xc <- sweep(x, 2, colMeans(x))
+  yc <- sweep(y, 2, colMeans(y))
+  X <- t(qr.solve(cbind(xc, 1), yc)[1:3, ])
+  s <- svd(X)
+  expect_equal(A, s$u %*% diag(s$d * c(1, 1, -1)) %*% t(s$v), tolerance = 1e-4)
+  # values from ANTsPy 0.6.3 fit_transform_to_paired_points on the same points
+  expect_equal(A[1, ], c(0.133950, -0.511184, 0.835491), tolerance = 1e-4)
+})
+
+test_that("applyAntsrTransformToPoint treats matrix rows as points", {
+  tx <- createAntsrTransform(type = "AffineTransform", dimension = 2, translation = c(1, 2))
   pts <- matrix(c(1, 2, 3, 4, 5, 6), ncol = 2)
-  skip_if_not(
-    is.matrix(applyAntsrTransformToPoint(tx, pts)),
-    "applyAntsrTransformToPoint does not handle point matrices"
-  )
+  expected <- sweep(pts, 2, c(1, 2), "+")
+  expect_equal(applyAntsrTransformToPoint(tx, pts), expected)
+  expect_equal(applyAntsrTransformToPoint(tx, c(1, 4)), c(2, 6))
+  expect_equal(applyAntsrTransform(tx, pts), expected)
+  expect_equal(applyAntsrTransform(tx, c(1, 4)), c(2, 6))
+  expect_equal(applyAntsrTransformToVector(tx, pts), pts)
+  expect_equal(applyAntsrTransform(tx, c(1, 4), dataType = "vector"), c(1, 4))
+})
+
+test_that("composeDisplacementFields gives w(x) + d(x + w(x)) as ANTsPy", {
+  set.seed(6)
+  makeField <- function() {
+    a <- array(rnorm(2 * 24 * 24), c(2, 24, 24))
+    smoothImage(as.antsImage(a, components = TRUE), 2) * 10
+  }
+  d <- makeField()
+  w <- makeField()
+  comp <- composeDisplacementFields(d, w)
+  txD <- createAntsrTransform(type = "DisplacementFieldTransform", displacement.field = d)
+  txW <- createAntsrTransform(type = "DisplacementFieldTransform", displacement.field = w)
+  p <- c(11, 13)
+  expected <- applyAntsrTransformToPoint(txD, applyAntsrTransformToPoint(txW, p)) - p
+  expect_equal(as.array(comp)[, 12, 14], expected, tolerance = 1e-4)
+})
+
+test_that("dense landmark fits run and match their targets", {
   dom <- makeImage(c(32, 32), 0)
   fixed <- unname(as.matrix(expand.grid(c(10, 16, 22), c(10, 16, 22))))
   moving <- fixed + 2
+  # ANTsPy 0.6.3 on the same points (fit_transform_to_paired_points):
+  #   tv: forward error 0.0657, inverse error 0.0764
+  #   diffeo: forward error 0.0020; syn: forward 0.00016, inverse 0.00014
   xf <- fitTransformToPairedPoints(moving, fixed,
     transformType = "tv",
     domainImage = dom, numberOfCompositions = 10, numberOfTimeSteps = 3,
@@ -139,8 +180,21 @@ test_that("time-varying landmark fit returns a non-identity inverse", {
   )
   fw <- applyAntsrTransformToPoint(xf$forwardTransform, fixed)
   iv <- applyAntsrTransformToPoint(xf$inverseTransform, moving)
-  expect_lt(mean(abs(fw - moving)), 0.5)
-  expect_lt(mean(abs(iv - fixed)), 0.5)
+  expect_equal(mean(abs(fw - moving)), 0.0657, tolerance = 0.01)
+  expect_equal(mean(abs(iv - fixed)), 0.0764, tolerance = 0.01)
+
+  xd <- fitTransformToPairedPoints(moving, fixed,
+    transformType = "diffeo",
+    domainImage = dom, meshSize = 4, numberOfFittingLevels = 3
+  )
+  expect_lt(mean(abs(applyAntsrTransformToPoint(xd, fixed) - moving)), 0.01)
+
+  xs <- fitTransformToPairedPoints(moving, fixed,
+    transformType = "syn",
+    domainImage = dom, meshSize = 4, numberOfFittingLevels = 3
+  )
+  expect_lt(mean(abs(applyAntsrTransformToPoint(xs$forwardTransform, fixed) - moving)), 0.01)
+  expect_lt(mean(abs(applyAntsrTransformToPoint(xs$inverseTransform, moving) - fixed)), 0.01)
 })
 
 test_that("antsApplyTransformsToPoints honors whichtoinvert", {
