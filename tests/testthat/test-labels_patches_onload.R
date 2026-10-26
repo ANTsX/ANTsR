@@ -69,6 +69,40 @@ test_that("extractImagePatchCoordinates 'all' matches extractImagePatches", {
   }
 })
 
+test_that("masked patches are centered on a masked voxel (as in ANTsPy)", {
+  img <- as.antsImage(array(as.numeric(1:144), c(12, 12)))
+  arr <- as.array(img)
+  for (p in 2:7) {
+    # patch center offset from the corner, as in ANTsPy:
+    # round(0.5 * patch_size) - 1
+    off <- round(p / 2) - 1
+    for (v in list(c(6, 6), c(1 + off, 1 + off), c(12 - p + 1 + off, 12 - p + 1 + off))) {
+      m <- array(0, c(12, 12))
+      m[v[1], v[2]] <- 1
+      mask <- as.antsImage(m)
+      pa <- extractImagePatches(img, c(p, p), 1, maskImage = mask)
+      expect_length(pa, 1)
+      expect_equal(dim(pa[[1]]), c(p, p))
+      expect_equal(pa[[1]][off + 1, off + 1], arr[v[1], v[2]], info = p)
+      co <- extractImagePatchCoordinates(img, c(p, p), 1,
+        maskImage = mask, physicalCoordinates = FALSE
+      )
+      expect_equal(as.vector(co), v - off, info = p)
+      cc <- extractImagePatchCoordinates(img, c(p, p), 1,
+        maskImage = mask, physicalCoordinates = FALSE,
+        cornerCoordinates = FALSE
+      )
+      expect_equal(as.vector(cc), v, info = p)
+    }
+    # a masked voxel too close to the edge for a full patch is skipped
+    m <- array(0, c(12, 12))
+    m[12 - p + 2 + off, 6] <- 1
+    expect_length(
+      extractImagePatches(img, c(p, p), 1, maskImage = as.antsImage(m)), 0
+    )
+  }
+})
+
 test_that("sparseDecomboot runs with a mask", {
   set.seed(1)
   mask <- makeImage(c(4, 4), 1)
