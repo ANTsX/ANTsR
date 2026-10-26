@@ -46,6 +46,8 @@
 #' @param writeCompositeTransform if \code{TRUE}, will write transformations to h5 format.  Defaults to FALSE.
 #' @param samplingPercentage value between zero and one that allows the percentage
 #' of points sampled to be controlled in low-dimensional metric estimation.
+#' If not given, \code{"DenseRigid"} uses 1.0 and the linear stages of
+#' \code{"SyNabp"} and \code{"antsRegistrationSyN*"} use 0.25, as in ANTsPy.
 #' @param verbose request verbose output (useful for debugging)
 #' @param printArgs print raw command line (useful for debugging)
 #' @param ... additional options see antsRegistration in ANTs
@@ -304,8 +306,9 @@ antsRegistration <- function(
   }
   if (typeofTransform == "DenseRigid") {
     typeofTransform <- "Rigid"
+    # as ANTsPy (aff_random_sampling_rate = 1.0)
     if (missing(samplingPercentage)) {
-      metsam <- 0.8
+      metsam <- 1.0
     }
   }
   if (typeofTransform == "BOLDRigid") {
@@ -677,13 +680,15 @@ antsRegistration <- function(
       }
 
       if (typeofTransform == "SyNabp") {
+        # ANTsPy uses a fixed sampling rate of 0.25 here
+        abpSampling <- if (missing(samplingPercentage)) 0.25 else samplingPercentage
         args <- list(
           "-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,", samplingPercentage, "]", sep = ""),
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,", abpSampling, "]", sep = ""),
           "-t", "Rigid[0.1]", "-c", "1000x500x250x100", "-s", "4x2x1x0",
           "-f", "8x4x2x1",
           "-x", earlyMaskOption,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,", samplingPercentage, "]", sep = ""),
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,", abpSampling, "]", sep = ""),
           "-t", "Affine[0.1]", "-c", "1000x500x250x100", "-s", "4x2x1x0",
           "-f", "8x4x2x1",
           "-x", earlyMaskOption,
@@ -811,12 +816,22 @@ antsRegistration <- function(
           doQuick <- TRUE
         }
 
+        doRepro <- FALSE
+        if (grepl("Repro", typeofTransform)) {
+          doRepro <- TRUE
+        }
+
         subtypeOfTransform <- "s"
         splineDistance <- 26
+        # as ANTsPy / antsRegistrationSyNQuick.sh: MI (32 bins) for Quick,
+        # otherwise (including QuickRepro) CC with radius 2
         metricParameter <- 2
-        if (doQuick) {
+        if (doQuick && !doRepro) {
           metricParameter <- 32
         }
+        # linear stages sample 25% of the points unless samplingPercentage
+        # is given (ANTsPy: "Regular,0.25")
+        linearSampling <- if (missing(samplingPercentage)) 0.25 else samplingPercentage
         linearGradientStep <- 0.1
         synGradientStep <- 0.2
 
@@ -840,11 +855,6 @@ antsRegistration <- function(
           }
         }
 
-
-        doRepro <- FALSE
-        if (grepl("Repro", typeofTransform)) {
-          doRepro <- TRUE
-        }
 
         if (doQuick == TRUE) {
           rigidConvergence <- "[1000x500x250x0,1e-6,10]"
@@ -891,7 +901,7 @@ antsRegistration <- function(
 
         rigidStage <- list(
           "--transform", paste0(tx, "[", linearGradientStep, "]"),
-          "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", samplingPercentage, "]"),
+          "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", linearSampling, "]"),
           "--convergence", rigidConvergence,
           "--shrink-factors", rigidShrinkFactors,
           "--smoothing-sigmas", rigidSmoothingSigmas
@@ -899,7 +909,7 @@ antsRegistration <- function(
 
         affineStage <- list(
           "--transform", paste0("Affine[", linearGradientStep, "]"),
-          "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", samplingPercentage, "]"),
+          "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", linearSampling, "]"),
           "--convergence", affineConvergence,
           "--shrink-factors", affineShrinkFactors,
           "--smoothing-sigmas", affineSmoothingSigmas

@@ -19,25 +19,29 @@ test_that("antsRegistration linear transforms honor samplingPercentage", {
     expect_true(grepl("regular,0.9]", out, fixed = TRUE), info = tx)
     expect_false(grepl("regular,0.2]", out, fixed = TRUE), info = tx)
   }
-  # DenseRigid keeps its denser default when samplingPercentage is not given
+  # DenseRigid samples densely (1.0, as ANTsPy) when samplingPercentage is not given
   out <- capture.output(suppressMessages(
     antsRegistration(imgs$f, imgs$m, "DenseRigid",
       affIterations = c(2, 1), printArgs = TRUE
     )
   ))
-  expect_true(grepl("regular,0.8]", paste(out, collapse = " "), fixed = TRUE))
+  expect_true(grepl("regular,1]", paste(out, collapse = " "), fixed = TRUE))
 })
 
 test_that("antsRegistrationSyN metric/transform strings are well formed", {
   imgs <- .small_reg_images()
   out <- capture.output(suppressMessages(
-    antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuickRepro[bo]",
+    antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuickRepro[b]",
       printArgs = TRUE
     )
   ))
   out <- paste(out, collapse = " ")
-  expect_true(grepl("CC\\[[^],]+,[^],]+,1,32\\]", out))
+  # QuickRepro uses CC with radius 2 (ANTsPy registration(), do_repro)
+  expect_true(grepl("CC\\[[^],]+,[^],]+,1,2\\]", out))
   expect_false(grepl(",132]", out, fixed = TRUE))
+  expect_false(grepl(",1,32]", out, fixed = TRUE))
+  # linear stages sample 0.25 by default, as ANTsPy / antsRegistrationSyN.sh
+  expect_true(grepl("GC\\[[^]]+,1,1,regular,0.25\\]", out))
 
   out <- capture.output(suppressMessages(
     antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuick[a]",
@@ -46,6 +50,14 @@ test_that("antsRegistrationSyN metric/transform strings are well formed", {
   ))
   out <- paste(out, collapse = " ")
   expect_true(grepl("--transform Affine[0.1] ", out, fixed = TRUE))
+  expect_true(grepl("MI\\[[^]]+,1,32,regular,0.25\\]", out))
+  # an explicit samplingPercentage is still honored
+  out <- capture.output(suppressMessages(
+    antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuick[a]",
+      samplingPercentage = 0.6, printArgs = TRUE
+    )
+  ))
+  expect_true(grepl("MI\\[[^]]+,1,32,regular,0.6\\]", paste(out, collapse = " ")))
 })
 
 test_that("maskImage binarizes with a scalar level", {
