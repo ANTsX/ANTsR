@@ -369,6 +369,8 @@ test_that("labelImageRegistration uses every label of every pair", {
   out <- paste(out, collapse = " ")
   # 2 pairs x 2 labels
   expect_equal(lengths(regmatches(out, gregexpr("MSQ[", out, fixed = TRUE))), 4)
+  # convergence string as in ANTsPy label_image_registration
+  expect_true(grepl("--convergence [2x0,1e-6,10]", out, fixed = TRUE))
 
   # randomSeed is appended instead of replacing all arguments
   out <- capture.output(suppressMessages(

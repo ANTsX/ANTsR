@@ -291,7 +291,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       intensityMetric <- typeOfDeformableTransform[[3]]
       intensityMetricParameter <- typeOfDeformableTransform[[4]]
 
-      synConvergence <- paste( typeOfDeformableTransform[[5]], collapse = 'x')
+      synConvergence <- paste0( "[",
+        paste( typeOfDeformableTransform[[5]], collapse = 'x' ), ",1e-6,10]" )
 
       synSmoothingSigmas <- paste( typeOfDeformableTransform[[6]], collapse = 'x')
       synSmoothingSigmas <- paste0( synSmoothingSigmas, "vox")
@@ -369,7 +370,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       } else {
       synTransformComplete <- list( "--transform", paste0("BSplineSyN[", gradientStep, ",", splineDistance, ",0,3]" ) )
       }
-    synStage <- lappend( synStage, synTransformComplete )    
+    # the transform precedes its metrics, as in ANTsPy
+    synStage <- lappend( synTransformComplete, synStage )
 
     args <- list(
       "-d", as.character( imageDimension ),
