@@ -177,3 +177,25 @@ test_that("cropImageFromCenterPoint centers the patch on the point", {
   p <- as.array(cropImageFromCenterPoint(ramp, center, c(7, 7)))
   expect_equal(p[, 4], 7:13)
 })
+
+test_that("segmentationRefinement.predict uses a 0.5 background row", {
+  skip_if_not_installed("xgboost")
+  seg <- matrix(0, 10, 10)
+  seg[4:7, 4:7] <- 1
+  segImg <- as.antsImage(seg)
+  feat <- as.antsImage(matrix(rnorm(100), 10, 10))
+  # fake model: same probability for every (FP, FN, TN, TP) class
+  registerS3method("predict", "fakeRefinementModel", function(object, newdata, ...) {
+    rep(object$p, 4 * nrow(newdata))
+  })
+  run <- function(p) {
+    model <- structure(list(p = p), class = "fakeRefinementModel")
+    suppressMessages(segmentationRefinement.predict(segImg, 1, list(model),
+      list(feat), "T1",
+      dilationRadius = 1
+    ))$RefinedSegmentationImage
+  }
+  # foreground probability below 0.5 -> background
+  expect_true(all(as.array(run(0.3)) == 0))
+  expect_true(all(as.array(run(0.9))[seg == 1] == 1))
+})

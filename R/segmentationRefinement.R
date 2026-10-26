@@ -749,8 +749,8 @@ segmentationRefinement.predict <- function(
 
   segmentationArray <- as.array(segmentationImage)
 
-  # we add a row of zeros to use with max.col to
-  # stand in for a '0' label (i.e. background)
+  # we add a row of 0.5s to use with max.col to
+  # stand in for a '0' label (i.e. background) when no label has p > 0.5
   foregroundProbabilitiesPerLabel <- matrix()
   if (!is.element(0, labelSet)) {
     foregroundProbabilitiesPerLabel <-
@@ -758,7 +758,7 @@ segmentationRefinement.predict <- function(
         nrow = length(labelSet) + 1,
         ncol = length(as.array(segmentationImage))
       )
-    foregroundProbabilitiesPerLabel[, length(labelSet) + 1] <- 0.5
+    foregroundProbabilitiesPerLabel[length(labelSet) + 1, ] <- 0.5
   } else {
     foregroundProbabilitiesPerLabel <-
       matrix(0,
