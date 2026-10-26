@@ -83,8 +83,9 @@ aslCensoring <- function(asl, mask = NULL, nuis = NA, method = "outlier",
     robvals <- mat * 0
     vox <- 1
     ct <- 0
-    visitvals <- (skip:floor((ncol(mat) - 1) / skip)) * skip
-    if (skip == 1) {
+    if (skip > 1 && ncol(mat) >= skip) {
+      visitvals <- seq(skip, ncol(mat), by = skip)
+    } else {
       visitvals <- 1:ncol(mat)
     }
     rgw <- regweights
@@ -207,8 +208,8 @@ aslCensoring <- function(asl, mask = NULL, nuis = NA, method = "outlier",
   ts <- timeseries2matrix(asl, mask)
 
   if (method == "robust") {
-    if (!usePkg("robust")) {
-      print("Need robust package")
+    if (!usePkg("robustbase")) {
+      print("Need robustbase package")
       return(NULL)
     }
     xideal <- (rep(
