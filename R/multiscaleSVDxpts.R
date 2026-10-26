@@ -2919,12 +2919,30 @@ mild <- function(dataFrame, voxmats, basisK,
 }
 
 
+#' Calculate the invariant orthogonality defect
+#'
+#' Scale-invariant measure of how far the columns of \code{A} are from being
+#' mutually orthogonal: the sum of squared off-diagonal entries of
+#' \code{crossprod(A)}, divided by \code{||A||_F^4}. Equivalently, the
+#' off-diagonal energy of \code{crossprod(A / ||A||_F)}. The result satisfies
+#' \code{invariant_orthogonality_defect(c * A) == invariant_orthogonality_defect(A)}
+#' for any nonzero scalar \code{c}, and is 0 for a zero matrix.
+#'
+#' @param A input matrix
+#' @return a non-negative scalar
+#' @seealso \code{\link{gradient_invariant_orthogonality_defect}}
+#' @examples
+#' A <- matrix(rnorm(20), 10, 2)
+#' all.equal(invariant_orthogonality_defect(A), invariant_orthogonality_defect(10 * A))
+#' @export
 invariant_orthogonality_defect <- function( A ) 
 {
+  if (!is.matrix(A)) A <- as.matrix(A)
   norm_A_F <- sqrt(sum(A^2))
+  if (norm_A_F <= 0) return(0)
   Ap <- A / norm_A_F
-  AtA <- t(Ap) %*% Ap
-  D <- diag(diag(AtA))
+  AtA <- crossprod(Ap)
+  D <- diag(diag(AtA), nrow = ncol(AtA))
   defect <- sum((AtA - D)^2)
   return(defect)
 }
@@ -3155,21 +3173,30 @@ sum_preserving_matrix_partition <- function(X, option = 2, tol = 1e-3 ) {
 
 #' Compute the Gradient of the Orthogonality Defect
 #'
-#' This function computes the gradient of the orthogonality defect for a matrix \code{A},
-#' The orthogonality defect is defined as the sum of the squared off-diagonal elements 
-#' of \code{t(A) \%*\% A}.
+#' Gradient, with respect to \code{A}, of
+#' \code{\link{invariant_orthogonality_defect}}
+#' \deqn{f(A) = ||offdiag(A^T A)||_F^2 / ||A||_F^4.}
+#' With \eqn{N = ||A||_F^2}, \eqn{A_p = A / \sqrt{N}} and
+#' \eqn{O_p = offdiag(A_p^T A_p)},
+#' \deqn{\nabla f(A) = \frac{4}{\sqrt{N}} (A_p O_p - f(A) A_p).}
+#' The gradient is orthogonal to \code{A} (\code{sum(A * grad) == 0}),
+#' as expected for a scale-invariant function, and scales as \code{1 / ||A||_F}.
 #'
 #' @param A A numeric matrix.
-#' 
-#' @return A matrix representing the gradient of the orthogonality defect with respect to \code{Ap}.
+#'
+#' @return A matrix of the same size as \code{A}: the (ascent) gradient of the
+#'   orthogonality defect with respect to \code{A}.
 #'
 #' @export
 gradient_invariant_orthogonality_defect <- function(A) {
-  Ap = A / norm( A, "F")  
-  AtA <- t(Ap) %*% Ap
-  D <- diag(diag(AtA))
-  orthogonality_diff <- AtA - D
-  gradient <- 4 * (Ap %*% orthogonality_diff)
+  if (!is.matrix(A)) A <- as.matrix(A)
+  norm_A_F <- sqrt(sum(A^2))
+  if (norm_A_F <= 0) return(A * 0)
+  Ap <- A / norm_A_F
+  AtA <- crossprod(Ap)
+  orthogonality_diff <- AtA - diag(diag(AtA), nrow = ncol(AtA))
+  defect <- sum(orthogonality_diff^2)
+  gradient <- (4 / norm_A_F) * (Ap %*% orthogonality_diff - defect * Ap)
   return(gradient)
 }
 
@@ -3194,213 +3221,6 @@ gradient_invariant_orthogonality_salad<- function(A) {
     stop("Please install package hdf5r in order to use gradient_invariant_orthogonality_salad")
   }
   matrix( salad::d( f1( salad::dual(A) ) ), nrow=nrow(A) )
-}
-
-
-#' Calculate the Gradient for the Procrustes-like Correlation Objective
-#'
-#' This function computes the gradient of the objective function:
-#' J(V) = tr(U'XV) / ||U'XV||_F
-#' with respect to the loading matrix V.
-#'
-#' The returned gradient is an ascent direction for J, which is a descent
-#' direction for the energy E = -J, suitable for use in the simlr optimizer.
-#'
-#' @param V The current loading matrix for the modality [p x k].
-#' @param Z Prior matrix
-#' @param lambda weight
-#'
-#' @return A matrix [p x k] representing the gradient of the objective.
-#'
-.calculate_domain_energy <- function(V, Z, lambda) {
-  # Input validation
-  stopifnot(
-#    is.matrix(V) && is.matrix(Z),
-    "Matrix dimensions are not compatible." = ncol(Z) == nrow(V),
-    "Lambda must be non-negative." = lambda >= 0
-  )
-  
-  # Compute projection
-  Z=data.matrix(Z)
-#  Vmod=l1_normalize_features(V)
-#  Vmod <- apply(V, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
-#  Z <- apply(Z, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
-  M <- Z %*% V
-  
-  # Compute domain alignment energy: -lambda * ||M||_F^2
-  energy <- -lambda * sum(M^2) / prod( c(nrow(Z), ncol(V)))
-  
-  return(energy)
-}
-
-#' Calculate Domain Alignment Gradient
-#'
-#' Computes the analytical gradient for the quadratic domain alignment objective,
-#' given by -2 * lambda * Z^T (ZV).
-#'
-#' @param V A loading matrix [p x k].
-#' @param Z A prior matrix [z x p].
-#' @param lambda Domain alignment strength (non-negative scalar).
-#' @return A matrix [p x k] representing a descent direction for the domain alignment energy.
-#' @keywords internal
-.calculate_domain_gradient <- function(V, Z, lambda) {
-  # Defensive dimension checks
-  p <- nrow(V); k <- ncol(V); z <- nrow(Z)
-  stopifnot(
-#    is.matrix(V) && is.matrix(Z),
-    "Matrix dimensions are not compatible." = ncol(Z) == p,
-    "Lambda must be non-negative." = lambda >= 0
-  )
-  
-  # Compute projection
-  Z=data.matrix(Z)
-#  Vmod=l1_normalize_features(V)
-#  Vmod <- apply(V, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
-#  Z <- apply(Z, 2, function(col) col / sqrt(sum(col^2)))  # L2 normalize columns
-  M <- Z %*% V
-  
-  # Compute gradient: -2 * lambda * Z^T M
-  gradient <- 2 / prod( c(nrow(Z), ncol(V))) * lambda * t(Z) %*% M
-  
-  return(gradient)
-}
-
-
-
-#' Clip a Gradient Matrix by its Frobenius Norm
-#'
-#' This function prevents exploding gradients by rescaling any gradient whose
-#' Frobenius norm exceeds a specified threshold. The direction of the gradient
-#' is preserved.
-#'
-#' @param gradient The gradient matrix to be clipped.
-#' @param threshold The maximum allowed Frobenius norm for the gradient.
-#'
-#' @return A gradient matrix whose Frobenius norm is guaranteed to be less
-#'   than or equal to the threshold.
-#'
-clip_gradient_norm <- function(gradient, threshold = 1.0) {
-  # Calculate the Frobenius norm of the gradient
-  grad_norm <- sqrt(sum(gradient^2))
-  
-  # If the norm exceeds the threshold, compute the scaling factor
-  if (grad_norm > threshold) {
-    # The factor is threshold / current_norm
-    clipping_factor <- threshold / grad_norm
-    # Rescale the gradient
-    gradient <- gradient * clipping_factor
-  }
-  
-  return(gradient)
-}
-
-
-
-#' Calculate SiMLR energy for optimization
-#' Find Optimal SiMLR Initializer
-#'
-#' This function generates multiple random candidate U matrices, evaluates their
-#' associated energy (without gradient descent), and returns the best-scoring
-#' initialization. A seed parameter ensures reproducibility across runs.
-#'
-#' @param data_matrices A list of modality-specific data matrices.
-#' @param n_init Number of random initializations to try (default = 10).
-#' @param basisK Number of basis components (columns in U).
-#' @param energyType Energy function to evaluate.
-#' @param domainMatrices Optional list of domain priors (same length as data_matrices).
-#' @param domainLambdas Optional vector of domain weights.
-#' @param verbose Logical, whether to print progress.
-#' @param seed Optional numeric seed for reproducibility (default = NULL, no seed set).
-#'
-#' @return A list with elements:
-#'   \describe{
-#'     \item{bestU}{List of U matrices (one per modality) for the best initialization.}
-#'     \item{bestV}{List of corresponding V matrices.}
-#'     \item{bestEnergy}{Mean energy for the selected initialization.}
-#'   }
-#' @export
-optimal_simlr_initializer <- function(data_matrices,
-                                     n_init = 10,
-                                     basisK,
-                                     energyType = "acc",
-                                     domainMatrices = NULL,
-                                     domainLambdas = NULL,
-                                     verbose = TRUE,
-                                     seed = NULL) {
-  nModalities <- length(data_matrices)
-
-  # Set random seed if provided
-  if (!is.null(seed)) {
-    if (!is.numeric(seed) || seed < 0 || seed != as.integer(seed)) {
-      stop("seed must be a non-negative integer or NULL")
-    }
-    set.seed(seed)
-    if (verbose) {
-      message(sprintf("Using seed: %d", seed))
-    }
-  }
-
-  bestEnergy <- Inf
-  bestU <- NULL
-  bestV <- NULL
-
-  for (trial in seq_len(n_init)) {
-    # --- 1. Generate random U matrices ---
-    if ( trial == 1 ) {
-      U = initializeSimlr(data_matrices, basisK, uAlgorithm = "pca", jointReduction = TRUE)
-    } else {
-      U = matrix(rnorm(nrow(data_matrices[[1]]) * basisK), nrow(data_matrices[[1]]), basisK)
-    }
-    U = U / norm(U, "F")
-    # --- 2. Build corresponding V matrices ---
-    V_list <- vector("list", nModalities)
-    for (i in seq_len(nModalities)) {
-      V_list[[i]] <- t(data_matrices[[i]]) %*% U
-      V_list[[i]] <- V_list[[i]] / norm(V_list[[i]], "F")
-    }
-
-    # --- 3. Compute energy for this initialization ---
-    total_energy <- 0
-    for (i in seq_len(nModalities)) {
-      sim_e <- calculate_simlr_energy(
-        V_list[[i]], data_matrices[[i]], U,
-        energyType
-      )
-
-      dom_e <- 0
-      if (!is.null(domainMatrices) && !is.null(domainLambdas)) {
-        lam <- domainLambdas[i]
-        if (lam > 0) {
-          dom_e <- calculate_simlr_energy(
-            V_list[[i]], data_matrices[[i]], U,
-            "dat", lambda = lam, prior_matrix = domainMatrices[[i]]
-          )
-        }
-      }
-
-      total_energy <- total_energy + sim_e + dom_e
-    }
-
-    mean_energy <- total_energy / nModalities
-
-    if (verbose) {
-      message(sprintf("Trial %d/%d | Mean energy = %.4f",
-                      trial, n_init, mean_energy))
-    }
-
-    # --- 4. Keep the best initialization ---
-    if (mean_energy < bestEnergy) {
-      bestEnergy <- mean_energy
-      bestU <- U
-      bestV <- V_list
-    }
-  }
-
-  if (verbose) {
-    message(sprintf("[OK] Best initialization found with mean energy = %.4f", bestEnergy))
-  }
-
-  return(list(bestU = bestU, bestV = bestV, bestEnergy = bestEnergy))
 }
 
 

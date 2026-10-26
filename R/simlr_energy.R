@@ -1,37 +1,3 @@
-
-
-#' Calculate the Gradient for the Procrustes-like Correlation Objective
-#'
-#' This function computes the gradient of the objective function:
-#' J(V) = tr(U'XV) / ||U'XV||_F
-#' with respect to the loading matrix V.
-#'
-#' The returned gradient is an ascent direction for J, which is a descent
-#' direction for the energy E = -J, suitable for use in the simlr optimizer.
-#'
-#' @param X A centered data matrix for a single modality [n x p].
-#' @param U The current shared basis matrix [n x k], with orthonormal columns.
-#' @param V The current loading matrix for the modality [p x k].
-#'
-#' @return A matrix [p x k] representing the gradient of the objective.
-#'
-.calculate_procrustes_gradient <- function(X, U, V) {
-  # This is the DEFINITIVE, CORRECTED gradient for J = tr(U'XV) / ||U'XV||_F
-  C <- crossprod(U, X %*% V)
-  trace_C <- sum(diag(C))
-  norm_C_sq <- sum(C^2)
-  if (!is.finite(norm_C_sq) || norm_C_sq < .Machine$double.eps) return(V * 0)
-  norm_C <- sqrt(norm_C_sq)
-
-  XtU <- crossprod(X, U)
-  term1 <- XtU * norm_C_sq
-  term2 <- (XtU %*% C) * trace_C
-  gradient_numerator <- term1 - term2
-  gradient_denominator <- norm_C^3
-  gradient <- gradient_numerator / gradient_denominator
-  return(gradient)
-}
-
 #' Calculate Squared Angular Distance
 #' @description The energy E = || U/||U|| - XV/||XV|| ||_F^2. This is a
 #'   **minimization** objective.

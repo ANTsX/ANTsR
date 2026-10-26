@@ -30,6 +30,13 @@
   `nsa_flow()`; `estimate_learning_rate_nsa()` searched along the ascent
   direction and returned the lower bound of its search range.
 
+* FIX: `invariant_orthogonality_defect()` is now the scale-invariant version
+  (a non-normalized duplicate in `simlr.R` was masking it), and
+  `gradient_invariant_orthogonality_defect()` returns its exact gradient.
+  Identical duplicate definitions of `optimal_simlr_initializer()`,
+  `plot_energy_decomposition()`, `clip_gradient_norm()` and internal helpers
+  were removed.
+
 ## 0.4.0
 
 * ENH: better compilation and release style.
