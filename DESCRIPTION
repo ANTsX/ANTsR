@@ -82,7 +82,6 @@ Suggests:
     sna,
     testthat,
     tools,
-    torch,
     tsne,
     viridis,
     xgboost,
@@ -103,7 +102,9 @@ Suggests:
     DT,
     clue,
     progress,
-    forcats
+    forcats,
+    entropy,
+    spls
 LazyData: TRUE
 Additional_repositories: https://antsx.github.io/drat
 VignetteBuilder: knitr
