@@ -103,3 +103,42 @@ test_that("unary minus does not wrap unsigned images", {
   img <- as.antsImage(matrix(c(1.5, -2, 3, 4), 2, 2))
   expect_equal(as.array(-img), -matrix(c(1.5, -2, 3, 4), 2, 2))
 })
+
+test_that("rigid landmark fit handles reflections (Kabsch)", {
+  set.seed(1)
+  x <- matrix(rnorm(60), 20, 3)
+  # best orthogonal fit is a reflection; a proper rotation must be returned
+  y <- x %*% diag(c(1, 1, -1)) + matrix(rnorm(60, sd = 0.05), 20, 3)
+  xfrm <- fitTransformToPairedPoints(y, x, transformType = "rigid")
+  A <- matrix(getAntsrTransformParameters(xfrm)[1:9], 3, 3, byrow = TRUE)
+  expect_equal(det(A), 1, tolerance = 1e-4)
+
+  xc <- sweep(x, 2, colMeans(x))
+  yc <- sweep(y, 2, colMeans(y))
+  s <- svd(t(yc) %*% xc)
+  D <- diag(c(1, 1, sign(det(s$u %*% t(s$v)))))
+  kabsch <- s$u %*% D %*% t(s$v)
+  residual <- function(M) sum((yc - xc %*% t(M))^2)
+  expect_lte(residual(A), residual(kabsch) + 1e-4)
+})
+
+test_that("time-varying landmark fit returns a non-identity inverse", {
+  tx <- createAntsrTransform(type = "AffineTransform", dimension = 2)
+  pts <- matrix(c(1, 2, 3, 4, 5, 6), ncol = 2)
+  skip_if_not(
+    is.matrix(applyAntsrTransformToPoint(tx, pts)),
+    "applyAntsrTransformToPoint does not handle point matrices"
+  )
+  dom <- makeImage(c(32, 32), 0)
+  fixed <- unname(as.matrix(expand.grid(c(10, 16, 22), c(10, 16, 22))))
+  moving <- fixed + 2
+  xf <- fitTransformToPairedPoints(moving, fixed,
+    transformType = "tv",
+    domainImage = dom, numberOfCompositions = 10, numberOfTimeSteps = 3,
+    numberOfIntegrationSteps = 10, meshSize = 4, numberOfFittingLevels = 3
+  )
+  fw <- applyAntsrTransformToPoint(xf$forwardTransform, fixed)
+  iv <- applyAntsrTransformToPoint(xf$inverseTransform, moving)
+  expect_lt(mean(abs(fw - moving)), 0.5)
+  expect_lt(mean(abs(iv - fixed)), 0.5)
+})

@@ -188,7 +188,7 @@ fitTransformToPairedPoints <- function(
       xDet <- det(xSvd$u %*% t(xSvd$v))
 
       if (xDet < 0) {
-        xSvd$v[dimensionality, ] <- xSvd$v[dimensionality, ] * -1
+        xSvd$v[, dimensionality] <- xSvd$v[, dimensionality] * -1
       }
 
       A <- xSvd$u %*% t(xSvd$v)
@@ -517,10 +517,10 @@ fitTransformToPairedPoints <- function(
       }
     }
 
-    integratedForwardField <- integrateVelocityField(velocityField, 0.0, t, numberOfIntegrationSteps)
+    integratedForwardField <- integrateVelocityField(velocityField, 0.0, 1.0, numberOfIntegrationSteps)
     forwardXfrm <- createAntsrTransform(type = "DisplacementFieldTransform", displacement.field = integratedForwardField)
 
-    integratedInverseField <- integrateVelocityField(velocityField, 1.0, t, numberOfIntegrationSteps)
+    integratedInverseField <- integrateVelocityField(velocityField, 1.0, 0.0, numberOfIntegrationSteps)
     inverseXfrm <- createAntsrTransform(type = "DisplacementFieldTransform", displacement.field = integratedInverseField)
 
     if (verbose) {
