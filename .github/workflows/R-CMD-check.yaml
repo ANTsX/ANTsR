@@ -19,8 +19,9 @@ jobs:
       matrix:
         config:
           - {os: ubuntu-latest,   r: 'release'}
-#          - { os: macos-13, r: "release" }
-#          - { os: macos-latest, r: "release" }
+          - {os: ubuntu-24.04,    r: 'release'}
+          - {os: macos-latest,    r: 'release'}
+          - {os: windows-latest,  r: 'release'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
