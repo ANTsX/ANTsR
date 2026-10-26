@@ -120,7 +120,7 @@ reconstructImageFromPatches <- function( patches, domainImage,
               }
 
             imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],] <-
-              imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],] +
+              imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],, drop = FALSE] +
               patch
             count <- count + 1
             }
@@ -132,8 +132,11 @@ reconstructImageFromPatches <- function( patches, domainImage,
           {
           for( j in seq_len( imageSize[2] ) )
             {
-            factor <- min( i, patchSize[1], imageSize[1] - i + 1 ) *
-              min( j, patchSize[2], imageSize[2] - j + 1 )
+            # number of patches covering voxel (i, j)
+            factor <- min( i, patchSize[1], imageSize[1] - i + 1,
+                imageSize[1] - patchSize[1] + 1 ) *
+              min( j, patchSize[2], imageSize[2] - j + 1,
+                imageSize[2] - patchSize[2] + 1 )
 
             imageArray[i, j,] <- imageArray[i, j,] / factor
             }
@@ -244,9 +247,13 @@ reconstructImageFromPatches <- function( patches, domainImage,
             {
             for( k in seq_len( imageSize[3] ) )
               {
-              factor <- min( i, patchSize[1], imageSize[1] - i + 1 ) *
-                min( j, patchSize[2], imageSize[2] - j + 1 ) *
-                min( k, patchSize[3], imageSize[3] - k + 1 )
+              # number of patches covering voxel (i, j, k)
+              factor <- min( i, patchSize[1], imageSize[1] - i + 1,
+                  imageSize[1] - patchSize[1] + 1 ) *
+                min( j, patchSize[2], imageSize[2] - j + 1,
+                  imageSize[2] - patchSize[2] + 1 ) *
+                min( k, patchSize[3], imageSize[3] - k + 1,
+                  imageSize[3] - patchSize[3] + 1 )
 
               imageArray[i, j, k,] <- imageArray[i, j, k,] / factor
               }

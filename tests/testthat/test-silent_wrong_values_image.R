@@ -243,3 +243,27 @@ test_that("partialVolumeCorrection honors proportion", {
   expect_equal(partialVolumeCorrection(obs, gm, wm, proportion = 0.25), obs / (gm + 0.25 * wm))
   expect_equal(partialVolumeCorrection(obs, gm, wm), obs / (gm + 0.4 * wm))
 })
+
+test_that("extractImagePatches -> reconstructImageFromPatches round-trips", {
+  set.seed(3)
+  cases <- list(
+    list(c(6, 6), c(5, 5), 1), list(c(10, 8), c(3, 4), 1),
+    list(c(9, 9), c(5, 5), 1), list(c(10, 10), c(4, 4), 2),
+    list(c(9, 7), c(3, 3), c(2, 1)),
+    list(c(6, 6, 6), c(5, 5, 5), 1), list(c(7, 6, 5), c(3, 2, 4), 1),
+    list(c(8, 8, 8), c(4, 4, 4), 2)
+  )
+  for (cs in cases) {
+    img <- as.antsImage(array(rnorm(prod(cs[[1]])), cs[[1]]))
+    for (asArray in c(FALSE, TRUE)) {
+      patches <- extractImagePatches(img, cs[[2]], "all", cs[[3]],
+        returnAsArray = asArray
+      )
+      recon <- reconstructImageFromPatches(patches, img, cs[[3]])
+      expect_equal(as.array(recon), as.array(img),
+        tolerance = 1e-5,
+        info = paste(c(cs[[1]], "|", cs[[2]], "|", cs[[3]], asArray), collapse = " ")
+      )
+    }
+  }
+})
