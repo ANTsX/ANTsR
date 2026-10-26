@@ -9,7 +9,8 @@
 #' @param level Level(s) at which to mask image.  If vector or list
 #' of values, output image is non-zero at all locations where label image
 #' matches any of the levels specified.
-#' @param binarize binarize the output image?
+#' @param binarize binarize the output image?  As in ANTsPy, the result is
+#' the intersection of \code{img.in != 0} and the mask at \code{level}.
 #' @return An object of type antsImage.
 #' @author Kandel BM and Avants B.
 #' @examples
@@ -30,7 +31,7 @@ maskImage <- function(img.in, img.mask, level = 1, binarize = FALSE) {
     img.mask <- check_ants(img.mask)
     img.out[img.mask != level] <- 0
     if (binarize) {
-      img.out[img.mask == level] <- 1
+      img.out[img.out != 0] <- 1
     }
     return(img.out)
   }
@@ -42,12 +43,10 @@ maskImage <- function(img.in, img.mask, level = 1, binarize = FALSE) {
     img.mask <- check_ants(img.mask)
     for (mylevel in level) {
       myval <- as.numeric(mylevel)
-      if (binarize) {
-        img.out[img.mask == myval] <- 1
-      }
-      if (!binarize) {
-        img.out[img.mask == myval] <- img.in[img.mask == myval]
-      }
+      img.out[img.mask == myval] <- img.in[img.mask == myval]
+    }
+    if (binarize) {
+      img.out[img.out != 0] <- 1
     }
     return(img.out)
   }

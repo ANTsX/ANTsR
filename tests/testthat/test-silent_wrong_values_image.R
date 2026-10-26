@@ -67,6 +67,18 @@ test_that("maskImage binarizes with a scalar level", {
   expect_equal(out, matrix(c(1, 1, 0, 0), 2, 2))
   out <- as.array(maskImage(img, seg, 1, binarize = FALSE))
   expect_equal(out, matrix(c(5, 7, 0, 0), 2, 2))
+  # as ANTsPy mask_image: binarize = (image != 0) & (mask == level)
+  img0 <- as.antsImage(matrix(c(0, 7, 9, -2), 2, 2))
+  seg2 <- as.antsImage(matrix(c(1, 1, 2, 3), 2, 2))
+  expect_equal(as.array(maskImage(img0, seg2, 1, binarize = TRUE)), matrix(c(0, 1, 0, 0), 2, 2))
+  expect_equal(
+    as.array(maskImage(img0, seg2, c(1, 3), binarize = TRUE)),
+    matrix(c(0, 1, 0, 1), 2, 2)
+  )
+  expect_equal(
+    as.array(maskImage(img0, seg2, c(1, 3), binarize = FALSE)),
+    matrix(c(0, 7, 0, -2), 2, 2)
+  )
 })
 
 test_that("round(img, digits) honors digits; cumulative Math functions work", {
