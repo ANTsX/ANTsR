@@ -12,7 +12,7 @@ jointLabelFusion(
   rad = 2,
   labelList = NULL,
   rho = 0.01,
-  usecor = TRUE,
+  usecor = FALSE,
   rSearch = 3,
   nonnegative = FALSE,
   maxLabelPlusOne = FALSE,
@@ -37,7 +37,8 @@ jointLabelFusion(
 makes image converge to average}
 
 \item{usecor}{employ correlation (\code{"PC"}) as local similarity;
-if \code{FALSE}, mean squares (\code{"MSQ"}) is used}
+if \code{FALSE} (the default, as in ANTsPy), mean squares (\code{"MSQ"})
+is used}
 
 \item{rSearch}{radius of search, default is 3}
 

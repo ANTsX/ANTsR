@@ -20,7 +20,8 @@
 #' @param rho ridge penalty increases robustness to outliers but also
 #'   makes image converge to average
 #' @param usecor employ correlation (\code{"PC"}) as local similarity;
-#' if \code{FALSE}, mean squares (\code{"MSQ"}) is used
+#' if \code{FALSE} (the default, as in ANTsPy), mean squares (\code{"MSQ"})
+#' is used
 #' @param rSearch radius of search, default is 3
 #' @param nonnegative constrain weights to be non-negative
 #' @param maxLabelPlusOne boolean
@@ -117,7 +118,7 @@ jointLabelFusion <- function(
     rad = 2,
     labelList = NULL,
     rho = 0.01,
-    usecor = TRUE,
+    usecor = FALSE,
     rSearch = 3,
     nonnegative = FALSE,
     maxLabelPlusOne = FALSE,

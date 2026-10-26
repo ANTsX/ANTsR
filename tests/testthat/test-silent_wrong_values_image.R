@@ -406,7 +406,8 @@ test_that("jointLabelFusion honors usecor and needs >= 2 atlases", {
     )
     sub(".*METRIC:", "", msg)
   }
-  expect_equal(metricUsed(), "PC")
+  # default matches ANTsPy joint_label_fusion(usecor=False)
+  expect_equal(metricUsed(), "MSQ")
   expect_equal(metricUsed(usecor = TRUE), "PC")
   expect_equal(metricUsed(usecor = FALSE), "MSQ")
   expect_error(
