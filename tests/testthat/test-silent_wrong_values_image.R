@@ -267,3 +267,36 @@ test_that("extractImagePatches -> reconstructImageFromPatches round-trips", {
     }
   }
 })
+
+test_that("labelImageRegistration uses every label of every pair", {
+  makeLabels <- function(shift) {
+    a <- matrix(0, 16, 16)
+    a[(3:6) + shift, 3:6] <- 1
+    a[(9:13) + shift, 9:13] <- 2
+    as.antsImage(a)
+  }
+  fixed <- list(makeLabels(0), makeLabels(0))
+  moving <- list(makeLabels(1), makeLabels(1))
+  quickSyN <- list("SyN", 0.2, "CC", 2, c(2, 0), c(1, 0), c(2, 1))
+  # default scalar labelImageWeighting with two label image pairs
+  out <- capture.output(suppressMessages(
+    labelImageRegistration(fixed, moving,
+      initialTransforms = "identity",
+      typeOfDeformableTransform = quickSyN, verbose = TRUE
+    )
+  ))
+  out <- paste(out, collapse = " ")
+  # 2 pairs x 2 labels
+  expect_equal(lengths(regmatches(out, gregexpr("MSQ[", out, fixed = TRUE))), 4)
+
+  # randomSeed is appended instead of replacing all arguments
+  out <- capture.output(suppressMessages(
+    labelImageRegistration(fixed[1], moving[1],
+      initialTransforms = "identity",
+      typeOfDeformableTransform = quickSyN, randomSeed = 1, verbose = TRUE
+    )
+  ))
+  out <- paste(out, collapse = " ")
+  expect_true(grepl("--random-seed 1", out, fixed = TRUE))
+  expect_true(grepl("MSQ[", out, fixed = TRUE))
+})

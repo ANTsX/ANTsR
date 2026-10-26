@@ -104,7 +104,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     }
     
   labelImageWeights <- labelImageWeighting
-  if( is.numeric( labelImageWeighting ) && ! is.vector( labelImageWeighting ) )
+  if( is.numeric( labelImageWeighting ) && length( labelImageWeighting ) == 1 )
     {
     labelImageWeights <- rep( labelImageWeighting, length( fixedLabelImages ) ) 
     } else {
@@ -229,8 +229,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
           deformableMultivariateExtras[[count]] <- list( "MSQ", fixedSingleLabelImage,
                                                       movingSingleLabelImage, 
                                                       labelImageWeights[i], 0 )
+          count <- count + 1
           }
-        count <- count + 1 
         }
       }
 
@@ -407,7 +407,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
     if( ! is.null( randomSeed ) )
       {
-      args <- lappend( "--random-seed", randomSeed )
+      args <- lappend( args, list( "--random-seed", as.character( randomSeed ) ) )
       }
 
     if( verbose )  
