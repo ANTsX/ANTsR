@@ -30,6 +30,7 @@ jobs:
       R_KEEP_PKG_SOURCE: yes
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       ITKR_RELEASE_ASSET: ITKR-release.zip
+      ITKR_FALLBACK_TAG: v0.6.0.2.1
 
     steps:
       - uses: actions/checkout@v4
@@ -59,7 +60,16 @@ jobs:
           dest <- file.path(tempdir(), asset)
           unpack <- file.path(tempdir(), "ITKR_unpack")
           dir.create(unpack, recursive = TRUE, showWarnings = FALSE)
-          download.file(url, dest, mode = "wb", quiet = TRUE)
+          # ITKR v0.6.1 doesn't publish ITKR-release.zip; fall back to the last
+          # release that does until the latest one has it again
+          ok <- tryCatch(download.file(url, dest, mode = "wb", quiet = TRUE) == 0,
+            error = function(e) FALSE, warning = function(w) FALSE)
+          if (!ok) {
+            url <- sprintf("https://github.com/ANTsX/ITKR/releases/download/%s/%s",
+              Sys.getenv("ITKR_FALLBACK_TAG"), asset)
+            message("Falling back to ", url)
+            download.file(url, dest, mode = "wb", quiet = TRUE)
+          }
           unzip(dest, exdir = unpack)
 
           desc <- list.files(unpack, pattern = "^DESCRIPTION$", recursive = TRUE, full.names = TRUE)[1]
