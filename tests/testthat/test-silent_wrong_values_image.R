@@ -142,3 +142,26 @@ test_that("time-varying landmark fit returns a non-identity inverse", {
   expect_lt(mean(abs(fw - moving)), 0.5)
   expect_lt(mean(abs(iv - fixed)), 0.5)
 })
+
+test_that("antsApplyTransformsToPoints honors whichtoinvert", {
+  tx1 <- createAntsrTransform(type = "AffineTransform", dimension = 2, translation = c(1, 0))
+  tx2 <- createAntsrTransform(type = "AffineTransform", dimension = 2, translation = c(0, 2))
+  f1 <- tempfile(fileext = ".mat")
+  f2 <- tempfile(fileext = ".mat")
+  writeAntsrTransform(tx1, f1)
+  writeAntsrTransform(tx2, f2)
+  pts <- data.frame(x = c(1, 5), y = c(2, 7))
+  d1 <- as.matrix(antsApplyTransformsToPoints(2, pts, f1)) - as.matrix(pts)
+  d2 <- as.matrix(antsApplyTransformsToPoints(2, pts, f2)) - as.matrix(pts)
+  expect_equal(abs(d1[, 1]), c(1, 1), tolerance = 1e-5)
+
+  out <- antsApplyTransformsToPoints(2, pts, c(f1, f2), whichtoinvert = c(FALSE, FALSE))
+  expect_equal(as.matrix(out), as.matrix(pts) + d1 + d2, ignore_attr = TRUE)
+  out <- antsApplyTransformsToPoints(2, pts, c(f1, f2), whichtoinvert = c(TRUE, FALSE))
+  expect_equal(as.matrix(out), as.matrix(pts) - d1 + d2, ignore_attr = TRUE)
+  out <- antsApplyTransformsToPoints(2, pts, c(f1, f2), whichtoinvert = c(FALSE, TRUE))
+  expect_equal(as.matrix(out), as.matrix(pts) + d1 - d2, ignore_attr = TRUE)
+  # default: two matrices are not inverted
+  out <- antsApplyTransformsToPoints(2, pts, c(f1, f2))
+  expect_equal(as.matrix(out), as.matrix(pts) + d1 + d2, ignore_attr = TRUE)
+})
