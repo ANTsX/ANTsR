@@ -23,10 +23,13 @@ cropImage <- function(image, labelImage, label = 1) {
     labelImage <- getMask(image)
   }
   labelImage <- check_ants(labelImage)
-  if (image@pixeltype != "float" | labelImage@pixeltype != "float") {
-    stop("input images must have float pixeltype")
+  inpixeltype <- image@pixeltype
+  if (image@pixeltype != "float") image <- antsImageClone(image, "float")
+  if (labelImage@pixeltype != "float") {
+    labelImage <- antsImageClone(labelImage, "float")
   }
-  ANTsRCore::CropImage(image, labelImage, label, 0, NULL, NULL)
+  outimg <- ANTsRCore::CropImage(image, labelImage, label, 0, NULL, NULL)
+  antsImageClone(outimg, inpixeltype)
 }
 
 
@@ -53,9 +56,8 @@ cropImage <- function(image, labelImage, label = 1) {
 #' @export cropIndices
 cropIndices <- function(image, lowerind, upperind) {
   image <- check_ants(image)
-  if (image@pixeltype != "float") {
-    stop("input images must have float pixeltype")
-  }
+  inpixeltype <- image@pixeltype
+  if (image@pixeltype != "float") image <- antsImageClone(image, "float")
   if (image@dimension != length(lowerind) |
     image@dimension != length(upperind)) {
     stop("dimensionality and index length dont match")
@@ -65,9 +67,9 @@ cropIndices <- function(image, lowerind, upperind) {
     stop("lowerind is < 1 or upperind is > dim(image)")
   }
   if (image@components == 1) {
-    return(ANTsRCore::CropImage(
+    return(antsImageClone(ANTsRCore::CropImage(
       image, image, 1, 2, lowerind, upperind
-    ))
+    ), inpixeltype))
   }
   ilist <- splitChannels(image)
   for (k in 1:image@components) {
@@ -76,7 +78,7 @@ cropIndices <- function(image, lowerind, upperind) {
       lowerind, upperind
     )
   }
-  return(mergeChannels(ilist))
+  return(antsImageClone(mergeChannels(ilist), inpixeltype))
 }
 
 
@@ -101,12 +103,17 @@ cropIndices <- function(image, lowerind, upperind) {
 decropImage <- function(croppedImage, fullImage) {
   croppedImage <- check_ants(croppedImage)
   fullImage <- check_ants(fullImage)
-  if (croppedImage@pixeltype != "float" | fullImage@pixeltype != "float") {
-    stop("input images must have float pixeltype")
+  inpixeltype <- croppedImage@pixeltype
+  if (croppedImage@pixeltype != "float") {
+    croppedImage <- antsImageClone(croppedImage, "float")
   }
-  ANTsRCore::CropImage(
+  if (fullImage@pixeltype != "float") {
+    fullImage <- antsImageClone(fullImage, "float")
+  }
+  outimg <- ANTsRCore::CropImage(
     croppedImage, fullImage, 1, 1, NULL, NULL
   )
+  antsImageClone(outimg, inpixeltype)
 }
 
 
@@ -134,9 +141,8 @@ decropImage <- function(croppedImage, fullImage) {
 #' @export extractSlice
 extractSlice <- function(image, slice, direction, collapseStrategy = 0) {
   image <- check_ants(image)
-  if (image@pixeltype != "float") {
-    stop("input images must have float pixeltype")
-  }
+  inpixeltype <- image@pixeltype
+  if (image@pixeltype != "float") image <- antsImageClone(image, "float")
   if (image@dimension < 3) stop("can't extract 1-d image")
   if (direction > image@dimension) {
     stop("dimensionality and index length dont match")
@@ -144,5 +150,6 @@ extractSlice <- function(image, slice, direction, collapseStrategy = 0) {
   if (collapseStrategy != 0 && collapseStrategy != 1 && collapseStrategy != 2) {
     stop("collapseStrategy must be 0, 1, or 2.")
   }
-  ANTsRCore::ExtractSlice(image, slice - 1, direction - 1, collapseStrategy)
+  outimg <- ANTsRCore::ExtractSlice(image, slice - 1, direction - 1, collapseStrategy)
+  antsImageClone(outimg, inpixeltype)
 }
