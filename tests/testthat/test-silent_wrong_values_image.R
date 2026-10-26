@@ -199,3 +199,19 @@ test_that("segmentationRefinement.predict uses a 0.5 background row", {
   expect_true(all(as.array(run(0.3)) == 0))
   expect_true(all(as.array(run(0.9))[seg == 1] == 1))
 })
+
+test_that("rfSegmentation returns label values, not factor codes", {
+  skip_if_not_installed("randomForest")
+  set.seed(2)
+  lab <- matrix(2, 10, 10)
+  lab[, 6:10] <- 5
+  img <- as.antsImage(lab + matrix(rnorm(100, sd = 0.1), 10, 10))
+  mask <- as.antsImage(matrix(1, 10, 10))
+  labImg <- as.antsImage(lab)
+  fmat <- matrix(img[mask == 1], ncol = 1)
+  colnames(fmat) <- "intensity"
+  rf <- rfSegmentation(fmat, mask, labImg, ntrees = 20)
+  expect_setequal(unique(c(as.array(rf$segmentation))), c(2, 5))
+  pred <- rfSegmentationPredict(rf$rfModel, fmat, mask)
+  expect_equal(as.array(pred), lab)
+})
