@@ -3715,14 +3715,18 @@ estimate_learning_rate_nsa <- function(
     }
   }
 
-  # --- Gradient direction ---
+  # --- Search direction ---
+  # grad = Y0 - X0 is the (ascent) gradient of the fidelity term
+  # 0.5 * ||Y - X0||^2, and nsa_flow steps along its negative
+  # (grad_fid = -fid_eta * (Y - X0)). Search along the descent direction
+  # X0 - Y0; searching along +grad only increases the energy, so every
+  # method collapsed onto the lower bound of the search range.
   grad <- Y0 - X0
-  grad_norm <- sqrt(sum(grad^2)) + 1e-12
-  grad_dir <- grad # / grad_norm
+  descent_dir <- -grad
 
   # --- Energy along line ---
   line_obj <- function(alpha) {
-    Y_trial <- Y0 + alpha * grad_dir
+    Y_trial <- Y0 + alpha * descent_dir
     nsa_energy(Y_trial)
   }
   lowr=search_range[1]
@@ -3750,8 +3754,8 @@ estimate_learning_rate_nsa <- function(
     c <- 1e-4
     rho <- 0.5
     E0 <- line_obj(0)
-    grad_dot <- sum(grad_dir * grad)
-    while (line_obj(alpha) > E0 - c * alpha * grad_dot) {
+    slope <- sum(grad * descent_dir) # <grad, d> = -||grad||^2 < 0
+    while (line_obj(alpha) > E0 + c * alpha * slope) {
       alpha <- alpha * rho
       if (alpha < 1e-5) break
     }

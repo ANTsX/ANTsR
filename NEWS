@@ -23,6 +23,13 @@
   initialisation seeds in `nsa_flow_pca()` / `nsa_flow_pca_fa()` and to
   `antsr_random_features()`.
 
+* FIX: SiMLR optimizer fixes: `riemannian_adam` stepped uphill; the
+  bidirectional line search (used by the default `bidirectional_lookahead`)
+  never tried `-d`; `lookahead` discarded Adam's moment estimates; several
+  optimizers ignored the `learning_rate` / `myit` passed by `simlr()` and
+  `nsa_flow()`; `estimate_learning_rate_nsa()` searched along the ascent
+  direction and returned the lower bound of its search range.
+
 ## 0.4.0
 
 * ENH: better compilation and release style.
