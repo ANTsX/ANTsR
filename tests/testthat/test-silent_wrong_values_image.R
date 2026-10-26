@@ -235,3 +235,11 @@ test_that("abpN4 bias corrects the truncated image", {
     tolerance = 1e-4
   )
 })
+
+test_that("partialVolumeCorrection honors proportion", {
+  obs <- c(5, 6, 7, 8)
+  gm <- c(0.5, 0.6, 0.7, 0.8)
+  wm <- 1 - gm
+  expect_equal(partialVolumeCorrection(obs, gm, wm, proportion = 0.25), obs / (gm + 0.25 * wm))
+  expect_equal(partialVolumeCorrection(obs, gm, wm), obs / (gm + 0.4 * wm))
+})
