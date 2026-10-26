@@ -225,3 +225,13 @@ test_that("sparseDecom verbose does not overwrite varex", {
   expect_true("meanReconstructionCorrelation" %in% names(loud))
   expect_true("Reconstruction" %in% names(loud))
 })
+
+test_that("abpN4 bias corrects the truncated image", {
+  img <- resampleImage(ri(1), c(64, 64), useVoxels = TRUE, interpType = 0)
+  truncated <- iMath(img, "TruncateIntensity", 0.025, 0.975, 256)
+  expect_equal(
+    as.array(abpN4(img)),
+    as.array(n4BiasFieldCorrection(truncated)),
+    tolerance = 1e-4
+  )
+})
