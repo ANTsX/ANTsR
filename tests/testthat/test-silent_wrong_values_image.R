@@ -300,3 +300,36 @@ test_that("labelImageRegistration uses every label of every pair", {
   expect_true(grepl("--random-seed 1", out, fixed = TRUE))
   expect_true(grepl("MSQ[", out, fixed = TRUE))
 })
+
+test_that("jointLabelFusion honors usecor and needs >= 2 atlases", {
+  set.seed(4)
+  base <- matrix(0, 16, 16)
+  base[4:12, 4:12] <- 1
+  tgt <- as.antsImage(base * 10 + matrix(rnorm(256), 16, 16))
+  mask <- as.antsImage(matrix(1, 16, 16))
+  atl <- lapply(c(1, 3, 0.5), function(s) {
+    as.antsImage(s * base * 10 + matrix(rnorm(256), 16, 16))
+  })
+  labs <- lapply(1:3, function(i) as.antsImage(base + 1))
+  # capture the metric passed to antsJointFusion without running it
+  metricUsed <- function(...) {
+    testthat::local_mocked_bindings(
+      antsJointFusion = function(args) {
+        stop("METRIC:", args[which(args == "-m") + 1])
+      },
+      .package = "ANTsRCore"
+    )
+    msg <- tryCatch(
+      jointLabelFusion(tgt, mask, atl, labelList = labs, rad = 1, rSearch = 1, ...),
+      error = function(e) conditionMessage(e)
+    )
+    sub(".*METRIC:", "", msg)
+  }
+  expect_equal(metricUsed(), "PC")
+  expect_equal(metricUsed(usecor = TRUE), "PC")
+  expect_equal(metricUsed(usecor = FALSE), "MSQ")
+  expect_error(
+    jointLabelFusion(tgt, mask, atl[1], labelList = labs[1]),
+    "at least 2 atlases"
+  )
+})
