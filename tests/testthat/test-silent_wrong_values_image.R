@@ -47,3 +47,12 @@ test_that("antsRegistrationSyN metric/transform strings are well formed", {
   out <- paste(out, collapse = " ")
   expect_true(grepl("--transform Affine[0.1] ", out, fixed = TRUE))
 })
+
+test_that("maskImage binarizes with a scalar level", {
+  img <- as.antsImage(matrix(c(5, 7, 9, 11), 2, 2))
+  seg <- as.antsImage(matrix(c(1, 1, 2, 0), 2, 2))
+  out <- as.array(maskImage(img, seg, 1, binarize = TRUE))
+  expect_equal(out, matrix(c(1, 1, 0, 0), 2, 2))
+  out <- as.array(maskImage(img, seg, 1, binarize = FALSE))
+  expect_equal(out, matrix(c(5, 7, 0, 0), 2, 2))
+})

@@ -29,6 +29,9 @@ maskImage <- function(img.in, img.mask, level = 1, binarize = FALSE) {
     img.out <- antsImageClone(img.in)
     img.mask <- check_ants(img.mask)
     img.out[img.mask != level] <- 0
+    if (binarize) {
+      img.out[img.mask == level] <- 1
+    }
     return(img.out)
   }
   if ((is.list(level)) |
