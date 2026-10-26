@@ -33,3 +33,4 @@ code_of_conduct.md
 ^\.gemini$
 ^check_output.*\.txt$
 ^check_results\.rds$
+^dev$
