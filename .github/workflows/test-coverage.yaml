@@ -17,6 +17,11 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      MPLBACKEND: Agg
 
     steps:
       - uses: actions/checkout@v4
@@ -29,6 +34,25 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libhdf5-dev cmake
+
+      - uses: actions/setup-python@v5
+        id: python
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: .github/requirements-ci.txt
+
+      - name: Install Python test dependencies
+        run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu -r .github/requirements-ci.txt
+
+      - name: Select Python for reticulate
+        shell: Rscript {0}
+        env:
+          ANTSR_TEST_PYTHON: ${{ steps.python.outputs.python-path }}
+        run: |
+          python <- normalizePath(Sys.getenv("ANTSR_TEST_PYTHON"), winslash = "/", mustWork = TRUE)
+          cat("RETICULATE_PYTHON=", python, "\n", sep = "",
+            file = Sys.getenv("GITHUB_ENV"), append = TRUE)
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:

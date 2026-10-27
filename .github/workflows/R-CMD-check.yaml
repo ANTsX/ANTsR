@@ -27,6 +27,11 @@ jobs:
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      MPLBACKEND: Agg
       R_KEEP_PKG_SOURCE: yes
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       ITKR_RELEASE_ASSET: ITKR-release.zip
@@ -95,13 +100,51 @@ jobs:
           writeLines(lines, "DESCRIPTION")
 
       # ANTsRCore and ITKR aren't on CRAN; they come from DESCRIPTION Remotes
+      - uses: actions/setup-python@v5
+        id: python
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: .github/requirements-ci.txt
+
+      - name: Install Python test dependencies
+        run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu -r .github/requirements-ci.txt
+
+      - name: Select Python for reticulate
+        shell: Rscript {0}
+        env:
+          ANTSR_TEST_PYTHON: ${{ steps.python.outputs.python-path }}
+        run: |
+          python <- normalizePath(Sys.getenv("ANTSR_TEST_PYTHON"), winslash = "/", mustWork = TRUE)
+          cat("RETICULATE_PYTHON=", python, "\n", sep = "",
+            file = Sys.getenv("GITHUB_ENV"), append = TRUE)
+
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
+
+      # Stream installation output: R CMD build otherwise hides it while
+      # installing ANTsR before building vignettes, where Windows stalled.
+      - name: Install ANTsR with live diagnostics - WINDOWS
+        if: runner.os == 'Windows'
+        timeout-minutes: 30
+        shell: bash
+        run: R CMD INSTALL --no-multiarch . 2>&1 | tee antsr-install.log
 
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
           error-on: '"error"'
+
+      - name: Upload Windows installation diagnostics
+        if: always() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installation-diagnostics
+          path: |
+            antsr-install.log
+            check/**/*.out
+            check/**/*.log
+          if-no-files-found: ignore
