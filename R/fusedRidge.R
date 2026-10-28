@@ -22,6 +22,8 @@
 #' @param thresh Convergence threshold for \code{glmnet}.
 #' @param nlambda Number of lambda values to use in \code{glmnet} (defaults to 100).
 #' @param nfolds Number of folds for cross-validation (defaults to 10).
+#' @param cv Boolean indicating whether to select the Ridge lambda by \code{glmnet::cv.glmnet}. If \code{FALSE} and \code{lambda} is \code{NULL}, a lambda of 1 is used. Defaults to TRUE.
+#' @param lambda Optional numeric value. If provided, CV is skipped and the model is fit directly using the specified lambda value.
 #' @param ... Additional arguments passed to \code{glmnet::cv.glmnet} and \code{glmnet::glmnet}.
 #' @details
 #' Fits a joint Fused Ridge regression model across multiple binarized thresholds of a continuous response variable,
@@ -857,6 +859,7 @@ predict.fusedRidgeDirect <- function(object, newx, newcovs = NULL, type = c("lin
 #' @param optim_control Optional list of control parameters passed to the PyTorch optimizer. Defaults to \code{list(maxit = 200)}.
 #' @param alpha Elastic net mixing parameter between 0 and 1. \code{alpha = 0} is pure ridge, \code{alpha = 1} is pure lasso. Defaults to 0.
 #' @param sparsity_thresh Hard threshold for sparsity post-optimization. Any coefficient smaller in absolute value is zeroed out. Defaults to 1e-4.
+#' @param lambda Optional numeric value. If provided, CV is skipped and the model is fit directly using the specified lambda value.
 #' @param ... Additional arguments (currently ignored).
 #'
 #' @return A list of class \code{c("fusedRidgeTorch", "fusedRidgeDirect", "fusedRidge")} containing:
