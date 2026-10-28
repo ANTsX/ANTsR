@@ -44,7 +44,7 @@
 
 \S4method{ceiling}{antsImage}(x)
 
-\S4method{round}{antsImage}(x)
+\S4method{round}{antsImage}(x, digits = 0)
 
 \S4method{floor}{antsImage}(x)
 
@@ -96,6 +96,9 @@
 }
 \arguments{
 \item{x}{is an object of class \code{antsImage}.}
+
+\item{digits}{integer number of decimal places to round to, as in
+\code{\link[base]{round}}.}
 
 \item{base}{a positive or complex number:
 the base with respect to which logarithms are computed.

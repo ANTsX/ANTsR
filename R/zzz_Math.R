@@ -65,6 +65,8 @@ setMethod(
 )
 
 #' @rdname antsImagemath
+#' @param digits integer number of decimal places to round to, as in
+#' \code{\link[base]{round}}.
 #' @export
 setMethod(
   "round", signature(x = "antsImage"),
