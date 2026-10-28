@@ -54,8 +54,8 @@ jobs:
           sudo apt-get install -y libhdf5-dev cmake
 
       # ITKR (and so ANTsRCore) can't be built from source on Windows here,
-      # so install the ITKR release binary and point Remotes at it, as
-      # ANTsRCore's CI does. ANTsRCore is then built from source against it.
+      # so install the ITKR release binary, as ANTsRCore's CI does.
+      # ANTsRCore is then built from source against it.
       - name: Install ITKR binary - WINDOWS
         if: runner.os == 'Windows'
         shell: Rscript {0}
@@ -94,9 +94,34 @@ jobs:
           install.packages(itkr_zip, repos = NULL, type = "win.binary")
           if (!requireNamespace("ITKR", quietly = TRUE)) stop("ITKR binary did not install")
 
+      # ANTsRCore's own Remotes point at ANTsX/ITKR, so pak replaced the ITKR
+      # binary with a ~55 min source build. Build ANTsRCore without its Remotes
+      # against the binary, then drop ANTsR's Remotes so pak keeps both.
+      - name: Install ANTsRCore against ITKR binary - WINDOWS
+        if: runner.os == 'Windows'
+        shell: Rscript {0}
+        run: |
+          src <- file.path(tempdir(), "ANTsRCore")
+          status <- system2("git", c("clone", "--depth", "1", "https://github.com/ANTsX/ANTsRCore", src))
+          if (status != 0) stop("Could not clone ANTsX/ANTsRCore")
+
+          desc <- file.path(src, "DESCRIPTION")
+          dcf <- read.dcf(desc)
+          write.dcf(dcf[, colnames(dcf) != "Remotes", drop = FALSE], desc)
+          fields <- intersect(c("Depends", "Imports", "LinkingTo"), colnames(dcf))
+          deps <- setdiff(names(tools:::.split_dependencies(dcf[1, fields])), c("R", rownames(installed.packages())))
+          if (length(deps)) install.packages(deps)
+
+          install.packages(src, repos = NULL, type = "source", INSTALL_opts = "--no-multiarch")
+          if (!requireNamespace("ANTsRCore", quietly = TRUE)) stop("ANTsRCore did not install")
+
           lines <- readLines("DESCRIPTION", warn = FALSE)
-          rem <- grepl("^Remotes:", lines) | grepl("^\\s+ANTsX/ITKR", lines)
-          lines[rem] <- sub("ANTsX/ITKR", paste0("ITKR=local::", itkr_zip), lines[rem], fixed = TRUE)
+          start <- grep("^Remotes:", lines)
+          if (length(start)) {
+            end <- start
+            while (end < length(lines) && grepl("^\\s", lines[end + 1])) end <- end + 1
+            lines <- lines[-(start:end)]
+          }
           writeLines(lines, "DESCRIPTION")
 
       # ANTsRCore and ITKR aren't on CRAN; they come from DESCRIPTION Remotes

@@ -17,8 +17,8 @@ data/*\.csv$
 OLD_NAMESPACE
 vignettes/\.build\.timestamp
 ^appveyor\.yml$
-which\.R
-c\.R
+^which\.R$
+^c\.R$
 _config\.yml
 ^docs$
 ^.*\.log$
@@ -33,3 +33,4 @@ code_of_conduct.md
 ^\.gemini$
 ^check_output.*\.txt$
 ^check_results\.rds$
+^\.claude$
