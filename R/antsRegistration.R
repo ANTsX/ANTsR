@@ -357,7 +357,7 @@ antsRegistration <- function(
       }
 
       # Perform Repro checking if set_ants_deterministic is True
-      if( getOption( "ants.deterministic", TRUE ) && !grepl( "Repro", typeofTransform ) ) {
+      if( isTRUE( getOption( "ants.deterministic", FALSE ) ) && !grepl( "Repro", typeofTransform ) ) {
         message( typeofTransform, " is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy." )
       }
 

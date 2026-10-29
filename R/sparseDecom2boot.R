@@ -130,11 +130,14 @@ sparseDecom2boot <- function(
           # temp1, temp2 ) )
         }
       }
+      # undefined distances (zero vectors) are the worst possible match;
+      # matched rows / columns are set to Inf so they are never re-selected
+      mymult[is.na(mymult)] <- 2
       for (ct in 1:(ncol(cca1))) {
-        arrind <- which(mymult == min(mymult), arr.ind = T)
+        arrind <- which(mymult == min(mymult), arr.ind = TRUE)[1, ]
         cca1copy[, arrind[1]] <- cca1[, arrind[2]]
-        mymult[arrind[1], ] <- 0
-        mymult[, arrind[2]] <- 0
+        mymult[arrind[1], ] <- Inf
+        mymult[, arrind[2]] <- Inf
       }
       cca1 <- cca1copy
       ###### nextview######
@@ -149,11 +152,14 @@ sparseDecom2boot <- function(
           # -1.0 * cor( temp1, temp2 ) )
         }
       }
+      # undefined distances (zero vectors) are the worst possible match;
+      # matched rows / columns are set to Inf so they are never re-selected
+      mymult[is.na(mymult)] <- 2
       for (ct in 1:(ncol(cca2))) {
-        arrind <- which(mymult == min(mymult), arr.ind = T)
+        arrind <- which(mymult == min(mymult), arr.ind = TRUE)[1, ]
         cca2copy[, arrind[1]] <- cca2[, arrind[2]]
-        mymult[arrind[1], ] <- 0
-        mymult[, arrind[2]] <- 0
+        mymult[arrind[1], ] <- Inf
+        mymult[, arrind[2]] <- Inf
       }
       cca2 <- cca2copy
     } # end try to sort results
