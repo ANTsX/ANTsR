@@ -2,6 +2,41 @@
 # Release notes
 
 
+## Development version
+
+* FIX: the SiMLR optimizer generic `step()` has been renamed to
+  `optimizer_step()` (methods are now `optimizer_step.adam()`,
+  `optimizer_step.nadam()`, ...). The exported `step()` generic masked
+  `stats::step()`, so `step(lm(...))` failed with "no applicable method"
+  once ANTsR was attached. ANTsR no longer exports `step()`; code that called
+  `step(optimizer, ...)` (or `ANTsR::step()`) directly should call
+  `optimizer_step()` instead.
+
+* FIX: `sd()` on non-`antsImage` input ignored `na.rm`, so
+  `sd(c(1, 2, NA, 4), na.rm = TRUE)` returned `NA` once ANTsR was attached.
+  It now matches `stats::sd()`.
+
+* FIX: `nsa_flow()` no longer resets the global random number stream or
+  changes `RNGkind()` on every call. Its `seed` (default 42) is now applied
+  locally and the caller's `.Random.seed` / `RNGkind()` are restored on exit;
+  `seed = NULL` uses the ambient stream. The same applies to the fixed
+  initialisation seeds in `nsa_flow_pca()` / `nsa_flow_pca_fa()` and to
+  `antsr_random_features()`.
+
+* FIX: SiMLR optimizer fixes: `riemannian_adam` stepped uphill; the
+  bidirectional line search (used by the default `bidirectional_lookahead`)
+  never tried `-d`; `lookahead` discarded Adam's moment estimates; several
+  optimizers ignored the `learning_rate` / `myit` passed by `simlr()` and
+  `nsa_flow()`; `estimate_learning_rate_nsa()` searched along the ascent
+  direction and returned the lower bound of its search range.
+
+* FIX: `invariant_orthogonality_defect()` is now the scale-invariant version
+  (a non-normalized duplicate in `simlr.R` was masking it), and
+  `gradient_invariant_orthogonality_defect()` returns its exact gradient.
+  Identical duplicate definitions of `optimal_simlr_initializer()`,
+  `plot_energy_decomposition()`, `clip_gradient_norm()` and internal helpers
+  were removed.
+
 ## 0.4.0
 
 * ENH: better compilation and release style.
