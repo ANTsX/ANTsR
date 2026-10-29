@@ -79,7 +79,7 @@ rfSegmentation <- function(
   probabilityimages <- predict(myrf, type = "prob")
   probabilityimages <- matrixToImages(t(probabilityimages), mask)
   segs <- antsImageClone(mask)
-  segs[mask == 1] <- predict(myrf)
+  segs[mask == 1] <- as.numeric(as.character(predict(myrf)))
   myout <- list(segmentation = segs, probabilityimages = probabilityimages, rfModel = myrf)
   return(myout)
 }
@@ -114,6 +114,8 @@ rfSegmentationPredict <- function(
     rfSegmentationModel, featureMatrix,
     mask, verbose = FALSE) {
   segs <- antsImageClone(mask)
-  segs[mask == 1] <- predict(rfSegmentationModel, newdata = featureMatrix)
+  segs[mask == 1] <- as.numeric(as.character(
+    predict(rfSegmentationModel, newdata = featureMatrix)
+  ))
   return(segs)
 }

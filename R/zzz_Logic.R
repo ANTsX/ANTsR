@@ -74,7 +74,7 @@ setMethod(
   "Logic", signature(e1 = "antsImage", e2 = "array"),
   function(e1, e2) {
     ## either use drop_img_dim and validObject or take out both
-    e2 <- as.antsImage(e2, reference = e1)
+    e2 <- .as_antsImage_keep_values(e2, reference = e1)
 
     res <- callGeneric(e1, e2)
     return(res)

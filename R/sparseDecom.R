@@ -181,8 +181,9 @@ sparseDecom <- function(inmatrix = NA, inmask = NULL,
     }
     reconerr <- reconerr / ncol(inmatrix)
     #  reconerr=mean( abs( inmatrix - reconmat ) )
-    outval[length(outval) - 1] <- reconerr
-    #  names(outval)[length(outval)-1]='meanReconstructionError'
+    # mean absolute correlation of the reconstruction; stored separately
+    # (it used to overwrite varex)
+    outval$meanReconstructionCorrelation <- reconerr
     outval[[length(outval) + 1]] <- reconmat
     names(outval)[length(outval)] <- "Reconstruction"
   }

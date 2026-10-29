@@ -104,7 +104,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     }
     
   labelImageWeights <- labelImageWeighting
-  if( is.numeric( labelImageWeighting ) && ! is.vector( labelImageWeighting ) )
+  if( is.numeric( labelImageWeighting ) && length( labelImageWeighting ) == 1 )
     {
     labelImageWeights <- rep( labelImageWeighting, length( fixedLabelImages ) ) 
     } else {
@@ -229,8 +229,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
           deformableMultivariateExtras[[count]] <- list( "MSQ", fixedSingleLabelImage,
                                                       movingSingleLabelImage, 
                                                       labelImageWeights[i], 0 )
+          count <- count + 1
           }
-        count <- count + 1 
         }
       }
 
@@ -291,7 +291,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       intensityMetric <- typeOfDeformableTransform[[3]]
       intensityMetricParameter <- typeOfDeformableTransform[[4]]
 
-      synConvergence <- paste( typeOfDeformableTransform[[5]], collapse = 'x')
+      synConvergence <- paste0( "[",
+        paste( typeOfDeformableTransform[[5]], collapse = 'x' ), ",1e-6,10]" )
 
       synSmoothingSigmas <- paste( typeOfDeformableTransform[[6]], collapse = 'x')
       synSmoothingSigmas <- paste0( synSmoothingSigmas, "vox")
@@ -369,7 +370,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       } else {
       synTransformComplete <- list( "--transform", paste0("BSplineSyN[", gradientStep, ",", splineDistance, ",0,3]" ) )
       }
-    synStage <- lappend( synStage, synTransformComplete )    
+    # the transform precedes its metrics, as in ANTsPy
+    synStage <- lappend( synTransformComplete, synStage )
 
     args <- list(
       "-d", as.character( imageDimension ),
@@ -407,7 +409,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
     if( ! is.null( randomSeed ) )
       {
-      args <- lappend( "--random-seed", randomSeed )
+      args <- lappend( args, list( "--random-seed", as.character( randomSeed ) ) )
       }
 
     if( verbose )  
