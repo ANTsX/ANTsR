@@ -23,6 +23,8 @@ jobs:
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-24.04,    r: 'release'}
           - {os: macos-latest,    r: 'release'}
+          # R >= 4.7 ships macOS binaries as .tar.xz, not .tgz
+          - {os: macos-latest,    r: 'devel'}
           - {os: windows-latest,  r: 'release'}
 
     env:
@@ -53,11 +55,66 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libhdf5-dev cmake
 
-      # ITKR (and so ANTsRCore) can't be built from source on Windows here,
-      # so install the ITKR release binary, as ANTsRCore's CI does.
-      # ANTsRCore is then built from source against it.
+      # ANTsRCore releases ship Windows and macOS binaries; installing one
+      # skips a ~55 min ANTs build. ITKR is only LinkingTo for ANTsRCore, so
+      # a prebuilt ANTsRCore doesn't need it. Assets are named
+      #   Windows: ANTsRCore_<ver>_<rlabel>-R<x.y>.zip
+      #   macOS:   ANTsRCore_<ver>_macos-<arm64|x86_64>_<rlabel>-R<x.y>.<tgz|tar.xz>
+      # Releases up to 0.8.3 built macOS on arm64 only, without the arch in
+      # .tgz names, so those count as arm64. No match: build from source.
+      - name: Install ANTsRCore release binary - WINDOWS/MACOS
+        id: antsrcore
+        if: runner.os != 'Linux'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rver=$(Rscript -e 'cat(R.version$major, sub("[.].*", "", R.version$minor), sep = ".")')
+          arch=$(Rscript -e 'cat(R.version$arch)')
+          [ "$arch" = "aarch64" ] && arch=arm64
+          rver_re=${rver//./\\.}
+          assets=$(gh release view --repo ANTsX/ANTsRCore --json assets --jq '.assets[].name')
+          # grep exits 1 on no match, which would end this step under pipefail
+          pick() { grep "$@" | head -n 1 || true; }
+          asset=
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            if [ "$arch" = "x86_64" ]; then
+              asset=$(pick -E "^ANTsRCore_.*-R${rver_re}\.zip$" <<< "$assets")
+            fi
+          else
+            matches=$(grep -E "^ANTsRCore_.*-R${rver_re}\.(tgz|tar\.xz)$" <<< "$assets" || true)
+            asset=$(pick -E "_macos-${arch}_" <<< "$matches")
+            if [ -z "$asset" ] && [ "$arch" = "arm64" ]; then
+              asset=$(pick -v "_macos-" <<< "$matches")
+            fi
+          fi
+          if [ -z "$asset" ]; then
+            echo "::notice::No ANTsRCore binary for R ${rver} on ${RUNNER_OS} ${arch}; building from source"
+            echo "installed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Installing ${asset} for R ${rver} on ${RUNNER_OS} ${arch}"
+          dest="${RUNNER_TEMP}/${asset}"
+          gh release download --repo ANTsX/ANTsRCore --pattern "$asset" --output "$dest"
+          Rscript -e 'install.packages("Rcpp")'
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            Rscript -e 'install.packages(commandArgs(TRUE), repos = NULL, type = "win.binary")' "$(cygpath -m "$dest")"
+          else
+            R CMD INSTALL "$dest"
+          fi
+          if Rscript -e 'library(ANTsRCore); cat("ANTsRCore", format(packageVersion("ANTsRCore")), "\n")'; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::${asset} did not load; building ANTsRCore from source"
+            Rscript -e 'remove.packages("ANTsRCore")' || true
+            echo "installed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Source fallback on Windows: ITKR can't be built from source there, so
+      # install the ITKR release binary, as ANTsRCore's CI does, then build
+      # ANTsRCore against it. On macOS pak builds both from the Remotes.
       - name: Install ITKR binary - WINDOWS
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && steps.antsrcore.outputs.installed != 'true'
         shell: Rscript {0}
         run: |
           asset <- Sys.getenv("ITKR_RELEASE_ASSET")
@@ -96,9 +153,9 @@ jobs:
 
       # ANTsRCore's own Remotes point at ANTsX/ITKR, so pak replaced the ITKR
       # binary with a ~55 min source build. Build ANTsRCore without its Remotes
-      # against the binary, then drop ANTsR's Remotes so pak keeps both.
+      # against the binary.
       - name: Install ANTsRCore against ITKR binary - WINDOWS
-        if: runner.os == 'Windows'
+        if: runner.os == 'Windows' && steps.antsrcore.outputs.installed != 'true'
         shell: Rscript {0}
         run: |
           src <- file.path(tempdir(), "ANTsRCore")
@@ -115,6 +172,12 @@ jobs:
           install.packages(src, repos = NULL, type = "source", INSTALL_opts = "--no-multiarch")
           if (!requireNamespace("ANTsRCore", quietly = TRUE)) stop("ANTsRCore did not install")
 
+      # ANTsR's Remotes would make pak reinstall ANTsRCore (and ITKR) from
+      # GitHub source over the one installed above, so drop them.
+      - name: Drop Remotes for the installed ANTsRCore
+        if: steps.antsrcore.outputs.installed == 'true' || runner.os == 'Windows'
+        shell: Rscript {0}
+        run: |
           lines <- readLines("DESCRIPTION", warn = FALSE)
           start <- grep("^Remotes:", lines)
           if (length(start)) {
