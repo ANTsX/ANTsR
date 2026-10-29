@@ -2,6 +2,20 @@
 # Release notes
 
 
+## Development version
+
+* FIX: the SiMLR optimizer generic `step()` has been renamed to
+  `optimizer_step()` (methods are now `optimizer_step.adam()`,
+  `optimizer_step.nadam()`, ...). The exported `step()` generic masked
+  `stats::step()`, so `step(lm(...))` failed with "no applicable method"
+  once ANTsR was attached. ANTsR no longer exports `step()`; code that called
+  `step(optimizer, ...)` (or `ANTsR::step()`) directly should call
+  `optimizer_step()` instead.
+
+* FIX: `sd()` on non-`antsImage` input ignored `na.rm`, so
+  `sd(c(1, 2, NA, 4), na.rm = TRUE)` returned `NA` once ANTsR was attached.
+  It now matches `stats::sd()`.
+
 ## 0.4.0
 
 * ENH: better compilation and release style.

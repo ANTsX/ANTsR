@@ -13,5 +13,5 @@ list_simlr_optimizers(torch = FALSE)
 A character vector of optimizer names (e.g., "adam", "nadam", etc.)
 }
 \description{
-Dynamically returns the names of all optimizer types with registered `step.*` methods.
+Dynamically returns the names of all optimizer types with registered `optimizer_step.*` methods.
 }
