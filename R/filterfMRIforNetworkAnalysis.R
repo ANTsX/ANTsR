@@ -84,8 +84,6 @@ filterfMRIforNetworkAnalysis <- function(
     print(myusage)
     return(NULL)
   }
-  freqLo <- freqLo * tr
-  freqHi <- freqHi * tr
   # network analysis
   # wb <- (mask > 0)  # whole brain
   if (!usePkg("magic")) {
@@ -180,7 +178,7 @@ filterfMRIforNetworkAnalysis <- function(
         }
       }
     }
-    if (!is.na(nuisancein)) {
+    if (!all(is.na(nuisancein))) {
       tlabmat <- cbind(tlabmat, nuisancein)
       ocormat <- cor(tlabmat, tlabmat)
     }
@@ -202,10 +200,10 @@ filterfMRIforNetworkAnalysis <- function(
           rgdens <- (0.5 * sum(gcormat > 0 & gcormat < 1) / (0.5 * ncol(gcormat) * (ncol(gcormat) - 1)))
         }
     }
-    if (!is.na(nuisancein)) pcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
-    if (!is.na(nuisancein)) gcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
-    if (!is.na(nuisancein)) cormat <- cormat[1:nbrainregions, 1:nbrainregions]
-    if (!is.na(nuisancein)) ocormat <- ocormat[1:nbrainregions, 1:nbrainregions]
+    if (!all(is.na(nuisancein))) pcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
+    if (!all(is.na(nuisancein))) gcormat <- gcormat[1:nbrainregions, 1:nbrainregions]
+    if (!all(is.na(nuisancein))) cormat <- cormat[1:nbrainregions, 1:nbrainregions]
+    if (!all(is.na(nuisancein))) ocormat <- ocormat[1:nbrainregions, 1:nbrainregions]
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
     L <- list(
       filteredTimeSeries = filteredTimeSeries,
