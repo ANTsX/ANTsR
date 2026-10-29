@@ -50,6 +50,10 @@ fusedRidge(
 
 \item{nfolds}{Number of folds for cross-validation (defaults to 10).}
 
+\item{cv}{Boolean indicating whether to select the Ridge lambda by \code{glmnet::cv.glmnet}. If \code{FALSE} and \code{lambda} is \code{NULL}, a lambda of 1 is used. Defaults to TRUE.}
+
+\item{lambda}{Optional numeric value. If provided, CV is skipped and the model is fit directly using the specified lambda value.}
+
 \item{...}{Additional arguments passed to \code{glmnet::cv.glmnet} and \code{glmnet::glmnet}.}
 }
 \value{
