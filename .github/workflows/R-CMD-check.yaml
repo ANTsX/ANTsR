@@ -96,7 +96,8 @@ jobs:
           echo "Installing ${asset} for R ${rver} on ${RUNNER_OS} ${arch}"
           dest="${RUNNER_TEMP}/${asset}"
           gh release download --repo ANTsX/ANTsRCore --pattern "$asset" --output "$dest"
-          Rscript -e 'install.packages("Rcpp")'
+          # Rscript from Windows bash doesn't see the mirror setup-r configures
+          Rscript -e 'r <- getOption("repos"); if (!any(grepl("^http", r))) r <- c(CRAN = "https://cloud.r-project.org"); install.packages("Rcpp", repos = r)'
           if [ "$RUNNER_OS" = "Windows" ]; then
             Rscript -e 'install.packages(commandArgs(TRUE), repos = NULL, type = "win.binary")' "$(cygpath -m "$dest")"
           else
