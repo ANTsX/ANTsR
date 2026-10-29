@@ -18,14 +18,26 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          # ubuntu-latest (26.04, GCC 15) fails building ITKR from source until
+          # ANTsX/ITKR picks up ITK 4f275769e3; ubuntu-24.04 (GCC 13) builds.
           - {os: ubuntu-latest,   r: 'release'}
-#          - { os: macos-13, r: "release" }
-#          - { os: macos-latest, r: "release" }
+          - {os: ubuntu-24.04,    r: 'release'}
+          - {os: macos-latest,    r: 'release'}
+          # R >= 4.7 ships macOS binaries as .tar.xz, not .tgz
+          - {os: macos-latest,    r: 'devel'}
+          - {os: windows-latest,  r: 'release'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS: '1'
+      OMP_NUM_THREADS: '1'
+      OPENBLAS_NUM_THREADS: '1'
+      MKL_NUM_THREADS: '1'
+      MPLBACKEND: Agg
       R_KEEP_PKG_SOURCE: yes
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
+      ITKR_RELEASE_ASSET: ITKR-release.zip
+      ITKR_FALLBACK_TAG: v0.6.0.2.1
 
     steps:
       - uses: actions/checkout@v4
@@ -36,21 +48,197 @@ jobs:
         with:
           use-public-rspm: true
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: |
-            any::rcmdcheck
-            any::ANTsRCore
-            any::ITKR
-          needs: check
-
-      - name: Build HDF5 - LINUX
+      # hdf5r needs libhdf5, and building ITKR from source needs cmake
+      - name: Install system dependencies - LINUX
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get update
           sudo apt-get install -y libhdf5-dev cmake
 
+      # ANTsRCore releases ship Windows and macOS binaries; installing one
+      # skips a ~55 min ANTs build. ITKR is only LinkingTo for ANTsRCore, so
+      # a prebuilt ANTsRCore doesn't need it. Assets are named
+      #   Windows: ANTsRCore_<ver>_<rlabel>-R<x.y>.zip
+      #   macOS:   ANTsRCore_<ver>_macos-<arm64|x86_64>_<rlabel>-R<x.y>.<tgz|tar.xz>
+      # Releases up to 0.8.3 built macOS on arm64 only, without the arch in
+      # .tgz names, so those count as arm64. No match: build from source.
+      - name: Install ANTsRCore release binary - WINDOWS/MACOS
+        id: antsrcore
+        if: runner.os != 'Linux'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rver=$(Rscript -e 'cat(R.version$major, sub("[.].*", "", R.version$minor), sep = ".")')
+          arch=$(Rscript -e 'cat(R.version$arch)')
+          [ "$arch" = "aarch64" ] && arch=arm64
+          rver_re=${rver//./\\.}
+          assets=$(gh release view --repo ANTsX/ANTsRCore --json assets --jq '.assets[].name')
+          # grep exits 1 on no match, which would end this step under pipefail
+          pick() { grep "$@" | head -n 1 || true; }
+          asset=
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            if [ "$arch" = "x86_64" ]; then
+              asset=$(pick -E "^ANTsRCore_.*-R${rver_re}\.zip$" <<< "$assets")
+            fi
+          else
+            matches=$(grep -E "^ANTsRCore_.*-R${rver_re}\.(tgz|tar\.xz)$" <<< "$assets" || true)
+            asset=$(pick -E "_macos-${arch}_" <<< "$matches")
+            if [ -z "$asset" ] && [ "$arch" = "arm64" ]; then
+              asset=$(pick -v "_macos-" <<< "$matches")
+            fi
+          fi
+          if [ -z "$asset" ]; then
+            echo "::notice::No ANTsRCore binary for R ${rver} on ${RUNNER_OS} ${arch}; building from source"
+            echo "installed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Installing ${asset} for R ${rver} on ${RUNNER_OS} ${arch}"
+          dest="${RUNNER_TEMP}/${asset}"
+          gh release download --repo ANTsX/ANTsRCore --pattern "$asset" --output "$dest"
+          # Rscript from Windows bash doesn't see the mirror setup-r configures
+          Rscript -e 'r <- getOption("repos"); if (!any(grepl("^http", r))) r <- c(CRAN = "https://cloud.r-project.org"); install.packages("Rcpp", repos = r)'
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            Rscript -e 'install.packages(commandArgs(TRUE), repos = NULL, type = "win.binary")' "$(cygpath -m "$dest")"
+          else
+            R CMD INSTALL "$dest"
+          fi
+          if Rscript -e 'library(ANTsRCore); cat("ANTsRCore", format(packageVersion("ANTsRCore")), "\n")'; then
+            echo "installed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::${asset} did not load; building ANTsRCore from source"
+            Rscript -e 'remove.packages("ANTsRCore")' || true
+            echo "installed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Source fallback on Windows: ITKR can't be built from source there, so
+      # install the ITKR release binary, as ANTsRCore's CI does, then build
+      # ANTsRCore against it. On macOS pak builds both from the Remotes.
+      - name: Install ITKR binary - WINDOWS
+        if: runner.os == 'Windows' && steps.antsrcore.outputs.installed != 'true'
+        shell: Rscript {0}
+        run: |
+          asset <- Sys.getenv("ITKR_RELEASE_ASSET")
+          url <- sprintf("https://github.com/ANTsX/ITKR/releases/latest/download/%s", asset)
+          dest <- file.path(tempdir(), asset)
+          unpack <- file.path(tempdir(), "ITKR_unpack")
+          dir.create(unpack, recursive = TRUE, showWarnings = FALSE)
+          # ITKR v0.6.1 doesn't publish ITKR-release.zip; fall back to the last
+          # release that does until the latest one has it again
+          ok <- tryCatch(download.file(url, dest, mode = "wb", quiet = TRUE) == 0,
+            error = function(e) FALSE, warning = function(w) FALSE)
+          if (!ok) {
+            url <- sprintf("https://github.com/ANTsX/ITKR/releases/download/%s/%s",
+              Sys.getenv("ITKR_FALLBACK_TAG"), asset)
+            message("Falling back to ", url)
+            download.file(url, dest, mode = "wb", quiet = TRUE)
+          }
+          unzip(dest, exdir = unpack)
+
+          desc <- list.files(unpack, pattern = "^DESCRIPTION$", recursive = TRUE, full.names = TRUE)[1]
+          if (is.na(desc)) stop(sprintf("Could not find DESCRIPTION inside %s", asset))
+          dcf <- read.dcf(desc)
+          fields <- intersect(c("Depends", "Imports", "LinkingTo"), colnames(dcf))
+          deps <- setdiff(names(tools:::.split_dependencies(dcf[1, fields])), c("R", rownames(installed.packages(priority = "base"))))
+          if (length(deps)) install.packages(deps)
+
+          # re-zip the package folder so it installs as a standard win.binary
+          pkgdir <- dirname(desc)
+          ver <- dcf[1, "Version"]
+          itkr_zip <- normalizePath(file.path(getwd(), paste0("ITKR_", ver, ".zip")), winslash = "/", mustWork = FALSE)
+          owd <- setwd(dirname(pkgdir))
+          zip(itkr_zip, files = list.files(basename(pkgdir), recursive = TRUE, full.names = TRUE))
+          setwd(owd)
+          install.packages(itkr_zip, repos = NULL, type = "win.binary")
+          if (!requireNamespace("ITKR", quietly = TRUE)) stop("ITKR binary did not install")
+
+      # ANTsRCore's own Remotes point at ANTsX/ITKR, so pak replaced the ITKR
+      # binary with a ~55 min source build. Build ANTsRCore without its Remotes
+      # against the binary.
+      - name: Install ANTsRCore against ITKR binary - WINDOWS
+        if: runner.os == 'Windows' && steps.antsrcore.outputs.installed != 'true'
+        shell: Rscript {0}
+        run: |
+          src <- file.path(tempdir(), "ANTsRCore")
+          status <- system2("git", c("clone", "--depth", "1", "https://github.com/ANTsX/ANTsRCore", src))
+          if (status != 0) stop("Could not clone ANTsX/ANTsRCore")
+
+          desc <- file.path(src, "DESCRIPTION")
+          dcf <- read.dcf(desc)
+          write.dcf(dcf[, colnames(dcf) != "Remotes", drop = FALSE], desc)
+          fields <- intersect(c("Depends", "Imports", "LinkingTo"), colnames(dcf))
+          deps <- setdiff(names(tools:::.split_dependencies(dcf[1, fields])), c("R", rownames(installed.packages())))
+          if (length(deps)) install.packages(deps)
+
+          install.packages(src, repos = NULL, type = "source", INSTALL_opts = "--no-multiarch")
+          if (!requireNamespace("ANTsRCore", quietly = TRUE)) stop("ANTsRCore did not install")
+
+      # ANTsR's Remotes would make pak reinstall ANTsRCore (and ITKR) from
+      # GitHub source over the one installed above, so drop them.
+      - name: Drop Remotes for the installed ANTsRCore
+        if: steps.antsrcore.outputs.installed == 'true' || runner.os == 'Windows'
+        shell: Rscript {0}
+        run: |
+          lines <- readLines("DESCRIPTION", warn = FALSE)
+          start <- grep("^Remotes:", lines)
+          if (length(start)) {
+            end <- start
+            while (end < length(lines) && grepl("^\\s", lines[end + 1])) end <- end + 1
+            lines <- lines[-(start:end)]
+          }
+          writeLines(lines, "DESCRIPTION")
+
+      # ANTsRCore and ITKR aren't on CRAN; they come from DESCRIPTION Remotes
+      - uses: actions/setup-python@v5
+        id: python
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: .github/requirements-ci.txt
+
+      - name: Install Python test dependencies
+        run: python -m pip install --extra-index-url https://download.pytorch.org/whl/cpu -r .github/requirements-ci.txt
+
+      - name: Select Python for reticulate
+        shell: Rscript {0}
+        env:
+          ANTSR_TEST_PYTHON: ${{ steps.python.outputs.python-path }}
+        run: |
+          python <- normalizePath(Sys.getenv("ANTSR_TEST_PYTHON"), winslash = "/", mustWork = TRUE)
+          cat("RETICULATE_PYTHON=", python, "\n", sep = "",
+            file = Sys.getenv("GITHUB_ENV"), append = TRUE)
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+
+      # Stream installation output: R CMD build otherwise hides it while
+      # installing ANTsR before building vignettes, where Windows stalled.
+      - name: Install ANTsR with live diagnostics - WINDOWS
+        if: runner.os == 'Windows'
+        timeout-minutes: 30
+        shell: bash
+        run: R CMD INSTALL --no-multiarch . 2>&1 | tee antsr-install.log
+
+      # On Windows the install R CMD build does before building vignettes
+      # hangs until the 6h job limit, even though the install above succeeds,
+      # so skip vignettes there; other platforms still build them.
       - uses: r-lib/actions/check-r-package@v2
+        timeout-minutes: 120
         with:
           upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          build_args: ${{ runner.os == 'Windows' && 'c("--no-manual","--no-build-vignettes")' || 'c("--no-manual","--compact-vignettes=gs+qpdf")' }}
+          args: ${{ runner.os == 'Windows' && 'c("--no-manual","--as-cran","--ignore-vignettes")' || 'c("--no-manual","--as-cran")' }}
           error-on: '"error"'
+
+      - name: Upload Windows installation diagnostics
+        if: always() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installation-diagnostics
+          path: |
+            antsr-install.log
+            check/**/*.out
+            check/**/*.log
+          if-no-files-found: ignore
