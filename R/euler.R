@@ -68,7 +68,8 @@ euler <- function(u, df, fieldType) {
     ec[4] <- ((4 * log(2)) / (2 * pi))^(3 / 2) * (u^(1 / 2 * (df[2] - 1)) * exp(-u / 2 - lgamma(df[2] / 2)) / 2^((df[2] -
       2) / 2)) * (u^2 - (2 * df[2] - 1) * u + (df[2] - 1) * (df[2] - 2))
   } else if (fieldType == "Z") {
-    ec[1] <- 1 - pnorm(u, df[2])
+    # Gaussian field: rho_0 = 1 - Phi(u) (Worsley et al., 1996); df unused
+    ec[1] <- 1 - pnorm(u)
     ec[2] <- (4 * log(2))^(1 / 2) / (2 * pi) * exp(-u^2 / 2)
     ec[3] <- (4 * log(2)) / ((2 * pi)^(3 / 2)) * exp(-u^2 / 2) * u
     ec[4] <- (4 * log(2))^(3 / 2) / ((2 * pi)^2) * exp(-u^2 / 2) * (u^2 - 1)

@@ -55,12 +55,16 @@ taskFMRI <- function(
   mask <- myvars$mask
   nuis <- (myvars$nuisancevariables)
   betas <- rep(NA, ncol(mat))
-  desmat <- as.matrix(cbind(myvars$globalsignal, nuis))
+  # name the columns explicitly so that the formula terms (hrf,
+  # globalsignal, ...) are found in the design data frame
+  desmat <- cbind(
+    globalsignal = as.numeric(myvars$globalsignal),
+    as.matrix(nuis)
+  )
   if (residualizedesignmatrix) {
     desmat <- residuals(lm(desmat ~ hrf))
   }
-  desmat <- cbind(hrf, desmat)
-  colnames(desmat) <- c(colnames(hrf), colnames(desmat))
+  desmat <- cbind(hrf = as.numeric(hrf), desmat)
   print(colnames(desmat))
   ####################################################### Statistical methods of estimation and inference for # functional MR image
   ####################################################### analysis Bullmore 1996 #
@@ -110,12 +114,14 @@ taskFMRI <- function(
     print(paste("final arcoefs", arcoefs))
     print(paste("initi arcoefs", initialarcoefs))
   }
+  # final glm uses the (whitened, if requested) design and nuisance terms
+  myformvox <- as.formula(paste("vox ~  hrf + ", myformula))
   progress <- txtProgressBar(min = 0, max = ncol(mat), style = 3)
   for (i in 1:ncol(amat)) {
     vox <- amat[, i]
     # mdl<-lmrob( vox ~ hrf, data = data.frame( adesmat ) )
-    mdl <- lm(vox ~ hrf, data = data.frame(desmat))
-    betas[i] <- coefficients(summary(mdl))[2, 3] # probably better way
+    mdl <- lm(myformvox, data = data.frame(adesmat))
+    betas[i] <- coefficients(summary(mdl))["hrf", 3] # probably better way
     # betas[i]<-cor.test( vox , hrf )$est
     setTxtProgressBar(progress, i)
   }

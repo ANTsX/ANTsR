@@ -168,7 +168,9 @@ aslCensoring <- function(asl, mask = NULL, nuis = NA, method = "outlier",
   }
 
   scor <- function(asl) {
-    npairs <- dim(asl)[1]
+    # asl is a time x voxel matrix (from timeseries2matrix): rows are frames
+    asl <- t(asl) # voxel x time, so columns index timepoints below
+    npairs <- dim(asl)[2]
     indices <- 1:npairs
     meancbf <- apply(asl, 1, mean)
     var.tot <- var(meancbf)
@@ -185,10 +187,13 @@ aslCensoring <- function(asl, mask = NULL, nuis = NA, method = "outlier",
         tmp <- asl[, timepoint]
         cc[timepoint] <- cor(meancbf, tmp)
       }
-      indices[which.max(cc)] <- NA
-      meancbf <- apply(asl[, indices[!is.na(indices)]], 1, mean)
+      removed <- which.max(cc)
+      indices[removed] <- NA
+      meancbf <- apply(asl[, indices[!is.na(indices)], drop = FALSE], 1, mean)
       var.tot <- var(meancbf)
     }
+    # the last removal did not reduce the variance, so keep that frame
+    indices[removed] <- removed
     indices.out <- rep(1, length(indices))
     indices.out[which(is.na(indices))] <- 0
     which(indices.out == 0)

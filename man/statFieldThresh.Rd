@@ -31,7 +31,9 @@ statFieldThresh(
 
 \item{resels}{resolution elements in search region}
 
-\item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error)}
+\item{df}{degrees of freedom expressed as df = c(degrees of interest, degrees of error).
+Following \code{\link{euler}}, T- and chi-square fields use \code{df[2]},
+F-fields use \code{df[1]} and \code{df[2]}.}
 
 \item{fieldType}{\describe{
 \item{T: }{T-field}

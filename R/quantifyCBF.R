@@ -125,7 +125,8 @@ quantifyCBF <- function(
     cbf[!is.finite(cbf)] <- 0
 
     if (hasTime) {
-      meancbf <- getAverageOfTimeSeries(cbf)
+      # cbf is a plain array here, so average over the last (time) axis
+      meancbf <- apply(cbf, seq_len(length(dim(cbf)) - 1), mean)
     } else {
       meancbf <- cbf
     }
@@ -206,12 +207,15 @@ quantifyCBF <- function(
     }
     TI <- slicetime * sliceTimeMat + delaytime + TI1
 
-    Aprim <- A * exp(((1 / T2wm) - (1 / T2b) * TE))
+    # T2 correction of the white-matter-referenced M0 to blood (ASLtbx;
+    # Wang et al. 2003 / Chen et al. 2011): exp((1/T2wm - 1/T2b) * TE)
+    Aprim <- A * exp(((1 / T2wm) - (1 / T2b)) * TE)
     cbf <- (3000 * 1000 * perf) / (Aprim * M0 * exp(-TI / T1b) * TI1 * alpha)
     cbf[!is.finite(cbf)] <- 0
 
     if (hasTime) {
-      meancbf <- getAverageOfTimeSeries(cbf)
+      # cbf is a plain array here, so average over the last (time) axis
+      meancbf <- apply(cbf, seq_len(length(dim(cbf)) - 1), mean)
     } else {
       meancbf <- cbf
     }

@@ -44,7 +44,7 @@ compcor <- function(
   if (inherits(fmri, "matrix")) {
     mat <- fmri
   }
-  if (is.na(highvarmatinds)) {
+  if (all(is.na(highvarmatinds))) {
     temporalvar <- apply(mat, 2, var)
     tvhist <- hist(temporalvar, breaks = c("FD"), plot = FALSE)
     percvar <- variance_extreme # percentage of high variance data to use
@@ -54,7 +54,7 @@ compcor <- function(
     thresh <- max(tvhist$mids[wh])
     highvarmatinds <- which(temporalvar > thresh)
   }
-  highvarmat <- mat[, highvarmatinds]
+  highvarmat <- mat[, highvarmatinds, drop = FALSE]
   if (scale) highvarmat <- scale(highvarmat, scale = FALSE)
   if (returnhighvarmatinds) {
     return(highvarmatinds)
@@ -62,7 +62,7 @@ compcor <- function(
   if (!returnv) {
     compcorrsvd <- svd(highvarmat, nu = ncompcor, nv = 0)
     if (ncompcor > 0) {
-      compcorr <- (compcorrsvd$u[, 1:ncompcor])
+      compcorr <- (compcorrsvd$u[, 1:ncompcor, drop = FALSE])
       compcorrnames <- paste("compcorr", c(1:ncol(compcorr)), sep = "")
       nuis <- compcorr
       colnames(nuis) <- c(compcorrnames)
@@ -72,7 +72,7 @@ compcor <- function(
   if (returnv) {
     compcorrsvd <- svd(highvarmat, nu = 0, nv = ncompcor)
     if (ncompcor > 0) {
-      compcorr <- (compcorrsvd$v[, 1:ncompcor])
+      compcorr <- (compcorrsvd$v[, 1:ncompcor, drop = FALSE])
       compcorrnames <- paste("compcorr", c(1:ncol(compcorr)), sep = "")
       nuis <- compcorr
       colnames(nuis) <- c(compcorrnames)
