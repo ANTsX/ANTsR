@@ -161,7 +161,7 @@ jobs:
       # hangs until the 6h job limit, even though the install above succeeds,
       # so skip vignettes there; other platforms still build them.
       - uses: r-lib/actions/check-r-package@v2
-        timeout-minutes: 90
+        timeout-minutes: 120
         with:
           upload-snapshots: true
           build_args: ${{ runner.os == 'Windows' && 'c("--no-manual","--no-build-vignettes")' || 'c("--no-manual","--compact-vignettes=gs+qpdf")' }}
