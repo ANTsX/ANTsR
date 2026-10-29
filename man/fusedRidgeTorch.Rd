@@ -64,6 +64,8 @@ fusedRidgeTorch(
 
 \item{sparsity_thresh}{Hard threshold for sparsity post-optimization. Any coefficient smaller in absolute value is zeroed out. Defaults to 1e-4.}
 
+\item{lambda}{Optional numeric value. If provided, CV is skipped and the model is fit directly using the specified lambda value.}
+
 \item{...}{Additional arguments (currently ignored).}
 }
 \value{

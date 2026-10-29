@@ -154,7 +154,7 @@ mat3 <- (outcome %*% t(outcome3) %*% (outcome3)) %*% view3tx
 matlist <- list(vox = mat1, vox2 = mat2, vox3 = mat3)
 result <- simlr(matlist)
 
-fn="/tmp/DANKZ"
+fn <- tempfile("simlr-roundtrip-")
 test_simlr_roundtrip(result, fn )
 rr=read_simlr( paste0(fn,"_simlr") )
 # rr=read_simlr("~/Downloads/ASS_simlr")

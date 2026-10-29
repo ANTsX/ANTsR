@@ -105,7 +105,9 @@ Suggests:
     progress,
     forcats
 LazyData: TRUE
-Additional_repositories: https://antsx.github.io/drat
+Remotes:
+    ANTsX/ANTsRCore,
+    ANTsX/ITKR
 VignetteBuilder: knitr
 Encoding: UTF-8
 Config/roxygen2/version: 8.0.0
