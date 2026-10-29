@@ -1,0 +1,6 @@
+# Python 3.11; the R wrappers require the nsa_flow 1.x API.
+# Keep this separate from the R package named torch.
+numpy<2
+torch==2.5.1
+scikit-learn
+nsa_flow @ git+https://github.com/stnava/nsa_flow.git@6064e8dbc6a1821e0a40331d97d5b20546ae73f9
