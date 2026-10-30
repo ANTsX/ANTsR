@@ -77,6 +77,7 @@ randomlyTransformImageData <- function( referenceImage,
     image, fixedParameters, transformType = 'affine', sdAffine = 0.02 )
     {
 
+    # same as ants.polar_decomposition() in ANTsPy
     polarDecomposition <- function( X )
       {
       svdX <- svd( X )
@@ -84,9 +85,9 @@ randomlyTransformImageData <- function( referenceImage,
       Z <- svdX$u %*% t( svdX$v )
       if( det( Z ) < 0 )
         {
-        D <- diag( nrow( X ) )
-        D[1, 1] <- -1.0
-        Z <- Z %*% D
+        uPrime <- svdX$u
+        uPrime[, ncol( uPrime )] <- -uPrime[, ncol( uPrime )]
+        Z <- uPrime %*% t( svdX$v )
         }
       return( list( P = P, Z = Z, Xtilde = P %*% Z ) )
       }
@@ -102,13 +103,14 @@ randomlyTransformImageData <- function( referenceImage,
       {
       randomEpsilon[1:( length( identityParameters ) - image@dimension )] <- 0
       } else if( transformType == 'rotation' ) {
-      randomEpsilon[( length( identityParameters ) - image@dimension ):length( randomEpsilon )] <- 0
+      randomEpsilon[( length( identityParameters ) - image@dimension + 1 ):length( randomEpsilon )] <- 0
       }
 
     randomParameters <- identityParameters + randomEpsilon
+    # ITK stores the affine matrix row-major
     randomMatrix <- matrix( randomParameters[
       1:( length( randomParameters ) - image@dimension )],
-        ncol = image@dimension )
+        ncol = image@dimension, byrow = TRUE )
     decomposition <- polarDecomposition( randomMatrix )
 
     if( transformType == "rotation" || transformType == "rigid" )
@@ -125,7 +127,7 @@ randomlyTransformImageData <- function( referenceImage,
       }
 
     randomParameters[1:( length( identityParameters ) - image@dimension )] <-
-      as.numeric( randomMatrix )
+      as.numeric( t( randomMatrix ) )
     setAntsrTransformParameters( transform, randomParameters )
     return( transform )
     }
@@ -204,7 +206,7 @@ randomlyTransformImageData <- function( referenceImage,
         fixedParameters, 'affine', sdAffine )
       transforms <- list( deformableTransform, linearTransform )
       }
-    else( transformType %in% admissibleTransforms[1:4] )
+    else
       {
       linearTransform <- createRandomLinearTransform( referenceImage,
         fixedParameters, transformType, sdAffine )
@@ -218,7 +220,7 @@ randomlyTransformImageData <- function( referenceImage,
       singleSubjectImage <- singleSubjectImageList[[j]]
       singleSubjectSimulatedImageList[[j]] <- applyAntsrTransform(
         simulatedTransforms[[i]], singleSubjectImage, referenceImage,
-        interpolation = inputImageInterpolator )
+        interpolation = tolower( inputImageInterpolator ) )
       }
     simulatedImageList[[i]] <- singleSubjectSimulatedImageList
 
@@ -226,7 +228,7 @@ randomlyTransformImageData <- function( referenceImage,
       {
       simulatedSegmentationImageList[[i]] <- applyAntsrTransform(
         simulatedTransforms[[i]], singleSubjectSegmentationImage, referenceImage,
-          interpolation = segmentationImageInterpolator )
+          interpolation = tolower( segmentationImageInterpolator ) )
       }
     }
 
