@@ -369,6 +369,7 @@ test_that("fusedRidgeDirect cross-validation tunes lambda correctly", {
 })
 
 test_that("fusedRidgeTorch dimensional consistency", {
+  skip_if_no_torch()
   set.seed(42)
   N <- 50
   M <- 10
@@ -390,6 +391,7 @@ test_that("fusedRidgeTorch dimensional consistency", {
 })
 
 test_that("fusedRidgeTorch handles null covariates", {
+  skip_if_no_torch()
   set.seed(42)
   N <- 40
   M <- 8
@@ -422,6 +424,7 @@ test_that("fusedRidgeTorch error handling on dimension mismatch", {
 })
 
 test_that("predict.fusedRidgeTorch works correctly", {
+  skip_if_no_torch()
   set.seed(42)
   N <- 30
   M <- 4
@@ -466,6 +469,7 @@ test_that("predict.fusedRidgeTorch works correctly", {
 })
 
 test_that("fusedRidgeTorch fits correctly with topK option", {
+  skip_if_no_torch()
   set.seed(42)
   N <- 50
   M <- 10
@@ -493,6 +497,7 @@ test_that("fusedRidgeTorch fits correctly with topK option", {
 })
 
 test_that("fusedRidgeTorch supports alternative families (gaussian, poisson)", {
+  skip_if_no_torch()
   set.seed(42)
   N <- 30
   M <- 5
@@ -522,6 +527,7 @@ test_that("fusedRidgeTorch supports alternative families (gaussian, poisson)", {
 })
 
 test_that("fusedRidgeTorch cross-validation tunes lambda correctly", {
+  skip_if_no_torch()
   set.seed(42)
   N <- 40
   M <- 8
@@ -552,6 +558,7 @@ test_that("fusedRidgeTorch cross-validation tunes lambda correctly", {
 })
 
 test_that("fusedRidgeTorch intrinsic sparsity works correctly", {
+  skip_if_no_torch()
   set.seed(42)
   N <- 50
   M <- 10
@@ -576,6 +583,7 @@ test_that("fusedRidgeTorch intrinsic sparsity works correctly", {
 })
 
 test_that("fusedRidge implementations parity and scaling consistency", {
+  skip_if_no_torch()
   set.seed(123)
   N <- 60
   M <- 8

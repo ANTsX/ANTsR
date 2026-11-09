@@ -94,7 +94,11 @@ jobs:
             exit 0
           fi
           echo "Installing ${asset} for R ${rver} on ${RUNNER_OS} ${arch}"
-          dest="${RUNNER_TEMP}/${asset}"
+          # R infers the package name from a binary's file name, so save it as
+          # the standard ANTsRCore_<ver>.<ext> rather than the asset name
+          ver=$(cut -d_ -f2 <<< "$asset")
+          ext=${asset##*-R${rver}.}
+          dest="${RUNNER_TEMP}/ANTsRCore_${ver}.${ext}"
           gh release download --repo ANTsX/ANTsRCore --pattern "$asset" --output "$dest"
           # Rscript from Windows bash doesn't see the mirror setup-r configures
           Rscript -e 'r <- getOption("repos"); if (!any(grepl("^http", r))) r <- c(CRAN = "https://cloud.r-project.org"); install.packages("Rcpp", repos = r)'

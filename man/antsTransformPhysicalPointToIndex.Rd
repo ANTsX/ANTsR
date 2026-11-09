@@ -9,10 +9,13 @@ antsTransformPhysicalPointToIndex(x, point)
 \arguments{
 \item{x}{Image object of S4 class 'antsImage' to get values from.}
 
-\item{point}{image physical point}
+\item{point}{image physical point, either a vector of length
+\code{x@dimension} or an N x \code{x@dimension} matrix with one
+point per row.}
 }
 \value{
-array of pixel values
+continuous (1-based) index / indices: a vector for a vector
+\code{point}, otherwise an N x \code{x@dimension} matrix.
 }
 \description{
 Get index from spatial point of an 'antsImage'.
