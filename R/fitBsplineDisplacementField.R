@@ -121,7 +121,8 @@ fitBsplineDisplacementField <- function(
   if (!is.null(displacementOrigins)) {
     if (!is.null(displacementWeights) && (length(displacementWeights) != nrow(displacementOrigins))) {
       stop("Error:  length of displacement weights must match the number of displacement points.")
-    } else {
+    }
+    if (is.null(displacementWeights)) {
       displacementWeights <- rep(1.0, nrow(displacementOrigins))
     }
   }

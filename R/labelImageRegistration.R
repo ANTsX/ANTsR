@@ -214,7 +214,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       }
     writeAntsrTransform( linearXfrm, linearXfrmFile )
     initialXfrmFiles <- append( initialXfrmFiles, linearXfrmFile )
-    } else if( ! is.null( initialTransforms ) || initialTransforms == "identity" ) {
+    } else {
 
     if( doDeformable )
       {
@@ -234,8 +234,10 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
         }
       }
 
-    if( initialTransforms != 'identity' )
-      { 
+    if( ! is.null( initialTransforms ) &&
+        ! ( length( initialTransforms ) == 1 && initialTransforms == 'identity' ) )
+      {
+      initialTransforms <- unlist( initialTransforms )
       for( i in seq.int( length( initialTransforms ) ) )
         {
         if( ! file.exists( initialTransforms[i] ) )
