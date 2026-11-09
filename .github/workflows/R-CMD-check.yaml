@@ -100,6 +100,8 @@ jobs:
           args: ${{ runner.os == 'Windows' && 'c("--no-manual","--as-cran","--ignore-vignettes")' || 'c("--no-manual","--as-cran")' }}
           error-on: '"error"'
 
+      # ANTsR-Ex.Rout is written as examples run, so after a timeout its last
+      # lines name the example that hung
       - name: Upload Windows installation diagnostics
         if: always() && runner.os == 'Windows'
         uses: actions/upload-artifact@v4
@@ -109,4 +111,6 @@ jobs:
             antsr-install.log
             check/**/*.out
             check/**/*.log
+            check/**/*.Rout
+            check/**/*.Rout.fail
           if-no-files-found: ignore
