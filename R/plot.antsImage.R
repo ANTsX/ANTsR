@@ -201,11 +201,8 @@ plot.antsImage <- function(
     y <- list(y)
   }
   imagedim <- length(dim(myantsimage))
-  hvpx <- usePkg("pixmap")
-  hvmsc <- usePkg("misc3d")
-  if (!hvmsc | !hvpx) {
-    print(paste("You need misc3d and pixmap libraries to use this."))
-    invisible(return())
+  if (!usePkg("pixmap")) {
+    stop("You need the pixmap package to use this.")
   }
   read.img <- function(x, dim = 2) {
     img <- antsImageRead(x, dim)
