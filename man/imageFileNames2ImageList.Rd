@@ -17,13 +17,15 @@ ImageFileNames2ImageLists converts the input list of file names to a list
 containing antsImages.
 }
 \examples{
-dir <- paste(tempdir(), .Platform$file.sep, sep = "")
+dir <- file.path(tempdir(), "imageFileNames2ImageList")
+dir.create(dir, showWarnings = FALSE)
 img <- makeImage(c(4, 4))
 for (ii in 1:6) {
-  antsImageWrite(img, paste(dir, "image", ii, ".nii.gz", sep = ""))
+  antsImageWrite(img, file.path(dir, paste0("image", ii, ".nii.gz")))
 }
 imagenames <- list.files(dir, glob2rx("*.nii.gz"), full.names = TRUE)
 images <- imageFileNames2ImageList(imagenames)
+unlink(dir, recursive = TRUE)
 
 }
 \author{
