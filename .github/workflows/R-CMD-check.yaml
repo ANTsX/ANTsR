@@ -102,8 +102,15 @@ jobs:
       # On Windows the install R CMD build does before building vignettes
       # hangs until the 6h job limit, even though the install above succeeds,
       # so skip vignettes there; other platforms still build them.
+      # On Windows, ANTSR_TRACE_FILE makes ANTsR's .onLoad log every
+      # completed top-level expression with a timestamp (see R/zzz.R); after
+      # a hang, the expression following the last logged line is the culprit.
+      # Windows examples take ~3 min, so a 45 min cap still catches the hang
+      # without burning 2 hours.
       - uses: r-lib/actions/check-r-package@v2
-        timeout-minutes: 120
+        timeout-minutes: ${{ runner.os == 'Windows' && 45 || 120 }}
+        env:
+          ANTSR_TRACE_FILE: ${{ runner.os == 'Windows' && format('{0}/antsr-trace.log', github.workspace) || '' }}
         with:
           upload-snapshots: true
           build_args: ${{ runner.os == 'Windows' && 'c("--no-manual","--no-build-vignettes")' || 'c("--no-manual","--compact-vignettes=gs+qpdf")' }}
@@ -126,6 +133,13 @@ jobs:
               Get-Content $_.FullName -Tail 100
               Write-Output "::endgroup::"
             }
+          if (Test-Path antsr-trace.log) {
+            Write-Output "::group::Tail of antsr-trace.log (last completed expressions)"
+            Get-Content antsr-trace.log -Tail 60
+            Write-Output "::endgroup::"
+            $last = Get-Content antsr-trace.log -Tail 1
+            Write-Output "Last completed expression: $last"
+          }
 
       - name: Upload Windows installation diagnostics
         if: always() && runner.os == 'Windows'
@@ -134,6 +148,9 @@ jobs:
           name: windows-installation-diagnostics
           path: |
             antsr-install.log
+            antsr-trace.log
+            check/**/*-Ex.R
+            check/**/*-Ex.timings
             check/**/*.out
             check/**/*.log
             check/**/*.Rout
