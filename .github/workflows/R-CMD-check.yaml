@@ -89,6 +89,16 @@ jobs:
         shell: bash
         run: R CMD INSTALL --no-multiarch . 2>&1 | tee antsr-install.log
 
+      # R CMD check's example run hangs on Windows and its buffered Rout
+      # can't say where. Run each example in its own process, kill any that
+      # exceeds 5 min, and report per-example timings and the stuck line.
+      - name: Time examples individually - WINDOWS
+        if: runner.os == 'Windows'
+        timeout-minutes: 90
+        continue-on-error: true
+        shell: bash
+        run: Rscript .github/scripts/time-examples.R 300
+
       # On Windows the install R CMD build does before building vignettes
       # hangs until the 6h job limit, even though the install above succeeds,
       # so skip vignettes there; other platforms still build them.
