@@ -101,7 +101,22 @@ jobs:
           error-on: '"error"'
 
       # ANTsR-Ex.Rout is written as examples run, so after a timeout its last
-      # lines name the example that hung
+      # lines name the example that hung. A timed-out check leaves Rterm
+      # running with the file locked (upload fails with EBUSY), so stop R
+      # first and also print the tail to the log.
+      - name: Release and show example output - WINDOWS
+        if: always() && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Stop-Process -Name Rterm, R, Rscript, Rcmd -Force -ErrorAction SilentlyContinue
+          Start-Sleep -Seconds 5
+          Get-ChildItem -Path check -Recurse -Filter '*-Ex.Rout*' -ErrorAction SilentlyContinue |
+            ForEach-Object {
+              Write-Output "::group::Tail of $($_.FullName)"
+              Get-Content $_.FullName -Tail 100
+              Write-Output "::endgroup::"
+            }
+
       - name: Upload Windows installation diagnostics
         if: always() && runner.os == 'Windows'
         uses: actions/upload-artifact@v4
