@@ -91,3 +91,22 @@ test_that("labelImageRegistration appends the random seed", {
   expect_identical(seed_arg(reg()), "99")
   expect_identical(seed_arg(reg(randomSeed = 7)), "7")
 })
+
+test_that("labelImageRegistration Repro seed: explicit > option > 1", {
+  old <- options(ants.randomSeed = NULL)
+  on.exit(options(old))
+  images <- deterministic_test_images()
+  for (type in c("antsRegistrationSyNRepro[so]", "antsRegistrationSyNRepro[bo]")) {
+    reg <- function(...) {
+      capture_ants_args(labelImageRegistration, images$fixed, images$moving,
+        initialTransforms = NULL, typeOfDeformableTransform = type, ...
+      )
+    }
+    options(ants.randomSeed = NULL)
+    expect_identical(seed_arg(reg()), "1", info = type)
+    options(ants.randomSeed = 42)
+    expect_identical(seed_arg(reg()), "42", info = type)
+    expect_identical(seed_arg(reg(randomSeed = 7)), "7", info = type)
+    expect_equal(sum(reg() == "--random-seed"), 1, info = type)
+  }
+})

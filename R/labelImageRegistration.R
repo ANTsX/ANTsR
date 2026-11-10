@@ -308,7 +308,11 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
         {
         doQuick <- TRUE
         } else if( grepl( "Repro", typeOfDeformableTransform ) ) {
-        randomSeed <- 1
+        # explicit seed, then setANTsDeterministic()'s, then 1
+        if( is.null( randomSeed ) )
+          {
+          randomSeed <- getOption( "ants.randomSeed", 1 )
+          }
         }
 
       if( grepl( "\\[", typeOfDeformableTransform ) && grepl("\\]", typeOfDeformableTransform ) ) 
