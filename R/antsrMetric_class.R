@@ -140,6 +140,7 @@ antsrMetricCreate <- function(
     fixed.mask <- check_ants(fixed.mask)
     # an array mask used to be silently ignored
     if (is.array(fixed.mask)) {
+      .stopIfNA(fixed.mask, "fixed.mask")
       fixed.mask <- as.antsImage(fixed.mask, reference = fixed)
     }
     if (!is.antsImage(fixed.mask)) {
@@ -152,6 +153,7 @@ antsrMetricCreate <- function(
     moving.mask <- check_ants(moving.mask)
     # an array mask used to be silently ignored
     if (is.array(moving.mask)) {
+      .stopIfNA(moving.mask, "moving.mask")
       moving.mask <- as.antsImage(moving.mask, reference = moving)
     }
     if (!is.antsImage(moving.mask)) {

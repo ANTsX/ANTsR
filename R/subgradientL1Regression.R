@@ -34,6 +34,14 @@ subgradientL1Regression <- function(
   if (.isNA1(betas)) {
     betas <- rep(0, ncol(x))
   }
+  .stopIfNA(betas, "betas")
+  if (length(betas) != ncol(x)) {
+    stop("betas must have one value per column of x")
+  }
+  if (!.isNA1(sparval) && !(is.numeric(sparval) && length(sparval) == 1 &&
+    is.finite(sparval))) {
+    stop("sparval must be a single number")
+  }
   nvals <- round(percentvals * ncol(x))
   if (nvals > ncol(x)) {
     nvals <- ncol(x)

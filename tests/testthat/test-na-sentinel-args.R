@@ -151,3 +151,78 @@ test_that("getMultiResFeatureMatrix accepts an array mask and ignores a global t
   on.exit(rm("testmat", envir = globalenv()), add = TRUE)
   expect_equal(getMultiResFeatureMatrix(list(img), lm, rad = c(1, 1), nsamples = 5), ref)
 })
+
+test_that("antsSet* reject NA/NaN and non-positive spacing", {
+  img <- makeImage(c(4, 4), 0)
+  expect_error(antsSetSpacing(img, c(NA_real_, 1)), "finite and positive")
+  expect_error(antsSetSpacing(img, c(NaN, 1)), "finite and positive")
+  expect_error(antsSetSpacing(img, c(0, 1)), "finite and positive")
+  expect_error(antsSetSpacing(img, c(-1, 1)), "finite and positive")
+  expect_error(antsSetSpacing(img, c("1", "1")), "numeric")
+  expect_error(spacing(img) <- c(NA_real_, NA_real_), "finite and positive")
+  antsSetSpacing(img, c(2, 0.5))
+  expect_equal(antsGetSpacing(img), c(2, 0.5))
+  expect_error(antsSetOrigin(img, c(NA_real_, 0)), "origin must be finite")
+  expect_error(antsSetOrigin(img, c(1, 2, 3)), "origin must be of same dimensions")
+  antsSetOrigin(img, c(-3, 4))
+  expect_equal(antsGetOrigin(img), c(-3, 4))
+  expect_error(antsSetDirection(img, matrix(NA_real_, 2, 2)), "direction must be finite")
+  expect_error(antsSetDirection(img, c(1, 0, 0, 1)), "class 'matrix'")
+  antsSetDirection(img, diag(2))
+  expect_equal(antsGetDirection(img), diag(2))
+})
+
+test_that("vectors of NAs are rejected instead of flowing into results", {
+  set.seed(1)
+  x <- matrix(rnorm(200), 20, 10)
+  y <- x[, 1] + rnorm(20)
+  expect_error(subgradientL1Regression(y, x, betas = rep(NA_real_, 10)), "betas must not contain NA")
+  expect_error(subgradientL1Regression(y, x, betas = rep(0, 3)), "one value per column")
+  expect_error(subgradientL1Regression(y, x, sparval = c(NA, NA)), "single number")
+
+  p4 <- makeImage(c(4, 4, 4, 10), runif(640))
+  voi <- makeImage(c(4, 4, 4), 1)
+  # used to return an empty AIF mask
+  expect_error(generateAifMaskImage(p4, voi, index = c(NA, NA)), "index must not contain NA")
+
+  mat <- matrix(rnorm(40 * 64), 40, 64)
+  mask <- makeImage(c(4, 4, 4), 1)
+  lab <- makeImage(c(4, 4, 4), rep(1:2, 32))
+  # used to return NA correlation matrices
+  expect_error(filterfMRIforNetworkAnalysis(mat, tr = 2, mask = mask, labels = lab,
+    nuisancein = data.frame(a = c(NA, rnorm(39)))), "nuisancein must not contain NA")
+  expect_error(compcor(mat, ncompcor = 2, highvarmatinds = c(NA, NA)), "highvarmatinds must not contain NA")
+
+  img4 <- makeImage(c(4, 4, 4, 12), rnorm(768))
+  m3 <- makeImage(c(4, 4, 4), 1)
+  tsm <- timeseries2matrix(img4, m3)
+  for (sp in list(rep(NA_real_, 4), c(NA_real_, NA_real_, 3, 5), c(1, 1, 1, 0), c(-1, 1, 1, 1))) {
+    expect_error(timeserieswindow2matrix(tsm, m3, c(3, 6), 2, spacing = sp),
+      "4 finite, positive numbers")
+  }
+
+  r16 <- antsImageRead(getANTsRData("r16"))
+  expect_error(reorientImage(r16, c(1, 0), axis2 = c(NA_real_, NA_real_)), "axis2 must not contain NA")
+
+  snps <- matrix(sample(0:2, 200, TRUE), 20, 10)
+  # used to turn every SNP value into NA
+  expect_error(quantifySNPs(snps, traitvecin = rep(NA, 20)), "traitvecin must not contain NA")
+  expect_error(quantifySNPs(snps, traitvecin = rnorm(20), trainvec = rep(NA, 20)), "trainvec must not contain NA")
+
+  fi <- antsImageRead(getANTsRData("r16"))
+  mi <- antsImageRead(getANTsRData("r64"))
+  expect_error(antsrMetricCreate(fi, mi, fixed.mask = array(NA_real_, dim(fi))), "fixed.mask must not contain NA")
+
+  img <- makeImage(c(8, 8), rnorm(64))
+  expect_error(getMultiResFeatureMatrix(list(img), array(NA_real_, c(8, 8)), rad = c(1, 1)), "labelmask must not contain NA")
+  expect_error(getMultiResFeatureMatrix(list(img), list(array(NA_real_, c(8, 8))), rad = c(1, 1)), "labelmask must not contain NA")
+})
+
+test_that("plotPrettyGraph rejects NA vertex sizes", {
+  skip_if_not_installed("sna")
+  A <- matrix(runif(16), 4)
+  A <- (A + t(A)) / 2
+  diag(A) <- 0
+  expect_error(plotPrettyGraph(A, 1:4, pngfn = tempfile(fileext = ".png"),
+    vertexSize = rep(NA, 4)), "vertexSize must not contain NA")
+})

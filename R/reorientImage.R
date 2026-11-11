@@ -29,6 +29,9 @@ reorientImage <- function(
   ax1norm <- sqrt(sum(axis1 * axis1))
   if (ax1norm == 0) ax1norm <- 1
   axis1 <- axis1 / ax1norm * (-1)
+  if (!.isNA1(axis2)) {
+    .stopIfNA(axis2, "axis2")
+  }
   if (.isNA1(axis2)) {
     axis2 <- rnorm(img@dimension)
     ax2norm <- sqrt(sum(axis2 * axis2))

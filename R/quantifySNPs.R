@@ -28,6 +28,12 @@ quantifySNPs <- function(
   useTrait <- !.isNA1(traitvecin)
   useTrain <- !.isNA1(trainvec)
   traitvec <- as.numeric(traitvecin)
+  if (useTrain && !useTrait) {
+    # trainvec only selects which subjects' traits are averaged
+    stop("trainvec requires traitvecin")
+  }
+  if (useTrait) .stopIfNA(traitvec, "traitvecin")
+  if (useTrain) .stopIfNA(trainvec, "trainvec")
   if (useTrait && length(traitvec) != nrow(snps)) {
     stop("traitvecin must have one value per row of snps")
   }

@@ -104,12 +104,17 @@ antsSetSpacing <- function(x, spacing) {
     stop("Input must be of class 'antsImage'")
   }
 
-  if (inherits(spacing, "numeric") && inherits(spacing, "array")) {
+  if (!is.numeric(spacing)) {
     stop("spacing must be of class 'numeric'")
   }
 
   if (length(spacing) != length(dim(x))) {
     stop("spacing must be of same dimensions as image")
+  }
+  # NA/NaN were accepted and gave an image with NaN spacing; ITK refuses 0
+  # and only warns about negative spacing
+  if (any(!is.finite(spacing)) || any(spacing <= 0)) {
+    stop("spacing must be finite and positive")
   }
 
   return(ANTsRCore::antsImage_SetSpacing(x, spacing))
@@ -135,12 +140,15 @@ antsSetOrigin <- function(x, origin) {
   if (!is.antsImage(x)) {
     stop("Input must be of class 'antsImage'")
   }
-  if (!is.numeric(origin) && !is.array(origin)) {
-    stop("spacing must be of class 'numeric' or 'array'")
+  if (!is.numeric(origin)) {
+    stop("origin must be of class 'numeric'")
   }
 
   if (length(origin) != length(dim(x))) {
-    stop("spacing must be of same dimensions as image")
+    stop("origin must be of same dimensions as image")
+  }
+  if (any(!is.finite(origin))) {
+    stop("origin must be finite")
   }
 
   # if (res != 0) {
@@ -181,11 +189,15 @@ antsSetDirection <- function(x, direction) {
   if (!is.antsImage(x)) {
     stop("Input must be of class 'antsImage'")
   }
-  if (!is.matrix(direction) && !is.array(array)) {
+  # (this used to test is.array(array), i.e. the base function)
+  if (!is.matrix(direction) || !is.numeric(direction)) {
     stop("direction must be of class 'matrix' or 'array'")
   }
   if ((dim(direction)[1] != length(dim(x))) || (dim(direction)[2] != length(dim(x)))) {
     stop("direction matrix must be of size imagedim * imagedim")
+  }
+  if (any(!is.finite(direction))) {
+    stop("direction must be finite")
   }
   return(ANTsRCore::antsImage_SetDirection(x, direction))
 }

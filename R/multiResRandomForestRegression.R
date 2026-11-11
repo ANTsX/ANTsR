@@ -192,10 +192,12 @@ getMultiResFeatureMatrix <- function(
     nsamples = 10) {
   set.seed(0) # set this in order to increase repeatability of sample call
   if (is.array(labelmask)) {
+    .stopIfNA(labelmask, "labelmask")
     labelmask <- as.antsImage(labelmask, reference = if (is.list(x)) x[[1]] else x)
   }
   if (is.list(labelmask)) {
     labelmask <- lapply(labelmask, function(m) {
+      if (is.array(m)) .stopIfNA(m, "labelmask")
       if (is.array(m)) as.antsImage(m, reference = if (is.list(x)) x[[1]] else x) else m
     })
     if (!all(vapply(labelmask, inherits, logical(1), "antsImage")) ||

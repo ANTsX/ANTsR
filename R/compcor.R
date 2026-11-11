@@ -44,6 +44,9 @@ compcor <- function(
   if (inherits(fmri, "matrix")) {
     mat <- fmri
   }
+  if (!.isNA1(highvarmatinds)) {
+    .stopIfNA(highvarmatinds, "highvarmatinds")
+  }
   if (.isNA1(highvarmatinds)) {
     temporalvar <- apply(mat, 2, var)
     tvhist <- hist(temporalvar, breaks = c("FD"), plot = FALSE)
