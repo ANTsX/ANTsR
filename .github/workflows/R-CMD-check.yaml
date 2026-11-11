@@ -81,31 +81,13 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      # On Windows the tests pass but R never exits afterwards. Test whether
-      # ITK's thread pool deadlocks at process shutdown by switching to the
-      # Platform threader, which keeps no persistent worker threads.
+      # On Windows, with ITK's default thread pool the tests pass but R never
+      # exits afterwards; the Platform threader keeps no persistent worker
+      # threads, so the process can shut down.
       - name: Use ITK Platform threader - WINDOWS
         if: runner.os == 'Windows'
         shell: bash
         run: echo "ITK_GLOBAL_DEFAULT_THREADER=Platform" >> "$GITHUB_ENV"
-
-      # Stream installation output: R CMD build otherwise hides it while
-      # installing ANTsR before building vignettes, where Windows stalled.
-      - name: Install ANTsR with live diagnostics - WINDOWS
-        if: runner.os == 'Windows'
-        timeout-minutes: 30
-        shell: bash
-        run: R CMD INSTALL --no-multiarch . 2>&1 | tee antsr-install.log
-
-      # R CMD check's example run hangs on Windows and its buffered Rout
-      # can't say where. Run each example in its own process, kill any that
-      # exceeds 5 min, and report per-example timings and the stuck line.
-      - name: Time examples individually - WINDOWS
-        if: runner.os == 'Windows'
-        timeout-minutes: 90
-        continue-on-error: true
-        shell: bash
-        run: Rscript .github/scripts/time-examples.R 300
 
       # On Windows the install R CMD build does before building vignettes
       # hangs until the 6h job limit, even though the install above succeeds,
@@ -125,12 +107,12 @@ jobs:
           args: ${{ runner.os == 'Windows' && 'c("--no-manual","--as-cran","--ignore-vignettes")' || 'c("--no-manual","--as-cran")' }}
           error-on: '"error"'
 
-      # ANTsR-Ex.Rout is written as examples run, so after a timeout its last
-      # lines name the example that hung. A timed-out check leaves Rterm
-      # running with the file locked (upload fails with EBUSY), so stop R
-      # first and also print the tail to the log.
+      # Only when the Windows check fails or times out: ANTsR-Ex.Rout and the
+      # trace name the example/expression that hung. A timed-out check leaves
+      # Rterm running with the files locked (upload fails with EBUSY), so
+      # stop R first and also print the tails to the log.
       - name: Release and show example output - WINDOWS
-        if: always() && runner.os == 'Windows'
+        if: failure() && runner.os == 'Windows'
         shell: pwsh
         run: |
           Stop-Process -Name Rterm, R, Rscript, Rcmd -Force -ErrorAction SilentlyContinue
@@ -149,13 +131,12 @@ jobs:
             Write-Output "Last completed expression: $last"
           }
 
-      - name: Upload Windows installation diagnostics
-        if: always() && runner.os == 'Windows'
+      - name: Upload Windows check diagnostics
+        if: failure() && runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installation-diagnostics
+          name: windows-check-diagnostics
           path: |
-            antsr-install.log
             antsr-trace.log
             check/**/*-Ex.R
             check/**/*-Ex.timings
