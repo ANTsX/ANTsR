@@ -18,6 +18,7 @@ make_refine_data <- function(seed = 1) {
 }
 
 test_that("segmentationRefinement train/predict round trip (numeric dilation)", {
+  skip_if_new_xgboost()
   d1 <- make_refine_data(1)
   d2 <- make_refine_data(2)
   m <- suppressWarnings(suppressMessages(segmentationRefinement.train(
@@ -47,6 +48,7 @@ test_that("segmentationRefinement train/predict round trip (numeric dilation)", 
 })
 
 test_that("segmentationRefinement with mm dilation and boundary regions", {
+  skip_if_new_xgboost()
   d <- make_refine_data(3)
   for (entire in c(TRUE, FALSE)) {
     m <- suppressWarnings(suppressMessages(segmentationRefinement.train(
@@ -75,6 +77,7 @@ test_that("segmentationRefinement with mm dilation and boundary regions", {
 })
 
 test_that("segmentationRefinement balanced sampling, background label and missing labels", {
+  skip_if_new_xgboost()
   d <- make_refine_data(4)
   msgs <- capture_messages(m <- suppressWarnings(segmentationRefinement.train(
     list(d$feats[1]), list(d$truth), list(d$seg),

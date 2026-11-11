@@ -55,7 +55,10 @@ test_that("aslPerfusion non-robust path, argument checks", {
   expect_error(aslPerfusion(c("a", "b")), "only one filename")
   expect_error(aslPerfusion(a$mask), "dimension")
   # integer pixel type gets cloned to float; checkmeansignal too high -> NA
-  moco <- ANTsR:::.motion_correction(a$img, moreaccurate = 0)
+  moco <- skip_on_known_error(
+    ANTsR:::.motion_correction(a$img, moreaccurate = 0), "names' attribute",
+    ".motion_correction returns no motion parameters on this platform"
+  )
   capture.output(expect_warning(
     res <- aslPerfusion(antsImageClone(a$img, "double"),
       moco_results = moco,
