@@ -191,17 +191,24 @@ getMultiResFeatureMatrix <- function(
     multiResSchedule = c(0),
     nsamples = 10) {
   set.seed(0) # set this in order to increase repeatability of sample call
+  # array masks take their geometry (spacing, origin, direction) from the
+  # feature image they belong to, not always from the first one
+  featureImage <- function(k) if (is.list(x)) x[[k]] else x
   if (is.array(labelmask)) {
     .stopIfNA(labelmask, "labelmask")
-    labelmask <- as.antsImage(labelmask, reference = if (is.list(x)) x[[1]] else x)
-  }
-  if (is.list(labelmask)) {
-    labelmask <- lapply(labelmask, function(m) {
-      if (is.array(m)) .stopIfNA(m, "labelmask")
-      if (is.array(m)) as.antsImage(m, reference = if (is.list(x)) x[[1]] else x) else m
+  } else if (is.list(labelmask)) {
+    if (length(labelmask) != length(x)) {
+      stop("a labelmask list must hold one antsImage (or array) per element of x")
+    }
+    labelmask <- lapply(seq_along(labelmask), function(k) {
+      m <- labelmask[[k]]
+      if (is.array(m)) {
+        .stopIfNA(m, "labelmask")
+        m <- as.antsImage(m, reference = featureImage(k))
+      }
+      m
     })
-    if (!all(vapply(labelmask, inherits, logical(1), "antsImage")) ||
-      length(labelmask) != length(x)) {
+    if (!all(vapply(labelmask, inherits, logical(1), "antsImage"))) {
       stop("a labelmask list must hold one antsImage (or array) per element of x")
     }
   } else if (!inherits(labelmask, "antsImage")) {
@@ -210,10 +217,11 @@ getMultiResFeatureMatrix <- function(
   # loop over features, labels and multires
   for (featk in 1:length(x))
   {
-    if (inherits(labelmask, "antsImage")) {
+    if (is.array(labelmask)) {
+      locmask <- as.antsImage(labelmask, reference = featureImage(featk))
+    } else if (inherits(labelmask, "antsImage")) {
       locmask <- (labelmask)
-    }
-    if (inherits(labelmask, "list")) {
+    } else {
       locmask <- labelmask[[featk]]
     }
     ulabs <- sort(unique(locmask[locmask > 0]))

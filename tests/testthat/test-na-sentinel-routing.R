@@ -54,6 +54,39 @@ test_that("getMultiResFeatureMatrix labelmask routing", {
   expect_error(f(as.numeric(as.array(lm))), "labelmask must be")
 })
 
+test_that("getMultiResFeatureMatrix array masks take each feature image's geometry", {
+  set.seed(1)
+  img1 <- makeImage(c(8, 8), rnorm(64))
+  img2 <- makeImage(c(8, 8), rnorm(64), spacing = c(2, 0.5), origin = c(10, -4))
+  m <- array(0, c(8, 8))
+  m[2:7, 2:7] <- 1
+  f <- function(masks) getMultiResFeatureMatrix(list(img1, img2), masks, rad = c(1, 1), nsamples = 5)
+  # record the geometry of every (image, mask) pair actually used; voxel
+  # values alone can't show this, since the images have the same size
+  pairs <- list()
+  orig <- getNeighborhoodInMask
+  local_mocked_bindings(.package = "ANTsR", getNeighborhoodInMask = function(image, mask, ...) {
+    pairs[[length(pairs) + 1]] <<- list(
+      image = list(antsGetSpacing(image), antsGetOrigin(image)),
+      mask = list(antsGetSpacing(mask), antsGetOrigin(mask))
+    )
+    orig(image, mask, ...)
+  })
+  same_space <- function() all(vapply(pairs, function(p) isTRUE(all.equal(p$image, p$mask)), TRUE))
+  # reference: masks built explicitly in each feature image's space
+  ref <- f(list(as.antsImage(m, reference = img1), as.antsImage(m, reference = img2)))
+  expect_true(same_space())
+  # a list of arrays: the second mask used to get img1's geometry
+  pairs <- list()
+  expect_equal(f(list(m, m)), ref)
+  expect_true(same_space())
+  # one array for all features: converted against each feature image
+  pairs <- list()
+  expect_equal(f(m), ref)
+  expect_true(same_space())
+  expect_true(length(pairs) >= 2)
+})
+
 test_that("subgradientL1Regression betas/sparval routing", {
   set.seed(1)
   x <- matrix(rnorm(200), 20, 10)
