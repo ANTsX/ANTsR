@@ -1,3 +1,7 @@
+# magrittr is in Imports; make its pipe available to the tests even when
+# they run outside test_check() (which sees the package's imports)
+`%>%` <- magrittr::`%>%`
+
 # Run `code`; if it fails with an error matching `pattern` (a known package
 # or platform issue), skip the test with `reason` instead of failing. Any
 # other error still fails.

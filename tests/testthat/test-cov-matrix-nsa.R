@@ -21,8 +21,9 @@ test_that("nsa_flow_pca basic proximal explains variance", {
   expect_true(any(grepl("Iter", out)))
   res1 <- nsa_flow_pca(x, k = 1, max_iter = 3)
   expect_equal(dim(res1$Y), c(10, 1))
-  invisible(capture.output(suppressMessages(nsa_flow_pca(x, k = 2, max_iter = 3,
-    proximal_type = "nsa_flow", nsa_flow_fn = identity_prox, verbose = TRUE))))
+  nsa_flow_pca(x, k = 2, max_iter = 3, proximal_type = "nsa_flow",
+    nsa_flow_fn = identity_prox, verbose = TRUE) %>% suppressMessages() %>%
+    capture.output() %>% invisible()
   res2 <- nsa_flow_pca(x, k = 2, max_iter = 3, proximal_type = "nsa_flow",
     nsa_flow_fn = identity_prox)
   expect_true(all(res2$Y >= 0 & res2$Y <= 1))
@@ -58,8 +59,9 @@ test_that("nsa_flow_pca_fa supports pca/fa objectives and rotations", {
   }
   r1 <- nsa_flow_pca_fa(x, k = 1, max_iter = 3, lambda = 0)
   expect_equal(ncol(r1$loadings), 1)
-  invisible(capture.output(suppressMessages(nsa_flow_pca_fa(x, k = 2, max_iter = 3,
-    proximal_type = "nsa_flow", nsa_flow_fn = identity_prox, verbose = TRUE))))
+  nsa_flow_pca_fa(x, k = 2, max_iter = 3, proximal_type = "nsa_flow",
+    nsa_flow_fn = identity_prox, verbose = TRUE) %>% suppressMessages() %>%
+    capture.output() %>% invisible()
   r2 <- nsa_flow_pca_fa(x, k = 2, max_iter = 40, proximal_type = "nsa_flow",
     nsa_flow_fn = identity_prox, nsa_flow_args = list(w = 0.2))
   expect_lte(r2$final_iter, 40)
@@ -94,8 +96,9 @@ test_that("nsa_flow_pca_fa_2 alternates FA updates", {
   r2 <- nsa_flow_pca_fa_2(x, k = 2, max_iter = 30, proximal_type = "nsa_flow",
     nsa_flow_fn = identity_prox, objective = "fa")
   expect_lte(r2$final_iter, 30)
-  invisible(capture.output(suppressMessages(nsa_flow_pca_fa_2(x, k = 2, max_iter = 2,
-    proximal_type = "nsa_flow", nsa_flow_fn = identity_prox, verbose = TRUE))))
+  nsa_flow_pca_fa_2(x, k = 2, max_iter = 2, proximal_type = "nsa_flow",
+    nsa_flow_fn = identity_prox, verbose = TRUE) %>% suppressMessages() %>%
+    capture.output() %>% invisible()
   expect_error(nsa_flow_pca_fa_2(x, k = 2, proximal_type = "nsa_flow"), "nsa_flow_fn")
   expect_error(nsa_flow_pca_fa_2(x, k = 2, max_iter = 2, proximal_type = "nsa_flow",
     nsa_flow_fn = function(Y0) stop("boom")), "nsa_flow_fn failed")
