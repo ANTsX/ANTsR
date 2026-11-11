@@ -205,7 +205,9 @@ test_that("antsRegistration handles masks, initial transforms and options", {
   expect_match(arg_after(a, "-r"), "\\.mat$")
   expect_true(file.exists(arg_after(a, "-r")))
   # restrictTransformation, verbose, random seed, composite
-  old <- options(randomSeed = 42)
+  # antsRegistration reads ants.randomSeed (set by setANTsDeterministic());
+  # before #465 it read randomSeed, so set both
+  old <- options(randomSeed = 42, ants.randomSeed = 42)
   on.exit(options(old), add = TRUE)
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "Affine",
                         restrictTransformation = c(1, 0, 1, 0, 1, 1),
