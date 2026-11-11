@@ -27,15 +27,17 @@ datasets as it is based on C++ implementations.
 # make some simulated images and convert them to a matrix
 
 n <- 2
-tdir <- tempdir()
+tdir <- file.path(tempdir(), "imagesToMatrix")
+dir.create(tdir, showWarnings = FALSE)
 for (i in 1:n) {
   simimg <- as.antsImage(replicate(64, rnorm(64)))
-  antsImageWrite(simimg, tempfile(fileext = ".mha"))
+  antsImageWrite(simimg, tempfile(tmpdir = tdir, fileext = ".mha"))
 }
-imageList <- list.files(tdir, pattern = ".mha", full.names = TRUE)
+imageList <- list.files(tdir, pattern = "[.]mha$", full.names = TRUE)
 mask <- getMask(antsImageRead(imageList[1]))
 mat <- imagesToMatrix(imageList, mask)
 print(dim(mat))
+unlink(tdir, recursive = TRUE)
 
 }
 \seealso{

@@ -1,25 +1,15 @@
-
-# Set default options when package is loaded
-.onLoad <- function( libname, pkgname ) 
-{
-  op <- options()
-  op.ants <- list(
-    ants.deterministic = FALSE,
-    ants.randomSeed = NULL
-  )
-  toSet <- !( names( op.ants ) %in% names( op ) )
-  if( any( toSet ) ) {
-    options( op.ants[toSet] )
-  } 
-  invisible()
-}
-
 #' Set ANTs deterministic behavior
 #'
 #' @name setANTsDeterministic
 #' @rdname setANTsDeterministic
 #' @param on Set deterministic behavior.
-#' @param seedValue Assign random seed value.
+#' @param seedValue Assign random seed value. When \code{on = TRUE} and this
+#'   is not \code{NULL}, it is used for \code{set.seed()}, stored in
+#'   \code{options(ants.randomSeed)} and \code{ANTS_RANDOM_SEED}, and passed
+#'   to ANTs as \code{--random-seed} by \code{antsRegistration} and
+#'   \code{labelImageRegistration}.
+#' @details \code{on = FALSE} clears the stored seed so later registrations
+#'   are no longer seeded.
 #' @return No return value, called for side effects.
 #' @examples
 #' setANTsDeterministic(TRUE)
@@ -34,5 +24,9 @@ setANTsDeterministic <- function( on = TRUE, seedValue = 123 )
       options( ants.randomSeed = seedValue )
       Sys.setenv( ANTS_RANDOM_SEED = seedValue )
     }
+  } else {
+    options( ants.randomSeed = NULL )
+    Sys.unsetenv( "ANTS_RANDOM_SEED" )
   }
+  invisible()
 }

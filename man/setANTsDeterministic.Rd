@@ -9,13 +9,21 @@ setANTsDeterministic(on = TRUE, seedValue = 123)
 \arguments{
 \item{on}{Set deterministic behavior.}
 
-\item{seedValue}{Assign random seed value.}
+\item{seedValue}{Assign random seed value. When \code{on = TRUE} and this
+is not \code{NULL}, it is used for \code{set.seed()}, stored in
+\code{options(ants.randomSeed)} and \code{ANTS_RANDOM_SEED}, and passed
+to ANTs as \code{--random-seed} by \code{antsRegistration} and
+\code{labelImageRegistration}.}
 }
 \value{
 No return value, called for side effects.
 }
 \description{
 Set ANTs deterministic behavior
+}
+\details{
+\code{on = FALSE} clears the stored seed so later registrations
+are no longer seeded.
 }
 \examples{
 setANTsDeterministic(TRUE)

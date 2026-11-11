@@ -65,10 +65,14 @@ n4BiasFieldCorrection <- function(img,
                                   verbose = FALSE,
                                   weightMask = NULL) {
   img <- check_ants(img)
+  # The ANTs code reinterprets these images as float, so other pixel
+  # types are read (and outputs written) past the end of their buffers.
+  if (img@pixeltype != "float") img <- antsImageClone(img, "float")
   if (var(img) == 0) stop("Input image has no variation.")
   if (!missing(mask)) {
     mask <- check_ants(mask)
     error_not_antsImage(mask, "mask")
+    if (mask@pixeltype != "float") mask <- antsImageClone(mask, "float")
   }
   # if mask was character - silent change below - bad
   # if (!is.antsImage(mask)) {
@@ -97,6 +101,9 @@ n4BiasFieldCorrection <- function(img,
     weightMask <- check_ants(weightMask)
     if (!is.antsImage(weightMask)) {
       stop("Weight Image must be an antsImage")
+    }
+    if (weightMask@pixeltype != "float") {
+      weightMask <- antsImageClone(weightMask, "float")
     }
   }
 
