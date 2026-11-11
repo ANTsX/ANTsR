@@ -104,3 +104,13 @@ test_optimizer("adagrad")
 
 cat("\n--- All Optimizer Tests Complete ---\n")
 
+
+test_that("list_simlr_optimizers ignores step methods from other packages", {
+  opts <- list_simlr_optimizers()
+  expect_true(all(c("adam", "nadam", "gd") %in% opts))
+  # a visible step.* function from outside ANTsR, as e.g. robust's step.lmRob
+  assign("step.not_an_antsr_optimizer", function(object, ...) NULL, envir = globalenv())
+  on.exit(rm("step.not_an_antsr_optimizer", envir = globalenv()), add = TRUE)
+  expect_true("step.not_an_antsr_optimizer" %in% as.character(methods("step")))
+  expect_identical(list_simlr_optimizers(), opts)
+})

@@ -1073,8 +1073,10 @@ step.bidirectional_lookahead <- function(optimizer, i, V_current, descent_gradie
 #' @return A character vector of optimizer names (e.g., "adam", "nadam", etc.)
 #' @export
 list_simlr_optimizers <- function( torch = FALSE ) {
-  methods_vec <- as.character(methods("step"))
-  optimizers <- gsub("^step\\.|\\*$", "", methods_vec)
+  # only ANTsR's own methods: methods("step") also lists step.* methods of
+  # any other loaded package (e.g. robust's step.lmRob)
+  methods_vec <- ls(asNamespace("ANTsR"), pattern = "^step\\.", all.names = TRUE)
+  optimizers <- sub("^step\\.", "", methods_vec)
   optimizers=optimizers[ !(optimizers %in% c("lbfgs", "random_search", "random_gradient"))]
   if ( torch  ) {
     return( c('adabound', 'adagrad', 'adam', 'adamax', 'adamp', 'adamw', 'asgd', 'lars', 'lbfgs', 'lookahead', 'nadam', 'padam', 'pid', 'qhadam', 'qhm', 'radam', 'rmsprop', 'rprop', 'sgd', 'sgd_nesterov', 'sgdp', 'yogi' ) )
