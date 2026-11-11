@@ -81,6 +81,14 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      # On Windows the tests pass but R never exits afterwards. Test whether
+      # ITK's thread pool deadlocks at process shutdown by switching to the
+      # Platform threader, which keeps no persistent worker threads.
+      - name: Use ITK Platform threader - WINDOWS
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "ITK_GLOBAL_DEFAULT_THREADER=Platform" >> "$GITHUB_ENV"
+
       # Stream installation output: R CMD build otherwise hides it while
       # installing ANTsR before building vignettes, where Windows stalled.
       - name: Install ANTsR with live diagnostics - WINDOWS
