@@ -356,9 +356,10 @@ antsRegistration <- function(
         stop("Unrecognized transform type.")
       }
 
-      # Perform Repro checking if set_ants_deterministic is True
+      # Perform Repro checking if setANTsDeterministic(TRUE) is in effect
       if( isTRUE( getOption( "ants.deterministic", FALSE ) ) && !grepl( "Repro", typeofTransform ) ) {
-        message( typeofTransform, " is not deterministic/reproducible. Use setANTsDeterministic(TRUE) to remedy." )
+        message( typeofTransform, " is not deterministic/reproducible. Use an ",
+          "antsRegistrationSyN*Repro[x] transform for reproducible results." )
       }
 
       initx <- initialTransform
@@ -984,9 +985,11 @@ antsRegistration <- function(
       args[[length(args) + 1]] <- "--float"
       args[[length(args) + 1]] <- "1"
 
-      if( !is.null( getOption( "randomSeed" ) ) ) {
+      # set by setANTsDeterministic()
+      randomSeed <- getOption( "ants.randomSeed" )
+      if( !is.null( randomSeed ) ) {
         args[[length(args) + 1]] <- "--random-seed"
-        args[[length(args) + 1]] <- as.character( getOption( "randomSeed" ) )
+        args[[length(args) + 1]] <- as.character( randomSeed )
       }
 
       args[[length(args) + 1]] <- "--write-composite-transform"
