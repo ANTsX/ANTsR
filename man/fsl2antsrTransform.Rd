@@ -20,7 +20,7 @@ Convert an FSL linear transform to an antsrTransform
 fslMat <- matrix(0, 4, 4)
 diag(fslMat) <- rep(1, 4)
 fslMat[1:3, 4] <- c(2, 3, 4)
-img <- antsImageRead(getANTsRData("ch2"))
+img <- antsImageRead(getANTsRData("ch2", backup = TRUE))
 tx <- fsl2antsrTransform(fslMat, img, img)
 
 }

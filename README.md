@@ -25,12 +25,21 @@ R CMD INSTALL ANTsRCore_*.tgz
 R CMD INSTALL ANTsR_*.tgz
 ```
 
-### From source using devtools
+### From r-universe
 
-To install ANTsR from source, you can use devtools to install the latest version of the code directly form GitHub. This should also automatically install the main dependencies like the ANTsRCore package.
+ANTsR and its main dependencies (ANTsRCore, ITKR) are built on [r-universe](https://antsx.r-universe.dev), which provides binaries for Windows, macOS and Linux:
 
 ```R
-devtools::install_github('ANTsX/ANTsR')
+install.packages('ANTsR', repos = c(ANTsX = 'https://antsx.r-universe.dev', CRAN = 'https://cloud.r-project.org'))
+```
+
+### From source using remotes
+
+To install the latest version of the code directly from GitHub, add r-universe to your repositories first, so remotes installs the ANTsRCore and ITKR binaries from there:
+
+```R
+options(repos = c(ANTsX = 'https://antsx.r-universe.dev', CRAN = 'https://cloud.r-project.org'))
+remotes::install_github('ANTsX/ANTsR')
 ```
 
 ### From source using R CMD INSTALL

@@ -146,7 +146,7 @@ sub <- sample(c(TRUE, FALSE), size = l, replace = TRUE)
 fi[sub] <- rnorm(sum(sub))
 fi[, 1] <- array(10, dim = dim(fi[, 1]))
 
-fi <- antsImageRead(getANTsRData("ch2"))
+fi <- antsImageRead(getANTsRData("ch2", backup = TRUE))
 fi[2, 1, 2]
 fi[2, 1, 2] <- 4
 fi[, 1, 2]
@@ -190,6 +190,6 @@ arr <- c(as.array(fi) > 45)
 fi[arr]
 fi[1:10, 2:14]
 fi[1:10 * 1.0, 2:14 * 1.0]
-fi <- antsImageRead(getANTsRData("ch2"))
+fi <- antsImageRead(getANTsRData("ch2", backup = TRUE))
 fi[, , 2]
 }
