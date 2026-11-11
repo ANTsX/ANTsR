@@ -390,7 +390,7 @@ setMethod(
 #' @rdname brackets
 #' @aliases [,antsImage,missing,missing-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData("ch2"))
+#' fi <- antsImageRead(getANTsRData("ch2", backup = TRUE))
 #' fi[, , 2]
 setMethod(
   f = "[",

@@ -36,7 +36,7 @@ setMethod(
 #' @rdname brackets
 #' @aliases [<-,antsImage,array-method
 #' @examples
-#' fi <- antsImageRead(getANTsRData("ch2"))
+#' fi <- antsImageRead(getANTsRData("ch2", backup = TRUE))
 #' fi[2, 1, 2]
 #' fi[2, 1, 2] <- 4
 #' fi[, 1, 2]

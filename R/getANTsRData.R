@@ -12,11 +12,11 @@
 #' (if any), and the progress bar.
 #' @param timeout Seconds to allow for the download (passed to
 #' \code{download.file} via \code{options(timeout)}).
-#' @param backup If \code{TRUE} (default), when an image cannot be
-#' downloaded or fails its checksum, warn with the reason (e.g. figshare
-#' returning an error page) and return a synthetic \code{makeImage()}
-#' stand-in of the same dimension instead of stopping. Set to \code{FALSE}
-#' to make such failures an error.
+#' @param backup If \code{FALSE} (default), a download that fails or does
+#' not pass its checksum is an error that says why (e.g. figshare returning
+#' an error page). If \code{TRUE}, warn with the reason and return a
+#' synthetic \code{makeImage()} stand-in of the same dimension instead,
+#' e.g. so examples still run when the data host is unavailable.
 #' @return filename string
 #' @details A download that errors, returns an HTML page instead of the file,
 #' or fails its MD5 checksum is deleted so later calls do not reuse it.
@@ -35,7 +35,7 @@ getANTsRData <- function(fileid,
                          ),
                          quiet = FALSE,
                          timeout = 60,
-                         backup = TRUE) {
+                         backup = FALSE) {
   myusage <- "usage: getANTsRData(fileid = whatever , usefixedlocation = TRUE )"
   if (missing(fileid)) {
     print(myusage)
