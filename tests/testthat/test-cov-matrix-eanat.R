@@ -150,8 +150,8 @@ test_that("networkEiganat decomposes data and validates mask handling", {
   expect_error(networkEiganat(mat, nvecs = 2, its = 1,
     mask = makeImage(c(5, 6), 1)), "not interpretable as logical")
   # .eanatsparsifyv with positive sparseness keeps the largest entries
-  sv <- ANTsR:::.eanatsparsifyv(matrix(c(5, 4, 3, 2, 1, -1, 0.5, 0.1), ncol = 1),
-    0.5, verbose = TRUE) |> quiet()
+  sv <- quiet(ANTsR:::.eanatsparsifyv(matrix(c(5, 4, 3, 2, 1, -1, 0.5, 0.1), ncol = 1),
+    0.5, verbose = TRUE))
   expect_equal(sum(sv != 0), 3)
   expect_equal(sv[1:3], c(5, 4, 3))
 })

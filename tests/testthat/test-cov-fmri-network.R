@@ -211,8 +211,11 @@ test_that("plotBasicNetwork draws nodes and edges with a null rgl device", {
     expect_equal(plotBasicNetwork(cents, brain, radius = 1, nodecolors = "red"), 1)
   })
   # weighted networks: the weights check uses `&&` on a length-2 vector,
-  # which is an error in R >= 4.3 (package bug)
-  expect_error(plotBasicNetwork(cents, brain, weights = w), "length = 2")
+  # which is an error in R >= 4.3 (package bug); R 4.2 only warns and
+  # earlier versions silently use the first element
+  if (getRversion() >= "4.3.0") {
+    expect_error(plotBasicNetwork(cents, brain, weights = w), "length = 2")
+  }
   rgl::close3d()
 })
 
