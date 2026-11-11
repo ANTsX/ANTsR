@@ -119,6 +119,12 @@ multiResRandomForestRegression <- function(
   if (idim != x[[1]][[1]]@dimension) {
     stop("multiResRandomForestRegression: dimensionality does not match")
   }
+  # x[[kk]] (one subject's feature images) is paired with labelmasks[[kk]]
+  # and y[kk]; only labelmasks was looped over, so a shorter list silently
+  # dropped subjects and misaligned y
+  if (length(labelmasks) != length(x) || length(y) != length(x)) {
+    stop("y, x and labelmasks must have one entry per subject")
+  }
   fm <- getMultiResFeatureMatrix(x[[1]], labelmasks[[1]],
     rad = rad, multiResSchedule = multiResSchedule, nsamples = nsamples
   )
@@ -191,9 +197,15 @@ getMultiResFeatureMatrix <- function(
     multiResSchedule = c(0),
     nsamples = 10) {
   set.seed(0) # set this in order to increase repeatability of sample call
+  if (is.antsImage(x)) {
+    x <- list(x)
+  }
+  if (!is.list(x) || !length(x) || !all(vapply(x, is.antsImage, logical(1)))) {
+    stop("x must be an antsImage or a list of antsImages")
+  }
   # array masks take their geometry (spacing, origin, direction) from the
   # feature image they belong to, not always from the first one
-  featureImage <- function(k) if (is.list(x)) x[[k]] else x
+  featureImage <- function(k) x[[k]]
   if (is.array(labelmask)) {
     .stopIfNA(labelmask, "labelmask")
   } else if (is.list(labelmask)) {
@@ -213,6 +225,16 @@ getMultiResFeatureMatrix <- function(
     }
   } else if (!inherits(labelmask, "antsImage")) {
     stop("labelmask must be an antsImage, an array or a list of antsImages")
+  }
+  # masks select voxels of their feature image, so they must share its size
+  for (k in seq_along(x)) {
+    m <- if (is.list(labelmask)) labelmask[[k]] else labelmask
+    if (!identical(as.integer(dim(m)), as.integer(dim(x[[k]])))) {
+      stop(
+        "labelmask for feature ", k, " has dimensions ", paste(dim(m), collapse = "x"),
+        " but the feature image has ", paste(dim(x[[k]]), collapse = "x")
+      )
+    }
   }
   # loop over features, labels and multires
   for (featk in 1:length(x))

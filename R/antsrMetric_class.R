@@ -141,6 +141,11 @@ antsrMetricCreate <- function(
     # an array mask used to be silently ignored
     if (is.array(fixed.mask)) {
       .stopIfNA(fixed.mask, "fixed.mask")
+      # an array takes fixed's geometry, so it must be on fixed's grid (an
+      # antsImage mask may be on another grid: ITK maps physical points)
+      if (!identical(as.integer(dim(fixed.mask)), as.integer(dim(fixed)))) {
+        stop("fixed.mask array must have the same dimensions as fixed")
+      }
       fixed.mask <- as.antsImage(fixed.mask, reference = fixed)
     }
     if (!is.antsImage(fixed.mask)) {
@@ -154,6 +159,11 @@ antsrMetricCreate <- function(
     # an array mask used to be silently ignored
     if (is.array(moving.mask)) {
       .stopIfNA(moving.mask, "moving.mask")
+      # an array takes moving's geometry, so it must be on moving's grid (an
+      # antsImage mask may be on another grid: ITK maps physical points)
+      if (!identical(as.integer(dim(moving.mask)), as.integer(dim(moving)))) {
+        stop("moving.mask array must have the same dimensions as moving")
+      }
       moving.mask <- as.antsImage(moving.mask, reference = moving)
     }
     if (!is.antsImage(moving.mask)) {

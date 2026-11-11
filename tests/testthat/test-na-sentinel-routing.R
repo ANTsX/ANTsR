@@ -87,6 +87,47 @@ test_that("getMultiResFeatureMatrix array masks take each feature image's geomet
   expect_true(length(pairs) >= 2)
 })
 
+test_that("getMultiResFeatureMatrix validates x and mask sizes per feature", {
+  set.seed(1)
+  img <- makeImage(c(8, 8), rnorm(64))
+  lm <- makeImage(c(8, 8), 0)
+  lm[2:7, 2:7] <- 1
+  f <- function(x, m) getMultiResFeatureMatrix(x, m, rad = c(1, 1), nsamples = 5)
+  ref <- f(list(img), lm)
+  expect_equal(f(img, lm), ref)                         # a single image: wrapped
+  expect_error(f(list(img, "notimage"), list(lm, lm)), "list of antsImages")
+  expect_error(f(list(), lm), "list of antsImages")
+  # masks select voxels of their feature image: sizes must match
+  expect_error(f(list(img), makeImage(c(6, 6), 1)), "has dimensions 6x6 but the feature image has 8x8")
+  expect_error(f(list(img), array(1, c(6, 6))), "has dimensions 6x6")
+  img2 <- makeImage(c(6, 6), rnorm(36))
+  expect_error(f(list(img, img2), list(lm, lm)), "feature 2 has dimensions 8x8 but the feature image has 6x6")
+  expect_error(f(list(img, img2), as.array(lm)), "feature 2")
+})
+
+test_that("multiResRandomForestRegression needs one y, x and mask per subject", {
+  set.seed(1)
+  subj <- function() list(makeImage(c(8, 8), rnorm(64)))
+  lm <- makeImage(c(8, 8), 0)
+  lm[2:7, 2:7] <- 1
+  x <- list(subj(), subj(), subj())
+  expect_error(multiResRandomForestRegression(1:3, x, list(lm, lm), rad = c(1, 1)),
+    "one entry per subject")
+  expect_error(multiResRandomForestRegression(1:2, x, list(lm, lm, lm), rad = c(1, 1)),
+    "one entry per subject")
+})
+
+test_that("antsrMetricCreate array masks must be on the image grid", {
+  fi <- makeImage(c(8, 8), rnorm(64))
+  mi <- makeImage(c(8, 8), rnorm(64))
+  expect_error(antsrMetricCreate(fi, mi, fixed.mask = array(1, c(4, 4))),
+    "fixed.mask array must have the same dimensions as fixed")
+  expect_error(antsrMetricCreate(fi, mi, moving.mask = array(1, c(4, 4))),
+    "moving.mask array must have the same dimensions as moving")
+  # an antsImage mask may be on another grid (ITK maps physical points)
+  expect_no_error(antsrMetricCreate(fi, mi, fixed.mask = makeImage(c(4, 4), 1, spacing = c(2, 2))))
+})
+
 test_that("subgradientL1Regression betas/sparval routing", {
   set.seed(1)
   x <- matrix(rnorm(200), 20, 10)
