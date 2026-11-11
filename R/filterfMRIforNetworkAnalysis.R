@@ -181,6 +181,12 @@ filterfMRIforNetworkAnalysis <- function(
       }
     }
     if (!.isNA1(nuisancein)) {
+      if (NROW(nuisancein) != nrow(tlabmat)) {
+        stop(
+          "nuisancein has ", NROW(nuisancein), " rows but there are ",
+          nrow(tlabmat), " time points"
+        )
+      }
       tlabmat <- cbind(tlabmat, nuisancein)
       ocormat <- cor(tlabmat, tlabmat)
     }
@@ -202,10 +208,15 @@ filterfMRIforNetworkAnalysis <- function(
           rgdens <- (0.5 * sum(gcormat > 0 & gcormat < 1) / (0.5 * ncol(gcormat) * (ncol(gcormat) - 1)))
         }
     }
-    if (!.isNA1(nuisancein)) pcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
-    if (!.isNA1(nuisancein)) gcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
-    if (!.isNA1(nuisancein)) cormat <- cormat[1:nbrainregions, 1:nbrainregions]
-    if (!.isNA1(nuisancein)) ocormat <- ocormat[1:nbrainregions, 1:nbrainregions]
+    if (!.isNA1(nuisancein)) {
+      # drop the nuisance rows/columns again; gcormat used to be overwritten
+      # with the partial correlations, discarding the glasso estimate
+      keep <- seq_len(nbrainregions)
+      pcormat <- pcormat[keep, keep]
+      gcormat <- gcormat[keep, keep]
+      cormat <- cormat[keep, keep]
+      ocormat <- ocormat[keep, keep]
+    }
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
     L <- list(
       filteredTimeSeries = filteredTimeSeries,

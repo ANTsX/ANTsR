@@ -194,7 +194,15 @@ getMultiResFeatureMatrix <- function(
   if (is.array(labelmask)) {
     labelmask <- as.antsImage(labelmask, reference = if (is.list(x)) x[[1]] else x)
   }
-  if (!inherits(labelmask, c("antsImage", "list"))) {
+  if (is.list(labelmask)) {
+    labelmask <- lapply(labelmask, function(m) {
+      if (is.array(m)) as.antsImage(m, reference = if (is.list(x)) x[[1]] else x) else m
+    })
+    if (!all(vapply(labelmask, inherits, logical(1), "antsImage")) ||
+      length(labelmask) != length(x)) {
+      stop("a labelmask list must hold one antsImage (or array) per element of x")
+    }
+  } else if (!inherits(labelmask, "antsImage")) {
     stop("labelmask must be an antsImage, an array or a list of antsImages")
   }
   # loop over features, labels and multires

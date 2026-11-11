@@ -53,8 +53,8 @@ subgradientL1Regression <- function(
     if (!.isNA1(sparval)) {
       betas <- .eanatsparsify(betas, sparval)
     }
-    resultcorr <- cor.test(y, x %*% betas)$est
+    resultcorr <- cor.test(y, x %*% betas)[["estimate"]]
   }
-  resultcorr <- cor.test(y, x %*% betas)$est
+  resultcorr <- cor.test(y, x %*% betas)[["estimate"]]
   return(list(betas = betas, deltmag = deltmag, resultcorr = resultcorr))
 }

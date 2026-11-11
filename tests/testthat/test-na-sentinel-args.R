@@ -24,8 +24,9 @@ test_that("antsrMetricCreate uses array masks instead of ignoring them", {
     fixed.mask = mask, moving.mask = mask))
   arr <- antsrMetricGetValue(antsrMetricCreate(fi, mi, type = "MeanSquares",
     fixed.mask = as.array(mask), moving.mask = as.array(mask)))
-  expect_equal(arr, img)
-  expect_false(isTRUE(all.equal(arr, none)))
+  expect_equal(arr, img, tolerance = 1e-6)
+  # the mask must actually change the metric (here by about 2x)
+  expect_gt(abs(arr - none) / abs(none), 0.1)
   expect_error(antsrMetricCreate(fi, mi, fixed.mask = list(1)), "fixed.mask must be")
   expect_error(antsrMetricCreate(fi, mi, moving.mask = list(1)), "moving.mask must be")
 })
@@ -60,6 +61,26 @@ test_that("filterfMRIforNetworkAnalysis accepts a nuisance data frame", {
   # nuisance columns are used for the correlations, then dropped again
   expect_equal(dim(ff$corrmat), c(2, 2))
   expect_equal(dim(ff$partialcorrmat), c(2, 2))
+  # without glasso the glasso matrix is the partial correlation matrix
+  expect_equal(ff$glassocormat, ff$partialcorrmat)
+  expect_error(filterfMRIforNetworkAnalysis(mat, tr = 2, mask = mask, labels = lab,
+    nuisancein = data.frame(a = rnorm(10))), "10 rows but there are 40 time points")
+})
+
+test_that("filterfMRIforNetworkAnalysis keeps the glasso estimate with nuisance variables", {
+  skip_if_not_installed("glasso")
+  set.seed(3)
+  mat <- matrix(rnorm(60 * 64), 60, 64)
+  mask <- makeImage(c(4, 4, 4), 1)
+  lab <- makeImage(c(4, 4, 4), rep(1:4, 16))
+  nz <- data.frame(a = rnorm(60), b = rnorm(60))
+  ff <- filterfMRIforNetworkAnalysis(mat, tr = 2, mask = mask, labels = lab,
+    nuisancein = nz, useglasso = 0.5)
+  expect_equal(dim(ff$glassocormat), c(4, 4))
+  # glasso with a large penalty zeroes partial correlations; this used to be
+  # overwritten by the (dense) partial correlation matrix
+  expect_false(isTRUE(all.equal(ff$glassocormat, ff$partialcorrmat)))
+  expect_true(any(ff$glassocormat[upper.tri(ff$glassocormat)] == 0))
 })
 
 test_that("plotPrettyGraph accepts per-vertex sizes", {
@@ -121,6 +142,10 @@ test_that("getMultiResFeatureMatrix accepts an array mask and ignores a global t
   ref <- getMultiResFeatureMatrix(list(img), lm, rad = c(1, 1), nsamples = 5)
   expect_equal(getMultiResFeatureMatrix(list(img), as.array(lm), rad = c(1, 1), nsamples = 5), ref)
   expect_error(getMultiResFeatureMatrix(list(img), "mask", rad = c(1, 1)), "labelmask must be")
+  # a list of masks: one antsImage or array per feature image
+  expect_equal(getMultiResFeatureMatrix(list(img), list(as.array(lm)), rad = c(1, 1), nsamples = 5), ref)
+  expect_error(getMultiResFeatureMatrix(list(img), list("a"), rad = c(1, 1)), "one antsImage")
+  expect_error(getMultiResFeatureMatrix(list(img), list(lm, lm), rad = c(1, 1)), "one antsImage")
   # an object called testmat in the global environment used to be picked up
   assign("testmat", matrix(999, 2, 2), envir = globalenv())
   on.exit(rm("testmat", envir = globalenv()), add = TRUE)
