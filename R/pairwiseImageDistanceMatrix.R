@@ -43,7 +43,7 @@ pairwiseImageDistanceMatrix <- function(
         mywarpedimage <- antsApplyTransforms(fixed = i1, moving = i2, transformlist = mytx$fwdtransforms)
         wh <- (mywarpedimage > 0 & i1 > 0)
         if (metrictype == "PearsonCorrelation") {
-          metric <- abs(cor.test(i1[wh], mywarpedimage[wh])$est)
+          metric <- abs(cor.test(i1[wh], mywarpedimage[wh])[["estimate"]])
         } else {
           metric <- mean(abs(i1[wh] - mywarpedimage[wh]))
         }
