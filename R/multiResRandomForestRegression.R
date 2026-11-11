@@ -191,6 +191,12 @@ getMultiResFeatureMatrix <- function(
     multiResSchedule = c(0),
     nsamples = 10) {
   set.seed(0) # set this in order to increase repeatability of sample call
+  if (is.array(labelmask)) {
+    labelmask <- as.antsImage(labelmask, reference = if (is.list(x)) x[[1]] else x)
+  }
+  if (!inherits(labelmask, c("antsImage", "list"))) {
+    stop("labelmask must be an antsImage, an array or a list of antsImages")
+  }
   # loop over features, labels and multires
   for (featk in 1:length(x))
   {
@@ -212,7 +218,9 @@ getMultiResFeatureMatrix <- function(
       randmask[randvec] <- 1
       for (smlev in multiResSchedule)
       {
-        if (!exists("testmat")) {
+        # inherits = FALSE: an object called testmat in the caller's or the
+        # global environment was otherwise picked up as the feature matrix
+        if (!exists("testmat", inherits = FALSE)) {
           testmat <- t(getNeighborhoodInMask(
             image = x[[featk]] %>% smoothImage(smlev), mask = randmask,
             radius = rad, spatial.info = F, boundary.condition = "image"

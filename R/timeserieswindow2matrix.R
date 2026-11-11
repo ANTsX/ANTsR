@@ -88,7 +88,7 @@ timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist,
     mask4d[, , , i] <- maskvec
   }
   mask4d <- as.antsImage(mask4d)
-  if (!is.na(spacing)) {
+  if (!.isNA1(spacing)) {
     stopifnot(length(spacing) == 4)
     antsSetSpacing(mask4d, spacing)
   }

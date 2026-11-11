@@ -47,7 +47,7 @@ eigSeg <- function(
       }
     }
   }
-  if (!exists("mydata")) {
+  if (!exists("mydata", inherits = FALSE)) {
     stop("wrong input type - see help")
   }
   if (smooth > 0 & !is.null(mask)) {

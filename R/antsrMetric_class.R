@@ -138,15 +138,25 @@ antsrMetricCreate <- function(
 
   if (!is.null(fixed.mask)) {
     fixed.mask <- check_ants(fixed.mask)
-  }
-  if (is.antsImage(fixed.mask)) {
+    # an array mask used to be silently ignored
+    if (is.array(fixed.mask)) {
+      fixed.mask <- as.antsImage(fixed.mask, reference = fixed)
+    }
+    if (!is.antsImage(fixed.mask)) {
+      stop("fixed.mask must be an antsImage, an array or an image filename")
+    }
     antsrMetricSetFixedImageMask(metric, fixed.mask)
   }
 
   if (!is.null(moving.mask)) {
     moving.mask <- check_ants(moving.mask)
-  }
-  if (is.antsImage(moving.mask)) {
+    # an array mask used to be silently ignored
+    if (is.array(moving.mask)) {
+      moving.mask <- as.antsImage(moving.mask, reference = moving)
+    }
+    if (!is.antsImage(moving.mask)) {
+      stop("moving.mask must be an antsImage, an array or an image filename")
+    }
     antsrMetricSetMovingImageMask(metric, moving.mask)
   }
 

@@ -25,7 +25,15 @@ quantifySNPs <- function(
   }
   qsnps <- snps
   okrow <- rep(FALSE, ncol(qsnps))
+  useTrait <- !.isNA1(traitvecin)
+  useTrain <- !.isNA1(trainvec)
   traitvec <- as.numeric(traitvecin)
+  if (useTrait && length(traitvec) != nrow(snps)) {
+    stop("traitvecin must have one value per row of snps")
+  }
+  if (useTrain && length(trainvec) != nrow(snps)) {
+    stop("trainvec must have one value per row of snps")
+  }
   NN <- ncol(qsnps)
   progress <- txtProgressBar(min = 0, max = NN, style = 3)
   for (y in 1:NN) # or dd for ADNI_SNPS
@@ -42,17 +50,17 @@ quantifySNPs <- function(
       if (f1 < freqthresh) okrow[y] <- FALSE
       if (f2 < freqthresh) okrow[y] <- FALSE
       if (f3 < freqthresh) okrow[y] <- FALSE
-      if (replaceWithF & is.na(traitvec)) {
+      if (replaceWithF && !useTrait) {
         qsnps[t1, y] <- f1
         qsnps[t2, y] <- f2
         qsnps[t3, y] <- f3
       }
-      if (replaceWithF & !is.na(traitvec) & is.na(trainvec)) {
+      if (replaceWithF && useTrait && !useTrain) {
         qsnps[t1, y] <- mean(traitvec[t1])
         qsnps[t2, y] <- mean(traitvec[t2])
         qsnps[t3, y] <- mean(traitvec[t3])
       }
-      if (replaceWithF & !is.na(traitvec) & !is.na(trainvec)) {
+      if (replaceWithF && useTrait && useTrain) {
         t1tr <- which(temp == 0 & trainvec)
         t2tr <- which(temp == 1 & trainvec)
         t3tr <- which(temp == 2 & trainvec)
