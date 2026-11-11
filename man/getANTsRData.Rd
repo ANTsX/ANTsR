@@ -9,7 +9,9 @@ getANTsRData(
   usefixedlocation = FALSE,
   verbose = FALSE,
   method = ifelse(Sys.info()["sysname"] == "Linux", "wget", "auto"),
-  quiet = FALSE
+  quiet = FALSE,
+  timeout = 60,
+  backup = FALSE
 )
 }
 \arguments{
@@ -25,12 +27,25 @@ passed to \code{\link{download.file}}}
 
 \item{quiet}{If \code{TRUE}, suppress status messages
 (if any), and the progress bar.}
+
+\item{timeout}{Seconds to allow for the download (passed to
+\code{download.file} via \code{options(timeout)}).}
+
+\item{backup}{If \code{FALSE} (default), a download that fails or does
+not pass its checksum is an error that says why (e.g. figshare returning
+an error page). If \code{TRUE}, warn with the reason and return a
+synthetic \code{makeImage()} stand-in of the same dimension instead,
+e.g. so examples still run when the data host is unavailable.}
 }
 \value{
 filename string
 }
 \description{
 Downloads antsr test data
+}
+\details{
+A download that errors, returns an HTML page instead of the file,
+or fails its MD5 checksum is deleted so later calls do not reuse it.
 }
 \examples{
 

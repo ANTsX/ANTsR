@@ -61,7 +61,8 @@ weighting for the label images.}
 \item{outputPrefix}{String definining the output prefix for the filenames
 of the output transform files.}
 
-\item{randomSeed}{Definition for deformable registration.}
+\item{randomSeed}{Definition for deformable registration. If \code{NULL},
+the seed set by \code{setANTsDeterministic} (if any) is used.}
 
 \item{verbose}{Print progress to the screen.}
 }
