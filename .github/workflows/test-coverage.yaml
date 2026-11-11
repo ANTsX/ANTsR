@@ -26,9 +26,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ANTsRCore and ITKR aren't on CRAN; install their r-universe builds
       - uses: r-lib/actions/setup-r@v2
         with:
           use-public-rspm: true
+          extra-repositories: https://antsx.r-universe.dev
 
       - name: Build HDF5 - LINUX
         run: |

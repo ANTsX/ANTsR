@@ -10,7 +10,16 @@
 #' passed to \code{\link{download.file}}
 #' @param quiet If \code{TRUE}, suppress status messages
 #' (if any), and the progress bar.
+#' @param timeout Seconds to allow for the download (passed to
+#' \code{download.file} via \code{options(timeout)}).
+#' @param backup If \code{FALSE} (default), a download that fails or does
+#' not pass its checksum is an error that says why (e.g. figshare returning
+#' an error page). If \code{TRUE}, warn with the reason and return a
+#' synthetic \code{makeImage()} stand-in of the same dimension instead,
+#' e.g. so examples still run when the data host is unavailable.
 #' @return filename string
+#' @details A download that errors, returns an HTML page instead of the file,
+#' or fails its MD5 checksum is deleted so later calls do not reuse it.
 #' @author Avants BB
 #' @examples
 #'
@@ -24,7 +33,9 @@ getANTsRData <- function(fileid,
                            Sys.info()["sysname"] == "Linux",
                            "wget", "auto"
                          ),
-                         quiet = FALSE) {
+                         quiet = FALSE,
+                         timeout = 60,
+                         backup = FALSE) {
   myusage <- "usage: getANTsRData(fileid = whatever , usefixedlocation = TRUE )"
   if (missing(fileid)) {
     print(myusage)
@@ -211,8 +222,44 @@ getANTsRData <- function(fileid,
     tdir <- system.file(package = "ANTsR") # for a fixed location
     tfn <- paste(tdir, "/html/", fileid, myext, sep = "") # for a fixed location
   }
+  host <- sub("^[a-z]+://([^/]+).*$", "\\1", myurl)
+  if (grepl("figshare", host)) host <- paste0("figshare (", host, ")")
+  failed <- function(reason) {
+    unlink(tfn)
+    msg <- sprintf("getANTsRData('%s'): %s failed for %s: %s", fileid,
+      host, myurl, reason)
+    if (!backup || !fileid %in% names(.antsrDataStandInDims)) {
+      stop(msg, call. = FALSE)
+    }
+    warning(msg, "; returning a synthetic makeImage() stand-in, not the ",
+      "real data.", call. = FALSE)
+    .antsrDataStandIn(fileid)
+  }
   if (!file.exists(tfn)) {
-    download.file(myurl, tfn, method = method)
+    old <- options(timeout = timeout)
+    on.exit(options(old), add = TRUE)
+    status <- tryCatch(
+      download.file(myurl, tfn, method = method, quiet = quiet),
+      error = function(e) conditionMessage(e),
+      warning = function(w) conditionMessage(w)
+    )
+    if (!is.numeric(status) || status != 0) {
+      return(failed(paste("download error:", status)))
+    }
+  }
+  # an error/bot-challenge page saved under the image's name
+  if (myext != ".zip" && fileid != "finncsv" && fileid != "rsboldpts") {
+    bytes <- readBin(tfn, "raw", 512L)
+    txt <- tolower(rawToChar(bytes[bytes > as.raw(0) & bytes < as.raw(128)]))
+    if (!length(bytes)) {
+      return(failed("downloaded file is empty"))
+    }
+    if (grepl("^\\s*<|<html|<!doctype", txt)) {
+      return(failed(sprintf(
+        "server returned an HTML page (%d bytes) instead of the file; the site may be down, rate limiting or blocking this IP",
+        file.size(tfn)
+      )))
+    }
   }
   if (fileid == "fmrinetworks") {
     inms <- c(
@@ -262,9 +309,59 @@ getANTsRData <- function(fileid,
   )
 
   if (!is.null(mymd5)) {
-    if (tools::md5sum(tfn) != mymd5) {
-      stop("checksum failure")
+    got <- unname(tools::md5sum(tfn))
+    if (!identical(got, mymd5)) {
+      return(failed(sprintf(
+        "checksum failure (md5 %s, expected %s, %d bytes); the download is corrupt or the remote file changed",
+        got, mymd5, file.size(tfn)
+      )))
     }
   }
   return(tfn)
+}
+
+# Dimensions of the synthetic stand-ins getANTsRData() returns when a
+# remote image can't be fetched; non-image ids (csv, zip) have none.
+.antsrDataStandInDims <- c(
+  list(
+    rsbold = c(16, 16, 16, 20), pcasl = c(16, 16, 16, 20),
+    adfmri = c(16, 16, 16, 20), decslice = c(64, 64), dtislice = c(64, 64)
+  ),
+  stats::setNames(
+    rep(list(c(32, 32, 32)), 18),
+    c(
+      "ch2", "ch2a", "ch2b", "mni", "mnia", "mnib", "mninat", "mnijhu1",
+      "mnijhu2", "mnidfn", "mniyeo", "atroposseg", "rsboldmask",
+      "rsboldseg", "pcaslseg", "finn", "surf", "blob"
+    )
+  )
+)
+
+# A sphere-shaped "brain" (labels for atlas/segmentation ids, 0/1 for
+# masks, smooth intensities plus noise otherwise) written to a temp file.
+.antsrDataStandIn <- function(fileid) {
+  dims <- .antsrDataStandInDims[[fileid]]
+  sp <- dims[seq_len(min(3, length(dims)))]
+  grid <- as.matrix(expand.grid(lapply(sp, seq_len)))
+  r <- sqrt(rowSums(sweep(grid, 2, (sp + 1) / 2)^2 / (sp / 2.5)^2))
+  if (fileid %in% c("rsboldmask", "blob")) {
+    vals <- as.numeric(r < 1)
+  } else if (fileid %in% c("ch2a", "ch2b", "mnia", "mnib", "mninat",
+    "mnijhu1", "mnijhu2", "mnidfn", "mniyeo", "atroposseg", "rsboldseg",
+    "pcaslseg", "surf")) {
+    vals <- ifelse(r < 1, pmin(3, floor(r * 3) + 1), 0)
+  } else {
+    vals <- ifelse(r < 1, 100 * (1.2 - r), 0)
+  }
+  if (length(dims) == 4) {
+    vals <- rep(vals, dims[4])
+  }
+  if (!fileid %in% c("rsboldmask", "blob") && !all(vals == floor(vals))) {
+    vals <- vals + stats::rnorm(length(vals), sd = 2)
+  }
+  img <- makeImage(dims, voxval = vals)
+  tfn <- tempfile(pattern = paste0("antsr_standin_", fileid, "_"),
+    fileext = ".nii.gz")
+  antsImageWrite(img, tfn)
+  tfn
 }
