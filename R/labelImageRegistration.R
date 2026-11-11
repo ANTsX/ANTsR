@@ -34,7 +34,8 @@
 #' weighting for the label images.
 #' @param outputPrefix String definining the output prefix for the filenames
 #' of the output transform files.
-#' @param randomSeed Definition for deformable registration.
+#' @param randomSeed Definition for deformable registration. If \code{NULL},
+#'   the seed set by \code{setANTsDeterministic} (if any) is used.
 #' @param verbose Print progress to the screen.
 #' @return outputs a list containing:
 #' \describe{
@@ -307,7 +308,11 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
         {
         doQuick <- TRUE
         } else if( grepl( "Repro", typeOfDeformableTransform ) ) {
-        randomSeed <- 1
+        # explicit seed, then setANTsDeterministic()'s, then 1
+        if( is.null( randomSeed ) )
+          {
+          randomSeed <- getOption( "ants.randomSeed", 1 )
+          }
         }
 
       if( grepl( "\\[", typeOfDeformableTransform ) && grepl("\\]", typeOfDeformableTransform ) ) 
@@ -407,9 +412,13 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
 
     args <- lappend( args, list( "--float", "1" ) )
 
+    if( is.null( randomSeed ) )
+      {
+      randomSeed <- getOption( "ants.randomSeed" )  # setANTsDeterministic()
+      }
     if( ! is.null( randomSeed ) )
       {
-      args <- lappend( "--random-seed", randomSeed )
+      args <- lappend( args, list( "--random-seed", as.character( randomSeed ) ) )
       }
 
     if( verbose )  
