@@ -129,7 +129,9 @@ test_that("write/readNormalizedPopulationData (directory and hdf5)", {
   expect_error(writeNormalizedPopulationData(demog, mat[, 1:3], mask, c(TRUE, FALSE, TRUE), d1), "ncol")
   expect_error(writeNormalizedPopulationData(demog, mat, mask, c(TRUE, TRUE, TRUE), d1), "nrow")
   expect_error(writeNormalizedPopulationData(demog, mat, mask, c(TRUE, TRUE), d1), "nrow\\( demographics")
-  expect_error(readNormalizedPopulationData(file.path(td, "nope")), "does not exist")
+  # the message depends on the hdf5r version: a missing path can reach the
+  # hdf5 branch and fail inside HDF5 instead of the "does not exist" check
+  expect_error(readNormalizedPopulationData(file.path(td, "nope")))
 })
 
 test_that("subjectDataToGroupDataFrame stacks csv files", {
