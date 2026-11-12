@@ -1,6 +1,233 @@
-
 # Release notes
 
+## Development version
+
+* FIX: on Windows, ANTsR now selects ITK's `Platform` threader at load time
+  (unless `ITK_GLOBAL_DEFAULT_THREADER` is already set). With ITK's default
+  thread pool, R did not exit after running ITK filters, so `R CMD check`
+  hung after the examples and the tests (including on r-universe).
+* API: `antsSetSpacing()` now errors on non-numeric, NA/NaN, zero or
+  negative spacing (negative spacing was previously accepted with an ITK
+  warning). `antsSetOrigin()` and `antsSetDirection()` now error on
+  non-finite values, and `antsSetDirection()` requires a numeric matrix.
+* API: `getANTsRData()` reports and deletes failed downloads. Its new
+  `backup` argument (default `FALSE`) returns a synthetic `makeImage()`
+  stand-in instead of erroring.
+* ENH: new manifold-regularized fused ridge regression: `fusedRidge()`,
+  `fusedRidgeDirect()` and `fusedRidgeTorch()` (Python torch backend), each
+  with a `predict()` method, `topK` sparsity control and an explicit
+  `lambda` (`lambda = NULL` skips cross-validation); fused logistic variants.
+* ENH: `decode_pymm_names()` and `humanize_anatomical_name()` turn ANTsPyMM
+  column names into readable anatomical labels; SiMLR updates.
+* FIX: `&`, `|` and `which()` methods for `antsImage`, and `ripmmarc()`,
+  `ripmmarcPop()`, `ripmmarcBasisImage()` and `scaleSpaceFeatureDetection()`,
+  were left out of the built package by `.Rbuildignore` and are exported again.
+* FIX: `setANTsDeterministic()` now actually takes effect, and `Repro` label
+  registration honors explicit and option seeds.
+* FIX: B-spline displacement-field weights and label-registration metrics are
+  preserved (#462).
+* FIX: point/index transforms no longer transpose N x d point matrices, and
+  return a vector for a single point, as in ANTsPy.
+* FIX: `n3BiasFieldCorrection()` / `n4BiasFieldCorrection()` cast images to
+  float before calling ANTs; crop functions accept non-float images.
+* FIX: `imagesToMatrix()` rejects images whose size differs from the mask.
+* FIX: optional arguments documented as vectors, matrices, data frames or
+  arrays (e.g. `quantifySNPs(traitvecin)`, `filterfMRIforNetworkAnalysis(nuisancein)`,
+  `antsrMetricCreate(fixed.mask, moving.mask)`) no longer error or get
+  silently ignored; NA-containing inputs now give a clear error.
+* FIX: `exists()` checks no longer pick up same-named objects from the
+  global environment.
+* FIX: `plot.antsImage()` no longer requires the unused `misc3d` package.
+* DEP: `entropy` and `spls` dropped from Suggests; unused `torch` R
+  dependency removed; README installs ANTsRCore and ITKR from r-universe.
+
+## 0.6.7
+
+* ENH: `nsa_flow()` family for non-negative, (semi-)orthogonal matrix factorization: `nsa_flow_retract()`, `nsa_flow_retract_auto()`, `nsa_flow_pca()`, `nsa_flow_pca_fa()`, `nsa_flow_pca_fa_2()`, `posthoc_fa_summary()`, `compute_communalities()`, `compute_variance_explained_per_factor()`, plus diagram helpers `nsa_flow_fa_diagram()` and `nsa_flow_flowchart()`.
+* ENH: torch-backed variants `nsa_flow_torch()`, `nsa_flow_torch_ag()` and `nsa_flow_autograd()` (via `reticulate`), with automatic learning-rate estimation (`estimate_learning_rate_nsa()`).
+* ENH: `simlr()` gains an `"nsaflow"` constraint (now the default), `"newton-schulz"` and `"ica-newton"` mixing algorithms, and a `sparse_gradient` argument; `sparsenessQuantiles`, `positivities`, `initialUMatrix` and `vmats` now default to `NULL`, and `expBeta` defaults to 0.9.
+* ENH: `extend_simlr_embedding_with_new_modalities()` adds modalities to an existing SiMLR embedding; `backup_simlr()` added.
+* ENH: matrix transform helpers `transform_matrix()`, `apply_transform_matrix()`, `undo_transform_matrix()` and `inv_sqrt_sym_newton()`.
+* ENH: new optimizer `step()` methods `lars`, `psgd`, `riemannian_adam` and `vsgd`, plus `clip_gradient_norm()` and `reset_optimizer_state()`.
+* ENH: `cropImageFromCenterPoint()` crops a patch around a physical-space center point (#440).
+* FIX: `apply_simlr_matrices()` name collision and handling of old parameters; more robust rank estimation, low-rank visualization and correlation (NaN) handling.
+* DEP: `reticulate`, `reshape2` and `GPArotation` added to Imports; `forcats`, `numDeriv` and `rlang` dropped from Imports; `torch` and several analysis packages (e.g. `RGCCA`, `PMA`, `sparsepca`, `elasticnet`, `psych`, `DiagrammeR`) added to Suggests.
+
+## 0.6.6
+
+* API: `antspymm_simlr()` and `antspymm_simlr_update_residuals()` renamed to `NNHEmbed()` and `NNHEmbed_update_residuals()`.
+* ENH: `nsa_flow()` for non-negative Stiefel-manifold optimization, with helpers `frob()`, `symm()`, `inv_sqrt_sym()`, `orth_residual()` and `neg_violation()`.
+* ENH: multi-view CCA baselines `antsr_mcca_features()`, `antsr_rgcca_baseline()` and `antsr_rgcca_sparse()`.
+
+## 0.6.4
+
+* ENH: `write_simlr()` and `read_simlr()` to save and restore SiMLR results.
+* ENH: additional SiMLR optimizers (`lookahead`, `bidirectional_lookahead`, `armijo_gradient`, `bidirectional_armijo_gradient`, `lbfgs`, `amsgrad`, `adadelta`, among others); `simlr()` default `optimizationStyle` is now `"bidirectional_lookahead"` and default `constraint` is `"orthox0x1"`.
+* ENH: `optimal_simlr_initializer()`, `fast_whiten()` and `transform_prior_rows_to_uncorrelated()`.
+* ENH: domain-knowledge priors supported in the ANTsPyMM SiMLR wrapper.
+* FIX: portability of SiMLR read/write; PCA features keep row names; `constraint_weight` must be >= 0; canonical correlation computation.
+
+## 0.6.3
+
+* API: `simlr()` interface reworked: `voxmats` renamed to `data_matrices`, `orthogonalize` replaced by `orthogonalizeU`, new `domainMatrices`/`domainLambdas` for domain-knowledge priors, many new `energyType` options, and new defaults (`iterations = 500`, `optimizationStyle = "adam"`, `sparsenessAlg = "soft"`, `randomSeed = 0`).
+* ENH: optimizer framework for SiMLR: `create_optimizer()`, `list_simlr_optimizers()` and `step()` methods (`sgd_momentum`, `adam`, `nadam`, `adagrad`, `rmsprop`, line-search variants, `hybrid_adam`).
+* ENH: `mapAsymVar()` and `mapLRAverageVar()` for asymmetry and left/right-average variable mapping.
+* ENH: `antsr_spca_features()` fast sparse PCA default, `estimate_joint_rank()`, `estimate_rank_by_permutation_rv()`, `select_joint_k()`, `safe_pca()` and `plot_energy_decomposition()`.
+* ENH: non-negative orthonormal projections `project_to_orthonormal_nonnegative()` and `project_to_partially_orthonormal_nonnegative()`; `simlr_sparseness()`, `ensembled_sparsity()`, soft Dice helpers.
+* DEP: `forcats`, `ggplot2`, `numDeriv`, `purrr`, `rlang` and `tibble` added to Imports.
+
+## 0.6.2
+
+* ENH: functionality migrated from ANTsRNet: `dataAugmentation()`, `randomlyTransformImageData()`, `extractImagePatches()`, `extractImagePatchCoordinates()`, `reconstructImageFromPatches()`, `histogramWarpImageIntensities()`, `regressionMatchImage()`, `simulateBiasField()`, `cropImageCenter()`, `padImageByFactor()` and `padOrCropImageToSize()` (#426); `dataAugmentation()` can apply the same bias field across modalities (#438).
+* ENH: `labelImageRegistration()` for registering label images, supporting explicit identity and deformable-only transforms; `typeOfLinearTransform` subsumed into `initialTransforms`.
+* ENH: `segmentationToOneHot()` and `oneHotToSegmentation()` (#431).
+* ENH: `hessianObjectness()` interface to the ITK Hessian objectness filter.
+* API: `ants.set.seed()` removed; use `setANTsDeterministic()` (options `ants.deterministic` and `ants.randomSeed`) to control reproducibility across registration, motion correction and preprocessing (#439).
+* ENH: `antsRegistration()` supports deformable-only `antsRegistrationSyN*[so]`/`[bo]` transforms and uses an identity (not center-of-mass) initial transform when no linear stage is run.
+* ENH: `antsRegistration()` `antsRegistrationSyN` defaults changed: CC radius 4 -> 2 and SyN gradient step 0.1 -> 0.2; `labelImageRegistration()` gradient step 0.1 -> 0.2.
+* ENH: `fitBsplineObjectToScatteredData()` checks closed parametric dimensions; label geometry measures fixed (#421).
+* ENH: SiMLR additions: `simlr.search()`, `simlr.parameters()`, `simlr.perm()`, `multiview_pca()`, `rvcoef()`, `adjusted_rvcoef()`, orthogonality-defect measures, `ba_svd()`, `antsr_pca_features()`, `antsr_random_features()`, interpretation and visualization helpers, and ANTsPyMM helpers (`antspymm_simlr()`, `antspymm_predictors()`, etc.).
+* DEP: `dplyr`, `stringr` and `rsvd` added to Imports; plotting packages (`GGally`, `ggpubr`, `patchwork`, `tsne`, etc.) and `salad` added to Suggests.
+
+## 0.6.1
+
+* ENH: `histogramEqualizeImage()` (rescaled to the original intensity range).
+* ENH: `histogramMatchImage2()`: Nyul/B-spline histogram matching with masking.
+* FIX: `antsRegistration()` no longer errors when the initial transform contains multiple files.
+* FIX: `fitTransformToPairedPoints()` diffeomorphic fitting now measures error against the original moving points; removed a broken verbose message.
+* FIX: `antsImageClone()` for multi-channel images, `splitChannels()`, and `mergeChannels()`.
+* FIX: removed function name collisions with ANTsRCore.
+* API: removed rarely used functions `regressionNetworkViz()`, `renderImageLabels()`, `renderSurfaceFunction()` and `invariantImageSimilarity()`.
+* DEP: ANTsRCore moved from Depends to Imports and now requires ANTsRCore >= 0.8.1; dropped dependencies including `wmtsa`, `ifultools`, `DMwR`, `misc3d`, `networkD3`, `R.matlab`, `visreg` and `glmnet`.
+
+## 0.6.0
+
+* ENH: ANTsR is now an R-only package: all compiled code moved to ANTsRCore, and the R-level image class, I/O, registration and transform functions previously in ANTsRCore are now provided by ANTsR.
+* DEP: no longer links to ITKR/ANTsRCore and no longer needs compilation (`cmake`, `git`, `clang` system requirements removed).
+
+## 0.5.6.1 - 0.5.7.5
+
+* ENH: New `addNoiseToImage()` (additive Gaussian, salt-and-pepper, shot and
+  speckle noise, implemented in C++).
+* ENH: New `functionalLungSegmentation()` for ventilation MRI, modelled on
+  `antsAtroposN4.sh`. It exposes Atropos/N4 iteration counts
+  (`numberOfIterations`, `numberOfAtroposIterations`) and other parameters.
+  This release also fixes its handling of masks, scale factors and a variable
+  number of clusters.
+* ENH: New exported `segmentationRefinement.predict()`, to go with
+  `segmentationRefinement.train()`.
+* ENH: New `reflectionMatrix()` helper alongside `reflectImage()`.
+* ENH: `predictSimlr()` is improved, and `simlr()` gains a source-matrix
+  option, more parameters and new defaults (including a Grassmann
+  optimisation option).
+* API: `simlr2()` is no longer exported.
+* FIX: `simlr()` no longer sets the random seed internally.
+* FIX: `robustMatrixTransform()` now applies `data.matrix()` to its input.
+* DEP: Suggests `ifultools`, which comes from the CRAN archive through Remotes
+  along with `wmtsa`.
+
+## 0.5.4 - 0.5.6.0
+
+* API: The `symilr` family was renamed, first to `symlr*` and then to
+  `simlr*`. The current names are `simlr()`, `simlrU()`, `initializeSimlr()`,
+  `regularizeSimlr()` and `predictSimlr()`. `symilr()`/`symilr2()` are no
+  longer exported.
+* ENH: `simlr()` gains sym-CCA/ICA "connector" options, low-rank and
+  normalized variants, a `lowDimensionalError` option, and better output: it
+  reports the initial and total energy and returns the best solution.
+* ENH: New `simulateDisplacementField()`, which simulates B-spline and
+  exponential displacement fields.
+* ENH: New `fitBsplineObjectToScatteredData()`.
+* ENH: New `labelOverlapMeasures()`.
+* ENH: New `generateAifMaskImage()`, which generates the AIF mask
+  automatically for `bloodPerfusionSVD()`.
+* ENH: `reflectImage()` passes `...` through to `antsRegistration()`.
+* ENH: `sparseDistanceMatrix()` gains a `kPackage` argument for choosing the
+  k-NN backend (`"FNN"` by default, or `"RcppHNSW"`), and HNSW search is
+  faster.
+* FIX: Fixed a bad default for `sinkhorn` and failures when
+  `lowDimensionalError` is too small in the sparse-distance/SiMLR code.
+* FIX: `getASLNoisePredictors()` handles rounding problems and gains a
+  tolerance argument.
+* FIX: `makePowersPointsImage()` checks correctly whether points are inside
+  the image.
+* FIX: In `eigSeg()`, the class now returns a 2-vector.
+* FIX: `fsl2antsrTransform()` builds against recent ITK.
+* API: Removed the unused C++ routines `confidenceConnectedImage` and
+  `connectedThresholdImage`.
+* DEP: Requires `ANTsRCore (>= 0.7.4)`. The k-NN backends are now `FNN` and
+  `RcppHNSW` (Suggests). The briefly added `nabor`, `RANN` and `RSpectra` were
+  dropped again.
+
+## 0.4.7 - 0.5.1
+
+* ENH: `abpBrainExtraction()` gains `pad` (zero-padding through `iMath`) and
+  verbose options.
+* ENH: `reflectImage()` gains a `verbose` argument.
+* ENH: `symilr()` gains a `randomSeed` argument for repeatable ICA-based
+  decompositions.
+* FIX: `save.ANTsR()`/`load.ANTsR()` work again.
+* FIX: `preprocessfMRI()` fixes `meanBoldFixedImageForMotionCorrection`, and
+  nuisance-variable checks no longer fail on `is.na()`.
+* FIX: Fixed `fillHoles` usage in brain-extraction code.
+* FIX: Defaults across many functions changed from `NA` to `NULL`.
+* PERF: The k-NN code in `sparseDistanceMatrix()` uses `FNN` instead of
+  `rflann`.
+* DEP: Dropped the `rflann` dependency, and `mFilter` now comes from CRAN.
+  Requires `ANTsRCore (>= 0.5.8)` (0.4.9) and later `>= 0.7.0` (0.5.0).
+
+## 0.4.3 - 0.4.6
+
+* API: `jointLabelFusion()` moved to ANTsRCore. ANTsR adds `jlfProp()` for
+  label propagation.
+* API: `imagesToMatrix()`, `imageListToMatrix()` and `matrixToImages()` are no
+  longer exported from ANTsR. They are provided by ANTsRCore.
+* API: `confidenceConnected()` and `connectedThresholdImage()` were removed
+  from the exports.
+* API: `maskImage()` moved to ANTsRCore and is re-exported from ANTsR, so
+  `importFrom(ANTsR, maskImage)` keeps working. `getCentroids()` also moved
+  to ANTsRCore.
+* ENH: `abpBrainExtraction()` gains a `reproducible` argument, and
+  `antsrMotionCalculation()` gains a `seed` argument, for reproducible
+  results.
+* ENH: `antsrMotionCalculation()` passes extra arguments through to
+  `antsRegistration()`.
+* FIX: Some functions took spacing, origin or dimension from the wrong image.
+* FIX: Fixed broken example code.
+* DEP: Uses `hdf5r` instead of the deprecated `h5`. `makeGraph()` no longer
+  needs `psych`.
+
+## 0.4.1 - 0.4.2.9000
+
+* API: The core image class, operators, I/O, registration, resampling,
+  `iMath`, cropping, smoothing, N3/N4 bias correction, transforms and related
+  C++ code moved to ANTsRCore, which ANTsR now Depends on. The `NAMESPACE`
+  now uses explicit exports in place of `exportPattern`.
+* ENH: New `skeletonize()` (with a `propagationOption` constraint).
+* ENH: New `localGyrificationIndex()`.
+* ENH: New `histogramMatchImage()`.
+* ENH: New k-NN smoothing tools: `knnSmoothImage()` and
+  `knnSmoothingMatrix()`.
+* ENH: New regression and decomposition tools: `smoothRegression()`,
+  `smoothMultiRegression()`, `smoothMatrixPrediction()`,
+  `jointSmoothMatrixReconstruction()`, `milr()`/`milr.predict()`, `mild()`
+  and the multi-view `symilr()`/`symilr2()`. These include random-effect,
+  orthogonalization, Sinkhorn and line-search options.
+* ENH: Added `connectedThresholdImage()` and `confidenceConnected()`
+  region-growing wrappers. They were later removed in 0.4.3.
+* ENH: `antsrSurf()` gains a `backgroundColor` option.
+* ENH: `reflectImage()` gains a `metric` argument.
+* ENH: `createJacobianDeterminantImage()` gains `geom`/log options.
+* ENH: `readNormalizedPopulationData()`/`writeNormalizedPopulationData()` can
+  use a directory.
+* ENH: Improved `plotBasicNetwork()`, and the `DesikanKillianyTourville` data
+  gains a descriptor with fixed labels.
+* FIX: `plot.antsImage()` outputs a title.
+* FIX: Fixed direction handling in the revised motion correction, a broken
+  `antsMotionCalculation()`, and CBF mask/mean bugs.
+* FIX: `timeseries2matrix()` works when a label has a single voxel.
+* FIX: Fixed the global-signal dimension and the smoothing call in rs-fMRI
+  preprocessing.
 
 ## 0.4.0
 

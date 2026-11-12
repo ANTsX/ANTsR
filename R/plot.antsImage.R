@@ -521,7 +521,7 @@ plot.antsImage <- function(
   if (!is.null(y)) {
     for (ind in 1:length(y)) {
       biglab <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
-      if (exists("plotimask")) { # the label image
+      if (exists("plotimask", inherits = FALSE)) { # the label image
         if (doCropping) {
           fimg <- cropImage(y[[ind]], plotimask)
           labimg <- as.array(fimg)

@@ -65,7 +65,7 @@
       denoisingParams <- data.matrix(data.frame(dnz$noiseu))
       dnz <- dnz$R2final
     }
-    if (exists("denoisingParams")) {
+    if (exists("denoisingParams", inherits = FALSE)) {
       compcorrnames <- paste("denoisingParams",
         c(1:ncol(denoisingParams)),
         sep = ""

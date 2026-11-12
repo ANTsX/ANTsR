@@ -119,6 +119,12 @@ multiResRandomForestRegression <- function(
   if (idim != x[[1]][[1]]@dimension) {
     stop("multiResRandomForestRegression: dimensionality does not match")
   }
+  # x[[kk]] (one subject's feature images) is paired with labelmasks[[kk]]
+  # and y[kk]; only labelmasks was looped over, so a shorter list silently
+  # dropped subjects and misaligned y
+  if (length(labelmasks) != length(x) || length(y) != length(x)) {
+    stop("y, x and labelmasks must have one entry per subject")
+  }
   fm <- getMultiResFeatureMatrix(x[[1]], labelmasks[[1]],
     rad = rad, multiResSchedule = multiResSchedule, nsamples = nsamples
   )
@@ -191,13 +197,53 @@ getMultiResFeatureMatrix <- function(
     multiResSchedule = c(0),
     nsamples = 10) {
   set.seed(0) # set this in order to increase repeatability of sample call
+  if (is.antsImage(x)) {
+    x <- list(x)
+  }
+  if (!is.list(x) || !length(x) || !all(vapply(x, is.antsImage, logical(1)))) {
+    stop("x must be an antsImage or a list of antsImages")
+  }
+  # array masks take their geometry (spacing, origin, direction) from the
+  # feature image they belong to, not always from the first one
+  featureImage <- function(k) x[[k]]
+  if (is.array(labelmask)) {
+    .stopIfNA(labelmask, "labelmask")
+  } else if (is.list(labelmask)) {
+    if (length(labelmask) != length(x)) {
+      stop("a labelmask list must hold one antsImage (or array) per element of x")
+    }
+    labelmask <- lapply(seq_along(labelmask), function(k) {
+      m <- labelmask[[k]]
+      if (is.array(m)) {
+        .stopIfNA(m, "labelmask")
+        m <- as.antsImage(m, reference = featureImage(k))
+      }
+      m
+    })
+    if (!all(vapply(labelmask, inherits, logical(1), "antsImage"))) {
+      stop("a labelmask list must hold one antsImage (or array) per element of x")
+    }
+  } else if (!inherits(labelmask, "antsImage")) {
+    stop("labelmask must be an antsImage, an array or a list of antsImages")
+  }
+  # masks select voxels of their feature image, so they must share its size
+  for (k in seq_along(x)) {
+    m <- if (is.list(labelmask)) labelmask[[k]] else labelmask
+    if (!identical(as.integer(dim(m)), as.integer(dim(x[[k]])))) {
+      stop(
+        "labelmask for feature ", k, " has dimensions ", paste(dim(m), collapse = "x"),
+        " but the feature image has ", paste(dim(x[[k]]), collapse = "x")
+      )
+    }
+  }
   # loop over features, labels and multires
   for (featk in 1:length(x))
   {
-    if (inherits(labelmask, "antsImage")) {
+    if (is.array(labelmask)) {
+      locmask <- as.antsImage(labelmask, reference = featureImage(featk))
+    } else if (inherits(labelmask, "antsImage")) {
       locmask <- (labelmask)
-    }
-    if (inherits(labelmask, "list")) {
+    } else {
       locmask <- labelmask[[featk]]
     }
     ulabs <- sort(unique(locmask[locmask > 0]))
@@ -212,7 +258,9 @@ getMultiResFeatureMatrix <- function(
       randmask[randvec] <- 1
       for (smlev in multiResSchedule)
       {
-        if (!exists("testmat")) {
+        # inherits = FALSE: an object called testmat in the caller's or the
+        # global environment was otherwise picked up as the feature matrix
+        if (!exists("testmat", inherits = FALSE)) {
           testmat <- t(getNeighborhoodInMask(
             image = x[[featk]] %>% smoothImage(smlev), mask = randmask,
             radius = rad, spatial.info = F, boundary.condition = "image"
