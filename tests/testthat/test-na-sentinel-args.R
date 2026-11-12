@@ -167,7 +167,7 @@ test_that("antsSet* reject NA/NaN and non-positive spacing", {
   antsSetOrigin(img, c(-3, 4))
   expect_equal(antsGetOrigin(img), c(-3, 4))
   expect_error(antsSetDirection(img, matrix(NA_real_, 2, 2)), "direction must be finite")
-  expect_error(antsSetDirection(img, c(1, 0, 0, 1)), "class 'matrix'")
+  expect_error(antsSetDirection(img, c(1, 0, 0, 1)), "numeric matrix")
   antsSetDirection(img, diag(2))
   expect_equal(antsGetDirection(img), diag(2))
 })
@@ -225,4 +225,10 @@ test_that("plotPrettyGraph rejects NA vertex sizes", {
   diag(A) <- 0
   expect_error(plotPrettyGraph(A, 1:4, pngfn = tempfile(fileext = ".png"),
     vertexSize = rep(NA, 4)), "vertexSize must not contain NA")
+})
+
+test_that("antsSetDirection error message matches its check", {
+  img <- makeImage(c(4, 4), 0)
+  expect_error(antsSetDirection(img, array(1, c(2, 2, 2))), "numeric matrix")
+  expect_error(antsSetDirection(img, matrix("a", 2, 2)), "numeric matrix")
 })

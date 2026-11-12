@@ -1,6 +1,19 @@
 
 # Release notes
 
+## Development version
+
+* BREAKING: `antsSetSpacing()` now errors on non-numeric, NA/NaN, zero or
+  negative spacing (negative spacing was previously accepted with an ITK
+  warning). `antsSetOrigin()` and `antsSetDirection()` now error on
+  non-finite values, and `antsSetDirection()` requires a numeric matrix.
+* FIX: optional arguments documented as vectors, matrices, data frames or
+  arrays (e.g. `quantifySNPs(traitvecin)`, `filterfMRIforNetworkAnalysis(nuisancein)`,
+  `antsrMetricCreate(fixed.mask, moving.mask)`) no longer error or get
+  silently ignored; NA-containing inputs now give a clear error.
+* FIX: `exists()` checks no longer pick up same-named objects from the
+  global environment.
+
 
 ## 0.4.0
 

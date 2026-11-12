@@ -191,7 +191,7 @@ antsSetDirection <- function(x, direction) {
   }
   # (this used to test is.array(array), i.e. the base function)
   if (!is.matrix(direction) || !is.numeric(direction)) {
-    stop("direction must be of class 'matrix' or 'array'")
+    stop("direction must be a numeric matrix")
   }
   if ((dim(direction)[1] != length(dim(x))) || (dim(direction)[2] != length(dim(x)))) {
     stop("direction matrix must be of size imagedim * imagedim")
