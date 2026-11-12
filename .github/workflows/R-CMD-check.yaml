@@ -81,14 +81,6 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
-      # On Windows, with ITK's default thread pool the tests pass but R never
-      # exits afterwards; the Platform threader keeps no persistent worker
-      # threads, so the process can shut down.
-      - name: Use ITK Platform threader - WINDOWS
-        if: runner.os == 'Windows'
-        shell: bash
-        run: echo "ITK_GLOBAL_DEFAULT_THREADER=Platform" >> "$GITHUB_ENV"
-
       # On Windows the install R CMD build does before building vignettes
       # hangs until the 6h job limit, even though the install above succeeds,
       # so skip vignettes there; other platforms still build them.

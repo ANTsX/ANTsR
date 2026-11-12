@@ -254,7 +254,7 @@ fMRINormalization <- function(
     t1brain <- structuralImage * thresholdImage(structuralSeg, 1, Inf)
   }
 
-  if (!exists("boldmap")) {
+  if (!exists("boldmap", inherits = FALSE)) {
     if (verbose) print("boldmap to structure (no boldmap passed in)")
     #  boldmap = antsRegistration( meanbold * mask, t1brain,
     #    typeofTransform='QuickRigid', verbose=FALSE )

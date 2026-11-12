@@ -178,8 +178,21 @@ filterfMRIforNetworkAnalysis <- function(
         }
       }
     }
-    if (!all(is.na(nuisancein))) {
-      tlabmat <- cbind(tlabmat, nuisancein)
+    if (!.isNA1(nuisancein)) {
+      .stopIfNA(nuisancein, "nuisancein")
+      if (NROW(nuisancein) != nrow(tlabmat)) {
+        stop(
+          "nuisancein has ", NROW(nuisancein), " rows but there are ",
+          nrow(tlabmat), " time points"
+        )
+      }
+      # as.matrix: a data frame made cbind() add dimnames, so results
+      # differed in names from the matrix and no-nuisance paths
+      nuisancemat <- as.matrix(nuisancein)
+      if (!is.numeric(nuisancemat)) {
+        stop("nuisancein must be numeric")
+      }
+      tlabmat <- cbind(tlabmat, nuisancemat)
       ocormat <- cor(tlabmat, tlabmat)
     }
     cormat <- ocormat
@@ -200,10 +213,17 @@ filterfMRIforNetworkAnalysis <- function(
           rgdens <- (0.5 * sum(gcormat > 0 & gcormat < 1) / (0.5 * ncol(gcormat) * (ncol(gcormat) - 1)))
         }
     }
-    if (!all(is.na(nuisancein))) pcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
-    if (!all(is.na(nuisancein))) gcormat <- gcormat[1:nbrainregions, 1:nbrainregions]
-    if (!all(is.na(nuisancein))) cormat <- cormat[1:nbrainregions, 1:nbrainregions]
-    if (!all(is.na(nuisancein))) ocormat <- ocormat[1:nbrainregions, 1:nbrainregions]
+    if (!.isNA1(nuisancein)) {
+      # drop the nuisance rows/columns again; gcormat used to be overwritten
+      # with the partial correlations, discarding the glasso estimate
+      # (unname: the nuisance columns' names left "" dimnames behind; the
+      # no-nuisance results have none)
+      keep <- seq_len(nbrainregions)
+      pcormat <- unname(pcormat[keep, keep])
+      gcormat <- unname(gcormat[keep, keep])
+      cormat <- unname(cormat[keep, keep])
+      ocormat <- unname(ocormat[keep, keep])
+    }
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
     L <- list(
       filteredTimeSeries = filteredTimeSeries,
