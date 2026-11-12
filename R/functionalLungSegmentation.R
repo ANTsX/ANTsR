@@ -49,6 +49,11 @@ functionalLungSegmentation <- function(
     stop("numberOfIterations must be >= 1.")
   }
 
+  # checked before bias correction (it used to fail after N4)
+  if (!all(is.na(clusterCenters)) && length(clusterCenters) != numberOfClusters) {
+    stop("numberOfClusters should match the vector size of the clusterCenters.")
+  }
+
   generatePureTissueN4WeightMask <- function(probabilityImages) {
     numberOfProbabilityImages <- length(probabilityImages)
 
