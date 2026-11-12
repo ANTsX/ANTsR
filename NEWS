@@ -2,6 +2,10 @@
 
 ## Development version
 
+* FIX: on Windows, ANTsR now selects ITK's `Platform` threader at load time
+  (unless `ITK_GLOBAL_DEFAULT_THREADER` is already set). With ITK's default
+  thread pool, R did not exit after running ITK filters, so `R CMD check`
+  hung after the examples and the tests (including on r-universe).
 * API: `antsSetSpacing()` now errors on non-numeric, NA/NaN, zero or
   negative spacing (negative spacing was previously accepted with an ITK
   warning). `antsSetOrigin()` and `antsSetDirection()` now error on
