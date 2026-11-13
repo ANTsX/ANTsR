@@ -45,7 +45,6 @@
 #' @param verbose print progress to the screen.
 #' @return list of lists of transformed images and/or outputs to a numpy array.
 #' @author Tustison NJ
-#' @importFrom stats rnorm runif
 #' @examples
 #' \dontrun{
 #' library( ANTsR )

@@ -87,9 +87,6 @@ getNamesFromDataframe <- function( x, demogIn, exclusions ) {
 #' @param replacer string to replace left with in column names of output
 #' @return fixed x
 #' @author Avants BB
-#' @importFrom stringr str_extract_all
-#' @importFrom stringr str_replace
-#' @importFrom purrr map_chr
 #' @export
 mapAsymVar <-function( mydataframe, leftvar, leftname='left', rightname='right', replacer='Asym' ) {
 
@@ -3945,8 +3942,6 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
 #' # print(result$plot)
 #' # print(result$traces)
 #'
-#' @import ggplot2
-#' @import reshape2
 #' @export
 nsa_flow <- function(
   Y0, X0 = NULL, w = 0.5,

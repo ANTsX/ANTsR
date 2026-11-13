@@ -2629,9 +2629,6 @@ exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
 #' # predictors <- antspymm_predictors(demographic_data)
 #' @export
 #'
-#' @importFrom tibble tibble
-#' @importFrom rsvd rsvd
-#' @importFrom magrittr %>%
 antspymm_predictors <- function( demog, doasym=FALSE, return_colnames=FALSE ) {
   badcaud=getNamesFromDataframe("bn_str_ca",demog)
   badcaud=badcaud[ -grep("deep",badcaud)]
@@ -3149,7 +3146,6 @@ humanize_anatomical_name <- function(x) {
 #' # simlrVariable <- "PC1"
 #' # interpretedVector <- interpret_simlr_vector2(simlrResult$v[[1]] )
 #' # print(interpretedVector)
-#' @importFrom stringr str_match str_extract
 #' @export
 interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
   
@@ -3793,7 +3789,6 @@ read_simlr_data_frames <- function(file_prefix, data_names, verbose=FALSE ) {
 #' # simlrVariable <- "PC1"
 #' # interpretedVector <- interpret_simlr_vector(simlrResult, simlrMats, simlrVariable)
 #' # print(interpretedVector)
-#' @importFrom stringr str_match str_extract
 #' @export
 interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
   
@@ -5194,7 +5189,6 @@ select_joint_k <- function(mat_list = NULL,
 #' optimal k is determined as the last component where the real eigenvalue
 #' exceeds the mean of the permuted eigenvalues.
 #'
-#' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme_minimal scale_y_log10
 #' @export
 estimate_joint_rank <- function(mat_list,
                                 n_permutations = 20,
