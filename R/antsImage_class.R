@@ -6,6 +6,7 @@
 #' @slot index indices of the region
 #' @slot size size of the region
 #' @import methods
+#' @import tools
 #' @import stats
 setClass(Class = "antsRegion", representation(index = "numeric", size = "numeric"))
 
