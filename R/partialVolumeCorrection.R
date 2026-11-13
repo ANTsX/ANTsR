@@ -55,7 +55,7 @@ partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion
     stop("Input image must be either antsImage or numeric.")
   }
 
-  values.corrected <- values.img / (values.gm + 0.4 * values.wm)
+  values.corrected <- values.img / (values.gm + proportion * values.wm)
   values.corrected[(values.gm + values.wm) < 0.25] <- values.img[(values.gm + values.wm) <
     0.25] # numerical stability
   if (is.numeric(img)) {

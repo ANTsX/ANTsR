@@ -36,6 +36,16 @@ antsImageRead <- function(filename, dimension = NULL, pixeltype = "float") {
       1) {
       stop("'dimension' argument must be of class 'numeric' and have length 1")
     }
+    # the number of components still comes from the header
+    imageInfo <- tryCatch(
+      antsImageHeaderInfo(filename),
+      error = function(e) {
+        return(NA)
+      }
+    )
+    if (!any(is.na(imageInfo))) {
+      components <- imageInfo$nComponents
+    }
   } else {
     if (file.access(filename, 4) == -1) {
       stop(paste("image is not readable, check permissions to", filename))

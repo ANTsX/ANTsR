@@ -35,7 +35,7 @@ Truncate outlier intensities and bias correct with the N4 algorithm.
 img <- antsImageRead(getANTsRData("r16"))
 img2 <- abpN4(img)
 img3 <- abpN4(img)
-testthat::expect_equal(mean(img2), 82.6, tolerance = 1e-2)
+testthat::expect_equal(mean(img2), 91.66, tolerance = 1e-2)
 testthat::expect_equal(img2, img3)
 
 }

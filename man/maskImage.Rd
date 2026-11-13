@@ -15,7 +15,8 @@ maskImage(img.in, img.mask, level = 1, binarize = FALSE)
 of values, output image is non-zero at all locations where label image
 matches any of the levels specified.}
 
-\item{binarize}{binarize the output image?}
+\item{binarize}{binarize the output image?  As in ANTsPy, the result is
+the intersection of \code{img.in != 0} and the mask at \code{level}.}
 }
 \value{
 An object of type antsImage.

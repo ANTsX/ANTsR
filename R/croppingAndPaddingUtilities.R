@@ -148,25 +148,18 @@ cropImageFromCenterPoint <- function( image, centerPoint, patchSize )
       }
     }
 
-  indexOffset <- index
-  for( k in seq_along( patchSize ) )
-    {
-    indexOffset[k] <- indexOffset[k] - round( 0.5 * patchSize[k] )
-    }
+  # first (1-based) index of a patch centered on index
+  indexOffset <- as.numeric( index ) - floor( 0.5 * patchSize )
 
-  domainLow <- numeric( length(imageShape) )
-  domainHigh <- numeric( length(imageShape) )
+  # physical location of that index (may lie outside the image, in which
+  # case the out-of-image part of the patch is zero)
+  spacing <- antsGetSpacing( image )
+  direction <- antsGetDirection( image )
+  patchOrigin <- antsGetOrigin( image ) +
+    as.numeric( direction %*% ( ( indexOffset - 1 ) * spacing ) )
 
-  for( k in seq_along(imageShape) )
-    {
-    domainLow[k] <- max(1, indexOffset[k] - 1)
-    domainHigh[k] <- min(imageShape[k], indexOffset[k] + 1)
-    }
-
-  domain <- cropIndices( image, domainLow, domainHigh )
-
-  patchImage <- makeImage( patchSize, 0 )
-  patchImage <- antsCopyImageInfo( domain, patchImage )
+  patchImage <- makeImage( patchSize, 0, spacing = spacing,
+    origin = patchOrigin, direction = direction )
 
   return( resampleImageToTarget( image, patchImage ) )
 }

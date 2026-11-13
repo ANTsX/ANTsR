@@ -114,7 +114,8 @@ iMath <- function(img, operation, param = NULL, ...) {
       # print("yes in 3")
       retval <- ANTsRCore::iMathInterface2(args)
     } else {
-      print("No match")
+      # e.g. "LabelStats" is listed in iMathOps but has no ANTsRCore backend
+      stop(paste0("iMath operation '", operation, "' is not currently supported."))
     }
 
     if (run_binary) {

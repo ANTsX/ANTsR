@@ -18,7 +18,12 @@ setMethod(
   function(x) {
     a1 <- as.array(x)
     res <- callGeneric(a1)
-    res <- as.antsImage(res, reference = x)
+    # cumulative functions (cumsum, cumprod, cummax, cummin) return a plain
+    # vector over the voxels (as for an array); they are not images
+    if (is.null(dim(res))) {
+      return(res)
+    }
+    res <- .as_antsImage_keep_values(res, reference = x)
     return(res)
   }
 )
@@ -60,11 +65,17 @@ setMethod(
 )
 
 #' @rdname antsImagemath
+#' @param digits integer number of decimal places to round to, as in
+#' \code{\link[base]{round}}.
 #' @export
 setMethod(
   "round", signature(x = "antsImage"),
-  function(x) {
-    return(ANTsRCore::antsImageMath(x, "round"))
+  function(x, digits = 0) {
+    if (digits == 0) {
+      return(ANTsRCore::antsImageMath(x, "round"))
+    }
+    res <- round(as.array(x), digits = digits)
+    return(as.antsImage(res, reference = x))
   }
 )
 

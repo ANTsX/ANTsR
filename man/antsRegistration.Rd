@@ -94,7 +94,9 @@ Restriction currently only works if there are no preceding transformations.}
 \item{writeCompositeTransform}{if \code{TRUE}, will write transformations to h5 format.  Defaults to FALSE.}
 
 \item{samplingPercentage}{value between zero and one that allows the percentage
-of points sampled to be controlled in low-dimensional metric estimation.}
+of points sampled to be controlled in low-dimensional metric estimation.
+If not given, \code{"DenseRigid"} uses 1.0 and the linear stages of
+\code{"SyNabp"} and \code{"antsRegistrationSyN*"} use 0.25, as in ANTsPy.}
 
 \item{verbose}{request verbose output (useful for debugging)}
 
