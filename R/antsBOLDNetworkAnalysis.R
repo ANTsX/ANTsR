@@ -82,7 +82,7 @@ antsBOLDNetworkAnalysis <- function(
     tmat2 <- matrix(as.numeric(mparams2[1:9]), ncol = 3, nrow = 3)
     pt <- t(matrix(rep(10, 3), nrow = 1))
     newpt1 <- data.matrix(tmat1) %*% data.matrix(pt) + as.numeric(mparams1[10:12])
-    newpt2 <- data.matrix(tmat2) %*% data.matrix(pt) + as.numeric(mparams1[10:12])
+    newpt2 <- data.matrix(tmat2) %*% data.matrix(pt) + as.numeric(mparams2[10:12])
     templateFD[i] <- sum(abs(newpt2 - newpt1))
     DVARS[i] <- sqrt(mean((omat[i, ] - omat[i - 1, ])^2))
   }

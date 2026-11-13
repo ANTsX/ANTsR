@@ -126,23 +126,20 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
   if (verbose) {
     progress <- txtProgressBar(min = 0, max = n, style = 3)
   }
+  # work on plain arrays: range indexing of antsImage objects is not reliable
+  if (inherits(x, "antsImage")) {
+    xar <- as.array(x)
+  }
   for (i in 1:n) {
     if (inherits(x, "matrix")) {
-      if (D == 1) {
-        d1[dimx1] <- makeImage(mask, x[i, ] / mrss)[dimx]
-      } else if (D == 2) {
-        d1[dimx1, dimy1] <- makeImage(mask, x[i, ] / mrss)[dimx, dimy]
-      } else if (D == 3) {
-        d1[dimx1, dimy1, dimz1] <- makeImage(mask, x[i, ] / mrss)[dimx, dimy, dimz]
-      }
-    } else {
-      if (D == 1) {
-        d1[dimx1] <- x[dimx]
-      } else if (D == 2) {
-        d1[dimx1, dimy1] <- x[dimx, dimy]
-      } else if (D == 3) {
-        d1[dimx1, dimy1, dimz1] <- x[dimx, dimy, dimz]
-      }
+      xar <- as.array(makeImage(mask, x[i, ] / mrss))
+    }
+    if (D == 1) {
+      d1[dimx1] <- xar[dimx]
+    } else if (D == 2) {
+      d1[dimx1, dimy1] <- xar[dimx, dimy]
+    } else if (D == 3) {
+      d1[dimx1, dimy1, dimz1] <- xar[dimx, dimy, dimz]
     }
     if (D == 1) {
       dx <- (d1[dimx1] - d1[dimx]) * m3
@@ -188,7 +185,8 @@ estSmooth <- function(x, mask, rdf, scaleResid = TRUE, sample = NULL, verbose = 
     xyz <- Vxx * m3
   } else if (D == 2) {
     xyz <- cbind(matrix(Vxx * m3, ncol = 1), matrix(Vyy * m3, ncol = 1))
-    rpv <- (Vxx * Vyy) + (Vxy * 2) # this needs to be checked
+    # determinant of the 2x2 gradient covariance matrix, as in the 3D case
+    rpv <- (Vxx * Vyy) - (Vxy * Vxy)
   } else if (D == 3) {
     xyz <- cbind(Vxx * m3, Vyy * m3, Vzz * m3)
     rpv <- (Vxx * Vyy * Vzz) +

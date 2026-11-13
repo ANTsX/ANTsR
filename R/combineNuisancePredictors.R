@@ -41,11 +41,14 @@ combineNuisancePredictors <- function(
     if (method == "svd") {
       noise <- svd(noisemat, nv = 0, nu = maxpreds)$u
     } else if (method == "cv") {
-      r2sum <- rep(0, length(maxpreds))
       bestpreds <- NULL
       if (ordered) {
-        for (ii in 1:ncol(globalpredictors)) {
-          residmat <- residuals(lm(inmat ~ globalpredictors[, ii]))
+        # ordered predictors: choose how many of the leading predictors to
+        # use, considering at most maxpreds of them
+        npreds <- min(maxpreds, ncol(globalpredictors))
+        r2sum <- rep(NA, npreds)
+        for (ii in 1:npreds) {
+          residmat <- residuals(lm(inmat ~ as.matrix(globalpredictors[, 1:ii])))
           r2sum[ii] <- avgR2(residmat, target, k, covariates)
         }
         scl <- 0.95
@@ -53,9 +56,10 @@ combineNuisancePredictors <- function(
           scl <- 1.05
         }
         mxt <- scl * max(r2sum, na.rm = T)
-        bestpreds <- (1:maxpreds)[which(r2sum > mxt)[1]]
+        bestpreds <- seq_len(which(r2sum > mxt)[1])
       } else {
-        r2sum <- matrix(rep(0, ncol(globalpredictors) * maxpreds), ncol = maxpreds)
+        # NA (not 0) so already-selected predictors cannot be re-picked
+        r2sum <- matrix(rep(NA, ncol(globalpredictors) * maxpreds), ncol = maxpreds)
         for (ii in 1:maxpreds) {
           if (is.null(bestpreds)) {
             preds.remain <- 1:ncol(globalpredictors)
@@ -72,7 +76,7 @@ combineNuisancePredictors <- function(
           bestpreds <- c(bestpreds, which.max(r2sum[, ii]))
         }
       }
-      noise <- noisemat[, bestpreds]
+      noise <- noisemat[, bestpreds, drop = FALSE]
     }
     noise
   }

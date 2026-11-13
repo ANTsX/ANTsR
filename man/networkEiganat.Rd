@@ -37,7 +37,10 @@ spatial variable lies along columns}
 
 \item{gradparam}{gradient descent parameter for data}
 
-\item{mask}{optional antsImage mask}
+\item{mask}{optional mask: an antsImage, or an array (converted with
+\code{as.antsImage}). Its number of voxels > 0.5 must equal
+\code{ncol(Xin)}. With a mask, components are cluster-filtered in image
+space and returned as \code{eigenanatomyimages}.}
 
 \item{v}{the spatial solultion}
 
@@ -45,7 +48,9 @@ spatial variable lies along columns}
 
 \item{pgradparam}{gradient descent parameter for prior term}
 
-\item{clustval}{integer greater than or equal to zero}
+\item{clustval}{integer greater than or equal to zero: with a mask, the
+minimum cluster size (in voxels) kept when sparsifying components; 0 uses
+the previous fixed minimum of 1000 voxels.}
 
 \item{downsample}{bool}
 

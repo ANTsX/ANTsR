@@ -149,7 +149,7 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
   }
 
   if (is.character(threshType)) {
-    if (verbose == "TRUE") {
+    if (isTRUE(verbose)) {
       cat("Calculating threshTypeold \n")
     }
     u <- statFieldThresh(x, pval, k, n, fwhm, resels, df, fieldType,
@@ -174,9 +174,17 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
       filename = paste(statdir, "ClusterImg.nii.gz", sep = "")
     )
   }
-  labs <- unique(clust[clust > 0])
+  # sort so that rows line up with getCentroids(), which is in label order
+  labs <- sort(unique(clust[clust > 0]))
   nclus <- length(labs) # number of clusters
-  cnames <- paste("Cluster", 1:nclus, sep = "") # create name for each cluster
+  if (nclus == 0) {
+    warning("No clusters survive threshold given the parameters")
+    return(list(
+      "SetStats" = NA, "ClusterStats" = NULL, "PeakStats" = NULL,
+      "LabeledClusters" = 0, "threshold" = u, "ClusterImage" = clust
+    ))
+  }
+  cnames <- paste("Cluster", seq_len(nclus), sep = "") # create name for each cluster
   k <- k * vox2res # convert voxel number to resels
 
 
@@ -187,7 +195,8 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
     "Pfwe", "Pfdr", "P",
     "Voxels", "xc", "yc", "zc"
   )
-  ClusterStats[1:nclus, 5:7] <- getCentroids(clust)[1:nclus, 1:3]
+  # getCentroids() always returns x, y, z, t columns (z = 0 for 2D images)
+  ClusterStats[, 5:7] <- getCentroids(clust)[seq_len(nclus), 1:3, drop = FALSE]
   # get locations of clusters
 
   # create table for peak-level statistics----------------------
@@ -204,7 +213,8 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
     (
       sum(as.array(clust[clust == tmp])) / tmp)
   })
-  K <- sapply(ClusterStats[, 4], function(tmp) {
+  K <- sapply(seq_len(nclus), function(i) {
+    tmp <- ClusterStats[i, 4] # number of voxels in cluster
     (
       if (is.null(RPVImg)) {
         # follows isotropic image assumptions
@@ -212,9 +222,7 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
       } else {
         RPVImg <- check_ants(RPVImg)
         # extract resels per voxel in cluster (for non-isotropic image)
-        cmask <- antsImageClone(clust)
-        cmask[cmask != tmp] <- 0
-        cmask[cmask == tmp] <- 1
+        cmask <- thresholdImage(clust, labs[i], labs[i])
         rkc <- RPVImg[cmask == 1]
         lkc <- sum(rkc) / tmp
         iv <- matrix(resels(cmask, c(1, 1, 1)), nrow = 1)
@@ -246,13 +254,10 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
         rftPval(D, 1, 0, tmp, n, resels, df, fieldType)$Pcor)
     }
   ) # fwe p-value (peak)
-  PeakStats[, 2] <- sapply(PeakStats[, 4], function(tmp) {
+  PeakStats[, 2] <- p.adjust(sapply(PeakStats[, 4], function(tmp) {
     (
-      p.adjust(rftPval(D, 1, 0, tmp, n, resels, df, fieldType)$Ec / Ez,
-        "BH",
-        n = nclus
-    ))
-  }) # FDR (peak)
+      rftPval(D, 1, 0, tmp, n, resels, df, fieldType)$Ec / Ez)
+  }), "BH") # FDR (peak)
   PeakStats[, 3] <- sapply(PeakStats[, 4], function(tmp) {
     (
       if (fieldType == "Z") {
@@ -262,12 +267,13 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
       } else if (fieldType == "F") {
         1 - pf(tmp, df[1], df[2])
       } else if (fieldType == "X") {
-        1 - pchisq(tmp, df[1], df[2])
+        # df[2] as in euler(); the third argument of pchisq is ncp
+        1 - pchisq(tmp, df[2])
       })
   }) # uncorrected p-value (peak)
   PeakStats[, 5] <- suppressWarnings(
-    sapply(PeakStats[, 4], function(tmp) (qnorm(1 - tmp)))
-  ) # comparable Z-statistic
+    sapply(PeakStats[, 3], function(tmp) (qnorm(1 - tmp)))
+  ) # comparable Z-statistic (from uncorrected peak p-value)
 
   # prepare output-------------------------------------------
   ClusterStats <- round(ClusterStats, 4)

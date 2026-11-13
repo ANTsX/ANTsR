@@ -53,10 +53,13 @@ resels <- function(mask, fwhm) {
     rz <- 1 / (fwhm[3])
   }
 
-  mask <- iMath(mask, "PadImage", 1)
-  nvox <- sum(as.array(mask))
+  # work on a plain array: three-range indexing of antsImage objects is not
+  # reliable
+  mask <- as.array(iMath(mask, "PadImage", 1))
+  nvox <- sum(mask)
   if (D == 2) {
-    rz <- 1
+    # no z-direction edges/faces/cubes in 2D (Worsley et al., 1996)
+    rz <- 0
     m <- mask[x1, y1]
     xm <- m + mask[x2, y1]
     ym <- m + mask[x1, y2]
@@ -64,11 +67,11 @@ resels <- function(mask, fwhm) {
 
     Ex <- sum(xm[xm == 2]) / 2
     Ey <- sum(ym[ym == 2]) / 2
-    Ez <- 1
+    Ez <- 0
     Fxy <- sum(xym[xym == 4]) / 4
-    Fxz <- 1
-    Fyz <- 1
-    Fxyz <- Fyz
+    Fxz <- 0
+    Fyz <- 0
+    Fxyz <- 0
   } else if (D == 3) {
     m <- mask[x1, y1, z1]
     xm <- m + mask[x2, y1, z1]

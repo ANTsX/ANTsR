@@ -172,11 +172,11 @@ hemodynamicRF <- function(
 
   dim(hrf) <- c(scans / scale, 1)
 
-  if (mean) {
-    hrf - mean(hrf)
-  } else {
-    hrf
-  }
   hrf <- hrf - min(hrf)
   hrf <- hrf / sum(hrf)
+  # centre after normalisation, otherwise the min-shift undoes it
+  if (mean) {
+    hrf <- hrf - mean(hrf)
+  }
+  hrf
 }

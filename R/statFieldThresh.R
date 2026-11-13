@@ -6,7 +6,9 @@
 #' @param n number of images in conjunction
 #' @param fwhm full width at half maxima
 #' @param resels resolution elements in search region
-#' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error)
+#' @param df degrees of freedom expressed as df = c(degrees of interest, degrees of error).
+#' Following \code{\link{euler}}, T- and chi-square fields use \code{df[2]},
+#' F-fields use \code{df[1]} and \code{df[2]}.
 #' @param fieldType
 #' \describe{
 #' \item{T: }{T-field}
@@ -95,7 +97,9 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
 
     # FDR based thresholding ------------------------------------------------------------------------------------------
   } else if (threshType == "cFDR" | threshType == "pFDR") {
-    # find initial threshold for given fieldType
+    # find initial threshold for given fieldType; degrees of freedom follow
+    # the conventions used in euler() (Worsley et al., 1996): T and
+    # chi-square fields use df[2], F-fields use df[1] and df[2]
     if (fieldType == "Z") {
       stat <- qnorm(1 - pp)
     } else if (fieldType == "T") {
@@ -103,58 +107,52 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
     } else if (fieldType == "F") {
       stat <- qf(1 - pp, df[1], df[2])
     } else if (fieldType == "X") {
-      stat <- qchisq(1 - pp, df[1], df[2])
+      stat <- qchisq(1 - pp, df[2])
     }
+    xarr <- as.array(x)
     if (threshType == "cFDR") {
-      fdrclust <- labelClusters(x, k, u, Inf)
-      fdrlabs <- unique(fdrclust[fdrclust > 0])
-      cmax <- c()
-
-      if (verbose == "True") {
-        progress <- txtProgressBar(min = 0, max = n, style = 3)
-      }
-      for (i in 1:length(fdrlabs)) {
-        cmax <- c(cmax, rftPval(D, 1, 0, max(x[fdrclust]), n, resels, df, fieldType)$Ec)
-        if (verbose == "TRUE") {
-          setTxtProgressBar(progress, i)
-        }
-      }
-      if (verbose == "TRUE") {
-        close(progress)
-      }
+      # suprathreshold clusters at the primary threshold (size in voxels)
+      fdrclust <- as.array(labelClusters(x, nvox, stat, Inf))
+      fdrlabs <- sort(unique(fdrclust[fdrclust > 0]))
+      peakvals <- sapply(fdrlabs, function(lab) max(xarr[fdrclust == lab]))
     } else if (threshType == "pFDR") {
-      fdrclust <- antsImageClone(x)
-      fdrclust[fdrclust < stat] <- 0
-      cmax <- as.numeric(fdrclust)
-      if (verbose == "True") {
-        progress <- txtProgressBar(min = 0, max = n, style = 3)
+      peakvals <- xarr[xarr >= stat]
+    }
+    if (length(peakvals) == 0) {
+      stop("No voxels survive the primary threshold given the parameters")
+    }
+    cmax <- rep(NA, length(peakvals))
+    if (isTRUE(verbose)) {
+      progress <- txtProgressBar(min = 0, max = length(peakvals), style = 3)
+    }
+    for (i in seq_along(peakvals)) {
+      cmax[i] <- rftPval(D, 1, 0, peakvals[i], n, resels, df, fieldType)$Ec
+      if (isTRUE(verbose)) {
+        setTxtProgressBar(progress, i)
       }
-      for (i in 1:length(cmax)) {
-        cmax[i] <- rftPval(D, 1, 0, max(x[fdrclust]), n, resels, df, fieldType)$Ec
-        if (verbose == "TRUE") {
-          setTxtProgressBar(progress, i)
-        }
-      }
-      if (verbose == "TRUE") {
-        close(progress)
-      }
+    }
+    if (isTRUE(verbose)) {
+      close(progress)
     }
     cmax <- cmax / rftPval(D, 1, 0, stat, n, resels, df, fieldType)$Ec
     cmax <- sort(cmax, decreasing = TRUE)
     fdrvec <- sort((pval * (1:length(cmax)) / length(cmax)), decreasing = TRUE)
     i <- 1
-    while (cmax[i] >= fdrvec[i]) {
+    while (i <= length(cmax) && cmax[i] >= fdrvec[i]) {
       (i <- i + 1)
+    }
+    if (i > length(cmax)) {
+      stop("No voxels survive FDR threshold given the parameters")
     }
 
     if (fieldType == "Z") {
       u <- qnorm(1 - cmax[i])
     } else if (fieldType == "T") {
-      u <- qt(1 - cmax[i], df[1])
+      u <- qt(1 - cmax[i], df[2])
     } else if (fieldType == "F") {
       u <- qf(1 - cmax[i], df[1], df[2])
     } else if (fieldType == "X") {
-      u <- qchisq(1 - cmax[i], df[1], df[2])
+      u <- qchisq(1 - cmax[i], df[2])
     }
   }
   u
