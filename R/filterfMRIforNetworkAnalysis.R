@@ -101,8 +101,6 @@ filterfMRIforNetworkAnalysis <- function(
     print(myusage)
     return(NULL)
   }
-  freqLo <- freqLo * tr
-  freqHi <- freqHi * tr
   # network analysis
   # wb <- (mask > 0)  # whole brain
   if (!usePkg("magic")) {

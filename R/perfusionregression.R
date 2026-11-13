@@ -35,8 +35,8 @@ perfusionregression <- function(
     print(myusage)
     return(NULL)
   }
-  if (!usePkg("robust")) {
-    print("Need robust package")
+  if (!usePkg("robustbase")) {
+    print("Need robustbase package")
     return(NULL)
   }
   if (missing(mat) | missing(xideal) | missing(nuis)) {
@@ -71,15 +71,17 @@ perfusionregression <- function(
   robvals <- mat * 0
   vox <- 1
   ct <- 0
-  visitvals <- (skip:floor((ncol(mat) - 1) / skip)) * skip
-  if (skip == 1) {
+  if (skip > 1 && ncol(mat) >= skip) {
+    visitvals <- seq(skip, ncol(mat), by = skip)
+  } else {
     visitvals <- 1:ncol(mat)
   }
   rgw <- regweights
   myct <- 0
-  if (!is.null(selectionValsForRegweights)) {
+  if (!is.null(selectionValsForRegweights) &&
+    !all(is.na(selectionValsForRegweights))) {
     vissel <- selectionValsForRegweights[visitvals]
-    visselThresh <- 0.8 * max(vissel)
+    visselThresh <- 0.8 * max(vissel, na.rm = TRUE)
   } else {
     visselThresh <- 0
     vissel <- rep(100, length(visitvals))
@@ -88,7 +90,8 @@ perfusionregression <- function(
   for (vox in visitvals) {
     try(mycbfmodel <- robustbase::lmrob(rcbfform, control = ctl), silent = T)
     rbetaideal[vox] <- mycbfmodel$coeff[2]
-    if (!is.null(mycbfmodel$rweights) & vissel[thisct] > visselThresh) {
+    if (!is.null(mycbfmodel$rweights) &&
+      isTRUE(vissel[thisct] > visselThresh)) {
       rgw <- rgw + mycbfmodel$rweights
       myct <- myct + 1
       robvals[, myct] <- mycbfmodel$rweights

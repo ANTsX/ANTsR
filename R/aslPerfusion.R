@@ -101,6 +101,22 @@ aslPerfusion <- function(
   if (n != 4) {
     stop("input image must have dimension 4 ")
   }
+  if (!is.null(mask)) {
+    mask <- check_ants(mask)
+  }
+  if (N3) {
+    # bias correct the input series before motion correction
+    if (!is.null(mask)) {
+      n3mask <- mask
+    } else {
+      aslavg <- getAverageOfTimeSeries(asl)
+      n3mask <- getMask(aslavg,
+        lowThresh = mean(aslavg) * maskThresh,
+        highThresh = Inf, cleanup = TRUE
+      )
+    }
+    asl <- timeseriesN3(asl, n3mask)
+  }
   if (is.null(moco_results)) {
     moco_results <- .motion_correction(asl, moreaccurate = moreaccurate)
   }
@@ -110,42 +126,40 @@ aslPerfusion <- function(
       maskThresh, highThresh = Inf, cleanup = TRUE
   )
   if (!is.null(mask)) {
-    mask <- check_ants(mask)
     moco_mask_img <- mask
   }
   mat <- timeseries2matrix(asl, moco_mask_img)
-  if (N3) {
-    asl <- timeseriesN3(asl, moco_mask_img)
+  ctllabs <- c(1:(dim(asl)[4] / 2)) * 2 # TC - jj data
+  taglabs <- ctllabs - 1
+  mvals2 <- apply(mat[ctllabs, , drop = FALSE], 2, mean)
+  mvals1 <- apply(mat[taglabs, , drop = FALSE], 2, mean)
+  if (verbose) print(paste("Mean-1st-label", mean(mvals1)))
+  if (verbose) print(paste("Mean-2nd-label", mean(mvals2)))
+  # mean control should exceed mean tag
+  if (mean(mvals2) > mean(mvals1)) {
+    m0vals <- mvals2
+    m1vals <- mvals1
+  } else {
+    m0vals <- mvals1
+    m1vals <- mvals2
   }
-  if (is.na(m0)) {
+  if (verbose) print(paste("ctl", mean(m0vals), "tag", mean(m1vals)))
+  # Get average tagged image
+  m1 <- antsImageClone(moco_mask_img)
+  m1[moco_mask_img == 0] <- 0
+  m1[moco_mask_img == 1] <- m1vals
+  if (is.character(m0) || is.antsImage(m0)) {
+    m0 <- check_ants(m0)
+  } else {
     warning(paste(
       "Estimating m0 image from the mean of the control values.",
       "Might be wrong for your data! Please check!"
     ))
-    ctllabs <- c(1:(dim(asl)[4] / 2)) * 2 # TC - jj data
-    taglabs <- ctllabs - 1
-    mvals2 <- apply(mat[ctllabs, , drop = FALSE], 2, mean)
-    mvals1 <- apply(mat[taglabs, , drop = FALSE], 2, mean)
-    if (verbose) print(paste("Mean-1st-label", mean(mvals1)))
-    if (verbose) print(paste("Mean-2nd-label", mean(mvals2)))
-    # mean control should exceed mean tag
-    if (mean(mvals2) > mean(mvals1)) {
-      m0vals <- mvals2
-      m1vals <- mvals1
-    } else {
-      m0vals <- mvals1
-      m1vals <- mvals2
-    }
-    if (verbose) print(paste("ctl", mean(m0vals), "tag", mean(m1vals)))
     m0 <- antsImageClone(moco_mask_img)
     m0[moco_mask_img == 0] <- 0
     m0[moco_mask_img == 1] <- m0vals
     m0 <- n3BiasFieldCorrection(m0, 4)
     m0 <- n3BiasFieldCorrection(m0, 2)
-    # Get average tagged image
-    m1 <- antsImageClone(moco_mask_img)
-    m1[moco_mask_img == 0] <- 0
-    m1[moco_mask_img == 1] <- m1vals
   }
   if (!is.null(mask)) {
     mask <- check_ants(mask)

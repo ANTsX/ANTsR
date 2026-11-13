@@ -34,19 +34,19 @@ bayesianCBF <- function(pcasl, segmentation, tissuelist,
                         localweights = FALSE, priorBetas = NA) {
   compcorComponents <- 0
   motionAcc <- 2 # motion accuracy - 0 is for testing, 1 or 2 real studies
-  if (all(dim(tissuelist[[1]]) == 1) | all(dim(seg) == 1) | all(dim(pcasl) == 1)) {
+  if (all(dim(tissuelist[[1]]) == 1) | all(dim(segmentation) == 1) | all(dim(pcasl) == 1)) {
     stop(paste("Check your input data"))
   }
   avg <- getAverageOfTimeSeries(pcasl)
   avg <- n3BiasFieldCorrection(avg, 2)
   avg <- n3BiasFieldCorrection(avg, 2)
-  mask <- antsImageClone(seg)
+  mask <- antsImageClone(segmentation)
   mask[mask > 0] <- 1
   if (useDataDrivenMask > 0) {
     mask2 <- getMask(avg, mean(avg), Inf, useDataDrivenMask)
     # cleans up mask to agree with data-driven mask2
     mask[mask2 == 0] <- 0
-    seg[mask2 == 0] <- 0
+    segmentation[mask2 == 0] <- 0
   }
   aslmat <- timeseries2matrix(pcasl, mask)
   perfpro <- aslPerfusion(pcasl,
@@ -78,10 +78,10 @@ bayesianCBF <- function(pcasl, segmentation, tissuelist,
   if (!all(is.na(priorBetas))) {
     bayespriormatfull <- priorBetas
   }
-  n <- max(seg) * nrow(bayespriormatfull)
-  bayespriormat <- matrix(rep(0, n), nrow = max(seg))
+  n <- max(segmentation) * nrow(bayespriormatfull)
+  bayespriormat <- matrix(rep(0, n), nrow = max(segmentation))
   for (i in 1:ncol(bayespriormat)) {
-    bayespriormat[, i] <- getpriors(bayespriormatfull[i, ], seg)
+    bayespriormat[, i] <- getpriors(bayespriormatfull[i, ], segmentation)
   }
   # set 4 to equal 2 - dgm = gm
   bayespriormat[4, ] <- bayespriormat[2, ]
@@ -115,7 +115,7 @@ bayesianCBF <- function(pcasl, segmentation, tissuelist,
     # average over all tissue models ...
     localtissuemat[, i] <- abs(localtissuemat[, i]) /
       sum(abs(localtissuemat[, i]))
-    for (segval in 1:max(seg))
+    for (segval in 1:max(segmentation))
     {
       tissueprior <- localtissuemat[segval, i]
       localprior <- bayespriormat[segval, ]

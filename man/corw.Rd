@@ -21,7 +21,7 @@ matrix - by columns.
 \examples{
 
 mat <- matrix(rnorm(100), nrow = 10)
-wcmat <- corw(mat, weights = abs(nrorm(nrow(mat))))
+wcmat <- corw(mat, weights = abs(rnorm(nrow(mat))))
 
 }
 \author{
