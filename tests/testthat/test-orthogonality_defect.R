@@ -24,7 +24,11 @@ test_that("Gradient descent successfully minimizes orthogonality defect", {
   # --- b. Gradient Descent Loop ---
   
   A_current <- A_initial
-  learning_rate <- 0.001
+  # The defect is scale-invariant, so its gradient scales as 1 / ||A||_F
+  # A step size of 0.001 was tuned for the
+  # old, non-normalized defect sum(offdiag(t(A) %*% A)^2), whose gradient is
+  # ~||A||^3 larger; with the normalized defect it barely moves.
+  learning_rate <- 1
   num_iterations <- 100
   
   # Calculate the starting error
@@ -57,4 +61,34 @@ test_that("Gradient descent successfully minimizes orthogonality defect", {
   expect_lt(final_defect, initial_defect / 100, label = info_message)
   
   succeed("Orthogonality defect was successfully minimized.")
+})
+
+
+test_that("invariant_orthogonality_defect is scale invariant", {
+  set.seed(1)
+  X <- matrix(rnorm(40), 10, 4)
+  d <- invariant_orthogonality_defect(X)
+  expect_gt(d, 0)
+  expect_equal(invariant_orthogonality_defect(10 * X), d)
+  expect_equal(invariant_orthogonality_defect(0.01 * X), d)
+  expect_equal(invariant_orthogonality_defect(qr.Q(qr(X))), 0)
+  expect_equal(invariant_orthogonality_defect(X * 0), 0)
+})
+
+test_that("gradient_invariant_orthogonality_defect matches finite differences", {
+  set.seed(2)
+  X <- matrix(rnorm(24), 8, 3)
+  g <- gradient_invariant_orthogonality_defect(X)
+  h <- 1e-6
+  num <- X * 0
+  for (j in seq_along(X)) {
+    E <- X * 0
+    E[j] <- h
+    num[j] <- (invariant_orthogonality_defect(X + E) -
+      invariant_orthogonality_defect(X - E)) / (2 * h)
+  }
+  expect_equal(g, num, tolerance = 1e-6)
+  # scale invariance of f implies <A, grad f(A)> = 0 and grad f(cA) = grad f(A) / c
+  expect_equal(sum(X * g), 0, tolerance = 1e-10)
+  expect_equal(gradient_invariant_orthogonality_defect(10 * X), g / 10)
 })

@@ -3,30 +3,8 @@
 
 # Removed redundant l1_normalize_features
 
-#' Calculate the invariant orthogonality defect
-#' @param A input matrix
-#' @export
-invariant_orthogonality_defect <- function( A ) 
-{
-  if (!is.matrix(A)) A <- as.matrix(A)
-  Gram <- crossprod( A )
-  defect_matrix <- Gram^2
-  diag(defect_matrix) <- 0
-  total_defect <- sum(defect_matrix)
-  return(total_defect)
-}
-
-#' Compute the Gradient of the Orthogonality Defect
-#' @export
-gradient_invariant_orthogonality_defect <- function(A) {
-  if (!is.matrix(A)) A <- as.matrix(A)
-  Gram <- crossprod(A)
-  G_off_diagonal <- Gram
-  diag(G_off_diagonal) <- 0
-  gradient_matrix <- 4 * (A %*% G_off_diagonal)
-  return(gradient_matrix)
-}
-
+# invariant_orthogonality_defect and gradient_invariant_orthogonality_defect
+# live in multiscaleSVDxpts.R (scale-invariant versions).
 
 # Removed redundant pairwise_matrix_similarity and safe_pca
 
@@ -777,7 +755,7 @@ u_initial = initialUMatrix
     }      
     
     riemannian_descent_grad = smooth_grad(vmats[[i]])
-    step_result <- step(
+    step_result <- optimizer_step(
           optimizer = optimizer_object_l[[i]],
           i = i,
           V_current = vmats[[i]],
@@ -981,85 +959,6 @@ return(
   rlist
   )
 }
-#'
-#' @param simlr_result A list returned by \code{simlr()}, containing
-#'   \code{energyPath}, \code{sim_energy}, \code{domain_energy}, 
-#'   and \code{total_energy}.
-#' @param modality Character string giving the name of the modality to plot
-#'   (must match names in \code{energyPath$modality}).
-#' @param show_weights Logical, if TRUE also show weighted energies.
-#' @return A \code{ggplot2} object.
-#' @examples
-#' \dontrun{
-#'   res <- simlr(...)
-#'   plot_energy_decomposition(res, modality = "RNA")
-#' }
-#' @export
-plot_energy_decomposition <- function(simlr_result, modality, show_weights = FALSE) {
-  stopifnot(requireNamespace("ggplot2", quietly = TRUE))
-  df <- simlr_result$energyPath
-  df <- df[df$modality == modality, ]
-  df = df[-1,]
-  if (!"iteration" %in% colnames(df)) {
-    df$iteration <- seq_len(nrow(df))
-  }
-  
-  # Base data
-  energies <- data.frame(
-    iteration = df$iteration,
-    similarity = df$similarity_energy,
-    domain = df$domain_energy,
-    orth = df$feature_orthogonality,
-    total = df$total_energy
-  )
-
-  energies_long <- tidyr::pivot_longer(
-    energies,
-    cols = -iteration,
-    names_to = "energy_type",
-    values_to = "value"
-  )
-
-  # Rescale each energy type to [0,1] for visual comparability
-  energies_long <- energies_long %>%
-    dplyr::group_by(energy_type) %>%
-    dplyr::mutate(value_rescaled = (value - min(value, na.rm = TRUE)) /
-                                   (max(value, na.rm = TRUE) - min(value, na.rm = TRUE) + 1e-8)) %>%
-    dplyr::ungroup()
-  
-  p <- ggplot2::ggplot(energies_long, ggplot2::aes(x = iteration, y = value_rescaled, color = energy_type)) +
-    ggplot2::geom_line(size = 1) +
-    ggplot2::theme_minimal(base_size = 14) +
-    ggplot2::labs(
-      title = paste("Energy Decomposition for", modality),
-      subtitle = "All energies rescaled to [0,1] for comparability",
-      x = "Iteration",
-      y = "Rescaled Energy (0-1)",
-      color = "Energy type"
-    )
-  
-  if (show_weights) {
-    weighted <- data.frame(
-      iteration = df$iteration,
-      sim_w = df$similarity_energy_w,
-      orth_w = df$feature_orthogonality_w
-    )
-    weighted_long <- tidyr::pivot_longer(
-      weighted,
-      cols = -iteration,
-      names_to = "weighted_type",
-      values_to = "value"
-    )
-    p <- p + ggplot2::geom_line(
-      data = weighted_long,
-      ggplot2::aes(x = iteration, y = value, linetype = weighted_type),
-      color = "black"
-    )
-  }
-  
-  return(p)
-}
-
 
 #' Safe PCA with Deterministic Bad-Column Repair
 #'
@@ -4057,7 +3956,8 @@ multiview_pca <- function(views, n_components, sparse = 0.5, max_iter = 100, spa
 antsr_random_features <- function(data_matrices, k, seed = 42) {
   stopifnot(is.list(data_matrices))
   stopifnot(all(sapply(data_matrices, is.matrix)))
-  set.seed(seed)
+  restore_rng <- .local_rng_seed(seed)
+  on.exit(restore_rng(), add = TRUE)
   plist = lapply(data_matrices, function(m) {
     nvox <- ncol(m)
     projection_matrix <- 
@@ -7572,7 +7472,7 @@ u_initial = initialUMatrix
     }      
     
     riemannian_descent_grad = smooth_grad(vmats[[i]])
-    step_result <- step(
+    step_result <- optimizer_step(
           optimizer = optimizer_object_l[[i]],
           i = i,
           V_current = vmats[[i]],

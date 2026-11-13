@@ -67,7 +67,7 @@
 #' Y0 <- matrix(runif(20), 5, 4)
 #' X0 <- matrix(runif(20), 5, 4)
 #' # The original function relies on helper functions not shown here, such as:
-#' # create_optimizer, step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
+#' # create_optimizer, optimizer_step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
 #' # The following example is conceptual:
 #' # result <- nsa_flow_torch(Y0, X0, w = 0.0, max_iter = 10, verbose = TRUE, plot = TRUE)
 #' # print(result$plot)
@@ -339,7 +339,7 @@ nsa_flow_torch <- function(
 #' Y0 <- matrix(runif(20), 5, 4)
 #' X0 <- matrix(runif(20), 5, 4)
 #' # The original function relies on helper functions not shown here, such as:
-#' # create_optimizer, step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
+#' # create_optimizer, optimizer_step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
 #' # The following example is conceptual:
 #' # result <- nsa_flow_torch(Y0, X0, w = 0.0, max_iter = 10, verbose = TRUE, plot = TRUE)
 #' # print(result$plot)
