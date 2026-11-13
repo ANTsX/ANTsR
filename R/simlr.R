@@ -2629,9 +2629,6 @@ exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
 #' # predictors <- antspymm_predictors(demographic_data)
 #' @export
 #'
-#' @importFrom tibble tibble
-#' @importFrom rsvd rsvd
-#' @importFrom magrittr %>%
 antspymm_predictors <- function( demog, doasym=FALSE, return_colnames=FALSE ) {
   badcaud=getNamesFromDataframe("bn_str_ca",demog)
   badcaud=badcaud[ -grep("deep",badcaud)]
@@ -3149,7 +3146,6 @@ humanize_anatomical_name <- function(x) {
 #' # simlrVariable <- "PC1"
 #' # interpretedVector <- interpret_simlr_vector2(simlrResult$v[[1]] )
 #' # print(interpretedVector)
-#' @importFrom stringr str_match str_extract
 #' @export
 interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
   
@@ -3793,7 +3789,6 @@ read_simlr_data_frames <- function(file_prefix, data_names, verbose=FALSE ) {
 #' # simlrVariable <- "PC1"
 #' # interpretedVector <- interpret_simlr_vector(simlrResult, simlrMats, simlrVariable)
 #' # print(interpretedVector)
-#' @importFrom stringr str_match str_extract
 #' @export
 interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
   
@@ -5085,7 +5080,7 @@ select_joint_k <- function(mat_list = NULL,
 #' @keywords internal
 .run_select_joint_k_tests <- function() {
   
-  context("Testing select_joint_k Functionality")
+  testthat::context("Testing select_joint_k Functionality")
   
   # --- Setup 1: Create data with a known, sharp elbow at k=8 ---
   set.seed(42)
@@ -5114,24 +5109,24 @@ select_joint_k <- function(mat_list = NULL,
 
   # --- Begin Tests ---
   
-  test_that("Function returns a correctly structured list output", {
+  testthat::test_that("Function returns a correctly structured list output", {
     cat("\n- Testing output structure...\n")
     res <- select_joint_k(pca_test_mat_list, k_max = 15)
-    expect_true(is.list(res))
-    expect_named(res, c("optimal_k", "joint_variance_curve", "plot"))
-    succeed()
+    testthat::expect_true(is.list(res))
+    testthat::expect_named(res, c("optimal_k", "joint_variance_curve", "plot"))
+    testthat::succeed()
   })
   
-  test_that("Robust elbow method correctly identifies the known elbow at k=8", {
+  testthat::test_that("Robust elbow method correctly identifies the known elbow at k=8", {
     cat("- Testing robust elbow detection method...\n")
     res_pca <- select_joint_k(pca_test_mat_list, method = "pca", k_max = 20, selection_method = "elbow")
     
-    expect_equal(res_pca$optimal_k, k_true, 
+    testthat::expect_equal(res_pca$optimal_k, k_true, 
                  label = paste("Elbow method failed. Expected k=", k_true, ", but got k=", res_pca$optimal_k))
-    succeed()
+    testthat::succeed()
   })
   
-  test_that("Threshold method works correctly", {
+  testthat::test_that("Threshold method works correctly", {
     cat("- Testing threshold selection method...\n")
     temp_res <- select_joint_k(pca_test_mat_list, k_max = 20)
     var_at_k4 <- temp_res$joint_variance_curve$joint_var[4]
@@ -5139,24 +5134,24 @@ select_joint_k <- function(mat_list = NULL,
     res_thresh <- select_joint_k(pca_test_mat_list, method = "pca", k_max = 20, 
                                  selection_method = "threshold", variance_threshold = var_at_k4)
     
-    expect_equal(res_thresh$optimal_k, 4,
+    testthat::expect_equal(res_thresh$optimal_k, 4,
                  label = "Threshold method should have selected k=4.")
-    succeed()
+    testthat::succeed()
   })
   
   if ( FALSE )
-  test_that("SPCA method runs and returns a valid result object", {
+  testthat::test_that("SPCA method runs and returns a valid result object", {
     cat("- Testing SPCA execution...\n")
     
     # This call now uses the well-behaved spca_test_mat_list
     result_spca <- select_joint_k(spca_test_mat_list, method = "spca", k_max = 5)
     
     # We test that the call completes and returns a list of the correct structure.
-    expect_true(is.list(result_spca), label = "SPCA run should return a list.")
-    expect_named(result_spca, c("optimal_k", "joint_variance_curve", "plot"),
+    testthat::expect_true(is.list(result_spca), label = "SPCA run should return a list.")
+    testthat::expect_named(result_spca, c("optimal_k", "joint_variance_curve", "plot"),
                  label = "SPCA run should return a correctly named list.")
     
-    succeed()
+    testthat::succeed()
   })
   
   cat("\n--- All select_joint_k self-tests passed successfully! ---\n")
@@ -5194,7 +5189,6 @@ select_joint_k <- function(mat_list = NULL,
 #' optimal k is determined as the last component where the real eigenvalue
 #' exceeds the mean of the permuted eigenvalues.
 #'
-#' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme_minimal scale_y_log10
 #' @export
 estimate_joint_rank <- function(mat_list,
                                 n_permutations = 20,

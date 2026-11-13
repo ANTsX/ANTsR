@@ -73,8 +73,6 @@
 #' # print(result$plot)
 #' # print(result$traces)
 #'
-#' @import ggplot2
-#' @import reshape2
 #' @export
 nsa_flow_torch <- function(
   Y0, X0 = NULL, w = 0.5,
@@ -345,8 +343,6 @@ nsa_flow_torch <- function(
 #' # print(result$plot)
 #' # print(result$traces)
 #'
-#' @import ggplot2
-#' @import reshape2
 #' @export
 nsa_flow_torch_ag <- function(
   Y0, X0 = NULL, w = 0.5,

@@ -35,10 +35,6 @@
 #' @author Brian B. Avants, Hongzhi Wang, Paul Yushkevich, Nicholas J. Tustison
 #' @keywords fusion
 #' @keywords template
-#' @importFrom grDevices colorRampPalette dev.off heat.colors hsv png rainbow rgb
-#' @importFrom graphics hist par plot points
-#' @importFrom magrittr %>%
-#' @importFrom methods is new
 #' @examples
 #'
 #' set.seed(123)

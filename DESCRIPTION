@@ -39,6 +39,7 @@ Imports:
     stringr,
     tibble,
     utils,
+    tools,
     rsvd,
     GPArotation,
     glmnet
@@ -81,7 +82,6 @@ Suggests:
     signal,
     sna,
     testthat,
-    tools,
     tsne,
     viridis,
     xgboost,

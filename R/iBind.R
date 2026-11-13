@@ -42,7 +42,6 @@ iBind <- function(img1, img2, along = NA) {
 #' The \code{\%>>\%} operator pipes the object on the left-hand side to the
 #' right-hand side according to the syntax.
 #'
-#' @importFrom magrittr %>%
 #' @name %>%
 #' @description Chain operators together
 #' @param lhs input from left side
