@@ -112,6 +112,10 @@ multiResRandomForestRegression <- function(
     nsamples = 10,
     multiResSchedule = c(0),
     ntrees = 500) {
+  # checked first: it used to fail only after every feature matrix was built
+  if (!usePkg("randomForest")) {
+    stop("install the randomForest package")
+  }
   if (all(is.na(rad))) {
     rad <- rep(0, x[[1]][[1]]@dimension)
   }

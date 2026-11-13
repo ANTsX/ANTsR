@@ -129,6 +129,18 @@ plot.antsImage <- function(
     stop("Cannot plot multichannel image: splitChannels, then plot as overlays.")
   }
   if (!is.antsImage(x)) stop("input x should be an antsImage.")
+  # argument checks that used to run only after the overlays were resampled
+  if (!usePkg("pixmap")) {
+    stop("You need the pixmap package to use this.")
+  }
+  if (!is.null(domainImageMap) && !is.antsImage(domainImageMap)) {
+    if (!is.list(domainImageMap) || length(domainImageMap) != 2) {
+      stop("domainImageMap list Should be length 2.")
+    }
+    if (!is.antsImage(domainImageMap[[1]])) {
+      stop("domainImageMap list first entry list should be antsImage.")
+    }
+  }
   interpNN <- "NearestNeighbor"
   interpStyle <- "Linear"
   if (!is.null(y)) {
