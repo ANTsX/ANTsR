@@ -250,7 +250,7 @@ sd <- function(x, na.rm = FALSE, ...) {
 #' @rdname sd
 #' @export
 sd.default <- function(x, na.rm = FALSE, ...) {
-  stats::sd(x, na.rm = FALSE)
+  stats::sd(x, na.rm = na.rm)
 }
 
 #' @rdname sd

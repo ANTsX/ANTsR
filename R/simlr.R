@@ -777,7 +777,7 @@ u_initial = initialUMatrix
     }      
     
     riemannian_descent_grad = smooth_grad(vmats[[i]])
-    step_result <- step(
+    step_result <- optimizer_step(
           optimizer = optimizer_object_l[[i]],
           i = i,
           V_current = vmats[[i]],
@@ -7572,7 +7572,7 @@ u_initial = initialUMatrix
     }      
     
     riemannian_descent_grad = smooth_grad(vmats[[i]])
-    step_result <- step(
+    step_result <- optimizer_step(
           optimizer = optimizer_object_l[[i]],
           i = i,
           V_current = vmats[[i]],
