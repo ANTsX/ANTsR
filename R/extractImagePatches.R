@@ -71,7 +71,12 @@ extractImagePatches <- function( image, patchSize, maxNumberOfPatches = 'all',
 
   patchList <- list()
   patchArray <- array( data = NA )
-  midPatchIndex <- round( patchSize / 2 )
+  # 1-based index of the patch center within a patch (as in
+  # reconstructImageFromPatches() and ANTsPy's 0-based
+  # round( 0.5 * patchSize ) - 1); offset from the patch corner is
+  # midPatchIndex - 1.
+  midPatchIndex <- pmax( round( patchSize / 2 ), 1 )
+  midPatchOffset <- midPatchIndex - 1
 
   numberOfExtractedPatches <- maxNumberOfPatches
 
@@ -200,16 +205,17 @@ extractImagePatches <- function( image, patchSize, maxNumberOfPatches = 'all',
       removeIndices <- c()
       for( d in seq_len( dimensionality ) )
         {
-        shiftedMaskIndices[, d] <- maskIndices[, d] - midPatchIndex[d]
+        # Patch corner; the patch must lie entirely within the image
+        shiftedMaskIndices[, d] <- maskIndices[, d] - midPatchOffset[d]
         removeIndices <- append( removeIndices, which( shiftedMaskIndices[, d] <= 0 ) )
-        shiftedMaskIndices[, d] <- maskIndices[, d] + midPatchIndex[d]
-        removeIndices <- append( removeIndices, which( shiftedMaskIndices[, d] > imageSize[d] ) )
+        removeIndices <- append( removeIndices,
+          which( shiftedMaskIndices[, d] + patchSize[d] - 1 > imageSize[d] ) )
         }
 
       removeIndices <- unique( removeIndices )
       if( length( removeIndices ) > 0 )
         {
-        maskIndices <- maskIndices[-removeIndices,]
+        maskIndices <- maskIndices[-removeIndices, , drop = FALSE]
         }
 
       # After pruning the mask indices, which were originally defined in terms of the
@@ -218,14 +224,14 @@ extractImagePatches <- function( image, patchSize, maxNumberOfPatches = 'all',
 
       for( d in seq_len( dimensionality ) )
         {
-        maskIndices[, d] <- maskIndices[, d] - midPatchIndex[d]
+        maskIndices[, d] <- maskIndices[, d] - midPatchOffset[d]
         }
 
       numberOfExtractedPatches <- min( maxNumberOfPatches, nrow( maskIndices ) )
       if( randomize )
         {
         randomIndices <- maskIndices[
-          sample.int( nrow( maskIndices ), numberOfExtractedPatches ),]
+          sample.int( nrow( maskIndices ), numberOfExtractedPatches ), , drop = FALSE]
         } else {
         randomIndices <- maskIndices
         }
@@ -350,26 +356,19 @@ extractImagePatchCoordinates <- function( image, patchSize, maxNumberOfPatches =
 {
 
   indexList = list()
+  # Indices are 1-based (R array convention, consistent with
+  # extractImagePatches() and antsTransformIndexToPhysicalPoint()),
+  # so no offset is applied.
   toPhysical <- function( inds, physical ) {
-    offsetter = rep( 1, image@dimension )
     if ( is.list( inds ) ) {
-      ptmat = matrix( nrow = length( inds ), ncol = image@dimension )
-      for ( k in 1:length( inds ) ) {
-        ptmat[k,] = inds[[k]] + offsetter
-      }
-      if ( physical ) return( antsTransformIndexToPhysicalPoint( image, ptmat ) )
-      if ( !physical ) return( ptmat )
+      ptmat = matrix( unlist( inds ), ncol = image@dimension, byrow = TRUE )
+    } else if ( is.matrix( inds ) ) {
+      ptmat = inds[ !is.na( inds[,1] ), , drop = FALSE ]
+    } else {
+      stop( "Index class unknown" )
     }
-    if ( is.array( inds ) ) {
-      ptmat = matrix( nrow = length( inds ), ncol = image@dimension )
-      for ( k in 1:nrow( inds ) ) {
-        ptmat[k,] = inds[k,] + offsetter
-      }
-      ptmat=ptmat[ !is.na( ptmat[,1] ),]
-      if ( physical ) return( antsTransformIndexToPhysicalPoint( image, ptmat ) )
-      if ( !physical ) return( ptmat )
-    }
-    stop( "Index class unknown" )
+    if ( physical ) return( antsTransformIndexToPhysicalPoint( image, ptmat ) )
+    return( ptmat )
   }
 
   if ( ! missing( randomSeed ) )
@@ -396,7 +395,12 @@ extractImagePatchCoordinates <- function( image, patchSize, maxNumberOfPatches =
     }
 
   patchList <- list()
-  midPatchIndex <- round( patchSize / 2 )
+  # 1-based index of the patch center within a patch (as in
+  # reconstructImageFromPatches() and ANTsPy's 0-based
+  # round( 0.5 * patchSize ) - 1); offset from the patch corner is
+  # midPatchIndex - 1.
+  midPatchIndex <- pmax( round( patchSize / 2 ), 1 )
+  midPatchOffset <- midPatchIndex - 1
 
   numberOfExtractedPatches <- maxNumberOfPatches
 
@@ -434,7 +438,8 @@ extractImagePatchCoordinates <- function( image, patchSize, maxNumberOfPatches =
           endIndex <- startIndex + patchSize - 1
           indexList[[ count ]] = c( i, j )
           if ( ! cornerCoordinates )
-            indexList[[ count ]] = indexList[[ count ]] + midPatchIndex
+            indexList[[ count ]] = indexList[[ count ]] + midPatchOffset
+          count <- count + 1
           }
         }
       } else {
@@ -448,7 +453,7 @@ extractImagePatchCoordinates <- function( image, patchSize, maxNumberOfPatches =
             endIndex <- startIndex + patchSize - 1
             indexList[[ count ]] = c( i, j, k )
             if ( ! cornerCoordinates )
-              indexList[[ count ]] = indexList[[ count ]] + midPatchIndex
+              indexList[[ count ]] = indexList[[ count ]] + midPatchOffset
             count <- count + 1
             }
           }
@@ -474,16 +479,17 @@ extractImagePatchCoordinates <- function( image, patchSize, maxNumberOfPatches =
       removeIndices <- c()
       for( d in seq_len( dimensionality ) )
         {
-        shiftedMaskIndices[, d] <- maskIndices[, d] - midPatchIndex[d]
+        # Patch corner; the patch must lie entirely within the image
+        shiftedMaskIndices[, d] <- maskIndices[, d] - midPatchOffset[d]
         removeIndices <- append( removeIndices, which( shiftedMaskIndices[, d] <= 0 ) )
-        shiftedMaskIndices[, d] <- maskIndices[, d] + midPatchIndex[d]
-        removeIndices <- append( removeIndices, which( shiftedMaskIndices[, d] > imageSize[d] ) )
+        removeIndices <- append( removeIndices,
+          which( shiftedMaskIndices[, d] + patchSize[d] - 1 > imageSize[d] ) )
         }
 
       removeIndices <- unique( removeIndices )
       if( length( removeIndices ) > 0 )
         {
-        maskIndices <- maskIndices[-removeIndices,]
+        maskIndices <- maskIndices[-removeIndices, , drop = FALSE]
         }
 
       # After pruning the mask indices, which were originally defined in terms of the
@@ -492,14 +498,14 @@ extractImagePatchCoordinates <- function( image, patchSize, maxNumberOfPatches =
 
       for( d in seq_len( dimensionality ) )
         {
-        maskIndices[, d] <- maskIndices[, d] - midPatchIndex[d]
+        maskIndices[, d] <- maskIndices[, d] - midPatchOffset[d]
         }
 
       numberOfExtractedPatches <- min( maxNumberOfPatches, nrow( maskIndices ) )
 
       if ( randomize ) {
         randomIndices <- maskIndices[
-          sample.int( nrow( maskIndices ), numberOfExtractedPatches ),]
+          sample.int( nrow( maskIndices ), numberOfExtractedPatches ), , drop = FALSE]
         } else randomIndices <- maskIndices
       } else {
       for( d in seq_len( dimensionality ) )
@@ -512,7 +518,7 @@ extractImagePatchCoordinates <- function( image, patchSize, maxNumberOfPatches =
       if ( ! cornerCoordinates ) {
         for( d in seq_len( dimensionality ) )
           {
-          randomIndices[, d] <- randomIndices[, d] + midPatchIndex[d]
+          randomIndices[, d] <- randomIndices[, d] + midPatchOffset[d]
           }
         }
       return( toPhysical( randomIndices, physicalCoordinates ) )
