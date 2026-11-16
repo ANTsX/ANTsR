@@ -100,5 +100,5 @@
   }
   # results for both cases are the same betav<-betav*(qv <= 0.05)
   dfm <- data.frame(betas = betav, qvals = 1 - qv, pvals = 1 - pvals)
-  write.csv(dfm, paste(id, "qvals.csv", sep = ""), row.names = FALSE, q = TRUE)
+  write.csv(dfm, paste(id, "qvals.csv", sep = ""), row.names = F, q = T)
 }
