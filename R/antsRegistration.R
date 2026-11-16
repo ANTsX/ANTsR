@@ -1222,7 +1222,7 @@ buildTemplate <- function(
       )
       jlf <- jointLabelFusion(template, tempmask,
         rSearch = 3,
-        avgIlist, labelList = avgSlist
+        atlasList = avgIlist, labelList = avgSlist
       )
       template <- jlf$intensity
       segmentation <- antsImageClone(jlf$segmentation, "float")

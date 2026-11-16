@@ -111,7 +111,7 @@ vwnrfs <- function(y, x, labelmasks, rad = NA, nsamples = 8,
       subdim <- round(dim(labelmasks[[i]]) / reduceFactor)
       subdim[subdim < 2 * rad + 1] <- (2 * rad + 1)[subdim < 2 * rad + 1]
       if (yisimg) yfactor <- resampleImage(y[[i]], subdim, useVoxels = 1, interpType = as.numeric(asFactors))
-      for (k in 1:nfeats) xfactor[[k]] <- resampleImage(xfactor[[k]], subdim, useVoxels = 1, 0)
+      for (k in 1:nfeats) xfactor[[k]] <- resampleImage(xfactor[[k]], subdim, useVoxels = 1, interpType = 0)
       if (i == 1 | useFirstMask == F) {
         labmaskfactor <- resampleImage(labmaskfactor, subdim,
           useVoxels = 1,
@@ -260,7 +260,7 @@ vwnrfs.predict <- function(rfm, x, labelmasks, rad = NA,
     if (reduceFactor != 1) {
       subdim <- round(dim(labmaskfactor) / reduceFactor)
       subdim[subdim < 2 * rad + 1] <- (2 * rad + 1)[subdim < 2 * rad + 1]
-      for (k in 1:nfeats) xfactor[[k]] <- resampleImage(xfactor[[k]], subdim, useVoxels = 1, 0)
+      for (k in 1:nfeats) xfactor[[k]] <- resampleImage(xfactor[[k]], subdim, useVoxels = 1, interpType = 0)
       labmaskfactor <- resampleImage(labmaskfactor, subdim, useVoxels = 1, interpType = as.numeric(asFactors))
     }
 

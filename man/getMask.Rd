@@ -16,9 +16,11 @@ the mask.}
 \item{highThresh}{An inclusive upper threshold for voxels to be included in
 the mask.}
 
-\item{cleanup}{If \code{>0}, morphological operations will be applied to
-clean up the mask by eroding away small or weakly-connected areas, and
-closing holes.}
+\item{cleanup}{Numeric radius, in voxels, of the morphological operations
+used to clean up the mask (default 2). If \code{>0}, small or
+weakly-connected areas are eroded away and holes are closed; \code{0}
+(or \code{FALSE}) skips the cleanup. This is a radius, not a flag:
+\code{TRUE} is converted to a radius of 1.}
 }
 \value{
 Object of type \code{antsImage} containing the mask image. The
@@ -30,10 +32,13 @@ Get a binary mask image from the given image after thresholding.
 \details{
 If \code{cleanup} is \code{>0}, the following steps are applied
 \enumerate{ 
-\item Erosion with radius 2 voxels 
+\item Erosion with radius \code{cleanup} voxels
 \item Retain largest component 
-\item Dilation with radius 1 voxel \item Morphological closing 
+\item Dilation with radius \code{cleanup} voxels
+\item Morphological closing 
 }
+If the cleaned-up mask is empty, \code{cleanup} is reduced by one voxel
+until the mask is non-empty.
 
 These functions are available in \link{iMath}, see the operations
 \dQuote{ME}, \dQuote{GetLargestComponent}, \dQuote{MD}, \dQuote{FillHoles}.

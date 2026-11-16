@@ -67,7 +67,7 @@ pairwiseImageDistanceMatrix <- function(
     for (nc in 1:nclusters) {
       wc <- c(1:fnl)[clusters == nc]
       if (length(dim(symat[, wc])) > 0) {
-        means <- apply(symat[, wc], MARGIN = 2, mean, na.rm = T)
+        means <- apply(symat[, wc], MARGIN = 2, FUN = mean, na.rm = T)
         clusterrep[nc] <- wc[which.min(means)]
       } else {
         clusterrep[nc] <- which(clusters == nc)

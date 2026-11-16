@@ -1702,8 +1702,8 @@ jointSmoothMatrixReconstruction <- function(
                           errs,
                           iterations = subIterations,
                           smoothingMatrix = loSmoo,
-                          repeatedMeasures = repeatedMeasures, ilist[[i]],
-                          positivity = positivity, gammas[i] * parameters[i, 3],
+                          repeatedMeasures = repeatedMeasures, intercept = ilist[[i]],
+                          positivity = positivity, gamma = gammas[i] * parameters[i, 3],
                           sparsenessQuantile = sparsenessQuantile, usubs = usubs,
                           doOrth = doOrth, verbose = F
       )
