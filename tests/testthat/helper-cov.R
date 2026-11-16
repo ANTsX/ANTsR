@@ -1,3 +1,12 @@
+# On macOS, R and ANTsRCore can each load their own OpenMP runtime, and the
+# second one aborts the process ("OMP: Error #15: Initializing libomp.dylib,
+# but found libomp.dylib already initialized"). Allow the duplicate runtime
+# when tests run outside R CMD check; an existing setting is respected.
+if (Sys.info()[["sysname"]] == "Darwin" &&
+  !nzchar(Sys.getenv("KMP_DUPLICATE_LIB_OK"))) {
+  Sys.setenv(KMP_DUPLICATE_LIB_OK = "TRUE")
+}
+
 # magrittr is in Imports; make its pipe available to the tests even when
 # they run outside test_check() (which sees the package's imports)
 `%>%` <- magrittr::`%>%`
