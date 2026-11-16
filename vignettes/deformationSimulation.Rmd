@@ -90,8 +90,8 @@ Curvature flow.
 ```{r curvflow,eval=FALSE}
 img = antsImageRead( "precuneus.nii.gz" )
 msk = thresholdImage( img, 1, Inf )
-grad = getNeighborhoodInMask( img, msk, rep(0,img@dimension), get.gradient=T,
-  physical.coordinates = T, boundary.condition = 'mean')$gradients
+grad = getNeighborhoodInMask( img, msk, rep(0,img@dimension), get.gradient=TRUE,
+  physical.coordinates = TRUE, boundary.condition = 'mean')$gradients
 kappa = weingartenImageCurvature( smoothImage(img,0.5) ) * msk
 # convert grad to channels
 glist=list()

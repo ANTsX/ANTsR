@@ -91,7 +91,7 @@ aslCensoring <- function(asl, mask = NULL, nuis = NA, method = "outlier",
     myct <- 0
     thisct <- 1
     for (vox in visitvals) {
-      try(mycbfmodel <- robustbase::lmrob(rcbfform, control = ctl), silent = T)
+      try(mycbfmodel <- robustbase::lmrob(rcbfform, control = ctl), silent = TRUE)
       rbetaideal[vox] <- mycbfmodel$coeff[2]
       if (!is.null(mycbfmodel$rweights)) {
         rgw <- rgw + mycbfmodel$rweights

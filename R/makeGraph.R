@@ -73,16 +73,16 @@ makeGraph <- function(
       mycol[mycol == Inf] <- NA
       mysps[, j] <- mycol
     }
-    myspsa <- apply(mysps, FUN = mean, MARGIN = 2, na.rm = T)
+    myspsa <- apply(mysps, FUN = mean, MARGIN = 2, na.rm = TRUE)
   } else {
     myspsa <- NA
   }
   # weights = similarity
   gmetric0 <- igraph::eigen_centrality(g1, weights = edgeWeights)$vector
-  gmetric1 <- igraph::closeness(g1, normalized = T, weights = edgeWeights)
+  gmetric1 <- igraph::closeness(g1, normalized = TRUE, weights = edgeWeights)
   gmetric2 <- igraph::page_rank(g1, weights = edgeWeights)$vector #
   gmetric3 <- igraph::degree(g1)
-  gmetric4 <- igraph::betweenness(g1, normalized = T, weights = edgeWeights)
+  gmetric4 <- igraph::betweenness(g1, normalized = TRUE, weights = edgeWeights)
   #  gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("barrat")
   gmetric5 <- igraph::transitivity(g1,
     isolates = c("zero"), type = c("barrat"),

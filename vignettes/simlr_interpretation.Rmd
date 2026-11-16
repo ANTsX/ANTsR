@@ -93,7 +93,7 @@ result <- simlr(matlist,constraint=constr,scale=prepro,
 p1 <- mat1 %*% (result$v[[1]])
 p2 <- mat2 %*% (result$v[[2]])
 p3 <- mat3 %*% (result$v[[3]])
-# pheatmap::pheatmap( result$v[[1]], cluster_cols=F, cluster_rows=F )
+# pheatmap::pheatmap( result$v[[1]], cluster_cols=FALSE, cluster_rows=FALSE )
 ```
 
 SiMLR identifies a sparse set of features that best reconstruct each view, resulting in projections `p1`, `p2`, and `p3` for each view.

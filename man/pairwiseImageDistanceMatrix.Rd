@@ -16,7 +16,7 @@ pairwiseImageDistanceMatrix(
 
 \item{myFileList}{dd<-'MICCAI-2013-SATA-Challenge-Data/CAP/training-images/'
 myFileList<-list.files(path=dd, pattern = glob2rx('*nii.gz'),full.names =
-T,recursive = T)}
+T,recursive = TRUE)}
 
 \item{metrictype}{similarity function}
 

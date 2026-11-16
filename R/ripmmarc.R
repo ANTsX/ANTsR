@@ -150,7 +150,7 @@ ripmmarc <- function(
   outstruct[[1]] <- antsImageClone(outstruct[[1]], img@pixeltype)
   if (regressProjections) {
     mdl <- lm(t(outstruct$imagePatchMat) ~ t(outstruct$basisMat))
-    bmdl <- bigLMStats(mdl, lambda = 1.e-4, includeIntercept = T)
+    bmdl <- bigLMStats(mdl, lambda = 1.e-4, includeIntercept = TRUE)
     outstruct$evecCoeffs <- t(bmdl$beta)
     mdl <- predict(mdl)
     outstruct$recon <- makeImage(mask, mdl[round(nrow(mdl) / 2) + 1, ])

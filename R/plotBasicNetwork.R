@@ -164,8 +164,8 @@ plotBasicNetwork <- function(centroids,
 
   if (all(is.na(radius))) { # node scaled by strength
     radiusw <- rep(0, nrow(centroids))
-    radiusscale <- as.numeric(apply(weights, FUN = sum, MARGIN = 1, na.rm = T) +
-      apply(weights, FUN = sum, MARGIN = 2, na.rm = T))
+    radiusscale <- as.numeric(apply(weights, FUN = sum, MARGIN = 1, na.rm = TRUE) +
+      apply(weights, FUN = sum, MARGIN = 2, na.rm = TRUE))
     radiusscale <- (radiusscale / max(radiusscale))
     nodeMask <- 1 * (radiusscale > 0) # unconnected nodes stay at 0 if showOnlyConnectedNodes
     radiusw <- (minRadius + (maxRadius - minRadius) * radiusscale)
