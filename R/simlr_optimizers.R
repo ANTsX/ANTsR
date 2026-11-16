@@ -28,6 +28,14 @@
 #' @return An optimizer object (a list with a class attribute).
 #' @export
 create_optimizer <- function(optimizer_type = "hybrid_adam", vmats, ...) {
+
+  if (!.simlr_optimizer_exists(optimizer_type)) {
+    stop("Unknown optimizer '", paste(optimizer_type, collapse = ", "),
+         "'. Available optimizers: ",
+         paste(sort(unique(c(list_simlr_optimizers(),
+                             "lbfgs", "random_search", "random_gradient"))),
+               collapse = ", "), call. = FALSE)
+  }
   
   # Initialize the state list, which will hold momentum, etc. for each modality
   state <- lapply(vmats, function(v) {
@@ -106,6 +114,22 @@ reset_optimizer_state <- function(optimizer, vmats) {
 #' @export
 optimizer_step <- function(optimizer, i, V_current, descent_gradient, ...) {
   UseMethod("optimizer_step")
+}
+
+# TRUE only if an `optimizer_step.<type>` update rule exists for `type`
+.simlr_optimizer_exists <- function(type) {
+  if (!is.character(type) || length(type) != 1L || is.na(type) || type == "default") {
+    return(FALSE)
+  }
+  is.function(get0(paste0("optimizer_step.", type), envir = asNamespace("ANTsR"),
+                   inherits = FALSE))
+}
+
+# An optimizer class with no update rule is an error, not a silent no-op
+#' @export
+optimizer_step.default <- function(optimizer, i, V_current, descent_gradient, ...) {
+  stop("No optimizer_step method for optimizer class '",
+       paste(class(optimizer), collapse = "/"), "'", call. = FALSE)
 }
 
 
@@ -1079,7 +1103,7 @@ optimizer_step.bidirectional_lookahead <- function(optimizer, i, V_current, desc
 list_simlr_optimizers <- function( torch = FALSE ) {
   methods_vec <- as.character(methods("optimizer_step"))
   optimizers <- gsub("^optimizer_step\\.|\\*$", "", methods_vec)
-  optimizers=optimizers[ !(optimizers %in% c("lbfgs", "random_search", "random_gradient"))]
+  optimizers <- optimizers[ !(optimizers %in% c("default", "lbfgs", "random_search", "random_gradient"))]
   if ( torch  ) {
     return( c('adabound', 'adagrad', 'adam', 'adamax', 'adamp', 'adamw', 'asgd', 'lars', 'lbfgs', 'lookahead', 'nadam', 'padam', 'pid', 'qhadam', 'qhm', 'radam', 'rmsprop', 'rprop', 'sgd', 'sgd_nesterov', 'sgdp', 'yogi' ) )
   }
