@@ -93,10 +93,6 @@
 #'
 #' @method plot antsImage
 #' @export
-#' @importFrom grDevices colorRampPalette dev.new dev.off heat.colors hsv
-#' @importFrom grDevices jpeg png rainbow rgb
-#' @importFrom graphics box hist image layout lcm par plot plot.new
-#' @importFrom graphics plot.window points rect title
 plot.antsImage <- function(
     x, y = NULL,
     color.img = "white",
