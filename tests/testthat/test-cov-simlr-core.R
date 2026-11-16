@@ -321,21 +321,26 @@ test_that("unregistered optimizer steps (lbfgs, random_search) update parameters
   energy <- function(V, return_raw = FALSE) sum((V - target)^2)
   grad <- function(V) 2 * (V - target)
 
+  # the update-rule generic is `step` or, once renamed, `optimizer_step`
+  ns <- asNamespace("ANTsR")
+  opt_step <- get0("optimizer_step", ns, mode = "function", inherits = FALSE)
+  if (is.null(opt_step)) opt_step <- get("step", ns, mode = "function")
+
   opt <- create_optimizer("lbfgs", vmats = list(V0), learning_rate = 0.1)
-  s1 <- ANTsR:::step.lbfgs(opt, 1, V0, grad(V0))
+  s1 <- opt_step(opt, 1, V0, grad(V0))
   expect_equal(dim(s1$updated_V), dim(V0))
   expect_lt(energy(s1$updated_V), energy(V0))
-  s2 <- ANTsR:::step.lbfgs(s1$optimizer, 1, s1$updated_V, grad(s1$updated_V))
+  s2 <- opt_step(s1$optimizer, 1, s1$updated_V, grad(s1$updated_V))
   expect_lt(energy(s2$updated_V), energy(V0))
   expect_true(is.matrix(s2$optimizer$state[[1]]$H))
   # vector parameters are also supported
-  sv <- ANTsR:::step.lbfgs(create_optimizer("lbfgs", vmats = list(1:3)), 1, c(1, 2, 3), c(1, 1, 1))
+  sv <- opt_step(create_optimizer("lbfgs", vmats = list(1:3)), 1, c(1, 2, 3), c(1, 1, 1))
   expect_length(sv$updated_V, 3)
 
   ropt <- create_optimizer("random_search", vmats = list(V0), n_trials = 20L,
                            noise_scale = 5, learning_rate = 0.5)
-  r1 <- ANTsR:::step.random_search(ropt, 1, V0, grad(V0), full_energy_function = energy)
+  r1 <- opt_step(ropt, 1, V0, grad(V0), full_energy_function = energy)
   expect_lte(energy(r1$updated_V), energy(V0))
-  r2 <- ANTsR:::step.random_search(ropt, 1, V0, grad(V0), full_energy_function = NULL)
+  r2 <- opt_step(ropt, 1, V0, grad(V0), full_energy_function = NULL)
   expect_false(isTRUE(all.equal(r2$updated_V, V0)))
 })
