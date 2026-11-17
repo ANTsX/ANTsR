@@ -10,6 +10,23 @@
 #   - step(): Generic function to perform one optimization step.
 # ==============================================================================
 
+# Optimizers that exist but are not offered by list_simlr_optimizers()
+.simlr_internal_optimizers <- c("lbfgs", "random_search", "random_gradient")
+
+# TRUE only if ANTsR defines an update rule for `type`.  Accepts either naming
+# of the generic (`optimizer_step.<type>` or `step.<type>`), and looks only in
+# the ANTsR namespace so methods from other packages do not count.
+.simlr_optimizer_exists <- function(type) {
+  if (!is.character(type) || length(type) != 1L || is.na(type) ||
+      type == "default") {
+    return(FALSE)
+  }
+  ns <- asNamespace("ANTsR")
+  any(vapply(paste0(c("optimizer_step.", "step."), type), function(f) {
+    is.function(get0(f, envir = ns, inherits = FALSE))
+  }, logical(1)))
+}
+
 #' Create and Initialize a SIMLR Optimizer
 #'
 #' This factory function creates an optimizer object that holds the state and
@@ -28,6 +45,14 @@
 #' @return An optimizer object (a list with a class attribute).
 #' @export
 create_optimizer <- function(optimizer_type = "hybrid_adam", vmats, ...) {
+
+  if (!.simlr_optimizer_exists(optimizer_type)) {
+    stop("Unknown optimizer '", paste(optimizer_type, collapse = ", "),
+         "'. Available optimizers: ",
+         paste(sort(unique(c(list_simlr_optimizers(),
+                             .simlr_internal_optimizers))), collapse = ", "),
+         call. = FALSE)
+  }
   
   # Initialize the state list, which will hold momentum, etc. for each modality
   state <- lapply(vmats, function(v) {
@@ -1068,14 +1093,17 @@ step.bidirectional_lookahead <- function(optimizer, i, V_current, descent_gradie
 
 #' List Available SIMLR Optimizers
 #'
-#' Dynamically returns the names of all optimizer types with registered `step.*` methods.
+#' Dynamically returns the names of all optimizer types that ANTsR itself
+#' defines an update rule for (`optimizer_step.*`, or `step.*` in older
+#' versions).  Methods registered by other packages (e.g. `step.lmRob` from
+#' robust) are not optimizers and are never listed.
 #' @param torch Logical; if TRUE, returns a predefined list of optimizers compatible with torch.
 #' @return A character vector of optimizer names (e.g., "adam", "nadam", etc.)
 #' @export
 list_simlr_optimizers <- function( torch = FALSE ) {
-  methods_vec <- as.character(methods("step"))
-  optimizers <- gsub("^step\\.|\\*$", "", methods_vec)
-  optimizers=optimizers[ !(optimizers %in% c("lbfgs", "random_search", "random_gradient"))]
+  fns <- ls(asNamespace("ANTsR"), pattern = "^(optimizer_)?step\\.", all.names = TRUE)
+  optimizers <- unique(sub("^(optimizer_)?step\\.", "", fns))
+  optimizers <- sort(setdiff(optimizers, c("default", .simlr_internal_optimizers)))
   if ( torch  ) {
     return( c('adabound', 'adagrad', 'adam', 'adamax', 'adamp', 'adamw', 'asgd', 'lars', 'lbfgs', 'lookahead', 'nadam', 'padam', 'pid', 'qhadam', 'qhm', 'radam', 'rmsprop', 'rprop', 'sgd', 'sgd_nesterov', 'sgdp', 'yogi' ) )
   }
