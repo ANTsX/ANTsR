@@ -45,7 +45,7 @@ antsImageMutualInformation <- function(in_image1, in_image2, sampling.percentage
   if (missing(nBins)) nBins <- 32
   metric <- antsrMetricCreate(in_image1, in_image2,
     type = "Mattes", sampling.strategy = "regular",
-    sampling.percentage = sampling.percentage, nBins
+    sampling.percentage = sampling.percentage, nBins = nBins
   )
   metricValue <- antsrMetricGetValue(metric)
   return(metricValue)

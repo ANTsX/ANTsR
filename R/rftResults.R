@@ -173,7 +173,7 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
   clust <- labelClusters(x, minClusterSize = k, minThresh = u, maxThresh = Inf)
   if (!is.null(statdir)) {
     antsImageWrite(clust,
-      filename = paste(statdir, "ClusterImg.nii.gz", sep = "")
+      filename = file.path(statdir, "ClusterImg.nii.gz")
     )
   }
   labs <- unique(clust[clust > 0])
@@ -282,8 +282,8 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
   )
 
   if (!is.null(statdir)) {
-    write.csv(ClusterStats, file = paste(statdir, "ClusterStats", sep = ""))
-    write.csv(PeakStats, file = paste(statdir, "PeakStats", sep = ""))
+    write.csv(ClusterStats, file = file.path(statdir, "ClusterStats"))
+    write.csv(PeakStats, file = file.path(statdir, "PeakStats"))
   }
   results
 }
