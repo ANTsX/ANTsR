@@ -3837,8 +3837,7 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
     if (!use_additive_svd_fallback) {
       # compute T = (YtY + eps_rf I)^{-1/2} using adaptive routine
       YtY <- crossprod(Y_cand)
-      T <- inv_sqrt_sym_adaptive(YtY, epsilon = eps_rf, method = inv_method,
-                                 ns_iter = ns_iter, eig_thresh = eig_thresh, verbose = verbose)
+      T <- inv_sqrt_sym(YtY, epsilon = eps_rf)
       # multiplicative soft polar
       T_w <- (1 - w_retract) * diag(k) + w_retract * T
       Ytilde <- Y_cand %*% T_w
@@ -4394,7 +4393,7 @@ digraph nsa_flow_algorithm {
 ")
   
   # Create and return the DiagrammeR graph
-  grViz(graph_spec)
+  DiagrammeR::grViz(graph_spec)
 }
 
 
@@ -4493,7 +4492,7 @@ nsa_flow_pca <- function(X, k,
                          proximal_type = c("basic", "nsa_flow"),
                          w_pca = 1.0, nsa_w = 0.5,
                          apply_soft_thresh_in_nns = FALSE,
-                         tol = 1e-6, retraction = def_ret,
+                         tol = 1e-6, retraction = "soft_polar",
                          grad_tol = 1e-4, nsa_flow_fn = nsa_flow_autograd, verbose = FALSE) {
   # --- argument checks ---
   if (!is.matrix(X) || any(!is.finite(X))) stop("X must be a finite numeric matrix")
@@ -4660,7 +4659,7 @@ nsa_flow_pca <- function(X, k,
     stop_due_to_plateau <- (no_improve_count >= patience && lr_reductions >= max_lr_reductions)
 
     if (verbose) {
-      sp_lvl <- if (exists("sparsity_level")) tryCatch(sparsity_level(Y_new), error = function(e) NA) else NA
+      sp_lvl <- mean(abs(Y_new) < 1e-8)
       cat(sprintf("Iter %3d | Energy: %12.6e | Sparsity: %s | ExplVar: %.4f | rgrad_norm: %.4e | bt: %2d | alpha: %.3e | t: %.2fs\n",
                   iter, energy, format(sp_lvl), expl_var_ratio, rgrad_norm, bt, alpha, as.numeric(Sys.time() - t_start, units = "secs")))
       if (!improved) cat(sprintf("  (no_improve_count=%d, lr_reductions=%d)\n", no_improve_count, lr_reductions))

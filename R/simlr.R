@@ -756,7 +756,7 @@ u_initial = initialUMatrix
       orth_grad <- 0
       if (constraint_type == "ortho" & FALSE) {
         orth_grad <- constraint_weight * orth_weights[i] *
-          gradient_invariant_orthogonality_defect(V_sp)
+          gradient_invariant_orthogonality_defect(V)
       }
 
 
@@ -7545,7 +7545,7 @@ u_initial = initialUMatrix
       orth_grad <- 0
       if (constraint_type == "ortho" & FALSE) {
         orth_grad <- constraint_weight * orth_weights[i] *
-          gradient_invariant_orthogonality_defect(V_sp)
+          gradient_invariant_orthogonality_defect(V)
       }
 
 
