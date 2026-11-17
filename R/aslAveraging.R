@@ -86,7 +86,7 @@ aslAveraging <- function(asl, mask = NULL, tc = NA, nuisance = NA, method = "reg
       return(p)
     }
     if (all(is.na(priorBetas))) {
-      blm <- bigLMStats(perfmodel, includeIntercept = T)
+      blm <- bigLMStats(perfmodel, includeIntercept = TRUE)
       bayespriormatfull <- blm$beta
     } else {
       bayespriormatfull <- priorBetas
@@ -116,7 +116,7 @@ aslAveraging <- function(asl, mask = NULL, tc = NA, nuisance = NA, method = "reg
         tissueprior <- localtissuemat[segval, i]
         localprior <- bayespriormat[segval, ]
         blm <- bayesianlm(X, aslmat[, i], localprior, priorwt,
-          includeIntercept = T
+          includeIntercept = TRUE
         )
         locbeta <- blm$beta[2]
         bayesianperfusionloc[segval, i] <- locbeta

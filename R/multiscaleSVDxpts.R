@@ -944,7 +944,7 @@ knnSmoothingMatrix <- function(x, k, sigma, segmentation, ...) {
 #'   x = mat, basisDf = mydf, iterations = 10,
 #'   gamma = 1.e-6, sparsenessQuantile = 0.5,
 #'   smoothingMatrix = smoomat, repeatedMeasures = repmeas,
-#'   verbose = T
+#'   verbose = TRUE
 #' )
 #' tt <- mat %*% fit$v
 #' print(cor.test(mydf$age, tt[, 1]))
@@ -1129,7 +1129,7 @@ smoothMatrixPrediction <- function(
 #' fit <- smoothRegression(
 #'   x = mat[sel, ], y = age[sel], iterations = 10,
 #'   sparsenessQuantile = 0.5,
-#'   smoothingMatrix = smoomat, verbose = T
+#'   smoothingMatrix = smoomat, verbose = TRUE
 #' )
 #' tt <- mat %*% fit$v
 #' print(cor.test(age[-sel], tt[-sel, 1]))
@@ -1266,7 +1266,7 @@ smoothRegression <- function(
 #' fit <- smoothMultiRegression(
 #'   x = mat[sel, ], y = age[sel, ], iterations = 10,
 #'   sparsenessQuantile = 0.5,
-#'   smoothingMatrixX = smoomat, smoothingMatrixY = NA, verbose = T
+#'   smoothingMatrixX = smoomat, smoothingMatrixY = NA, verbose = TRUE
 #' )
 #' tt <- mat %*% fit$v
 #' print(cor.test(age[-sel, 1], tt[-sel, 1]))
@@ -1593,7 +1593,7 @@ knnSmoothImage <- function(
 #' slist <- list(smoomat2, smoomat, smoomat, smoomat, smoomat, smoomat2)
 #'
 #' jj <- jointSmoothMatrixReconstruction(x, 4, params,
-#'   positivity = T,
+#'   positivity = TRUE,
 #'   gamma = 1e-6, sparsenessQuantile = 0.9, iterations = 10,
 #'   smoothingMatrix = slist, verbose = TRUE
 #' )
@@ -1702,10 +1702,10 @@ jointSmoothMatrixReconstruction <- function(
                           errs,
                           iterations = subIterations,
                           smoothingMatrix = loSmoo,
-                          repeatedMeasures = repeatedMeasures, ilist[[i]],
-                          positivity = positivity, gammas[i] * parameters[i, 3],
+                          repeatedMeasures = repeatedMeasures, intercept = ilist[[i]],
+                          positivity = positivity, gamma = gammas[i] * parameters[i, 3],
                           sparsenessQuantile = sparsenessQuantile, usubs = usubs,
-                          doOrth = doOrth, verbose = F
+                          doOrth = doOrth, verbose = FALSE
       )
       #    gammas[i] = temp$gamma * 1.0 # 5
       vlist[[i]] <- temp$v
@@ -2192,8 +2192,8 @@ smoothAppGradCCA <- function(x, y,
                              initialization = "randxy",
                              verbose = FALSE) {
   if (nrow(x) != nrow(y)) stop("nrow x should equal nrow y")
-  x <- scale(x, scale = T)
-  y <- scale(y, scale = T)
+  x <- scale(x, scale = TRUE)
+  y <- scale(y, scale = TRUE)
   errs <- rep(NA, iterations)
   poschoices <- c("positive", "negative", "either", TRUE, FALSE)
   if (sum(positivity == poschoices) != 1 | length(positivity) != 1) {
@@ -2316,14 +2316,14 @@ smoothAppGradCCA <- function(x, y,
 #' mat2 <- imageListToMatrix(feature1Images, mask)
 #' mat3 <- imageListToMatrix(feature3Images, mask)
 #' myscale <- function(x) {
-#'   return(scale(x, center = TRUE, scale = T))
+#'   return(scale(x, center = TRUE, scale = TRUE))
 #' }
 #' x <- list(x1 = myscale(mat[-5, ]), x2 = myscale(mat2[-5, ]), x3 = myscale(mat3[-5, ]))
 #' df <- data.frame(m1 = rowMeans(x$x1), m2 = rowMeans(x$x2), m3 = rowMeans(x$x3))
 #' myform <- " x1 ~ x2 + x3 + m2 + m3 "
 #' result <- milr(df, x, myform,
 #'   iterations = 32, smoothingMatrix = smoomat,
-#'   gamma = 1e-1, verbose = T
+#'   gamma = 1e-1, verbose = TRUE
 #' )
 #' k <- 1
 #' mm <- makeImage(mask, (result$prediction[k, ])) %>% iMath("Normalize")
@@ -2338,7 +2338,7 @@ smoothAppGradCCA <- function(x, y,
 #' result <- milr(df, x, myform,
 #'   iterations = 11, smoothingMatrix = smoomat,
 #'   sparsenessQuantile = 0.5, positivity = "positive",
-#'   gamma = 1e-2, verbose = T
+#'   gamma = 1e-2, verbose = TRUE
 #' )
 #' myol <- makeImage(mask, abs(result$v[, "x2"])) %>% iMath("Normalize")
 #' plot(tar, myol, doCropping = FALSE, window.overlay = c(0.1, 1))
@@ -2351,7 +2351,7 @@ smoothAppGradCCA <- function(x, y,
 #' myform <- " m1 ~ x2 + x3 + m2 + m3 "
 #' result <- milr(df, x, myform,
 #'   iterations = 11, smoothingMatrix = smoomat,
-#'   gamma = 1e-2, verbose = T
+#'   gamma = 1e-2, verbose = TRUE
 #' )
 #' }
 #'

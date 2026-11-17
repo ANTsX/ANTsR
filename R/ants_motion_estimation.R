@@ -41,7 +41,7 @@
       print("'img' should be only one filename")
       return(NULL)
     }
-    img <- antsImageRead(img, dimension = 4, "float")
+    img <- antsImageRead(img, dimension = 4, pixeltype = "float")
     inpixeltype <- img@pixeltype
   } else if (inherits(img, "antsImage")) {
     inpixeltype <- img@pixeltype
@@ -66,7 +66,7 @@
         print("'fixed' should be only one filename")
         return(NULL)
       }
-      fixed <- antsImageRead(fixed, dimension = 3, "float")
+      fixed <- antsImageRead(fixed, dimension = 3, pixeltype = "float")
     } else if (is.antsImage(fixed)) {
       if (fixed@pixeltype != "float") {
         print("'fixed' must have pixeltype  'float' ")

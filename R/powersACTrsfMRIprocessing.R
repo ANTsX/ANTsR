@@ -605,7 +605,7 @@ fMRINormalization <- function(
   ## ----adjacency,message=FALSE,warnings=FALSE, fig.width=5, fig.height=5----
   density <- 0.1
   nEdges <- length(upper.tri(connMat)) * density
-  thresh <- sort(connMat[upper.tri(connMat)], decreasing = T)[nEdges]
+  thresh <- sort(connMat[upper.tri(connMat)], decreasing = TRUE)[nEdges]
   adj <- 1 * (connMat >= thresh)
 
   bingraph <- igraph::graph.adjacency(adj, mode = "undirected", weighted = NULL)

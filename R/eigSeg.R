@@ -54,7 +54,7 @@ eigSeg <- function(
     for (i in 1:nrow(mydata))
     {
       tempImg <- makeImage(mask, mydata[i, ]) %>%
-        smoothImage(smooth, sigmaInPhysicalCoordinates = F)
+        smoothImage(smooth, sigmaInPhysicalCoordinates = FALSE)
       mydata[i, ] <- tempImg[mask >= 0.5]
     }
   }

@@ -12,10 +12,10 @@ aslDenoiseR(
   maxnoisepreds = 2:12,
   polydegree = "loess",
   crossvalidationgroups = 4,
-  scalemat = F,
+  scalemat = FALSE,
   noisepoolfun = max,
-  usecompcor = F,
-  verbose = F
+  usecompcor = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -110,7 +110,7 @@ if (!exists("bold")) {
 }
 postcing <- aal$label_num[grep("Cingulum_Post", aal$label_name)]
 postCingMask <- maskImage(boldmask, aalimg,
-  level = as.numeric(postcing), binarize = T
+  level = as.numeric(postcing), binarize = TRUE
 )
 mpostCingMask <- antsImageClone(postCingMask) * 0
 mpostCingMask[postCingMask == 0] <- 1

@@ -4,7 +4,7 @@
 \alias{crossvalidatedR2}
 \title{Cross-Validated R^2 value}
 \usage{
-crossvalidatedR2(x, y, ngroups=5, covariates=NA, fast=F)
+crossvalidatedR2(x, y, ngroups=5, covariates=NA, fast=FALSE)
 }
 \arguments{
 \item{x}{Input predictor matrix.}
