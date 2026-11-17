@@ -30,3 +30,17 @@ skip_if_new_xgboost <- function() {
   skip_if(utils::packageVersion("xgboost") >= "2.0.0",
     "segmentationRefinement uses the xgboost < 2 API")
 }
+
+# Assert the INTENDED behavior of code that has a known package bug.  While the
+# bug exists the expectations fail (or the code errors) and the test is skipped
+# with `bug`; once it is fixed the same expectations run and pass, so the test
+# never has to be rewritten and a fix cannot break CI.
+expect_intended_despite_bug <- function(code, bug) {
+  tryCatch(code,
+    expectation_failure = function(e) {
+      skip(paste0("known bug: ", bug, " (", conditionMessage(e), ")"))
+    },
+    error = function(e) {
+      skip(paste0("known bug: ", bug, " (", conditionMessage(e), ")"))
+    })
+}

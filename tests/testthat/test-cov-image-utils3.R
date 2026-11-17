@@ -65,6 +65,21 @@ test_that("antsImageTypeCast chooses the widest type", {
   expect_equal(as.array(dd[[2]]), as.array(img))
 })
 
+test_that("antsImageMutualInformation forwards nBins to antsrMetricCreate", {
+  img <- makeImage(c(8, 8), 1:64)
+  seen <- NULL
+  local_mocked_bindings(
+    antsrMetricCreate = function(...) { seen <<- list(...); "metric" },
+    antsrMetricGetValue = function(metric) 0,
+    .package = "ANTsR"
+  )
+  antsImageMutualInformation(img, img, 0.5, 16)
+  expect_identical(seen$nBins, 16)  # by name; it used to land in fixed.mask
+  expect_null(seen$fixed.mask)
+  antsImageMutualInformation(img, img)
+  expect_identical(seen$nBins, 32)  # default
+})
+
 test_that("antsImageMutualInformation and antsrMetricCreate", {
   set.seed(2)
   img <- makeImage(c(8, 8), 1:64)
@@ -72,8 +87,6 @@ test_that("antsImageMutualInformation and antsrMetricCreate", {
   mi <- antsImageMutualInformation(img, i2)
   mi_self <- antsImageMutualInformation(img, img)
   expect_lt(mi_self, mi) # more (negative) MI with itself
-  # nBins is now passed through (it used to land in fixed.mask)
-  expect_true(is.finite(antsImageMutualInformation(img, img, 0.5, 16)))
   expect_output(expect_error(antsImageMutualInformation(antsImageClone(img, "unsigned char"), i2), "float"))
   expect_error(antsImageMutualInformation(img, makeImage(c(8, 8), 1, spacing = c(2, 2))), "physical space")
   m <- img * 0 + 1

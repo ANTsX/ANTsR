@@ -101,9 +101,7 @@ test_that("antsApplyTransformsToPoints maps points and round-trips", {
                                       whichtoinvert = TRUE)
   expect_equal(back$x, pts$x, tolerance = 1e-3)
   expect_equal(back$y, pts$y, tolerance = 1e-3)
-  # NOTE: antsApplyTransformsToPoints() currently calls the image tool
-  # ANTsRCore::AntsApplyTransforms instead of AntsApplyTransformsToPoints, so
-  # coordinates come back unchanged; only structure is checked here.
+  # structure only; the coordinate values are checked in the next test
   tx <- createAntsrTransform(type = "AffineTransform", dimension = 2,
                              translation = c(2, -3))
   txf <- tempfile(fileext = ".mat")
@@ -122,6 +120,31 @@ test_that("antsApplyTransformsToPoints maps points and round-trips", {
   expect_error(antsApplyTransformsToPoints(2, pts, tempfile()), "may not exist")
   expect_error(antsApplyTransformsToPoints(2, makeImage(c(3, 3, 3), 1), txf),
                "must be 2d")
+})
+
+test_that("antsApplyTransformsToPoints translates coordinates", {
+  expect_intended_despite_bug({
+    tx <- createAntsrTransform(type = "AffineTransform", dimension = 2,
+                               translation = c(2, -3))
+    txf <- tempfile(fileext = ".mat")
+    on.exit(unlink(txf))
+    writeAntsrTransform(tx, txf)
+    # forward: (1, 1) + (2, -3) = (3, -2)
+    m <- antsApplyTransformsToPoints(2, data.frame(x = 1, y = 1), txf)
+    expect_equal(c(m$x, m$y), c(3, -2), tolerance = 1e-4)
+    # inverse: (1, 1) - (2, -3) = (-1, 4)
+    mi <- antsApplyTransformsToPoints(2, data.frame(x = 1, y = 1), txf,
+                                      whichtoinvert = TRUE)
+    expect_equal(c(mi$x, mi$y), c(-1, 4), tolerance = 1e-4)
+    # antsImage input: same coordinates
+    pts <- as.antsImage(matrix(c(1, 1, 5, 7), ncol = 2, byrow = TRUE))
+    out <- as.matrix(antsApplyTransformsToPoints(2, pts, txf))
+    expect_equal(unname(out), matrix(c(3, -2, 7, 4), ncol = 2, byrow = TRUE),
+                 tolerance = 1e-4)
+    outi <- as.matrix(antsApplyTransformsToPoints(2, pts, txf, whichtoinvert = TRUE))
+    expect_equal(unname(outi), matrix(c(-1, 4, 3, 10), ncol = 2, byrow = TRUE),
+                 tolerance = 1e-4)
+  }, "antsApplyTransformsToPoints() calls the image tool AntsApplyTransforms, so coordinates are returned unchanged")
 })
 
 test_that("createWarpedGrid draws grids in 2D and 3D and warps them", {

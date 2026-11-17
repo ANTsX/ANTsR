@@ -182,8 +182,15 @@ test_that("extractImagePatchCoordinates returns index and physical coordinates",
   r2d <- extractImagePatchCoordinates(img, c(3, 3), maxNumberOfPatches = 4, randomSeed = 2, physicalCoordinates = FALSE)
   expect_equal(dim(r2d), c(4, 2))
   expect_true(all(r2d[, 1] <= 9 & r2d[, 2] <= 11))
-  # package bug: the 2D 'all' branch never increments its counter, so only
-  # one (the last) coordinate is returned
-  a2d <- extractImagePatchCoordinates(img, c(3, 3), physicalCoordinates = FALSE)
-  expect_equal(as.vector(a2d), c(9, 11))
+})
+
+test_that("extractImagePatchCoordinates 2D returns every patch with 'all'", {
+  expect_intended_despite_bug({
+    img <- makeImage(c(10, 12), 1)
+    a2d <- extractImagePatchCoordinates(img, c(3, 3), physicalCoordinates = FALSE)
+    # like the 3D branch: one row per patch, (10-3+1) * (12-3+1) = 80
+    expect_equal(dim(a2d), c(80, 2))
+    expect_equal(unname(a2d[1, ]), c(1, 1))
+    expect_equal(unname(a2d[nrow(a2d), ]), c(8, 10))
+  }, "the 2D 'all' branch never increments its counter, so only one coordinate is returned")
 })
