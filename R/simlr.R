@@ -989,6 +989,7 @@ return(
 #' }
 #' @export
 plot_energy_decomposition <- function(simlr_result, modality, show_weights = FALSE) {
+  weighted_type = NULL; rm(list = c("weighted_type"))  # NSE / non-standard names (R CMD check)
   stopifnot(requireNamespace("ggplot2", quietly = TRUE))
   df <- simlr_result$energyPath
   df <- df[df$modality == modality, ]
@@ -5298,6 +5299,7 @@ estimate_rank_by_permutation_rv <- function(mat_list,
                                             var_explained_threshold = 0.90, 
                                             handle_missing = TRUE,
                                             return_max = FALSE) {
+  score = NULL; rm(list = c("score"))  # NSE / non-standard names (R CMD check)
   
   if (!requireNamespace("pbapply", quietly = TRUE)) stop("Install 'pbapply'.")
   if (!requireNamespace("ggplot2", quietly = TRUE)) stop("Install 'ggplot2'.")
