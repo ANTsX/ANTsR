@@ -753,14 +753,7 @@ u_initial = initialUMatrix
         }
       }
 
-      orth_grad <- 0
-      if (constraint_type == "ortho" & FALSE) {
-        orth_grad <- constraint_weight * orth_weights[i] *
-          gradient_invariant_orthogonality_defect(V_sp)
-      }
-
-
-      g <- sim_grad + dom_grad - orth_grad
+      g <- sim_grad + dom_grad
       g <- clip_gradient_by_quantile( as.matrix(g), clipper)
       g <- simlr_sparseness(
         g,
@@ -7542,14 +7535,7 @@ u_initial = initialUMatrix
         }
       }
 
-      orth_grad <- 0
-      if (constraint_type == "ortho" & FALSE) {
-        orth_grad <- constraint_weight * orth_weights[i] *
-          gradient_invariant_orthogonality_defect(V_sp)
-      }
-
-
-      g <- sim_grad + dom_grad - orth_grad
+      g <- sim_grad + dom_grad
       g <- clip_gradient_by_quantile( as.matrix(g), clipper)
       g <- simlr_sparseness(
         g,
