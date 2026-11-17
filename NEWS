@@ -2,6 +2,12 @@
 
 ## Development version
 
+* MAINT: requires ANTsRCore >= 0.8.5, where the raw Rcpp bindings
+  `fastMarchingExtension`, `robustMatrixTransform` and `antsImageMutualInformation`
+  were renamed with a `cpp_` prefix so they no longer clash with the ANTsR
+  functions of the same name. `fastMarchingExtension()` and
+  `robustMatrixTransform()` now call the `cpp_` versions.
+
 * FIX: on Windows, ANTsR now selects ITK's `Platform` threader at load time
   (unless `ITK_GLOBAL_DEFAULT_THREADER` is already set). With ITK's default
   thread pool, R did not exit after running ITK filters, so `R CMD check`

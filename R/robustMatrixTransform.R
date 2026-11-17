@@ -11,5 +11,5 @@
 #'
 #' @export robustMatrixTransform
 robustMatrixTransform <- function(mat) {
-  ANTsRCore::robustMatrixTransform(data.matrix(mat))
+  ANTsRCore::cpp_robustMatrixTransform(data.matrix(mat))
 }
