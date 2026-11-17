@@ -14,6 +14,29 @@ S3method(factor,antsImage)
 S3method(hist,antsImage)
 S3method(mean,antsImage)
 S3method(median,antsImage)
+S3method(optimizer_step,adadelta)
+S3method(optimizer_step,adagrad)
+S3method(optimizer_step,adam)
+S3method(optimizer_step,amsgrad)
+S3method(optimizer_step,armijo_gradient)
+S3method(optimizer_step,bidirectional_armijo_gradient)
+S3method(optimizer_step,bidirectional_lookahead)
+S3method(optimizer_step,gd)
+S3method(optimizer_step,hybrid_adam)
+S3method(optimizer_step,lars)
+S3method(optimizer_step,lbfgs)
+S3method(optimizer_step,lookahead)
+S3method(optimizer_step,ls_adam)
+S3method(optimizer_step,ls_nadam)
+S3method(optimizer_step,ls_rmsprop)
+S3method(optimizer_step,nadam)
+S3method(optimizer_step,psgd)
+S3method(optimizer_step,random_gradient)
+S3method(optimizer_step,random_search)
+S3method(optimizer_step,riemannian_adam)
+S3method(optimizer_step,rmsprop)
+S3method(optimizer_step,sgd_momentum)
+S3method(optimizer_step,vsgd)
 S3method(plot,antsImage)
 S3method(predict,fusedRidge)
 S3method(predict,fusedRidgeDirect)
@@ -21,29 +44,6 @@ S3method(predict,fusedRidgeTorch)
 S3method(quantile,antsImage)
 S3method(sd,antsImage)
 S3method(sd,default)
-S3method(step,adadelta)
-S3method(step,adagrad)
-S3method(step,adam)
-S3method(step,amsgrad)
-S3method(step,armijo_gradient)
-S3method(step,bidirectional_armijo_gradient)
-S3method(step,bidirectional_lookahead)
-S3method(step,gd)
-S3method(step,hybrid_adam)
-S3method(step,lars)
-S3method(step,lbfgs)
-S3method(step,lookahead)
-S3method(step,ls_adam)
-S3method(step,ls_nadam)
-S3method(step,ls_rmsprop)
-S3method(step,nadam)
-S3method(step,psgd)
-S3method(step,random_gradient)
-S3method(step,random_search)
-S3method(step,riemannian_adam)
-S3method(step,rmsprop)
-S3method(step,sgd_momentum)
-S3method(step,vsgd)
 S3method(subset,antsImage)
 S3method(unique,antsImage)
 S3method(var,antsImage)
@@ -359,6 +359,7 @@ export(nsa_flow_torch_ag)
 export(oneHotToSegmentation)
 export(optimal_simlr_initializer)
 export(optimize_indicator_matrix)
+export(optimizer_step)
 export(origin)
 export(orth_residual)
 export(orthogonalizeAndQSparsify)
@@ -470,7 +471,6 @@ export(splitData)
 export(splitMask)
 export(splitNDImageToList)
 export(statFieldThresh)
-export(step)
 export(subgradientL1Regression)
 export(subjectDataToGroupDataFrame)
 export(sum)
@@ -566,45 +566,57 @@ import(reshape2)
 import(stats)
 import(tools)
 import(utils)
-importFrom(ggplot2,aes)
-importFrom(ggplot2,geom_line)
-importFrom(ggplot2,geom_point)
-importFrom(ggplot2,ggplot)
-importFrom(ggplot2,labs)
-importFrom(ggplot2,scale_y_log10)
-importFrom(ggplot2,theme_minimal)
-importFrom(grDevices,colorRampPalette)
-importFrom(grDevices,dev.new)
-importFrom(grDevices,dev.off)
-importFrom(grDevices,heat.colors)
-importFrom(grDevices,hsv)
-importFrom(grDevices,jpeg)
-importFrom(grDevices,png)
-importFrom(grDevices,rainbow)
-importFrom(grDevices,rgb)
-importFrom(graphics,box)
-importFrom(graphics,boxplot)
-importFrom(graphics,hist)
-importFrom(graphics,image)
-importFrom(graphics,layout)
-importFrom(graphics,lcm)
-importFrom(graphics,par)
-importFrom(graphics,plot)
-importFrom(graphics,plot.new)
-importFrom(graphics,plot.window)
-importFrom(graphics,points)
-importFrom(graphics,rect)
-importFrom(graphics,title)
+importFrom(ggplot2,
+  aes,
+  geom_line,
+  geom_point,
+  ggplot,
+  labs,
+  scale_y_log10,
+  theme_minimal
+)
+importFrom(grDevices,
+  colorRampPalette,
+  dev.new,
+  dev.off,
+  heat.colors,
+  hsv,
+  jpeg,
+  png,
+  rainbow,
+  rgb
+)
+importFrom(graphics,
+  box,
+  boxplot,
+  hist,
+  image,
+  layout,
+  lcm,
+  par,
+  plot,
+  plot.new,
+  plot.window,
+  points,
+  rect,
+  title
+)
 importFrom(magrittr,"%>%")
-importFrom(methods,is)
-importFrom(methods,new)
+importFrom(methods,
+  is,
+  new
+)
 importFrom(purrr,map_chr)
 importFrom(rsvd,rsvd)
-importFrom(stats,AIC)
-importFrom(stats,rnorm)
-importFrom(stats,runif)
-importFrom(stringr,str_extract)
-importFrom(stringr,str_extract_all)
-importFrom(stringr,str_match)
-importFrom(stringr,str_replace)
+importFrom(stats,
+  AIC,
+  rnorm,
+  runif
+)
+importFrom(stringr,
+  str_extract,
+  str_extract_all,
+  str_match,
+  str_replace
+)
 importFrom(tibble,tibble)

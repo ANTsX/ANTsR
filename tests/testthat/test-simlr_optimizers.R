@@ -13,7 +13,7 @@ library(testthat)
 
 # --- 1. The Optimizer System to be Tested ---
 # (This section should contain the complete, correct optimizer code from our
-# previous response, including create_optimizer, step, step.hybrid_adam, etc.)
+# previous response, including create_optimizer, optimizer_step, optimizer_step.hybrid_adam, etc.)
 
 # --- 2. The Test Suite Itself ---
 context("Testing SIMLR Optimizer Implementations")
@@ -60,9 +60,9 @@ test_optimizer <- function(optimizer_type) {
     ascent_grad <- gradient_func_test(V_start)
     descent_grad <- -ascent_grad
     
-    # Take one step using the generic `step()` function.
+    # Take one step using the generic `optimizer_step()` function.
     # The `params` list is automatically carried inside the optimizer object.
-    step_result <- step(
+    step_result <- optimizer_step(
       optimizer,
       i = 1,
       V_current = V_start,
