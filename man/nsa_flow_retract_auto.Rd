@@ -2,18 +2,12 @@
 % Please edit documentation in R/multiscaleSVDxpts.R
 \name{nsa_flow_retract_auto}
 \alias{nsa_flow_retract_auto}
-\title{Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)}
+\title{Retraction onto the Stiefel Manifold (polar or soft-polar)}
 \usage{
 nsa_flow_retract_auto(
   Y_cand,
   w_retract = 1,
-  retraction_type = c("polar", "soft_polar", "none"),
-  eps_rf = 1e-08,
-  inv_method = "diag",
-  ns_iter = 1L,
-  eig_thresh = 128L,
-  diag_thresh = 8192L,
-  verbose = FALSE
+  retraction_type = c("polar", "soft_polar", "none")
 )
 }
 \arguments{
@@ -22,19 +16,7 @@ nsa_flow_retract_auto(
 \item{w_retract}{Weight for soft retraction.}
 
 \item{retraction_type}{Type of retraction ('polar', 'soft_polar', or 'none').}
-
-\item{eps_rf}{Small numeric value for stability.}
-
-\item{inv_method}{Method for inverse square root.}
-
-\item{ns_iter}{Number of iterations for Newton-Schulz.}
-
-\item{eig_thresh}{Threshold for eigen-decomposition.}
-
-\item{diag_thresh}{Threshold for diagonal check.}
-
-\item{verbose}{Verbose output.}
 }
 \description{
-Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)
+Retraction onto the Stiefel Manifold (polar or soft-polar)
 }
