@@ -3837,7 +3837,8 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
     if (!use_additive_svd_fallback) {
       # compute T = (YtY + eps_rf I)^{-1/2} using adaptive routine
       YtY <- crossprod(Y_cand)
-      T <- inv_sqrt_sym(YtY, epsilon = eps_rf)
+      T <- inv_sqrt_sym_adaptive(YtY, epsilon = eps_rf, method = inv_method,
+                                 ns_iter = ns_iter, eig_thresh = eig_thresh, verbose = verbose)
       # multiplicative soft polar
       T_w <- (1 - w_retract) * diag(k) + w_retract * T
       Ytilde <- Y_cand %*% T_w
@@ -4659,7 +4660,7 @@ nsa_flow_pca <- function(X, k,
     stop_due_to_plateau <- (no_improve_count >= patience && lr_reductions >= max_lr_reductions)
 
     if (verbose) {
-      sp_lvl <- mean(abs(Y_new) < 1e-8)
+      sp_lvl <- if (exists("sparsity_level")) tryCatch(sparsity_level(Y_new), error = function(e) NA) else NA
       cat(sprintf("Iter %3d | Energy: %12.6e | Sparsity: %s | ExplVar: %.4f | rgrad_norm: %.4e | bt: %2d | alpha: %.3e | t: %.2fs\n",
                   iter, energy, format(sp_lvl), expl_var_ratio, rgrad_norm, bt, alpha, as.numeric(Sys.time() - t_start, units = "secs")))
       if (!improved) cat(sprintf("  (no_improve_count=%d, lr_reductions=%d)\n", no_improve_count, lr_reductions))
