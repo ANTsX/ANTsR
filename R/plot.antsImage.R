@@ -18,7 +18,7 @@
 #' @param color.colorbar color scale to use for colorbar
 #' @param window.img lower and upper thresholds for display of main image
 #' @param window.overlay lower and upper thresholds for display of overlay.
-#' if you set \code{window.overlay = c( 0, 100 )} and \code{useAbsoluteScale=T}
+#' if you set \code{window.overlay = c( 0, 100 )} and \code{useAbsoluteScale=TRUE}
 #' then the image overlay will map into that range.  otherswise, the min and
 #' max of the image will be used.
 #' @param quality  integer quality magnification factor 1 => large (e.g.
@@ -93,10 +93,6 @@
 #'
 #' @method plot antsImage
 #' @export
-#' @importFrom grDevices colorRampPalette dev.new dev.off heat.colors hsv
-#' @importFrom grDevices jpeg png rainbow rgb
-#' @importFrom graphics box hist image layout lcm par plot plot.new
-#' @importFrom graphics plot.window points rect title
 plot.antsImage <- function(
     x, y = NULL,
     color.img = "white",
@@ -129,6 +125,18 @@ plot.antsImage <- function(
     stop("Cannot plot multichannel image: splitChannels, then plot as overlays.")
   }
   if (!is.antsImage(x)) stop("input x should be an antsImage.")
+  # argument checks that used to run only after the overlays were resampled
+  if (!usePkg("pixmap")) {
+    stop("You need the pixmap package to use this.")
+  }
+  if (!is.null(domainImageMap) && !is.antsImage(domainImageMap)) {
+    if (!is.list(domainImageMap) || length(domainImageMap) != 2) {
+      stop("domainImageMap list Should be length 2.")
+    }
+    if (!is.antsImage(domainImageMap[[1]])) {
+      stop("domainImageMap list first entry list should be antsImage.")
+    }
+  }
   interpNN <- "NearestNeighbor"
   interpStyle <- "Linear"
   if (!is.null(y)) {
@@ -322,7 +330,7 @@ plot.antsImage <- function(
   }
   # now label the results
   if (imagedim == 3) {
-    img <- aperm(img, c(perms), resize = T)
+    img <- aperm(img, c(perms), resize = TRUE)
   }
   if (is.character(slices)) {
     slices <- c(as.numeric(unlist(strsplit(slices, "x"))))
@@ -521,7 +529,7 @@ plot.antsImage <- function(
   if (!is.null(y)) {
     for (ind in 1:length(y)) {
       biglab <- matrix(0, nrow = slicerow * winrows, ncol = (slicecol * wincols))
-      if (exists("plotimask")) { # the label image
+      if (exists("plotimask", inherits = FALSE)) { # the label image
         if (doCropping) {
           fimg <- cropImage(y[[ind]], plotimask)
           labimg <- as.array(fimg)
@@ -537,7 +545,7 @@ plot.antsImage <- function(
         labimg <- rotate270.matrix(labimg)
       }
       if (imagedim == 3) {
-        labimg <- aperm(labimg, c(perms), resize = T)
+        labimg <- aperm(labimg, c(perms), resize = TRUE)
       }
       # check sizes
       #    if ( ! antsImagePhysicalSpaceConsistency( img, labimg ) )
@@ -656,8 +664,8 @@ plot.antsImage <- function(
         biglab[1] <- 255
         biglab[2] <- 0
       }
-      mn <- min(biglab, na.rm = T)
-      mx <- max(biglab, na.rm = T)
+      mn <- min(biglab, na.rm = TRUE)
+      mx <- max(biglab, na.rm = TRUE)
       if ((mn != mx) & (mn < mx)) {
         invisible(suppressWarnings(
           pixmap::plot(

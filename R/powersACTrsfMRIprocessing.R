@@ -113,6 +113,13 @@ fMRINormalization <- function(
   if (!usePkg("igraph")) stop("need igraph")
   if (!usePkg("pracma")) stop("need pracma")
   if (!usePkg("mFilter")) stop("need mFilter")
+  # check extra runs before any reading or motion correction
+  if (length(extraRuns) > 0) {
+    if (!is.list(extraRuns) || !all(vapply(extraRuns, is.antsImage, logical(1)))) {
+      stop("extraRuns must be a list of antsImages.")
+    }
+    if (!usePkg("abind")) stop("need abind package for the extraRuns feature")
+  }
   if (missing(img)) # for stand-alone testing
     {
       img <- antsImageRead(getANTsRData("rsbold"))
@@ -254,7 +261,7 @@ fMRINormalization <- function(
     t1brain <- structuralImage * thresholdImage(structuralSeg, 1, Inf)
   }
 
-  if (!exists("boldmap")) {
+  if (!exists("boldmap", inherits = FALSE)) {
     if (verbose) print("boldmap to structure (no boldmap passed in)")
     #  boldmap = antsRegistration( meanbold * mask, t1brain,
     #    typeofTransform='QuickRigid', verbose=FALSE )
@@ -598,7 +605,7 @@ fMRINormalization <- function(
   ## ----adjacency,message=FALSE,warnings=FALSE, fig.width=5, fig.height=5----
   density <- 0.1
   nEdges <- length(upper.tri(connMat)) * density
-  thresh <- sort(connMat[upper.tri(connMat)], decreasing = T)[nEdges]
+  thresh <- sort(connMat[upper.tri(connMat)], decreasing = TRUE)[nEdges]
   adj <- 1 * (connMat >= thresh)
 
   bingraph <- igraph::graph.adjacency(adj, mode = "undirected", weighted = NULL)

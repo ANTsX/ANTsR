@@ -85,7 +85,7 @@ bigLMStats <- function(mylm, lambda = 0, includeIntercept = FALSE) {
     mse <- colSums((mylm$residuals)^2) / dfe
     fstat <- msm / mse
   }
-  pval.model <- pf(fstat, dfr, dfe, lower.tail = F)
+  pval.model <- pf(fstat, dfr, dfe, lower.tail = FALSE)
   XtXinv <- solve(t(X) %*% X + diag(ncol(X)) * lambda)
   if (!includeIntercept) {
     if (dim(X)[2] > 2) {

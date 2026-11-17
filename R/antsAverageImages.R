@@ -34,6 +34,14 @@ antsAverageImages <- function(imageList, normalize = FALSE, weights,
     isfile <- TRUE
   }
 
+  # check weights before reading any image
+  if (missing("weights")) {
+    weights <- rep(1.0 / length(imageList), length(imageList))
+  }
+  if (length(weights) != length(imageList)) {
+    stop("length( weights ) != length( imageList )")
+  }
+
   # create empty average image
   if (isfile) {
     avg <- antsImageRead(imageList[1]) * 0
@@ -43,12 +51,6 @@ antsAverageImages <- function(imageList, normalize = FALSE, weights,
   }
 
   # average them
-  if (missing("weights")) {
-    weights <- rep(1.0 / length(imageList), length(imageList))
-  }
-  if (length(weights) != length(imageList)) {
-    stop("length( weights ) != length( imageList )")
-  }
   ct <- 1
   if (verbose) {
     pb <- utils::txtProgressBar(min = 0, max = length(imageList))

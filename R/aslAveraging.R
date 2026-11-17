@@ -57,6 +57,11 @@
 #'
 #' @export
 aslAveraging <- function(asl, mask = NULL, tc = NA, nuisance = NA, method = "regression", ...) {
+  # checked first: it used to fail only after the time series was extracted
+  if (!is.character(method) || length(method) != 1 ||
+    !(grepl("Subtract", method) || method %in% c("regression", "bayesian"))) {
+    stop("Unrecognized method.")
+  }
   # define helper function
   bayesianPerfusion <- function(asl, xideal, nuisance, segmentation, tissuelist,
                                 myPriorStrength = 30.0,
@@ -81,7 +86,7 @@ aslAveraging <- function(asl, mask = NULL, tc = NA, nuisance = NA, method = "reg
       return(p)
     }
     if (all(is.na(priorBetas))) {
-      blm <- bigLMStats(perfmodel, includeIntercept = T)
+      blm <- bigLMStats(perfmodel, includeIntercept = TRUE)
       bayespriormatfull <- blm$beta
     } else {
       bayespriormatfull <- priorBetas
@@ -111,7 +116,7 @@ aslAveraging <- function(asl, mask = NULL, tc = NA, nuisance = NA, method = "reg
         tissueprior <- localtissuemat[segval, i]
         localprior <- bayespriormat[segval, ]
         blm <- bayesianlm(X, aslmat[, i], localprior, priorwt,
-          includeIntercept = T
+          includeIntercept = TRUE
         )
         locbeta <- blm$beta[2]
         bayesianperfusionloc[segval, i] <- locbeta

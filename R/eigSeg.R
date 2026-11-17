@@ -47,14 +47,14 @@ eigSeg <- function(
       }
     }
   }
-  if (!exists("mydata")) {
+  if (!exists("mydata", inherits = FALSE)) {
     stop("wrong input type - see help")
   }
   if (smooth > 0 & !is.null(mask)) {
     for (i in 1:nrow(mydata))
     {
       tempImg <- makeImage(mask, mydata[i, ]) %>%
-        smoothImage(smooth, sigmaInPhysicalCoordinates = F)
+        smoothImage(smooth, sigmaInPhysicalCoordinates = FALSE)
       mydata[i, ] <- tempImg[mask >= 0.5]
     }
   }

@@ -52,7 +52,7 @@ if (usePkg("randomForest")) {
   lrr <- lowrankRowMatrix(rfsegs, 10, faster = TRUE)
   nv <- eanatSelect(
     inmat = lrr, mask = mask, selectorScale = 1.2, cthresh = 50,
-    verbose = T, smooth = 1
+    verbose = TRUE, smooth = 1
   )
   ee <- eanatDef(lrr, mask,
     nvecs = nv, smooth = 0., cthresh = 50,

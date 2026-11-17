@@ -129,6 +129,52 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     doDeformable <- FALSE
     }
 
+  # Validate the deformable specification and the initial transform files
+  # now: they used to be checked only after the label loop and the linear
+  # stage had run. (The same checks remain below.)
+  if( doDeformable )
+    {
+    if( is.list( typeOfDeformableTransform ) )
+      {
+      if( ( length( typeOfDeformableTransform ) != 7 ) ||
+            ! is.character( typeOfDeformableTransform[[1]] ) ||
+            ! is.numeric( typeOfDeformableTransform[[2]] ) ||
+            ! is.character( typeOfDeformableTransform[[3]] ) ||
+            ! is.numeric( typeOfDeformableTransform[[4]] ) ||
+            ! is.vector( typeOfDeformableTransform[[5]] ) ||
+            ! is.vector( typeOfDeformableTransform[[6]] ) ||
+            ! is.vector( typeOfDeformableTransform[[7]] ) )
+        {
+        stop( "Incorrect specification for typeOfDeformableTransform.  See help menu." )
+        }
+      } else {
+      if( ! is.character( typeOfDeformableTransform ) || length( typeOfDeformableTransform ) != 1 )
+        {
+        stop( "Incorrect specification for typeOfDeformableTransform.  See help menu." )
+        }
+      if( grepl( "\\[", typeOfDeformableTransform ) && grepl( "\\]", typeOfDeformableTransform ) )
+        {
+        earlySubtype <- strsplit( strsplit( typeOfDeformableTransform, "\\[" )[[1]][2], "\\]" )[[1]][1]
+        if( ! ( grepl( "bo", earlySubtype ) || grepl( "so", earlySubtype ) ) )
+          {
+          stop( "Only 'so' or 'bo' transforms are available." )
+          }
+        }
+      }
+    }
+  if( ! is.null( initialTransforms ) &&
+      ! ( length( initialTransforms ) == 1 &&
+          initialTransforms %in% c( 'rigid', 'similarity', 'affine', 'identity' ) ) )
+    {
+    for( f in unlist( initialTransforms ) )
+      {
+      if( ! file.exists( f ) )
+        {
+        stop( paste0( f, " does not exist." ) )
+        }
+      }
+    }
+
   commonLabelIds <- list()
   totalNumberOfLabels <- 0
   for( i in seq.int( length( fixedLabelImages ) ) )

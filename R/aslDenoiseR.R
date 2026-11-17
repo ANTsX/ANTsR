@@ -78,7 +78,7 @@
 #' }
 #' postcing <- aal$label_num[grep("Cingulum_Post", aal$label_name)]
 #' postCingMask <- maskImage(boldmask, aalimg,
-#'   level = as.numeric(postcing), binarize = T
+#'   level = as.numeric(postcing), binarize = TRUE
 #' )
 #' mpostCingMask <- antsImageClone(postCingMask) * 0
 #' mpostCingMask[postCingMask == 0] <- 1
@@ -115,10 +115,10 @@ aslDenoiseR <- function(
     maxnoisepreds = 2:12,
     polydegree = "loess",
     crossvalidationgroups = 4,
-    scalemat = F,
+    scalemat = FALSE,
     noisepoolfun = max,
-    usecompcor = F,
-    verbose = F) {
+    usecompcor = FALSE,
+    verbose = FALSE) {
   nvox <- ncol(boldmatrix)
   groups <- crossvalidationgroups
   if (length(groups) == 1) {
@@ -212,10 +212,10 @@ aslDenoiseR <- function(
     ct <- ct + 1
   }
   scl <- 0.95
-  if (max(R2summary, na.rm = T) < 0) {
+  if (max(R2summary, na.rm = TRUE) < 0) {
     scl <- 1.05
   }
-  mxt <- scl * max(R2summary, na.rm = T)
+  mxt <- scl * max(R2summary, na.rm = TRUE)
   bestn <- maxnoisepreds[which(R2summary > mxt)[1]]
   if (ct == 2) {
     R2final <- R2perNoiseLevel

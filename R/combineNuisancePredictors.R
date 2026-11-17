@@ -30,7 +30,7 @@ combineNuisancePredictors <- function(
     localpredictors = NA, method = "cv", k = 5,
     covariates = NA, ordered = FALSE) {
   avgR2 <- function(inmat, target, k, covariates) {
-    r2 <- crossvalidatedR2(inmat, target, k, covariates, fast = T)
+    r2 <- crossvalidatedR2(inmat, target, k, covariates, fast = TRUE)
     r2max <- apply(r2, FUN = median, MARGIN = 2)
     r2pos <- r2max[r2max > 0]
     median(r2pos)
@@ -49,10 +49,10 @@ combineNuisancePredictors <- function(
           r2sum[ii] <- avgR2(residmat, target, k, covariates)
         }
         scl <- 0.95
-        if (max(r2sum, na.rm = T) < 0) {
+        if (max(r2sum, na.rm = TRUE) < 0) {
           scl <- 1.05
         }
-        mxt <- scl * max(r2sum, na.rm = T)
+        mxt <- scl * max(r2sum, na.rm = TRUE)
         bestpreds <- (1:maxpreds)[which(r2sum > mxt)[1]]
       } else {
         r2sum <- matrix(rep(0, ncol(globalpredictors) * maxpreds), ncol = maxpreds)

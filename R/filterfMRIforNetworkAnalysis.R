@@ -74,6 +74,23 @@ filterfMRIforNetworkAnalysis <- function(
     print(myusage)
     return(NULL)
   }
+  # Check the network-analysis inputs before the (slow) frequency filtering;
+  # they used to be checked only afterwards.
+  if (!missing(aslmat) && !is.null(labels) && is.null(mask)) {
+    stop("mask is required when labels are given")
+  }
+  if (!missing(aslmat) && !is.null(labels) && !.isNA1(nuisancein)) {
+    .stopIfNA(nuisancein, "nuisancein")
+    if (NROW(nuisancein) != nrow(aslmat)) {
+      stop(
+        "nuisancein has ", NROW(nuisancein), " rows but there are ",
+        nrow(aslmat), " time points"
+      )
+    }
+    if (!is.numeric(as.matrix(nuisancein))) {
+      stop("nuisancein must be numeric")
+    }
+  }
   if (!is.numeric(freqLo) | !is.numeric(freqHi)) {
     print("freqLo/Hi is not numeric type")
     print(myusage)
@@ -113,7 +130,7 @@ filterfMRIforNetworkAnalysis <- function(
   myTimeSeries <- ts(aslmat, frequency = 1 / tr)
   filteredTimeSeries <- frequencyFilterfMRI(aslmat, tr = tr, freqLo = freqLo, freqHi = freqHi, opt = "trig")
   vox <- round(ncol(filteredTimeSeries) * 0.5) #  a test voxel
-  spec.pgram(filteredTimeSeries[, vox], taper = 0, fast = FALSE, detrend = F, demean = F, log = "n")
+  spec.pgram(filteredTimeSeries[, vox], taper = 0, fast = FALSE, detrend = FALSE, demean = FALSE, log = "n")
   temporalvar <- apply(filteredTimeSeries, 2, var)
   wh <- which(temporalvar == 0)
   for (x in wh) {
@@ -180,8 +197,21 @@ filterfMRIforNetworkAnalysis <- function(
         }
       }
     }
-    if (!is.na(nuisancein)) {
-      tlabmat <- cbind(tlabmat, nuisancein)
+    if (!.isNA1(nuisancein)) {
+      .stopIfNA(nuisancein, "nuisancein")
+      if (NROW(nuisancein) != nrow(tlabmat)) {
+        stop(
+          "nuisancein has ", NROW(nuisancein), " rows but there are ",
+          nrow(tlabmat), " time points"
+        )
+      }
+      # as.matrix: a data frame made cbind() add dimnames, so results
+      # differed in names from the matrix and no-nuisance paths
+      nuisancemat <- as.matrix(nuisancein)
+      if (!is.numeric(nuisancemat)) {
+        stop("nuisancein must be numeric")
+      }
+      tlabmat <- cbind(tlabmat, nuisancemat)
       ocormat <- cor(tlabmat, tlabmat)
     }
     cormat <- ocormat
@@ -202,10 +232,17 @@ filterfMRIforNetworkAnalysis <- function(
           rgdens <- (0.5 * sum(gcormat > 0 & gcormat < 1) / (0.5 * ncol(gcormat) * (ncol(gcormat) - 1)))
         }
     }
-    if (!is.na(nuisancein)) pcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
-    if (!is.na(nuisancein)) gcormat <- pcormat[1:nbrainregions, 1:nbrainregions]
-    if (!is.na(nuisancein)) cormat <- cormat[1:nbrainregions, 1:nbrainregions]
-    if (!is.na(nuisancein)) ocormat <- ocormat[1:nbrainregions, 1:nbrainregions]
+    if (!.isNA1(nuisancein)) {
+      # drop the nuisance rows/columns again; gcormat used to be overwritten
+      # with the partial correlations, discarding the glasso estimate
+      # (unname: the nuisance columns' names left "" dimnames behind; the
+      # no-nuisance results have none)
+      keep <- seq_len(nbrainregions)
+      pcormat <- unname(pcormat[keep, keep])
+      gcormat <- unname(gcormat[keep, keep])
+      cormat <- unname(cormat[keep, keep])
+      ocormat <- unname(ocormat[keep, keep])
+    }
     gmet <- makeGraph(cormat, graphdensity = graphdensity)
     L <- list(
       filteredTimeSeries = filteredTimeSeries,

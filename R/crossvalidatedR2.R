@@ -1,7 +1,7 @@
 #' @name crossvalidatedR2
 #' @title Cross-Validated R^2 value
 #' @description Computes an R^2 value for predicting an outcome measure using a k-fold cross-validation scheme.
-#' @usage crossvalidatedR2(x, y, ngroups=5, covariates=NA, fast=F)
+#' @usage crossvalidatedR2(x, y, ngroups=5, covariates=NA, fast=FALSE)
 #' @param x Input predictor matrix.
 #' @param y Target dependent variable.
 #' @param ngroups Number of cross-validation folds to use or the fold labels themselves, equal to the length of y.  e.g. c(1,1,1,2,2,2...)
@@ -22,7 +22,7 @@
 #' }
 #' r2 <- crossvalidatedR2(x, y, covariates = covariate)
 #' @export crossvalidatedR2
-crossvalidatedR2 <- function(x, y, ngroups = 5, covariates = NA, fast = F) {
+crossvalidatedR2 <- function(x, y, ngroups = 5, covariates = NA, fast = FALSE) {
   havecaret <- usePkg("caret")
   nvox <- ncol(x)
   if (length(ngroups) == 1) {
@@ -70,12 +70,12 @@ crossvalidatedR2 <- function(x, y, ngroups = 5, covariates = NA, fast = F) {
       predmat <- y.sel %*% myfit$coefficients
     }
     realmat <- x[selector, ]
-    sum1vec <- colSums((predmat - realmat)^2, na.rm = T)
-    temp <- matrix(rep(colMeans(realmat, na.rm = T), nrow(realmat)),
+    sum1vec <- colSums((predmat - realmat)^2, na.rm = TRUE)
+    temp <- matrix(rep(colMeans(realmat, na.rm = TRUE), nrow(realmat)),
       nrow = nrow(realmat),
-      byrow = T
+      byrow = TRUE
     )
-    sum2vec <- colSums((temp - realmat)^2, na.rm = T)
+    sum2vec <- colSums((temp - realmat)^2, na.rm = TRUE)
     R2vec <- 100 * (1 - sum1vec / sum2vec)
     R2v[k, ] <- R2vec
   }

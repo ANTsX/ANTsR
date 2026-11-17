@@ -48,7 +48,7 @@ save.ANTsR <- function(filename = file.path(".", ".ANTsRsession"),
     fnames <- list.files(filename)
     assign("fremove1234567890", file.path(filename, fnames), envir = env)
   } else {
-    dir.create(filename, showWarnings = F)
+    dir.create(filename, showWarnings = FALSE)
     assign("fremove1234567890", "", envir = env)
   }
   if (file.exists(file.path(filename, "ANTSLOAD.Rdata")) & !overwrite) {
@@ -64,7 +64,7 @@ save.ANTsR <- function(filename = file.path(".", ".ANTsRsession"),
 
 
   funimgS <- function(x, fold = filename) {
-    file <- paste0(paste(sample(c(0:9, letters, LETTERS), 20, replace = T), collapse = ""), ".nii.gz")
+    file <- paste0(paste(sample(c(0:9, letters, LETTERS), 20, replace = TRUE), collapse = ""), ".nii.gz")
     fn <- file.path(fold, file)
     antsImageWrite(x, fn)
     return(paste0("ANTSload", file))
@@ -88,7 +88,7 @@ save.ANTsR <- function(filename = file.path(".", ".ANTsRsession"),
 
     for (indx in index) {
       file <- paste0(
-        paste(sample(c(0:9, letters, LETTERS), 20, replace = T), collapse = ""),
+        paste(sample(c(0:9, letters, LETTERS), 20, replace = TRUE), collapse = ""),
         "_", basename(x[indx])
       )
       fn <- file.path(fold, file)

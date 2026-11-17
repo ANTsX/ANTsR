@@ -13,7 +13,6 @@
 #' dimension).
 #' @return simulated bias field
 #' @author Tustison NJ
-#' @importFrom stats rnorm
 #' @examples
 #'
 #' library( ANTsR )

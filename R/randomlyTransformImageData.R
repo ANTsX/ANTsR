@@ -41,7 +41,6 @@
 #' \"nearestNeighbor\".
 #' @return list (if no directory set) or boolean for success, failure
 #' @author Avants BB, Tustison NJ
-#' @importFrom stats rnorm
 #' @examples
 #'
 #' library( ANTsR )

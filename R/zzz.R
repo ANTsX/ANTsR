@@ -18,6 +18,16 @@
   if (any(toSet)) {
     options(op.ants[toSet])
   }
+  # On Windows, ITK's default thread pool keeps worker threads that stop R
+  # from exiting once any multithreaded filter has run (R CMD check hung
+  # after the examples and after the tests). The Platform threader keeps no
+  # persistent threads. ITK reads this variable when it first creates its
+  # threader (the first filter call), so setting it at load time is early
+  # enough; an existing setting is respected.
+  if (.Platform$OS.type == "windows" &&
+    !nzchar(Sys.getenv("ITK_GLOBAL_DEFAULT_THREADER"))) {
+    Sys.setenv(ITK_GLOBAL_DEFAULT_THREADER = "Platform")
+  }
   trace_file <- Sys.getenv("ANTSR_TRACE_FILE")
   if (nzchar(trace_file)) {
     .start_expr_trace(trace_file)
