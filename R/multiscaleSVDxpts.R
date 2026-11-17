@@ -3779,21 +3779,13 @@ estimate_learning_rate_nsa <- function(
 }
 
 
-#' Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)
+#' Retraction onto the Stiefel Manifold (polar or soft-polar)
 #'
 #' @param Y_cand Candidate matrix.
 #' @param w_retract Weight for soft retraction.
 #' @param retraction_type Type of retraction ('polar', 'soft_polar', or 'none').
-#' @param eps_rf Small numeric value for stability.
-#' @param inv_method Method for inverse square root.
-#' @param ns_iter Number of iterations for Newton-Schulz.
-#' @param eig_thresh Threshold for eigen-decomposition.
-#' @param diag_thresh Threshold for diagonal check.
-#' @param verbose Verbose output.
 #' @export
-nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("polar", "soft_polar", "none"),
-                             eps_rf = 1e-8, inv_method = "diag", ns_iter = 1L,
-                             eig_thresh = 128L, diag_thresh = 8192L, verbose = FALSE) {
+nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("polar", "soft_polar", "none")) {
   retraction_type <- match.arg(retraction_type)
 
   # trivial
@@ -3802,9 +3794,6 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
 
   p <- nrow(Y_cand); k <- ncol(Y_cand)
   normY <- sqrt(sum(Y_cand^2))
-
-  # Prepare Gram matrix (k x k)
-  # We add eps_rf to the diagonal inside the inv_sqrt routine for stability
 
   # --- polar exact (full) ---
   if (retraction_type == "polar") {
@@ -3820,49 +3809,17 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
     return(Ytilde)
   }
 
-  # --- soft_polar (multiplicative) ---
+  # --- soft_polar ---
   if (retraction_type == "soft_polar") {
-    # We use the multiplicative soft-polar operator:
-    #   Ytilde = Y_cand %*% ( (1-w) I + w * (YtY + eps_rf I)^{-1/2} )
-    # Choose an efficient way to compute the inverse sqrt of the small k x k Gram matrix.
-    # For moderate k we use eigendecomposition; for larger k we use Newton-Schulz or diag fallback.
-    # If k is extremely large relative to p, computing T on k x k may be worse than SVD on (p x p) route.
-    use_additive_svd_fallback <- FALSE
-
-    # Heuristic: if k is very large compared to p and k is huge, prefer SVD-based soft additive fallback
-    if (k > diag_thresh && p < k) {
-      use_additive_svd_fallback <- TRUE
+    # Additive soft-SVD blend of Y_cand with its polar factor.
+    s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
+    Q <- s$u %*% t(s$v)
+    Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
+    if (!is.null(normY) && normY > 1e-12) {
+      cur_norm <- sqrt(sum(Ytilde^2))
+      if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
     }
-    use_additive_svd_fallback <- TRUE
-    if (!use_additive_svd_fallback) {
-      # compute T = (YtY + eps_rf I)^{-1/2} using adaptive routine
-      YtY <- crossprod(Y_cand)
-      T <- inv_sqrt_sym_adaptive(YtY, epsilon = eps_rf, method = inv_method,
-                                 ns_iter = ns_iter, eig_thresh = eig_thresh, verbose = verbose)
-      # multiplicative soft polar
-      T_w <- (1 - w_retract) * diag(k) + w_retract * T
-      Ytilde <- Y_cand %*% T_w
-
-      # Optional: preserve Frobenius norm (matches previous code / practical desire)
-      if (!is.null(normY) && normY > 1e-12) {
-        cur_norm <- sqrt(sum(Ytilde^2))
-        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
-      }
-
-      # Ensure numeric symmetry / cleanup
-      return(as.matrix(Ytilde))
-    } else {
-      # Fallback: for extremely wide problems compute economy SVD and perform additive soft-SVD blend
-      # (this avoids expensive k x k inv-sqrt when k >> p)
-      s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
-      Q <- s$u %*% t(s$v)
-      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
-      if (!is.null(normY) && normY > 1e-12) {
-        cur_norm <- sqrt(sum(Ytilde^2))
-        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
-      }
-      return(as.matrix(Ytilde))
-    }
+    return(as.matrix(Ytilde))
   }
 
   stop("unsupported retraction_type in nsa_flow_retract_auto()")
