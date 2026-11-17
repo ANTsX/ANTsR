@@ -111,7 +111,7 @@
 bayesianlm <- function(
     X, y, priorMean, priorPrecision,
     priorIntercept = 0, regweights,
-    includeIntercept = F) {
+    includeIntercept = FALSE) {
   if (is.null(dim(y))) {
     veccoef <- TRUE
   } else {
@@ -193,11 +193,11 @@ bayesianlm <- function(
     errterm <- myresidualsmod^2 # my error distribution
     gamma_parms <- fitdistr(errterm, "gamma")
     # or use residuals directly as theory says
-    b_1 <- priorIntercept + 0.5 * mean(errterm, na.rm = T)
+    b_1 <- priorIntercept + 0.5 * mean(errterm, na.rm = TRUE)
     sorterr <- sort(errterm)
     shest <- fitdistr(sorterr, "gamma")$estimate[1]
     pgam <- pgamma(sorterr, shape = shest)
-    phi <- mean(pgam, na.rm = T)
+    phi <- mean(pgam, na.rm = TRUE)
     sig1 <- solve(tXX + phi * priorPrecision)
     mu1 <- as.numeric(mu_n)
     # below gives mean posterior for beta across a range

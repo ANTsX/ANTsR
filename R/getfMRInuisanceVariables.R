@@ -22,7 +22,7 @@
 #' aslmask <- getMask(aslmean)
 #' ee <- getfMRInuisanceVariables(pcasl,
 #'   mask = aslmask,
-#'   moreaccurate = F
+#'   moreaccurate = FALSE
 #' )
 #' }
 #'

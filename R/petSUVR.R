@@ -68,7 +68,7 @@ petSUVR <- function(
         sigmaInPhysicalCoordinates = TRUE
       )
       petMoco <- antsrMotionCalculation(petTimeSmoothed, petRef,
-        typeofTransform = typetx, verbose = F
+        typeofTransform = typetx, verbose = FALSE
       )$moco_img
     }
     pet <- getAverageOfTimeSeries(petMoco)

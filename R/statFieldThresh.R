@@ -77,9 +77,9 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
   if (threshType == "cRFT" | threshType == "pRFT") {
     u <- max(x)
     if (threshType == "cRFT") {
-      alpha <- rftPval(D, 1, k, u, n, resels, df, fieldType)$Pcor
+      alpha <- rftPval(D = D, c = 1, k = k, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor
     } else if (threshType == "pRFT") {
-      alpha <- rftPval(D, 1, 0, u, n, resels, df, fieldType)$Pcor
+      alpha <- rftPval(D = D, c = 1, k = 0, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor
     }
     if (alpha > pval) {
       stop("No voxels survive threshold given the parameters")
@@ -87,9 +87,9 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
     while (alpha < pval) {
       u <- u - .01
       if (threshType == "cRFT") {
-        alpha <- rftPval(D, 1, k, u, n, resels, df, fieldType)$Pcor
+        alpha <- rftPval(D = D, c = 1, k = k, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor
       } else if (threshType == "pRFT") {
-        alpha <- rftPval(D, 1, 0, u, n, resels, df, fieldType)$Pcor
+        alpha <- rftPval(D = D, c = 1, k = 0, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor
       }
     }
 
@@ -106,7 +106,7 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
       stat <- qchisq(1 - pp, df[1], df[2])
     }
     if (threshType == "cFDR") {
-      fdrclust <- labelClusters(x, k, u, Inf)
+      fdrclust <- labelClusters(x, minClusterSize = k, minThresh = u, maxThresh = Inf)
       fdrlabs <- unique(fdrclust[fdrclust > 0])
       cmax <- c()
 
@@ -114,7 +114,7 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
         progress <- txtProgressBar(min = 0, max = n, style = 3)
       }
       for (i in 1:length(fdrlabs)) {
-        cmax <- c(cmax, rftPval(D, 1, 0, max(x[fdrclust]), n, resels, df, fieldType)$Ec)
+        cmax <- c(cmax, rftPval(D = D, c = 1, k = 0, u = max(x[fdrclust]), n = n, resels = resels, df = df, fieldType = fieldType)$Ec)
         if (verbose == "TRUE") {
           setTxtProgressBar(progress, i)
         }
@@ -130,7 +130,7 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
         progress <- txtProgressBar(min = 0, max = n, style = 3)
       }
       for (i in 1:length(cmax)) {
-        cmax[i] <- rftPval(D, 1, 0, max(x[fdrclust]), n, resels, df, fieldType)$Ec
+        cmax[i] <- rftPval(D = D, c = 1, k = 0, u = max(x[fdrclust]), n = n, resels = resels, df = df, fieldType = fieldType)$Ec
         if (verbose == "TRUE") {
           setTxtProgressBar(progress, i)
         }
@@ -139,7 +139,7 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
         close(progress)
       }
     }
-    cmax <- cmax / rftPval(D, 1, 0, stat, n, resels, df, fieldType)$Ec
+    cmax <- cmax / rftPval(D = D, c = 1, k = 0, u = stat, n = n, resels = resels, df = df, fieldType = fieldType)$Ec
     cmax <- sort(cmax, decreasing = TRUE)
     fdrvec <- sort((pval * (1:length(cmax)) / length(cmax)), decreasing = TRUE)
     i <- 1

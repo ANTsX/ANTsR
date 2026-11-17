@@ -33,7 +33,7 @@ asl <- antsImageRead(fn)
 # image available at http://files.figshare.com/1701182/PEDS012_20131101.zip
 pcasl.bayesian <- aslPerfusion(asl,
   dorobust = 0., useDenoiser = 4, skip = 11, useBayesian = 1000,
-  moreaccurate = 0, verbose = T, maskThresh = 0.5
+  moreaccurate = 0, verbose = TRUE, maskThresh = 0.5
 ) # throw away lots of data
 # user might compare to useDenoiser=FALSE
 pcasl.parameters <- list(sequence = "pcasl", m0 = pcasl.bayesian$m0)

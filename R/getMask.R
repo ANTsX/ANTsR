@@ -4,10 +4,13 @@
 #'
 #' If \code{cleanup} is \code{>0}, the following steps are applied
 #' \enumerate{ 
-#' \item Erosion with radius 2 voxels 
+#' \item Erosion with radius \code{cleanup} voxels
 #' \item Retain largest component 
-#' \item Dilation with radius 1 voxel \item Morphological closing 
+#' \item Dilation with radius \code{cleanup} voxels
+#' \item Morphological closing 
 #' }
+#' If the cleaned-up mask is empty, \code{cleanup} is reduced by one voxel
+#' until the mask is non-empty.
 #'
 #' These functions are available in \link{iMath}, see the operations
 #' \dQuote{ME}, \dQuote{GetLargestComponent}, \dQuote{MD}, \dQuote{FillHoles}.
@@ -18,9 +21,11 @@
 #' the mask.
 #' @param highThresh An inclusive upper threshold for voxels to be included in
 #' the mask.
-#' @param cleanup If \code{>0}, morphological operations will be applied to
-#' clean up the mask by eroding away small or weakly-connected areas, and
-#' closing holes.
+#' @param cleanup Numeric radius, in voxels, of the morphological operations
+#' used to clean up the mask (default 2). If \code{>0}, small or
+#' weakly-connected areas are eroded away and holes are closed; \code{0}
+#' (or \code{FALSE}) skips the cleanup. This is a radius, not a flag:
+#' \code{TRUE} is converted to a radius of 1.
 #' @return Object of type \code{antsImage} containing the mask image. The
 #' voxel intensities will be binarized, 1 for voxels in the mask and 0 outside.
 #' @author Shrinidhi KL, Cook PA, Avants BB
@@ -59,17 +64,17 @@ getMask <- function(img, lowThresh, highThresh, cleanup = 2) {
   mask_img <- thresholdImage(img, lowThresh, highThresh)
 
   if (cleanup > 0) {
-    mask_img <- iMath(mask_img, "ME", cleanup)
+    mask_img <- iMath(mask_img, "ME", param = cleanup)
     mask_img <- iMath(mask_img, "GetLargestComponent")
-    mask_img <- iMath(mask_img, "MD", cleanup)
+    mask_img <- iMath(mask_img, "MD", param = cleanup)
     mask_img <- iMath(mask_img, "FillHoles")
     mask_img <- thresholdImage(mask_img, 1, Inf)
     while ((min(mask_img) == max(mask_img)) & cleanup > 0) {
       cleanup <- cleanup - 1
       mask_img <- thresholdImage(img, lowThresh, highThresh)
       if (cleanup > 0) {
-        mask_img <- morphology(mask_img, "erode", cleanup)
-        mask_img <- morphology(mask_img, "dilate", cleanup)
+        mask_img <- morphology(mask_img, "erode", radius = cleanup)
+        mask_img <- morphology(mask_img, "dilate", radius = cleanup)
         mask_img <- iMath(mask_img, "FillHoles")
         mask_img <- thresholdImage(mask_img, 1, Inf)
       }

@@ -152,8 +152,10 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
     if (verbose == "TRUE") {
       cat("Calculating threshTypeold \n")
     }
-    u <- statFieldThresh(x, pval, k, n, fwhm, resels, df, fieldType,
-      threshType = threshType, pp, verbose = verbose
+    u <- statFieldThresh(
+      x = x, pval = pval, nvox = k, n = n, fwhm = fwhm, resels = resels,
+      df = df, fieldType = fieldType, threshType = threshType, pp = pp,
+      verbose = verbose
     )
   } else if (is.numeric(threshType)) {
     u <- threshType
@@ -168,7 +170,7 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
   nvox <- length(as.vector(x[x != 0]))
   mask <- getMask(x)
   # extract clusters at threshold
-  clust <- labelClusters(x, k, u, Inf)
+  clust <- labelClusters(x, minClusterSize = k, minThresh = u, maxThresh = Inf)
   if (!is.null(statdir)) {
     antsImageWrite(clust,
       filename = paste(statdir, "ClusterImg.nii.gz", sep = "")
@@ -196,8 +198,8 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
   dimnames(PeakStats)[[2]] <- c("Pfwe", "Pfdr", "P", "MaxStat", "Z")
 
   # Set-Level----------------------------------------------------
-  Pset <- rftPval(D, nclus, k, u, n, resels, df, fieldType)$Pcor
-  Ez <- rftPval(D, 1, 0, u, n, resels, df, fieldType)$Ec
+  Pset <- rftPval(D = D, c = nclus, k = k, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor
+  Ez <- rftPval(D = D, c = 1, k = 0, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Ec
 
   # Cluster-Level------------------------------------------------
   ClusterStats[, 4] <- sapply(labs, function(tmp) {
@@ -224,12 +226,12 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
   })
   ClusterStats[, 1] <- sapply(K, function(tmp) {
     (
-      rftPval(D, 1, tmp, u, n, resels, df, fieldType)$Pcor)
+      rftPval(D = D, c = 1, k = tmp, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor)
   })
   # fwe p-value (cluster)
   ClusterStats[, 3] <- sapply(K, function(tmp) {
     (
-      rftPval(D, 1, tmp, u, n, resels, df, fieldType)$Punc)
+      rftPval(D = D, c = 1, k = tmp, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Punc)
   })
   # uncorrected p-value (cluster)
   ClusterStats[, 2] <- p.adjust(ClusterStats[, 3], "BH") # FDR (cluster)
@@ -243,12 +245,12 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
     PeakStats[, 4],
     function(tmp) {
       (
-        rftPval(D, 1, 0, tmp, n, resels, df, fieldType)$Pcor)
+        rftPval(D = D, c = 1, k = 0, u = tmp, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor)
     }
   ) # fwe p-value (peak)
   PeakStats[, 2] <- sapply(PeakStats[, 4], function(tmp) {
     (
-      p.adjust(rftPval(D, 1, 0, tmp, n, resels, df, fieldType)$Ec / Ez,
+      p.adjust(rftPval(D = D, c = 1, k = 0, u = tmp, n = n, resels = resels, df = df, fieldType = fieldType)$Ec / Ez,
         "BH",
         n = nclus
     ))

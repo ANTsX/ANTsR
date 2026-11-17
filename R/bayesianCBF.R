@@ -43,7 +43,7 @@ bayesianCBF <- function(pcasl, segmentation, tissuelist,
   mask <- antsImageClone(seg)
   mask[mask > 0] <- 1
   if (useDataDrivenMask > 0) {
-    mask2 <- getMask(avg, mean(avg), Inf, useDataDrivenMask)
+    mask2 <- getMask(avg, lowThresh = mean(avg), highThresh = Inf, cleanup = useDataDrivenMask)
     # cleans up mask to agree with data-driven mask2
     mask[mask2 == 0] <- 0
     seg[mask2 == 0] <- 0
@@ -100,7 +100,7 @@ bayesianCBF <- function(pcasl, segmentation, tissuelist,
   if (localweights) {
     motion_params <- .motion_correction(pcasl, moreaccurate = 1)$moco_params[, 1:4]
     reliability <- aslDenoiseR(aslmat, perfpro$xideal, motion_params,
-      usecompcor = T
+      usecompcor = TRUE
     )$R2final
     reliability[reliability < 0.05] <- 0.05
     unreliability <- log(min(reliability) / reliability)
@@ -122,12 +122,12 @@ bayesianCBF <- function(pcasl, segmentation, tissuelist,
       if (!localweights) {
         blm <- bayesianlm(X, aslmat[, i], localprior, priorwt,
           regweights = perfpro$regweights,
-          includeIntercept = T
+          includeIntercept = TRUE
         )
       } else {
         blm <- bayesianlm(X, aslmat[, i], localprior, priorwt * unreliability[i],
           regweights = perfpro$regweights,
-          includeIntercept = T
+          includeIntercept = TRUE
         )
       }
       locbeta <- blm$beta[2]

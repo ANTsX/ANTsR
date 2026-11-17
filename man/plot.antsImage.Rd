@@ -62,7 +62,7 @@ of this list should match the image list.}
 \item{window.img}{lower and upper thresholds for display of main image}
 
 \item{window.overlay}{lower and upper thresholds for display of overlay.
-if you set \code{window.overlay = c( 0, 100 )} and \code{useAbsoluteScale=T}
+if you set \code{window.overlay = c( 0, 100 )} and \code{useAbsoluteScale=TRUE}
 then the image overlay will map into that range.  otherswise, the min and
 max of the image will be used.}
 

@@ -50,7 +50,7 @@ aslmean <- getAverageOfTimeSeries(asl)
 aslmask <- getMask(aslmean, lowThresh = mean(aslmean), cleanup = TRUE)
 pcaslpre <- aslPerfusion(asl,
   dorobust = 0, useDenoiser = NULL, skip = 1,
-  useBayesian = 0, moreaccurate = 0, verbose = T, mask = aslmask
+  useBayesian = 0, moreaccurate = 0, verbose = TRUE, mask = aslmask
 )
 # user might compare to useDenoiser=FALSE
 pcasl.parameters <- list(sequence = "pcasl", m0 = pcaslpre$m0)
