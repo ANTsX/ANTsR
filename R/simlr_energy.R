@@ -902,6 +902,7 @@ optimal_simlr_initializer <- function(data_matrices,
 #' }
 #' @export
 plot_energy_decomposition <- function(simlr_result, modality, show_weights = FALSE) {
+  weighted_type = NULL; rm(list = c("weighted_type"))  # NSE / non-standard names (R CMD check)
   stopifnot(requireNamespace("ggplot2", quietly = TRUE))
   df <- simlr_result$energyPath
   df <- df[df$modality == modality, ]

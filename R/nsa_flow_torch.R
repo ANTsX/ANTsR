@@ -86,6 +86,7 @@ nsa_flow_torch <- function(
   plot = FALSE,
   precision = 'float64'
 ) {
+  iter = fidelity = orthogonality = NULL; rm(list = c("iter", "fidelity", "orthogonality"))  # NSE / non-standard names (R CMD check)
   if (!is.matrix(Y0)) {
     stop("Y0 must be a numeric matrix.")
   }
@@ -356,6 +357,7 @@ nsa_flow_torch_ag <- function(
   plot = FALSE,
   precision = 'float64'
 ) {
+  iter = fidelity = orthogonality = NULL; rm(list = c("iter", "fidelity", "orthogonality"))  # NSE / non-standard names (R CMD check)
   if (!is.matrix(Y0)) {
     stop("Y0 must be a numeric matrix.")
   }
@@ -587,6 +589,7 @@ nsa_flow_autograd <- function(
   plot = FALSE,
   precision = "float64"
 ) {
+  iter = fidelity = orthogonality = NULL; rm(list = c("iter", "fidelity", "orthogonality"))  # NSE / non-standard names (R CMD check)
   # basic checks
   if (!is.matrix(Y0)) stop("Y0 must be a numeric matrix.")
   if (!is.null(X0) && !is.matrix(X0)) stop("X0 must be a numeric matrix or NULL.")

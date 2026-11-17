@@ -3648,6 +3648,7 @@ estimate_learning_rate_nsa <- function(
   verbose = TRUE,
   plot = TRUE
 ) {
+  learning_rate = energy = NULL; rm(list = c("learning_rate", "energy"))  # NSE / non-standard names (R CMD check)
   method <- match.arg(method)
   stopifnot(is.matrix(Y0), is.matrix(X0))
   if (method == "default" & apply_nonneg) {
@@ -3794,6 +3795,7 @@ estimate_learning_rate_nsa <- function(
 nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("polar", "soft_polar", "none"),
                              eps_rf = 1e-8, inv_method = "diag", ns_iter = 1L,
                              eig_thresh = 128L, diag_thresh = 8192L, verbose = FALSE) {
+  inv_sqrt_sym_adaptive = NULL; rm(list = c("inv_sqrt_sym_adaptive"))  # NSE / non-standard names (R CMD check)
   retraction_type <- match.arg(retraction_type)
 
   # trivial
@@ -3953,6 +3955,7 @@ nsa_flow <- function(
   simplified = FALSE,
   plot = FALSE
 ) {
+  iter = NULL; rm(list = c("iter"))  # NSE / non-standard names (R CMD check)
   # --- Input validation ---
   stopifnot(is.matrix(Y0), is.numeric(Y0))
   stopifnot(is.null(X0) || (is.matrix(X0) && is.numeric(X0)))
@@ -4495,6 +4498,7 @@ nsa_flow_pca <- function(X, k,
                          apply_soft_thresh_in_nns = FALSE,
                          tol = 1e-6, retraction = "soft_polar",
                          grad_tol = 1e-4, nsa_flow_fn = nsa_flow_autograd, verbose = FALSE) {
+  sparsity_level = NULL; rm(list = c("sparsity_level"))  # NSE / non-standard names (R CMD check)
   # --- argument checks ---
   if (!is.matrix(X) || any(!is.finite(X))) stop("X must be a finite numeric matrix")
   n <- nrow(X); p <- ncol(X)
