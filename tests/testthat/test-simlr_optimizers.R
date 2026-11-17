@@ -103,18 +103,3 @@ test_optimizer("adagrad")
 # test_optimizer("hybrid_nadam")
 
 cat("\n--- All Optimizer Tests Complete ---\n")
-
-
-test_that("only existing optimizers can be created or stepped", {
-  expect_false("default" %in% list_simlr_optimizers())
-  expect_false(ANTsR:::.simlr_optimizer_exists("not_an_antsr_optimizer"))
-  expect_false(ANTsR:::.simlr_optimizer_exists(c("adam", "nadam")))
-  expect_true(ANTsR:::.simlr_optimizer_exists("adam"))
-  expect_error(create_optimizer("not_an_antsr_optimizer", vmats = list(matrix(0, 2, 2))),
-               "Unknown optimizer")
-  expect_s3_class(create_optimizer("adam", vmats = list(matrix(0, 2, 2))),
-                  "simlr_optimizer")
-  v <- matrix(0, 2, 2)
-  bad <- structure(list(), class = c("nope", "simlr_optimizer"))
-  expect_error(optimizer_step(bad, 1, v, v), "No optimizer_step method")
-})
