@@ -15,7 +15,7 @@
 #' img <- antsImageRead(getANTsRData("r16"))
 #' img2 <- abpN4(img)
 #' img3 <- abpN4(img)
-#' testthat::expect_equal(mean(img2), 82.6, tolerance = 1e-2)
+#' testthat::expect_equal(mean(img2), 91.66, tolerance = 1e-2)
 #' testthat::expect_equal(img2, img3)
 #'
 #' @export abpN4
@@ -42,9 +42,9 @@ abpN4 <- function(
     return(outimg)
   }
   if (!missing(mask)) {
-    outimg <- n4BiasFieldCorrection(img, mask = mask, ...)
+    outimg <- n4BiasFieldCorrection(outimg, mask = mask, ...)
   } else {
-    outimg <- n4BiasFieldCorrection(img, ...)
+    outimg <- n4BiasFieldCorrection(outimg, ...)
   }
 
   return(outimg)

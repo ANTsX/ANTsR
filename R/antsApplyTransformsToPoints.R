@@ -83,21 +83,34 @@ antsApplyTransformsToPoints <- function(
   }
   if (ttexists) {
     mytx <- list()
+    # If whichtoinvert is NA, guess as antsApplyTransforms does: invert the
+    # matrix of an (affine.mat, warp) pair (e.g. invtransforms), else nothing
     if (all(is.na(whichtoinvert))) {
-      whichtoinvert <- rep(FALSE, length(transformlist))
+      if (length(transformlist) == 2 &&
+        grepl("\\.mat$", transformlist[1]) &&
+        !grepl("\\.mat$", transformlist[2])) {
+        whichtoinvert <- c(TRUE, FALSE)
+      } else {
+        whichtoinvert <- rep(FALSE, length(transformlist))
+      }
     }
+    if (length(whichtoinvert) != length(transformlist)) {
+      stop("Transform list and inversion list must be the same length")
+    }
+    whichtoinvert <- as.logical(whichtoinvert)
     for (i in c(1:length(transformlist)))
     {
-      ismat <- FALSE
-      if ((i == 1 & length(transformlist) > 1) |
-        whichtoinvert[i] == TRUE) {
-        if (length(grep(".mat", transformlist[i])) == 1) {
-          ismat <- TRUE
-        }
+      ismat <- grepl("\\.mat$", transformlist[i]) ||
+        grepl("\\.txt$", transformlist[i])
+      if (whichtoinvert[i] && !ismat) {
+        stop(paste("Cannot invert transform ", i, " ( ", transformlist[i],
+          " ), because it is not a matrix. ",
+          sep = ""
+        ))
       }
-      if (!ismat) {
+      if (!whichtoinvert[i]) {
         mytx <- list(mytx, "-t", transformlist[i])
-      } else if (ismat) {
+      } else {
         mytx <- list(
           mytx, "-t",
           paste("[", transformlist[i], ",1]", sep = "")
@@ -123,8 +136,7 @@ antsApplyTransformsToPoints <- function(
         }
       }
     }
-#    ANTsRCore::AntsApplyTransforms(c(myargs, "-f", 1, "--precision", 0))
-    ANTsRCore::AntsApplyTransforms(c(myargs, "-f", 1 ))
+    ANTsRCore::AntsApplyTransformsToPoints(c(myargs, "-f", 1, "--precision", 0))
 
     if (inherits(points, "antsImage")) {
       return(pointsout)
