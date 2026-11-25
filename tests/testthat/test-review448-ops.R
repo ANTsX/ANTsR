@@ -65,3 +65,17 @@ test_that("float images still equal their own values as arrays", {
   expect_true(all(as.array(img == as.array(img)) == 1))
   expect_true(all(as.array(as.array(img) == img) == 1))
 })
+
+test_that("image-array arithmetic keeps unsigned int labels above 2^24 exact", {
+  ui <- as.antsImage(array(c(16777217, 1, 2, 3), c(2, 2)), pixeltype = "unsigned int")
+  z <- array(0, c(2, 2))
+  expect_equal(as.array(ui + z)[1, 1], 16777217)
+  expect_equal(as.array(z + ui)[1, 1], 16777217)
+  expect_equal(as.array(ui * array(1, c(2, 2)))[1, 1], 16777217)
+  expect_equal(as.array(-ui)[1, 1], -16777217)
+  # unsigned char still promotes to float rather than wrapping
+  u <- as.antsImage(array(c(0, 1, 2, 255), c(2, 2)), pixeltype = "unsigned char")
+  out <- u + array(1, c(2, 2))
+  expect_equal(out@pixeltype, "float")
+  expect_equal(as.array(out)[2, 2], 256)
+})

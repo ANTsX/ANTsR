@@ -421,7 +421,7 @@ test_that("labelImageRegistration assembles deformable stages", {
                           movingIntensityImages = lp$moving,
                           typeOfDeformableTransform = spec, verbose = TRUE)
   expect_equal(a[which(a == "--transform") + 1], "SyN[0.3,3,0]")
-  expect_true("5x2" %in% a)
+  expect_true("[5x2,1e-6,10]" %in% a)
   expect_true("1x0vox" %in% a)
   expect_equal(a[which(a == "-v") + 1], "1")
 })

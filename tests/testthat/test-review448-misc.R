@@ -87,3 +87,9 @@ test_that("jointLabelFusion(noZeroes = TRUE) does not modify the caller's mask",
   expect_equal(sum(as.array(mask)), before)
   expect_equal(before, 144)
 })
+
+test_that("random-forest predictions map to label values, or codes for text labels", {
+  expect_equal(ANTsR:::.rfLabelValues(factor(c(5, 2, 5), levels = c(2, 5))), c(5, 2, 5))
+  expect_equal(ANTsR:::.rfLabelValues(factor(c(0, 1), levels = c(0, 1))), c(0, 1))
+  expect_equal(ANTsR:::.rfLabelValues(factor(c("WM", "GM"), levels = c("GM", "WM"))), c(2L, 1L))
+})

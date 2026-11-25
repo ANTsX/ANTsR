@@ -148,8 +148,9 @@ cropImageFromCenterPoint <- function( image, centerPoint, patchSize )
       }
     }
 
-  # first (1-based) index of a patch centered on index
-  indexOffset <- as.numeric( index ) - floor( 0.5 * patchSize )
+  # first (1-based) index of a patch centered on index; for even sizes the
+  # point is the lower of the two central voxels, as in ANTsPy
+  indexOffset <- as.numeric( index ) - ( patchSize - 1 ) %/% 2
 
   # physical location of that index (may lie outside the image, in which
   # case the out-of-image part of the patch is zero)

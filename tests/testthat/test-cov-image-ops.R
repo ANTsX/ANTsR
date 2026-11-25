@@ -109,8 +109,8 @@ test_that("logic operators", {
   expect_error(b1 & makeImage(c(2, 3), 1, spacing = c(3, 3)), "physical space")
   expect_error(b1 | makeImage(c(2, 3), 1, spacing = c(3, 3)), "physical space")
   expect_error(b1 & "TRUE", "operations are possible")
-  # Math group fallback: cumsum drops dims, so re-wrapping as an image fails
-  expect_error(cumsum(b1), "as.antsImage")
+  # Math group fallback: cumsum drops dims, so it returns a plain vector
+  expect_equal(cumsum(b1), cumsum(as.numeric(as.array(b1))))
 })
 
 test_that("finite checks, which and summaries", {

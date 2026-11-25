@@ -118,10 +118,16 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
       if (verbose) {
         print(myargs)
       }
-      ANTsRCore::AntsApplyTransforms(c(
+      status <- ANTsRCore::AntsApplyTransforms(c(
         myargs, "-z", 1, "-v",
         myverb, "--float", 1, "-e", imagetype
       ))
+      # 0 is success; on failure (e.g. an unknown flag passed through ...)
+      # the output would be the unresampled input
+      if (!identical(as.integer(status), 0L)) {
+        stop("resampleImageToTarget failed (status ", status, "); ",
+          "see the ANTs message above.")
+      }
       if (is.na(compose)) {
         return(antsImageClone(warpedmovout, inpixeltype))
       }

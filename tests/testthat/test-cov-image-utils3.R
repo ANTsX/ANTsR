@@ -196,8 +196,10 @@ test_that("cropImageFromCenterPoint and abpN4", {
   img <- makeImage(c(20, 20), runif(400))
   cp <- cropImageFromCenterPoint(img, c(10, 10), c(5, 5))
   expect_equal(dim(cp), c(5, 5))
-  # package bug: points outside the image yield an invalid crop domain
-  expect_error(cropImageFromCenterPoint(img, c(-5, 30), c(5, 5)), "outside")
+  # points outside the image give a zero-padded patch (as in ANTsPy)
+  out <- cropImageFromCenterPoint(img, c(-5, 30), c(5, 5))
+  expect_equal(dim(out), c(5, 5))
+  expect_true(all(is.finite(as.array(out))))
 
   img16 <- makeImage(c(20, 20), runif(400, 10, 100))
   a1 <- abpN4(img16, shrinkFactor = 1, convergence = list(iters = 5, tol = 1e-4))

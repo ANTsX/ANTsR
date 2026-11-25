@@ -19,7 +19,7 @@ correction.}
 \item{mask}{Brain mask for image.}
 
 \item{proportion}{Ratio of activity for white matter to gray matter.
-Assumed to be 0.4.  Must be a single non-negative number.}
+Assumed to be 0.4.  Must be a single finite non-negative number.}
 }
 \value{
 Returns partial volume corrected antsImage (or numeric vector for

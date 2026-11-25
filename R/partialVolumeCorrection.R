@@ -13,7 +13,7 @@
 #' correction.
 #' @param mask Brain mask for image.
 #' @param proportion Ratio of activity for white matter to gray matter.
-#' Assumed to be 0.4.  Must be a single non-negative number.
+#' Assumed to be 0.4.  Must be a single finite non-negative number.
 #' @return Returns partial volume corrected antsImage (or numeric vector for
 #' numeric input).
 #' @details
@@ -49,8 +49,8 @@
 #' @export partialVolumeCorrection
 partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion = 0.4) {
   if (!is.numeric(proportion) || length(proportion) != 1 ||
-    is.na(proportion) || proportion < 0) {
-    stop("proportion must be a single non-negative number")
+    !is.finite(proportion) || proportion < 0) {
+    stop("proportion must be a single finite non-negative number")
   }
   if (is.antsImage(img)) {
     if (is.null(mask)) {
@@ -73,13 +73,16 @@ partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion
   denominator <- values.gm + proportion * values.wm
   values.corrected <- values.img / denominator
   # little tissue in the voxel: return it uncorrected (numerical stability)
-  lowtissue <- (values.gm + values.wm) < 0.25
+  # (which() so missing GM/WM values stay NA instead of erroring)
+  lowtissue <- which((values.gm + values.wm) < 0.25)
   values.corrected[lowtissue] <- values.img[lowtissue]
   # the fixed-ratio model cannot recover GM flow when its denominator is zero
-  unrecoverable <- !lowtissue & abs(denominator) < sqrt(.Machine$double.eps)
-  if (any(unrecoverable)) {
+  unrecoverable <- setdiff(
+    which(abs(denominator) < sqrt(.Machine$double.eps)), lowtissue
+  )
+  if (length(unrecoverable) > 0) {
     warning(
-      sum(unrecoverable), " voxel(s) have GM + proportion * WM == 0, so GM ",
+      length(unrecoverable), " voxel(s) have GM + proportion * WM == 0, so GM ",
       "flow cannot be recovered; returning NA for them"
     )
     values.corrected[unrecoverable] <- NA

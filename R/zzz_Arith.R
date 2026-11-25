@@ -295,8 +295,10 @@ setMethod(
     a1 <- as.array(e1)
 
     res <- callGeneric(a1)
-    # keep values such as -1 representable (unsigned types would wrap)
-    res <- .as_antsImage_keep_values(res, reference = e1)
+    # keep values such as -1 representable (unsigned types would wrap);
+    # double for unsigned int so labels above 2^24 stay exact
+    res <- .as_antsImage_keep_values(res, reference = e1,
+      exact = e1@pixeltype == "unsigned int")
     return(res)
   }
 )
@@ -348,7 +350,8 @@ setMethod(
 setMethod(
   "Arith", signature(e1 = "antsImage", e2 = "array"),
   function(e1, e2) {
-    e2 <- .as_antsImage_keep_values(e2, reference = e1)
+    e2 <- .as_antsImage_keep_values(e2, reference = e1,
+      exact = e1@pixeltype == "unsigned int")
     res <- callGeneric(e1, e2)
     return(res)
   }
@@ -359,7 +362,8 @@ setMethod(
 setMethod(
   "Arith", signature(e1 = "array", e2 = "antsImage"),
   function(e1, e2) {
-    e1 <- .as_antsImage_keep_values(e1, reference = e2)
+    e1 <- .as_antsImage_keep_values(e1, reference = e2,
+      exact = e2@pixeltype == "unsigned int")
     res <- callGeneric(e1, e2)
     return(res)
   }

@@ -49,7 +49,8 @@ test_that("antsRegistration builds expected stages for linear transforms", {
   expect_equal(arg_after(a, "-t"), "Rigid[0.25]")
   expect_equal(arg_after(a, "-c"), "20x20x0x0")
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "DenseRigid")
-  expect_match(arg_after(a, "-m"), ",0.8\\]$")
+  # as ANTsPy (aff_random_sampling_rate = 1.0)
+  expect_match(arg_after(a, "-m"), ",1\\]$")
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "BOLDRigid")
   expect_equal(arg_after(a, "-s"), "1x0")
   # affIterations controls levels, a single level means no pyramid.
@@ -126,7 +127,7 @@ test_that("antsRegistration builds antsRegistrationSyN-style stages", {
   p <- reg_small_pair()
   tx_of <- function(a) a[which(a == "--transform") + 1]
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "antsRegistrationSyN[s]")
-  expect_equal(tx_of(a), c("Rigid[0.1]", "Affine[", "SyN[0.2,3,0]"))
+  expect_equal(tx_of(a), c("Rigid[0.1]", "Affine[0.1]", "SyN[0.2,3,0]"))
   expect_true(any(grepl("^CC\\[", a[which(a == "--metric") + 1])))
   expect_true("[100x70x50x20,1e-6,10]" %in% a)
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "antsRegistrationSyNQuick[s]")
@@ -137,7 +138,7 @@ test_that("antsRegistration builds antsRegistrationSyN-style stages", {
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "antsRegistrationSyN[t]")
   expect_equal(tx_of(a), "Translation[0.1]")
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "antsRegistrationSyNRepro[a]")
-  expect_equal(tx_of(a), c("Rigid[0.1]", "Affine["))
+  expect_equal(tx_of(a), c("Rigid[0.1]", "Affine[0.1]"))
   expect_true(any(grepl("^GC\\[", a[which(a == "--metric") + 1])))
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "antsRegistrationSyN[b]")
   expect_equal(tail(tx_of(a), 1), "BSplineSyN[0.2,26,0,3]")

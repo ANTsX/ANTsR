@@ -82,3 +82,23 @@ test_that("partialVolumeCorrection guards antsImage inputs", {
   expect_true(is.na(vals[1, 1]))
   expect_equal(vals[2, 2], 10)
 })
+
+test_that("a double antsImage of points keeps double precision by default", {
+  tx <- createAntsrTransform(dimension = 2, translation = c(10, 0))
+  f <- tempfile(fileext = ".mat")
+  on.exit(unlink(f))
+  writeAntsrTransform(tx, f)
+  pts <- as.antsImage(matrix(c(123456.789, 1), 1), pixeltype = "double")
+  out <- antsApplyTransformsToPoints(2, pts, f)
+  expect_equal(out@pixeltype, "double")
+  expect_equal(as.array(out)[1, 1], 123456.789 + 10, tolerance = 1e-9)
+  fl <- antsApplyTransformsToPoints(2, pts, f, precision = "float")
+  expect_equal(fl@pixeltype, "float")
+})
+
+test_that("partialVolumeCorrection keeps missing tissue values as NA", {
+  out <- partialVolumeCorrection(c(10, 10), c(NA, 0.5), c(0.5, 0.5))
+  expect_true(is.na(out[1]))
+  expect_equal(out[2], 10 / (0.5 + 0.4 * 0.5))
+  expect_error(partialVolumeCorrection(10, 0.5, 0.5, proportion = Inf), "finite")
+})

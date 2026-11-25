@@ -2,6 +2,106 @@
 
 ## Development version
 
+Version 0.7.0. Many functions that silently returned wrong values are fixed,
+so results change for existing code; the `BREAKING` entries below are the
+ones most likely to change your results.
+
+### Registration and transforms
+
+* BREAKING: `antsApplyTransformsToPoints()` now transforms points; it called
+  the image routine and returned its input unchanged. The first `.mat` in a
+  list is no longer always inverted: by default only an (affine `.mat`, warp)
+  pair gets `whichtoinvert = c(TRUE, FALSE)`, and asking to invert a warp is
+  an error. New `precision = c("float", "double")` (double is kept for a
+  double antsImage of points). It errors when there are fewer coordinate
+  columns than `dim` or the native call fails, instead of returning the input.
+* BREAKING: `antsRegistration()` sampling, matching ANTsPy:
+  `samplingPercentage` is now honoured by `Rigid`, `Affine`, `Similarity`,
+  `Translation`, `QuickRigid` and `BOLD*` (it was ignored; default 0.2 output
+  is unchanged). When `samplingPercentage` is not given, `DenseRigid` samples
+  100% (was 80%) and the linear stages of `SyNabp` and the
+  `antsRegistrationSyN*` presets sample 25% (was 20%). Passing
+  `samplingPercentage = 0.2` explicitly keeps the old linear sampling.
+* FIX: `antsRegistrationSyNQuickRepro` used a malformed CC metric
+  (`CC[f,m,132]`, i.e. weight 132); it now uses `CC[f,m,1,2]` as in ANTsPy.
+  The SyN* `Affine` stage argument is now a single `Affine[0.1]` string.
+* BREAKING: `jointLabelFusion()` now respects `usecor`; it always used
+  correlation (`PC`). The default `usecor = FALSE` uses mean squares as in
+  ANTsPy, so segmentations change; use `usecor = TRUE` for the old results.
+  It now needs at least two atlases and no longer modifies the caller's mask
+  with `noZeroes = TRUE`. `localJointLabelFusion()` passes `noZeroes` on,
+  skips atlases whose initial registration fails, and its `Similarity` step
+  now really uses full sampling.
+* BREAKING: `labelImageRegistration()` uses every label pair (with
+  identity/file initial transforms only the last label was used), accepts a
+  scalar `labelImageWeighting` with several labels, and gives `Repro`
+  presets (including `QuickRepro`) the automatic random seed.
+* FIX: `fitTransformToPairedPoints()` handles reflections in rigid,
+  similarity and affine fits as ANTsPy does, and the time-varying transform's
+  inverse is a real inverse (it was the identity).
+* FIX: `composeDisplacementFields()` works (it always errored) and returns
+  `w(x) + d(x + w(x))` as ITK/ANTsPy.
+* BREAKING: `abpN4()` bias-corrects the intensity-truncated image, as ANTsPy
+  and `antsBrainExtraction.sh` do (the truncation was discarded).
+* FIX: `resampleImageToTarget()` passes `...` on to antsApplyTransforms and
+  errors when the native call fails instead of returning the input unchanged.
+
+### Image operations
+
+* BREAKING: arithmetic between an antsImage and an R array, unary minus and
+  Math functions without their own method (e.g. `log1p`) no longer truncate
+  or wrap values of `unsigned char`/`unsigned int` images: the result is
+  float (double for `unsigned int` and double images, so labels above 2^24
+  stay exact). Arithmetic with a single number (`img + 0.5`) is unchanged.
+  Dividing an `unsigned char` image by an array with values in (0, 1) no
+  longer crashes R.
+* BREAKING: comparisons and `&` / `|` between an integer image and an array
+  use the array's values (the array was truncated to the image type, so
+  `0 == 0.5` was TRUE and `&` acted bitwise); comparisons are exact for
+  labels above 2^24.
+* FIX: `round(img, digits)` honours `digits` (it was ignored) and promotes
+  the pixel type when rounded values do not fit (`unsigned char` 255 with
+  `digits = -1` gives 260, not 4). `cumsum()` and friends on an antsImage
+  return a numeric vector instead of erroring.
+* BREAKING: `maskImage(binarize = TRUE)` returns 1 where the image is
+  non-zero and the mask matches `level`, as ANTsPy (a single level ignored
+  `binarize`; several levels set 1 where the image was 0).
+* FIX: `antsImageRead(file, dimension = )` keeps the file's components
+  (multi-channel images were read as scalar images with wrong values).
+  `iMath()` errors clearly for listed but unimplemented operations.
+
+### Patches and cropping
+
+* BREAKING: `extractImagePatches()` list output keeps length-one patch axes
+  (a 4 x 1 patch is a 4 x 1 matrix, not a vector).
+* FIX: `reconstructImageFromPatches()` works for 2D single-component images
+  with stride 1 and for length-one patch axes, divides overlaps by the true
+  count (3D stride-1 values were wrong when the patch exceeded half the
+  image), and with `domainImageIsMask = TRUE` averages overlapping patches
+  instead of summing them, as ANTsPy.
+* BREAKING: `cropImageFromCenterPoint()` centres the patch on the point (it
+  was shifted by one or more voxels), keeps spacing and direction, zero-pads
+  points near or outside the image instead of erroring, and for even sizes
+  uses the lower of the two central voxels, as ANTsPy.
+
+### Segmentation and other
+
+* BREAKING: `partialVolumeCorrection()` uses `proportion` (0.4 was always
+  used), which must be a single finite non-negative number; voxels where
+  GM + proportion * WM is zero are NA with a warning instead of `Inf`, and
+  missing GM/WM values stay NA.
+* BREAKING: `rfSegmentation()` and `rfSegmentationPredict()` return the label
+  values (factor codes 1..K were returned, so labels {0, 1} became {1, 2});
+  models with non-numeric classes still return the codes.
+* BREAKING: `segmentationRefinement.predict()` labels a voxel background
+  unless some label's probability exceeds 0.5 (any non-zero probability kept
+  the whole dilated region), so refined segmentations are usually smaller.
+* FIX: `sparseDecom(verbose = TRUE)` no longer overwrites `varex` with the
+  reconstruction correlation, which is returned as
+  `meanReconstructionCorrelation`.
+
+### Earlier development changes
+
 * MAINT: requires ANTsRCore >= 0.8.5, where the raw Rcpp bindings
   `fastMarchingExtension`, `robustMatrixTransform` and `antsImageMutualInformation`
   were renamed with a `cpp_` prefix so they no longer clash with the ANTsR

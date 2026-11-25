@@ -21,7 +21,9 @@
 #' @param precision \code{"float"} (default) or \code{"double"}: the
 #' precision used to store and transform the coordinates.  Single precision
 #' keeps about 7 significant digits, so use \code{"double"} when coordinates
-#' must be exact beyond that (e.g. large physical coordinates).
+#' must be exact beyond that (e.g. large physical coordinates).  When
+#' \code{precision} is not given and \code{points} is a double antsImage,
+#' double precision is used.
 #' @return same type as input; an antsImage input is returned with the pixel
 #' type given by \code{precision}.  An error is raised if the point set has
 #' fewer than \code{dim} coordinate columns or the transformation fails.
@@ -83,6 +85,11 @@ antsApplyTransformsToPoints <- function(
     transformlist = "",
     whichtoinvert = NA,
     precision = c("float", "double")) {
+  # an antsImage of points keeps its own (double) precision unless asked
+  if (missing(precision) && is.antsImage(points) &&
+    points@pixeltype == "double") {
+    precision <- "double"
+  }
   precision <- match.arg(precision)
   ttexists <- TRUE
   for (i in 1:length(transformlist))

@@ -28,7 +28,9 @@ antsRegistration where each transform is a filename.}
 \item{precision}{\code{"float"} (default) or \code{"double"}: the
 precision used to store and transform the coordinates.  Single precision
 keeps about 7 significant digits, so use \code{"double"} when coordinates
-must be exact beyond that (e.g. large physical coordinates).}
+must be exact beyond that (e.g. large physical coordinates).  When
+\code{precision} is not given and \code{points} is a double antsImage,
+double precision is used.}
 }
 \value{
 same type as input; an antsImage input is returned with the pixel

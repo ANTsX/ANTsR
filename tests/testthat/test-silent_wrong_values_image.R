@@ -254,6 +254,11 @@ test_that("cropImageFromCenterPoint centers the patch on the point", {
   expect_equal(p[, 2], 9:11)
   p <- as.array(cropImageFromCenterPoint(ramp, center, c(7, 7)))
   expect_equal(p[, 4], 7:13)
+  # even sizes: the point is the lower of the two central voxels (ANTsPy)
+  p <- as.array(cropImageFromCenterPoint(ramp, center, c(4, 4)))
+  expect_equal(p[, 2], 9:12)
+  p <- as.array(cropImageFromCenterPoint(ramp, center, c(2, 2)))
+  expect_equal(p[, 1], 10:11)
 })
 
 test_that("segmentationRefinement.predict uses a 0.5 background row", {

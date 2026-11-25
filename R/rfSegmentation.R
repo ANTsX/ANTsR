@@ -79,7 +79,7 @@ rfSegmentation <- function(
   probabilityimages <- predict(myrf, type = "prob")
   probabilityimages <- matrixToImages(t(probabilityimages), mask)
   segs <- antsImageClone(mask)
-  segs[mask == 1] <- as.numeric(as.character(predict(myrf)))
+  segs[mask == 1] <- .rfLabelValues(predict(myrf))
   myout <- list(segmentation = segs, probabilityimages = probabilityimages, rfModel = myrf)
   return(myout)
 }
@@ -114,8 +114,18 @@ rfSegmentationPredict <- function(
     rfSegmentationModel, featureMatrix,
     mask, verbose = FALSE) {
   segs <- antsImageClone(mask)
-  segs[mask == 1] <- as.numeric(as.character(
+  segs[mask == 1] <- .rfLabelValues(
     predict(rfSegmentationModel, newdata = featureMatrix)
-  ))
+  )
   return(segs)
+}
+
+# Predicted classes as label values: the factor levels when they are numbers
+# (e.g. labels 0/1 or 2/5), otherwise the class codes 1..K
+.rfLabelValues <- function(pred) {
+  lev <- suppressWarnings(as.numeric(levels(pred)))
+  if (anyNA(lev)) {
+    return(as.integer(pred))
+  }
+  lev[as.integer(pred)]
 }
