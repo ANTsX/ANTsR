@@ -31,7 +31,9 @@ a single transform object, or a list mixing filenames and objects.
 Objects can be \code{antsImage} displacement fields or
 \code{\link{antsrTransform}}s; they are written to temporary files,
 which are removed afterwards.  A linear \code{antsrTransform} is written
-as a \code{.mat} file, so it can be inverted with \code{whichtoinvert}.}
+as a \code{.mat} file, so it can be inverted with \code{whichtoinvert};
+composite, displacement-field and other non-linear transforms are written
+as \code{.h5}.}
 
 \item{interpolator}{Choice of interpolator.  Supports partial matching.
 \describe{

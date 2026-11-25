@@ -18,7 +18,9 @@
 #' Objects can be \code{antsImage} displacement fields or
 #' \code{\link{antsrTransform}}s; they are written to temporary files,
 #' which are removed afterwards.  A linear \code{antsrTransform} is written
-#' as a \code{.mat} file, so it can be inverted with \code{whichtoinvert}.
+#' as a \code{.mat} file, so it can be inverted with \code{whichtoinvert};
+#' composite, displacement-field and other non-linear transforms are written
+#' as \code{.h5}.
 #' @param interpolator Choice of interpolator.  Supports partial matching.
 #' \describe{
 #' \item{linear}{}
@@ -187,15 +189,23 @@ antsApplyTransforms <- function(
       if (fixed@components > 1) {
         f <- splitChannels(fixed)[[1]]
       }
-      if (moving@components > 1 && imagetype == 0) {
+      if (moving@components > 1 && imagetype %in% c(0, 1)) {
         if (!is.na(compose)) {
           # moving is not used when composing transforms
           moving <- f
         } else {
-          stop(
-            "moving has ", moving@components, " components; ",
-            "set imagetype = 1 to transform vector images."
-          )
+          # the native call cannot read in-memory multi-component images
+          # (it crashes for imagetype 0 and fails for imagetype 1), so warp
+          # each channel and merge; like imagetype 1 in ANTs, vectors are
+          # interpolated component-wise and not reoriented
+          warped <- lapply(splitChannels(moving), function(channel) {
+            antsApplyTransforms(
+              fixed = f, moving = channel, transformlist = transformlist,
+              interpolator = interpolator, imagetype = 0,
+              whichtoinvert = whichtoinvert, verbose = verbose, ...
+            )
+          })
+          return(mergeChannels(warped))
         }
       }
       warpedmovout <- antsImageClone(moving)
@@ -264,7 +274,14 @@ antsApplyTransforms <- function(
       }
       myverb <- as.numeric(verbose)
       if (verbose) print(myargs)
-      ANTsRCore::AntsApplyTransforms(c(myargs, "-z", 1, "-v", myverb, "--float", 1, "-e", imagetype))
+      status <- ANTsRCore::AntsApplyTransforms(
+        c(myargs, "-z", 1, "-v", myverb, "--float", 1, "-e", imagetype)
+      )
+      # 0 is success; on failure the output image is left unwarped
+      if (!identical(as.integer(status), 0L)) {
+        stop("antsApplyTransforms failed (status ", status, "); ",
+          "see the ANTs message above.")
+      }
 
       if (is.na(compose)) {
         return(antsImageClone(warpedmovout, inpixeltype))
@@ -290,6 +307,21 @@ antsApplyTransforms <- function(
   ANTsRCore::AntsApplyTransforms(.int_antsProcessArguments(
     c(args, "-z", 1, "--float", 1, "-e", imagetype)
   ))
+}
+
+
+# antsrTransform types that ITK can write to and read from .mat files
+.int_isLinearTransformType <- function(type) {
+  type %in% c(
+    "AffineTransform", "CenteredAffineTransform",
+    "Euler2DTransform", "Euler3DTransform",
+    "CenteredEuler3DTransform", "Rigid2DTransform", "Rigid3DTransform",
+    "CenteredRigid2DTransform", "Similarity2DTransform",
+    "Similarity3DTransform", "CenteredSimilarity2DTransform",
+    "QuaternionRigidTransform", "VersorRigid3DTransform",
+    "ScaleVersor3DTransform", "ScaleSkewVersor3DTransform",
+    "MatrixOffsetTransformBase", "TranslationTransform"
+  )
 }
 
 
@@ -325,7 +357,9 @@ antsApplyTransforms <- function(
       tfile <- tempfile(fileext = ".nii.gz")
       antsImageWrite(tx, tfile)
     } else if (inherits(tx, "antsrTransform")) {
-      ext <- if (tx@type == "DisplacementFieldTransform") ".h5" else ".mat"
+      # only matrix-offset (linear) transforms can be stored in .mat files;
+      # composite, displacement-field and other transforms need HDF5
+      ext <- if (.int_isLinearTransformType(tx@type)) ".mat" else ".h5"
       tfile <- tempfile(fileext = ext)
       writeAntsrTransform(tx, tfile)
     } else {

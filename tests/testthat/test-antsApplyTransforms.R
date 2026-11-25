@@ -73,13 +73,13 @@ test_that("multi-component fixed/moving images do not reach native code", {
       reg$fwdtransforms)),
     as.array(fromFiles)
   )
-  # a vector moving image needs imagetype = 1
-  expect_error(
-    antsApplyTransforms(fixed, vec, reg$fwdtransforms),
-    "set imagetype = 1"
-  )
-  out <- antsApplyTransforms(fixed, vec, reg$fwdtransforms, imagetype = 1)
-  expect_equal(out@components, 2L)
+  # a vector moving image is warped channel by channel
+  for (it in c(0, 1)) {
+    out <- antsApplyTransforms(fixed, vec, reg$fwdtransforms, imagetype = it)
+    expect_equal(out@components, 2L)
+    expect_equal(as.array(splitChannels(out)[[1]]), as.array(fromFiles))
+    expect_equal(as.array(splitChannels(out)[[2]]), as.array(fromFiles))
+  }
   # moving is unused when composing, so a vector moving image is fine
   cfile <- antsApplyTransforms(vec, vec, list(field, affine),
     compose = tempfile()
@@ -94,4 +94,30 @@ test_that("temporary files are removed when a later transform is invalid", {
     "must be a filename"
   )
   expect_length(setdiff(list.files(tempdir()), before), 0)
+})
+
+test_that("composite antsrTransform objects are applied, not silently skipped", {
+  img <- makeImage(c(20, 20), 0)
+  img[10, 10] <- 5
+  t1 <- createAntsrTransform(dimension = 2, translation = c(1, 0))
+  t2 <- createAntsrTransform(dimension = 2, translation = c(2, 0))
+  comp <- composeAntsrTransforms(list(t1, t2))
+  h5 <- tempfile(fileext = ".h5")
+  on.exit(unlink(h5))
+  writeAntsrTransform(comp, h5)
+  viaFile <- antsApplyTransforms(img, img, h5, interpolator = "nearestNeighbor")
+  viaObject <- antsApplyTransforms(img, img, comp, interpolator = "nearestNeighbor")
+  # two translations totalling three voxels move the value from x = 10 to 7
+  expect_equal(unname(which(as.array(viaFile) == 5, arr.ind = TRUE)[1, 1]), 7)
+  expect_equal(as.array(viaObject), as.array(viaFile))
+})
+
+test_that("native failures raise an error instead of returning the input", {
+  bad <- tempfile(fileext = ".mat")
+  on.exit(unlink(bad))
+  writeLines("not a transform", bad)
+  expect_error(
+    suppressWarnings(capture.output(antsApplyTransforms(fixed, moving, bad))),
+    "antsApplyTransforms failed"
+  )
 })
