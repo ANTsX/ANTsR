@@ -155,7 +155,7 @@ mrvnrfs <- function(y, x, labelmasks, rad = NA, nsamples = 1,
       invisible(gc())
       for (tt1 in 1:length(newprobs)) {
         for (tt2 in 1:length(newprobs[[tt1]])) {
-          newprobs[[tt1]][[tt2]] <- resampleImage(newprobs[[tt1]][[tt2]], dim(labelmasks[[tt1]]), useVoxels = 1, 0)
+          newprobs[[tt1]][[tt2]] <- resampleImage(newprobs[[tt1]][[tt2]], dim(labelmasks[[tt1]]), useVoxels = 1, interpType = 0)
         }
       }
     }
@@ -235,7 +235,7 @@ mrvnrfs.predict <- function(rflist, x, labelmasks, rad = NA,
     if (rfct < length(multiResSchedule)) {
       for (tt1 in 1:length(newprobs)) {
         for (tt2 in 1:length(newprobs[[tt1]])) {
-          newprobs[[tt1]][[tt2]] <- resampleImage(newprobs[[tt1]][[tt2]], dim(labelmasks[[1]]), useVoxels = 1, 0)
+          newprobs[[tt1]][[tt2]] <- resampleImage(newprobs[[tt1]][[tt2]], dim(labelmasks[[1]]), useVoxels = 1, interpType = 0)
         }
       }
     }

@@ -189,7 +189,7 @@
 #' msk <- thresholdImage(fiseg$segmentation, 0, 0)
 #' mytx <- antsRegistration(
 #'   fixed = fi, moving = mi, typeofTransform = c("SyNCC"),
-#'   mask = msk, verbose = F
+#'   mask = msk, verbose = FALSE
 #' )
 #' jac <- createJacobianDeterminantImage(fi, mytx$fwdtransforms[1])
 #' }
@@ -1234,7 +1234,7 @@ buildTemplate <- function(
       )
       jlf <- jointLabelFusion(template, tempmask,
         rSearch = 3,
-        avgIlist, labelList = avgSlist
+        atlasList = avgIlist, labelList = avgSlist
       )
       template <- jlf$intensity
       segmentation <- antsImageClone(jlf$segmentation, "float")

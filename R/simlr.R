@@ -753,14 +753,7 @@ u_initial = initialUMatrix
         }
       }
 
-      orth_grad <- 0
-      if (constraint_type == "ortho" & FALSE) {
-        orth_grad <- constraint_weight * orth_weights[i] *
-          gradient_invariant_orthogonality_defect(V_sp)
-      }
-
-
-      g <- sim_grad + dom_grad - orth_grad
+      g <- sim_grad + dom_grad
       g <- clip_gradient_by_quantile( as.matrix(g), clipper)
       g <- simlr_sparseness(
         g,
@@ -777,7 +770,7 @@ u_initial = initialUMatrix
     }      
     
     riemannian_descent_grad = smooth_grad(vmats[[i]])
-    step_result <- step(
+    step_result <- optimizer_step(
           optimizer = optimizer_object_l[[i]],
           i = i,
           V_current = vmats[[i]],
@@ -996,6 +989,7 @@ return(
 #' }
 #' @export
 plot_energy_decomposition <- function(simlr_result, modality, show_weights = FALSE) {
+  weighted_type = NULL; rm(list = c("weighted_type"))  # NSE / non-standard names (R CMD check)
   stopifnot(requireNamespace("ggplot2", quietly = TRUE))
   df <- simlr_result$energyPath
   df <- df[df$modality == modality, ]
@@ -1288,7 +1282,7 @@ simlrU <- function(
         BtB <- t(basis) %*% basis
         basis <- basis %*% inv_sqrt_sym_newton(BtB)
       } else {
-        basis <- (ba_svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
+        basis <- (ba_svd(scale(avgU,TRUE,TRUE), nu = nc, nv = 0)$u)
       }
     }
 
@@ -2629,9 +2623,6 @@ exploratory_visualization <- function(data, dotsne=FALSE, verbose=FALSE ) {
 #' # predictors <- antspymm_predictors(demographic_data)
 #' @export
 #'
-#' @importFrom tibble tibble
-#' @importFrom rsvd rsvd
-#' @importFrom magrittr %>%
 antspymm_predictors <- function( demog, doasym=FALSE, return_colnames=FALSE ) {
   badcaud=getNamesFromDataframe("bn_str_ca",demog)
   badcaud=badcaud[ -grep("deep",badcaud)]
@@ -3149,7 +3140,6 @@ humanize_anatomical_name <- function(x) {
 #' # simlrVariable <- "PC1"
 #' # interpretedVector <- interpret_simlr_vector2(simlrResult$v[[1]] )
 #' # print(interpretedVector)
-#' @importFrom stringr str_match str_extract
 #' @export
 interpret_simlr_vector2 <- function( simlrResult, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
   
@@ -3330,7 +3320,7 @@ regularizeSimlr <- function(x, knn, fraction = 0.1, sigma, kPackage = "FNN") {
     if (inherits(x[[i]], "antsImage")) {
       slist[[i]] <- getSpatialRegularization(x[[i]], knn[i], sigma[i])
     } else {
-      slist[[i]] <- knnSmoothingMatrix(scale(data.matrix(x[[i]]), T, T),
+      slist[[i]] <- knnSmoothingMatrix(scale(data.matrix(x[[i]]), TRUE, TRUE),
                                        k = knn[i],
                                        sigma = sigma[i], kPackage = kPackage
       )
@@ -3793,7 +3783,6 @@ read_simlr_data_frames <- function(file_prefix, data_names, verbose=FALSE ) {
 #' # simlrVariable <- "PC1"
 #' # interpretedVector <- interpret_simlr_vector(simlrResult, simlrMats, simlrVariable)
 #' # print(interpretedVector)
-#' @importFrom stringr str_match str_extract
 #' @export
 interpret_simlr_vector <- function( simlrResult, simlrMats, simlrVariable, n2show = 5, shortnames=TRUE, return_dataframe=FALSE ) {
   
@@ -4903,7 +4892,7 @@ predictSimlr <- function(x, simsol, targetMatrix, sourceMatrices, projectv = TRU
     myBetas[i, ] <- rowMeans(abs(blm$beta.t))
     q5betas <- abs(blm$beta.t)
     q5betas[q5betas < quantile(q5betas, 0.5, na.rm = TRUE)] <- NA
-    myBetasQ5[i, ] <- rowMeans(q5betas, na.rm = T)
+    myBetasQ5[i, ] <- rowMeans(q5betas, na.rm = TRUE)
     varxj <- rep(NA, length(smdl))
     for (j in 1:length(smdl)) {
       varxj[j] <- smdl[[j]]$r.squared
@@ -5085,7 +5074,7 @@ select_joint_k <- function(mat_list = NULL,
 #' @keywords internal
 .run_select_joint_k_tests <- function() {
   
-  context("Testing select_joint_k Functionality")
+  testthat::context("Testing select_joint_k Functionality")
   
   # --- Setup 1: Create data with a known, sharp elbow at k=8 ---
   set.seed(42)
@@ -5114,24 +5103,24 @@ select_joint_k <- function(mat_list = NULL,
 
   # --- Begin Tests ---
   
-  test_that("Function returns a correctly structured list output", {
+  testthat::test_that("Function returns a correctly structured list output", {
     cat("\n- Testing output structure...\n")
     res <- select_joint_k(pca_test_mat_list, k_max = 15)
-    expect_true(is.list(res))
-    expect_named(res, c("optimal_k", "joint_variance_curve", "plot"))
-    succeed()
+    testthat::expect_true(is.list(res))
+    testthat::expect_named(res, c("optimal_k", "joint_variance_curve", "plot"))
+    testthat::succeed()
   })
   
-  test_that("Robust elbow method correctly identifies the known elbow at k=8", {
+  testthat::test_that("Robust elbow method correctly identifies the known elbow at k=8", {
     cat("- Testing robust elbow detection method...\n")
     res_pca <- select_joint_k(pca_test_mat_list, method = "pca", k_max = 20, selection_method = "elbow")
     
-    expect_equal(res_pca$optimal_k, k_true, 
+    testthat::expect_equal(res_pca$optimal_k, k_true, 
                  label = paste("Elbow method failed. Expected k=", k_true, ", but got k=", res_pca$optimal_k))
-    succeed()
+    testthat::succeed()
   })
   
-  test_that("Threshold method works correctly", {
+  testthat::test_that("Threshold method works correctly", {
     cat("- Testing threshold selection method...\n")
     temp_res <- select_joint_k(pca_test_mat_list, k_max = 20)
     var_at_k4 <- temp_res$joint_variance_curve$joint_var[4]
@@ -5139,24 +5128,24 @@ select_joint_k <- function(mat_list = NULL,
     res_thresh <- select_joint_k(pca_test_mat_list, method = "pca", k_max = 20, 
                                  selection_method = "threshold", variance_threshold = var_at_k4)
     
-    expect_equal(res_thresh$optimal_k, 4,
+    testthat::expect_equal(res_thresh$optimal_k, 4,
                  label = "Threshold method should have selected k=4.")
-    succeed()
+    testthat::succeed()
   })
   
   if ( FALSE )
-  test_that("SPCA method runs and returns a valid result object", {
+  testthat::test_that("SPCA method runs and returns a valid result object", {
     cat("- Testing SPCA execution...\n")
     
     # This call now uses the well-behaved spca_test_mat_list
     result_spca <- select_joint_k(spca_test_mat_list, method = "spca", k_max = 5)
     
     # We test that the call completes and returns a list of the correct structure.
-    expect_true(is.list(result_spca), label = "SPCA run should return a list.")
-    expect_named(result_spca, c("optimal_k", "joint_variance_curve", "plot"),
+    testthat::expect_true(is.list(result_spca), label = "SPCA run should return a list.")
+    testthat::expect_named(result_spca, c("optimal_k", "joint_variance_curve", "plot"),
                  label = "SPCA run should return a correctly named list.")
     
-    succeed()
+    testthat::succeed()
   })
   
   cat("\n--- All select_joint_k self-tests passed successfully! ---\n")
@@ -5194,7 +5183,6 @@ select_joint_k <- function(mat_list = NULL,
 #' optimal k is determined as the last component where the real eigenvalue
 #' exceeds the mean of the permuted eigenvalues.
 #'
-#' @importFrom ggplot2 ggplot aes geom_line geom_point labs theme_minimal scale_y_log10
 #' @export
 estimate_joint_rank <- function(mat_list,
                                 n_permutations = 20,
@@ -5311,6 +5299,7 @@ estimate_rank_by_permutation_rv <- function(mat_list,
                                             var_explained_threshold = 0.90, 
                                             handle_missing = TRUE,
                                             return_max = FALSE) {
+  score = NULL; rm(list = c("score"))  # NSE / non-standard names (R CMD check)
   
   if (!requireNamespace("pbapply", quietly = TRUE)) stop("Install 'pbapply'.")
   if (!requireNamespace("ggplot2", quietly = TRUE)) stop("Install 'ggplot2'.")
@@ -7548,14 +7537,7 @@ u_initial = initialUMatrix
         }
       }
 
-      orth_grad <- 0
-      if (constraint_type == "ortho" & FALSE) {
-        orth_grad <- constraint_weight * orth_weights[i] *
-          gradient_invariant_orthogonality_defect(V_sp)
-      }
-
-
-      g <- sim_grad + dom_grad - orth_grad
+      g <- sim_grad + dom_grad
       g <- clip_gradient_by_quantile( as.matrix(g), clipper)
       g <- simlr_sparseness(
         g,
@@ -7572,7 +7554,7 @@ u_initial = initialUMatrix
     }      
     
     riemannian_descent_grad = smooth_grad(vmats[[i]])
-    step_result <- step(
+    step_result <- optimizer_step(
           optimizer = optimizer_object_l[[i]],
           i = i,
           V_current = vmats[[i]],

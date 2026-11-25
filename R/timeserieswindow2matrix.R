@@ -88,8 +88,11 @@ timeserieswindow2matrix <- function(timeseriesmatrix, mask, eventlist,
     mask4d[, , , i] <- maskvec
   }
   mask4d <- as.antsImage(mask4d)
-  if (!is.na(spacing)) {
-    stopifnot(length(spacing) == 4)
+  if (!.isNA1(spacing)) {
+    if (!is.numeric(spacing) || length(spacing) != 4 ||
+      any(!is.finite(spacing)) || any(spacing <= 0)) {
+      stop("spacing must be 4 finite, positive numbers")
+    }
     antsSetSpacing(mask4d, spacing)
   }
   nvox4dmask <- sum(mask4d == 1)

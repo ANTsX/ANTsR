@@ -15,7 +15,7 @@ nsa_flow_pca(
   nsa_w = 0.5,
   apply_soft_thresh_in_nns = FALSE,
   tol = 1e-06,
-  retraction = def_ret,
+  retraction = "soft_polar",
   grad_tol = 1e-04,
   nsa_flow_fn = nsa_flow_autograd,
   verbose = FALSE

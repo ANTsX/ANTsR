@@ -167,10 +167,10 @@ regressProjections <- function(input.train, input.test, demog.train, demog.test,
   if (is.numeric(outcome.real.train)) {
     outcome.predicted.train <- predict(model.train, newdata = demog.train)
     outcome.predicted.test <- predict(model.train, newdata = demog.test)
-    error.train <- mean(abs(outcome.predicted.train - outcome.real.train), na.rm = T)
+    error.train <- mean(abs(outcome.predicted.train - outcome.real.train), na.rm = TRUE)
     corcoeff.train <- cor.test(outcome.predicted.train, outcome.real.train)$estimate
     pvalue.train <- cor.test(outcome.predicted.train, outcome.real.train)$p.value
-    error.test <- mean(abs(outcome.predicted.test - outcome.real.test), na.rm = T)
+    error.test <- mean(abs(outcome.predicted.test - outcome.real.test), na.rm = TRUE)
     corcoeff.test <- cor.test(outcome.predicted.test, outcome.real.test)$estimate
     pvalue.test <- cor.test(outcome.predicted.test, outcome.real.test)$p.value
     stats <- data.frame(

@@ -32,6 +32,10 @@ compcor <- function(
     print("Usage:  compcorr_df<-compcor( fmri, mask ) ")
     return(1)
   }
+  # checked before extracting the time series
+  if (!.isNA1(highvarmatinds)) {
+    .stopIfNA(highvarmatinds, "highvarmatinds")
+  }
   if (is.antsImage(fmri) & is.null(mask)) {
     print("Need to input a mask too")
     print(args(compcor))
@@ -44,7 +48,7 @@ compcor <- function(
   if (inherits(fmri, "matrix")) {
     mat <- fmri
   }
-  if (is.na(highvarmatinds)) {
+  if (.isNA1(highvarmatinds)) {
     temporalvar <- apply(mat, 2, var)
     tvhist <- hist(temporalvar, breaks = c("FD"), plot = FALSE)
     percvar <- variance_extreme # percentage of high variance data to use

@@ -68,8 +68,8 @@ eanatSelect <- function(inmat, mask = NULL, cthresh = 0, smooth = 0,
     if (verbose) setTxtProgressBar(progress, xpn)
   }
   if (verbose) close(progress)
-  mycorrs[1] <- max(mycorrs, na.rm = T)
-  targetCorr <- selectorScale * min(abs(mycorrs), na.rm = T)
+  mycorrs[1] <- max(mycorrs, na.rm = TRUE)
+  targetCorr <- selectorScale * min(abs(mycorrs), na.rm = TRUE)
   nvecs <- which(mycorrs <= targetCorr)
   nvecs <- nvecs[1] # take 1st that meets criterion
   if (verbose) {

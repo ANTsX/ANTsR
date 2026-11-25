@@ -1,9 +1,6 @@
 #' @title Advanced Normalization Tools in R
 #' @name ANTsR
 #'
-#' @importFrom stats AIC
-#'
-#' @import ANTsRCore stats grDevices utils
 #'
 #' @keywords internal
 "_PACKAGE"

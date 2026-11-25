@@ -25,7 +25,7 @@
 #'   img <- matrix2timeseries(asl, aslmask, omat[sel, ])
 #'   perf <- aslPerfusion(img,
 #'     dorobust = 0.9, useDenoiser = 4, skip = 10, useBayesian = 0,
-#'     moreaccurate = 0, verbose = F, mask = aslmask
+#'     moreaccurate = 0, verbose = FALSE, mask = aslmask
 #'   )
 #'   perfp <- list(sequence = "pcasl", m0 = perf$m0)
 #'   cbf <- quantifyCBF(perf$perfusion, perf$mask, perfp)

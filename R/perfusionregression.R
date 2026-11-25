@@ -86,7 +86,7 @@ perfusionregression <- function(
   }
   thisct <- 1
   for (vox in visitvals) {
-    try(mycbfmodel <- robustbase::lmrob(rcbfform, control = ctl), silent = T)
+    try(mycbfmodel <- robustbase::lmrob(rcbfform, control = ctl), silent = TRUE)
     rbetaideal[vox] <- mycbfmodel$coeff[2]
     if (!is.null(mycbfmodel$rweights) & vissel[thisct] > visselThresh) {
       rgw <- rgw + mycbfmodel$rweights

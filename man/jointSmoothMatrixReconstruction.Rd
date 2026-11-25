@@ -142,7 +142,7 @@ x <- list(scale(mat, scale = scl), scale(mat2, scale = scl), scale(mat3, scale =
 slist <- list(smoomat2, smoomat, smoomat, smoomat, smoomat, smoomat2)
 
 jj <- jointSmoothMatrixReconstruction(x, 4, params,
-  positivity = T,
+  positivity = TRUE,
   gamma = 1e-6, sparsenessQuantile = 0.9, iterations = 10,
   smoothingMatrix = slist, verbose = TRUE
 )

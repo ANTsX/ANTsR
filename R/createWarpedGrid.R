@@ -22,7 +22,7 @@
 #' \dontrun{
 #' mytx <- antsRegistration(fixed = fi, moving = mi, typeofTransform = c("SyN"))
 #' mywarpedgrid <- createWarpedGrid(mi,
-#'   gridDirections = c(F, T),
+#'   gridDirections = c(FALSE, TRUE),
 #'   transform = mytx$fwdtransforms, fixedReferenceImage = fi
 #' )
 #' plot(fi, mywarpedgrid, alpha = 0.75, color.overlay = "blue")

@@ -11,7 +11,7 @@ bayesianlm(
   priorPrecision,
   priorIntercept = 0,
   regweights,
-  includeIntercept = F
+  includeIntercept = FALSE
 )
 }
 \arguments{

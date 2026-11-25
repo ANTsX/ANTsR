@@ -1,7 +1,7 @@
 Package: ANTsR
 Type: Package
 Title: ANTs in R: Quantification Tools for Biomedical Images
-Version: 0.6.7
+Version: 0.6.8
 Date: 2026-05-08
 Authors@R: c(
     person("Brian B.", "Avants", role = c("aut", "cre"), email = "stnava@gmail.com"),
@@ -26,7 +26,7 @@ Depends:
     R (>= 3.5.0),
     methods
 Imports:
-    ANTsRCore (>= 0.8.1),
+    ANTsRCore (>= 0.8.5),
     dplyr,
     ggplot2,
     graphics,
@@ -39,6 +39,7 @@ Imports:
     stringr,
     tibble,
     utils,
+    tools,
     rsvd,
     GPArotation,
     glmnet
@@ -81,7 +82,6 @@ Suggests:
     signal,
     sna,
     testthat,
-    tools,
     tsne,
     viridis,
     xgboost,

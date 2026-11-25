@@ -66,6 +66,8 @@ preprocessRestingBOLD <- function(
     spatialSmoothingType = "none",
     spatialSmoothingParameters = 0,
     residualizeMatrix = TRUE) {
+  # check options before motion correction and filtering
+  .checkSpatialSmoothing(spatialSmoothingType, spatialSmoothingParameters)
   nuisanceVariables <- NULL
   if (!missing(initialNuisanceVariables)) {
     nuisanceVariables <- initialNuisanceVariables

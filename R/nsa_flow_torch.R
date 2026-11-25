@@ -67,14 +67,12 @@
 #' Y0 <- matrix(runif(20), 5, 4)
 #' X0 <- matrix(runif(20), 5, 4)
 #' # The original function relies on helper functions not shown here, such as:
-#' # create_optimizer, step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
+#' # create_optimizer, optimizer_step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
 #' # The following example is conceptual:
 #' # result <- nsa_flow_torch(Y0, X0, w = 0.0, max_iter = 10, verbose = TRUE, plot = TRUE)
 #' # print(result$plot)
 #' # print(result$traces)
 #'
-#' @import ggplot2
-#' @import reshape2
 #' @export
 nsa_flow_torch <- function(
   Y0, X0 = NULL, w = 0.5,
@@ -88,6 +86,7 @@ nsa_flow_torch <- function(
   plot = FALSE,
   precision = 'float64'
 ) {
+  iter = fidelity = orthogonality = NULL; rm(list = c("iter", "fidelity", "orthogonality"))  # NSE / non-standard names (R CMD check)
   if (!is.matrix(Y0)) {
     stop("Y0 must be a numeric matrix.")
   }
@@ -339,14 +338,12 @@ nsa_flow_torch <- function(
 #' Y0 <- matrix(runif(20), 5, 4)
 #' X0 <- matrix(runif(20), 5, 4)
 #' # The original function relies on helper functions not shown here, such as:
-#' # create_optimizer, step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
+#' # create_optimizer, optimizer_step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
 #' # The following example is conceptual:
 #' # result <- nsa_flow_torch(Y0, X0, w = 0.0, max_iter = 10, verbose = TRUE, plot = TRUE)
 #' # print(result$plot)
 #' # print(result$traces)
 #'
-#' @import ggplot2
-#' @import reshape2
 #' @export
 nsa_flow_torch_ag <- function(
   Y0, X0 = NULL, w = 0.5,
@@ -360,6 +357,7 @@ nsa_flow_torch_ag <- function(
   plot = FALSE,
   precision = 'float64'
 ) {
+  iter = fidelity = orthogonality = NULL; rm(list = c("iter", "fidelity", "orthogonality"))  # NSE / non-standard names (R CMD check)
   if (!is.matrix(Y0)) {
     stop("Y0 must be a numeric matrix.")
   }
@@ -591,6 +589,7 @@ nsa_flow_autograd <- function(
   plot = FALSE,
   precision = "float64"
 ) {
+  iter = fidelity = orthogonality = NULL; rm(list = c("iter", "fidelity", "orthogonality"))  # NSE / non-standard names (R CMD check)
   # basic checks
   if (!is.matrix(Y0)) stop("Y0 must be a numeric matrix.")
   if (!is.null(X0) && !is.matrix(X0)) stop("X0 must be a numeric matrix or NULL.")

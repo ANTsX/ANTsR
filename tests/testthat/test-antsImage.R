@@ -194,7 +194,7 @@ test_that("antsImage ^ scalar, preserves header", {
 })
 
 test_that("antsImage ^ antsImage", {
-  expect_true(sum(img3^img3) == sum(values3^values3))
+  expect_equal(sum(img3^img3), sum(values3^values3))
 })
 test_that("antsImage ^ antsImage, preserves header", {
   expect_true(antsImagePhysicalSpaceConsistency(data.type = TRUE, img3, img3^

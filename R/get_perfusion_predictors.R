@@ -54,7 +54,7 @@
       #        selectionthresh = 0.2,
       #        maxnoisepreds = useDenoiser, polydegree = 8,
       #        crossvalidationgroups = 6,
-      #        scalemat = F, noisepoolfun = max)
+      #        scalemat = FALSE, noisepoolfun = max)
       #      clustasl<-(clusterTimeSeries( mat,  8 )$clusters)
       clustasl <- 8
       dnz <- aslDenoiseR(mat, xideal,
@@ -65,7 +65,7 @@
       denoisingParams <- data.matrix(data.frame(dnz$noiseu))
       dnz <- dnz$R2final
     }
-    if (exists("denoisingParams")) {
+    if (exists("denoisingParams", inherits = FALSE)) {
       compcorrnames <- paste("denoisingParams",
         c(1:ncol(denoisingParams)),
         sep = ""

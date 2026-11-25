@@ -111,8 +111,8 @@ vwnrfs <- function(y, x, labelmasks, rad = NA, nsamples = 8,
       subdim <- round(dim(labelmasks[[i]]) / reduceFactor)
       subdim[subdim < 2 * rad + 1] <- (2 * rad + 1)[subdim < 2 * rad + 1]
       if (yisimg) yfactor <- resampleImage(y[[i]], subdim, useVoxels = 1, interpType = as.numeric(asFactors))
-      for (k in 1:nfeats) xfactor[[k]] <- resampleImage(xfactor[[k]], subdim, useVoxels = 1, 0)
-      if (i == 1 | useFirstMask == F) {
+      for (k in 1:nfeats) xfactor[[k]] <- resampleImage(xfactor[[k]], subdim, useVoxels = 1, interpType = 0)
+      if (i == 1 | useFirstMask == FALSE) {
         labmaskfactor <- resampleImage(labmaskfactor, subdim,
           useVoxels = 1,
           interpType = as.numeric(asFactors)
@@ -122,7 +122,7 @@ vwnrfs <- function(y, x, labelmasks, rad = NA, nsamples = 8,
 
 
     # get randmask, only once unless necessary
-    if (i == 1 | useFirstMask == F) {
+    if (i == 1 | useFirstMask == FALSE) {
       randmask <- randomMask(labmaskfactor, nsamples = nsamples, perLabel = asFactors)
       randvox <- sum(randmask == 1)
       if (randvox == 0) stop("error in input data - randmask ", i, " is empty")
@@ -134,7 +134,7 @@ vwnrfs <- function(y, x, labelmasks, rad = NA, nsamples = 8,
 
     # fill tv
     if (yisimg) {
-      tv[fromrow:torow] <- t(getNeighborhoodInMask(yfactor, randmask, rad * 0, spatial.info = F, boundary.condition = "image"))
+      tv[fromrow:torow] <- t(getNeighborhoodInMask(yfactor, randmask, rad * 0, spatial.info = FALSE, boundary.condition = "image"))
     } else {
       tv[fromrow:torow] <- rep(yfactor, randvox)
     }
@@ -260,7 +260,7 @@ vwnrfs.predict <- function(rfm, x, labelmasks, rad = NA,
     if (reduceFactor != 1) {
       subdim <- round(dim(labmaskfactor) / reduceFactor)
       subdim[subdim < 2 * rad + 1] <- (2 * rad + 1)[subdim < 2 * rad + 1]
-      for (k in 1:nfeats) xfactor[[k]] <- resampleImage(xfactor[[k]], subdim, useVoxels = 1, 0)
+      for (k in 1:nfeats) xfactor[[k]] <- resampleImage(xfactor[[k]], subdim, useVoxels = 1, interpType = 0)
       labmaskfactor <- resampleImage(labmaskfactor, subdim, useVoxels = 1, interpType = as.numeric(asFactors))
     }
 
@@ -289,7 +289,7 @@ vwnrfs.predict <- function(rfm, x, labelmasks, rad = NA,
         tocol <- fromcol + neigh - 1
 
         # get neighborhood
-        m1 <- t(getNeighborhoodInMask(xfactor[[k]], binchunk, rad, spatial.info = F, boundary.condition = "image"))
+        m1 <- t(getNeighborhoodInMask(xfactor[[k]], binchunk, rad, spatial.info = FALSE, boundary.condition = "image"))
 
         # make sure neiborhood is not out of image
         if (any(is.na(m1))) {

@@ -21,7 +21,7 @@ library(tidyr)
 library(gridExtra)
 library(knitr)
 library(microbenchmark)  # For timing
-library(ANTsR)  # Assumes missing functions like create_optimizer, step are here
+library(ANTsR)  # Assumes missing functions like create_optimizer, optimizer_step are here
 
 
 inv_sqrt_sym_adaptive <- function(A, method = "auto", eig_thresh = NULL,
