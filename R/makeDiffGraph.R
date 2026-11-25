@@ -46,10 +46,10 @@
   edgeWeights <- igraph::E(g1)$weight
   # print( paste( 'Graph-Density:',graph.density( g1 ) ) )
   gmetric0 <- igraph::evcent(g1, scale = TRUE)$vector
-  gmetric1 <- igraph::closeness(g1, normalized = T, weights = edgeWeights)
+  gmetric1 <- igraph::closeness(g1, normalized = TRUE, weights = edgeWeights)
   gmetric2 <- igraph::page.rank(g1, weights = edgeWeights)$vector #
   gmetric3 <- igraph::degree(g1)
-  gmetric4 <- igraph::betweenness(g1, normalized = F, weights = edgeWeights)
+  gmetric4 <- igraph::betweenness(g1, normalized = FALSE, weights = edgeWeights)
   gmetric5 <- igraph::transitivity(g1, isolates = c("zero"), type = c("local"))
   mycommunity <- igraph::fastgreedy.community(g1)
   walktrapcomm <- igraph::walktrap.community(g1)

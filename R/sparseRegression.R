@@ -106,7 +106,7 @@ sparseRegression <- function(
   if (!is.null(mask)) {
     glb <- paste("spca*View1vec*.nii.gz", sep = "")
     fnl <- list.files(
-      path = statdir, pattern = glob2rx(glb), full.names = T,
+      path = statdir, pattern = glob2rx(glb), full.names = TRUE,
       recursive = TRUE
     )[1:nvecs]
     fnll <- list()
@@ -126,7 +126,7 @@ sparseRegression <- function(
     fnl <- read.csv(fnl)
   }
   glb <- paste("spcaprojectionsView1vec.csv", sep = "")
-  fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = T, recursive = T)
+  fnu <- list.files(path = statdir, pattern = glob2rx(glb), full.names = TRUE, recursive = TRUE)
   fnu <- read.csv(fnu)
   return(list(projections = mydecomp, eigenanatomyimages = fnl, umatrix = fnu))
 }

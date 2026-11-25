@@ -322,7 +322,7 @@ plot.antsImage <- function(
   }
   # now label the results
   if (imagedim == 3) {
-    img <- aperm(img, c(perms), resize = T)
+    img <- aperm(img, c(perms), resize = TRUE)
   }
   if (is.character(slices)) {
     slices <- c(as.numeric(unlist(strsplit(slices, "x"))))
@@ -537,7 +537,7 @@ plot.antsImage <- function(
         labimg <- rotate270.matrix(labimg)
       }
       if (imagedim == 3) {
-        labimg <- aperm(labimg, c(perms), resize = T)
+        labimg <- aperm(labimg, c(perms), resize = TRUE)
       }
       # check sizes
       #    if ( ! antsImagePhysicalSpaceConsistency( img, labimg ) )
@@ -656,8 +656,8 @@ plot.antsImage <- function(
         biglab[1] <- 255
         biglab[2] <- 0
       }
-      mn <- min(biglab, na.rm = T)
-      mx <- max(biglab, na.rm = T)
+      mn <- min(biglab, na.rm = TRUE)
+      mx <- max(biglab, na.rm = TRUE)
       if ((mn != mx) & (mn < mx)) {
         invisible(suppressWarnings(
           pixmap::plot(

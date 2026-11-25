@@ -62,7 +62,7 @@ sel <- 1:25
 fit <- smoothMultiRegression(
   x = mat[sel, ], y = age[sel, ], iterations = 10,
   sparsenessQuantile = 0.5,
-  smoothingMatrixX = smoomat, smoothingMatrixY = NA, verbose = T
+  smoothingMatrixX = smoomat, smoothingMatrixY = NA, verbose = TRUE
 )
 tt <- mat \%*\% fit$v
 print(cor.test(age[-sel, 1], tt[-sel, 1]))

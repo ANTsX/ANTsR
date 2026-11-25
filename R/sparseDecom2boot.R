@@ -131,7 +131,7 @@ sparseDecom2boot <- function(
         }
       }
       for (ct in 1:(ncol(cca1))) {
-        arrind <- which(mymult == min(mymult), arr.ind = T)
+        arrind <- which(mymult == min(mymult), arr.ind = TRUE)
         cca1copy[, arrind[1]] <- cca1[, arrind[2]]
         mymult[arrind[1], ] <- 0
         mymult[, arrind[2]] <- 0
@@ -150,7 +150,7 @@ sparseDecom2boot <- function(
         }
       }
       for (ct in 1:(ncol(cca2))) {
-        arrind <- which(mymult == min(mymult), arr.ind = T)
+        arrind <- which(mymult == min(mymult), arr.ind = TRUE)
         cca2copy[, arrind[1]] <- cca2[, arrind[2]]
         mymult[arrind[1], ] <- 0
         mymult[, arrind[2]] <- 0

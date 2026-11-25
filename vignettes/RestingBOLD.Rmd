@@ -14,7 +14,7 @@ vignette: >
 ```{r, echo = FALSE, message = FALSE, include = FALSE}
 library( knitr )
 library( rmarkdown )
-knitr::opts_chunk$set(collapse = T, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(ANTsR)
 ```
 
@@ -656,7 +656,7 @@ adjacency matrix is then used to create a graph.
 
 density = 0.1
 nEdges = length(upper.tri(connMat))*density
-thresh = sort( connMat[upper.tri(connMat)], decreasing=T)[nEdges]
+thresh = sort( connMat[upper.tri(connMat)], decreasing=TRUE)[nEdges]
 adj = 1*(connMat >= thresh)
 
 bingraph = graph.adjacency(adj, mode="undirected", weighted=NULL)
@@ -890,7 +890,7 @@ plot( meanbold, betasI, axis=3, nslices=30, ncolumns=10,
 
 # same thing, different denoising strategy
 dnz = aslDenoiseR( fboldMat[goodtimes,], refSignal[goodtimes],
-  polydegree = 2, crossvalidationgroups=8, verbose=T )
+  polydegree = 2, crossvalidationgroups=8, verbose=TRUE )
 networkDf = data.frame(
   ROI=refSignal[goodtimes],
   dnz$noiseu, dnz$covariates )

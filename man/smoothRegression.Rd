@@ -58,7 +58,7 @@ sel <- 1:25
 fit <- smoothRegression(
   x = mat[sel, ], y = age[sel], iterations = 10,
   sparsenessQuantile = 0.5,
-  smoothingMatrix = smoomat, verbose = T
+  smoothingMatrix = smoomat, verbose = TRUE
 )
 tt <- mat \%*\% fit$v
 print(cor.test(age[-sel], tt[-sel, 1]))

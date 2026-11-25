@@ -113,7 +113,7 @@ filterfMRIforNetworkAnalysis <- function(
   myTimeSeries <- ts(aslmat, frequency = 1 / tr)
   filteredTimeSeries <- frequencyFilterfMRI(aslmat, tr = tr, freqLo = freqLo, freqHi = freqHi, opt = "trig")
   vox <- round(ncol(filteredTimeSeries) * 0.5) #  a test voxel
-  spec.pgram(filteredTimeSeries[, vox], taper = 0, fast = FALSE, detrend = F, demean = F, log = "n")
+  spec.pgram(filteredTimeSeries[, vox], taper = 0, fast = FALSE, detrend = FALSE, demean = FALSE, log = "n")
   temporalvar <- apply(filteredTimeSeries, 2, var)
   wh <- which(temporalvar == 0)
   for (x in wh) {

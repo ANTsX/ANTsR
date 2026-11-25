@@ -100,7 +100,7 @@ bayesianCBF <- function(pcasl, segmentation, tissuelist,
   if (localweights) {
     motion_params <- .motion_correction(pcasl, moreaccurate = 1)$moco_params[, 1:4]
     reliability <- aslDenoiseR(aslmat, perfpro$xideal, motion_params,
-      usecompcor = T
+      usecompcor = TRUE
     )$R2final
     reliability[reliability < 0.05] <- 0.05
     unreliability <- log(min(reliability) / reliability)
@@ -122,12 +122,12 @@ bayesianCBF <- function(pcasl, segmentation, tissuelist,
       if (!localweights) {
         blm <- bayesianlm(X, aslmat[, i], localprior, priorwt,
           regweights = perfpro$regweights,
-          includeIntercept = T
+          includeIntercept = TRUE
         )
       } else {
         blm <- bayesianlm(X, aslmat[, i], localprior, priorwt * unreliability[i],
           regweights = perfpro$regweights,
-          includeIntercept = T
+          includeIntercept = TRUE
         )
       }
       locbeta <- blm$beta[2]

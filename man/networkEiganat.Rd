@@ -16,13 +16,13 @@ networkEiganat(
   pgradparam = 0.1,
   clustval = 0,
   downsample = 0,
-  doscale = T,
-  domin = T,
-  verbose = F,
+  doscale = TRUE,
+  domin = TRUE,
+  verbose = FALSE,
   dowhite = 0,
-  timeme = T,
-  addb = T,
-  useregression = T
+  timeme = TRUE,
+  addb = TRUE,
+  useregression = TRUE
 )
 }
 \arguments{
@@ -100,12 +100,12 @@ if (ch1 & ch2) {
   projmat <- as.matrix(snpdF$eig)
   snpdFast <- networkEiganat(as.matrix(snps[train, ]),
     nvecs = 2,
-    sparseness = c(1, -0.001), downsample = 45, verbose = T, its = 3,
+    sparseness = c(1, -0.001), downsample = 45, verbose = TRUE, its = 3,
     gradparam = 10
   )
   snpdSlow <- networkEiganat(as.matrix(snps[train, ]),
     nvecs = 2,
-    sparseness = c(1, -0.001), downsample = 0, verbose = T,
+    sparseness = c(1, -0.001), downsample = 0, verbose = TRUE,
     its = 3, gradparam = 10
   )
   snpd <- snpdSlow

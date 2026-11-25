@@ -187,7 +187,7 @@
 #' msk <- thresholdImage(fiseg$segmentation, 0, 0)
 #' mytx <- antsRegistration(
 #'   fixed = fi, moving = mi, typeofTransform = c("SyNCC"),
-#'   mask = msk, verbose = F
+#'   mask = msk, verbose = FALSE
 #' )
 #' jac <- createJacobianDeterminantImage(fi, mytx$fwdtransforms[1])
 #' }

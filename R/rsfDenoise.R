@@ -35,7 +35,7 @@
 #' # roimat<-matrix( roimean, ncol=1)
 #' # dnz<-rsfDenoise( boldmat[timeselect,] ,
 #' #   roimat[timeselect,1], motionparams=NA,
-#' #   polydegree=1, crossvalidationgroups = 8, maxnoisepreds=c(2:4), debug=F )
+#' #   polydegree=1, crossvalidationgroups = 8, maxnoisepreds=c(2:4), debug=FALSE )
 #' # # might iterate over above to further refine noise variables
 #' # mdl<-bigLMStats( lm( boldmat[timeselect,] ~ roimean[timeselect] +
 #' #    dnz$polys + dnz$noiseu  ), 0.001 )
@@ -76,7 +76,7 @@
 #' # dmnvec<-ts(as.numeric(dmnvec)-as.numeric(dmnvec2))
 #' # dmnmat<-matrix( dmnvec, ncol=1)
 #' # dnz<-rsfDenoise( boldmat , dmnmat[,1], motionparams=moco, polydegree=4,
-#' #                 crossvalidationgroups = 8, maxnoisepreds=1:4, debug=F )
+#' #                 crossvalidationgroups = 8, maxnoisepreds=1:4, debug=FALSE )
 #' # print(paste("Best number of noise regressors",dnz$n))
 #' # # now recompute the matrix using the full mask
 #' # boldmask<-antsImageRead("meanboldmask.nii.gz")
@@ -92,7 +92,7 @@ rsfDenoise <- function(
     targety, motionparams = NA, selectionthresh = 0.1,
     maxnoisepreds = 1:12, debug = FALSE,
     polydegree = 4, crossvalidationgroups = 4,
-    tr = 1, scalemat = F, noisepoolfun = max) {
+    tr = 1, scalemat = FALSE, noisepoolfun = max) {
   nvox <- ncol(boldmatrix)
   groups <- crossvalidationgroups
   if (length(groups) == 1) {

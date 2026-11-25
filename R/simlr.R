@@ -1288,7 +1288,7 @@ simlrU <- function(
         BtB <- t(basis) %*% basis
         basis <- basis %*% inv_sqrt_sym_newton(BtB)
       } else {
-        basis <- (ba_svd(scale(avgU,T,T), nu = nc, nv = 0)$u)
+        basis <- (ba_svd(scale(avgU,TRUE,TRUE), nu = nc, nv = 0)$u)
       }
     }
 
@@ -3330,7 +3330,7 @@ regularizeSimlr <- function(x, knn, fraction = 0.1, sigma, kPackage = "FNN") {
     if (inherits(x[[i]], "antsImage")) {
       slist[[i]] <- getSpatialRegularization(x[[i]], knn[i], sigma[i])
     } else {
-      slist[[i]] <- knnSmoothingMatrix(scale(data.matrix(x[[i]]), T, T),
+      slist[[i]] <- knnSmoothingMatrix(scale(data.matrix(x[[i]]), TRUE, TRUE),
                                        k = knn[i],
                                        sigma = sigma[i], kPackage = kPackage
       )
@@ -4903,7 +4903,7 @@ predictSimlr <- function(x, simsol, targetMatrix, sourceMatrices, projectv = TRU
     myBetas[i, ] <- rowMeans(abs(blm$beta.t))
     q5betas <- abs(blm$beta.t)
     q5betas[q5betas < quantile(q5betas, 0.5, na.rm = TRUE)] <- NA
-    myBetasQ5[i, ] <- rowMeans(q5betas, na.rm = T)
+    myBetasQ5[i, ] <- rowMeans(q5betas, na.rm = TRUE)
     varxj <- rep(NA, length(smdl))
     for (j in 1:length(smdl)) {
       varxj[j] <- smdl[[j]]$r.squared

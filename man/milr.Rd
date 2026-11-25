@@ -98,14 +98,14 @@ mat <- imageListToMatrix(images, mask)
 mat2 <- imageListToMatrix(feature1Images, mask)
 mat3 <- imageListToMatrix(feature3Images, mask)
 myscale <- function(x) {
-  return(scale(x, center = TRUE, scale = T))
+  return(scale(x, center = TRUE, scale = TRUE))
 }
 x <- list(x1 = myscale(mat[-5, ]), x2 = myscale(mat2[-5, ]), x3 = myscale(mat3[-5, ]))
 df <- data.frame(m1 = rowMeans(x$x1), m2 = rowMeans(x$x2), m3 = rowMeans(x$x3))
 myform <- " x1 ~ x2 + x3 + m2 + m3 "
 result <- milr(df, x, myform,
   iterations = 32, smoothingMatrix = smoomat,
-  gamma = 1e-1, verbose = T
+  gamma = 1e-1, verbose = TRUE
 )
 k <- 1
 mm <- makeImage(mask, (result$prediction[k, ])) \%>\% iMath("Normalize")
@@ -120,7 +120,7 @@ plot(tar, myol, doCropping = FALSE)
 result <- milr(df, x, myform,
   iterations = 11, smoothingMatrix = smoomat,
   sparsenessQuantile = 0.5, positivity = "positive",
-  gamma = 1e-2, verbose = T
+  gamma = 1e-2, verbose = TRUE
 )
 myol <- makeImage(mask, abs(result$v[, "x2"])) \%>\% iMath("Normalize")
 plot(tar, myol, doCropping = FALSE, window.overlay = c(0.1, 1))
@@ -133,7 +133,7 @@ cor.test(result$prediction[k, ], x$x1[k, ])
 myform <- " m1 ~ x2 + x3 + m2 + m3 "
 result <- milr(df, x, myform,
   iterations = 11, smoothingMatrix = smoomat,
-  gamma = 1e-2, verbose = T
+  gamma = 1e-2, verbose = TRUE
 )
 }
 

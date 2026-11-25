@@ -79,7 +79,7 @@ fit <- smoothMatrixPrediction(
   x = mat, basisDf = mydf, iterations = 10,
   gamma = 1.e-6, sparsenessQuantile = 0.5,
   smoothingMatrix = smoomat, repeatedMeasures = repmeas,
-  verbose = T
+  verbose = TRUE
 )
 tt <- mat \%*\% fit$v
 print(cor.test(mydf$age, tt[, 1]))

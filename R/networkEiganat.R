@@ -54,12 +54,12 @@
 #'   projmat <- as.matrix(snpdF$eig)
 #'   snpdFast <- networkEiganat(as.matrix(snps[train, ]),
 #'     nvecs = 2,
-#'     sparseness = c(1, -0.001), downsample = 45, verbose = T, its = 3,
+#'     sparseness = c(1, -0.001), downsample = 45, verbose = TRUE, its = 3,
 #'     gradparam = 10
 #'   )
 #'   snpdSlow <- networkEiganat(as.matrix(snps[train, ]),
 #'     nvecs = 2,
-#'     sparseness = c(1, -0.001), downsample = 0, verbose = T,
+#'     sparseness = c(1, -0.001), downsample = 0, verbose = TRUE,
 #'     its = 3, gradparam = 10
 #'   )
 #'   snpd <- snpdSlow
@@ -93,13 +93,13 @@ networkEiganat <- function(
     pgradparam = 0.1,
     clustval = 0,
     downsample = 0,
-    doscale = T,
-    domin = T,
-    verbose = F,
+    doscale = TRUE,
+    domin = TRUE,
+    verbose = FALSE,
     dowhite = 0,
-    timeme = T,
-    addb = T,
-    useregression = T) {
+    timeme = TRUE,
+    addb = TRUE,
+    useregression = TRUE) {
   if (is.array(mask)) {
     mask <- as.antsImage(mask)
   } else if (!inherits(mask, "antsImage") &&
@@ -172,7 +172,7 @@ networkEiganat <- function(
 
     if (abs(sparseness[1]) < 1) {
       u <- whiten(u)
-      u <- .eanatsparsify(u, sparseness[1], verbose = F)
+      u <- .eanatsparsify(u, sparseness[1], verbose = FALSE)
     }
     if (is.na(norm(u))) {
       if (verbose) {
@@ -256,7 +256,7 @@ lowrankRowMatrix <- function(A, k = 2, faster = FALSE) {
   }
 }
 
-.eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0, verbose = F) {
+.eanatsparsify <- function(vin, sparam, mask = NA, clustval = 0, verbose = FALSE) {
   if (abs(sparam) >= 1) {
     return(vin)
   }
@@ -270,7 +270,7 @@ lowrankRowMatrix <- function(A, k = 2, faster = FALSE) {
   return(vpos)
 }
 
-.eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0, verbose = F) {
+.eanatsparsifyv <- function(vin, sparam, mask = NA, clustval = 0, verbose = FALSE) {
   if (abs(sparam) >= 1) {
     return(vin)
   }

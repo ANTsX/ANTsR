@@ -263,14 +263,14 @@ getMultiResFeatureMatrix <- function(
         if (!exists("testmat", inherits = FALSE)) {
           testmat <- t(getNeighborhoodInMask(
             image = x[[featk]] %>% smoothImage(smlev), mask = randmask,
-            radius = rad, spatial.info = F, boundary.condition = "image"
+            radius = rad, spatial.info = FALSE, boundary.condition = "image"
           ))
         } else {
           testmat <- cbind(
             testmat,
             t(getNeighborhoodInMask(
               image = x[[featk]] %>% smoothImage(smlev), mask = randmask,
-              radius = rad, spatial.info = F, boundary.condition = "image"
+              radius = rad, spatial.info = FALSE, boundary.condition = "image"
             ))
           )
         }

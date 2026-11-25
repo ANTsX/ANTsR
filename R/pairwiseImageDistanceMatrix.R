@@ -11,7 +11,7 @@
 #' @param dim imageDimension
 #' @param myFileList dd<-'MICCAI-2013-SATA-Challenge-Data/CAP/training-images/'
 #' myFileList<-list.files(path=dd, pattern = glob2rx('*nii.gz'),full.names =
-#' T,recursive = T)
+#' TRUE, recursive = TRUE)
 #' @param metrictype similarity function
 #' @param nclusters integer controlling max number of clusters to search over
 #' @return raw dissimilarity matrix is output, symmetrized matrix and
@@ -57,7 +57,7 @@ pairwiseImageDistanceMatrix <- function(
   if (metrictype == "PearsonCorrelation") {
     mymat <- mymat * (-1) # make a dissimilarity matrix
   }
-  mymat <- mymat - min(mymat, na.rm = T) # make min zero
+  mymat <- mymat - min(mymat, na.rm = TRUE) # make min zero
   symat <- (mymat + t(mymat)) * 0.5 # make symmetric
   if (!is.na(nclusters) & usePkg("cluster")) {
     clusters <- rep(NA, fnl)
@@ -67,7 +67,7 @@ pairwiseImageDistanceMatrix <- function(
     for (nc in 1:nclusters) {
       wc <- c(1:fnl)[clusters == nc]
       if (length(dim(symat[, wc])) > 0) {
-        means <- apply(symat[, wc], MARGIN = 2, mean, na.rm = T)
+        means <- apply(symat[, wc], MARGIN = 2, mean, na.rm = TRUE)
         clusterrep[nc] <- wc[which.min(means)]
       } else {
         clusterrep[nc] <- which(clusters == nc)

@@ -14,7 +14,7 @@ vignette: >
 
 ```{r global options, include=FALSE}
 library( knitr )
-knitr::opts_chunk$set(collapse = T, comment = "#>")
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(ANTsR)
 ```
 

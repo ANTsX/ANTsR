@@ -10,7 +10,7 @@ joinEigenanatomy(
   listEanatImages,
   graphdensity = 0.65,
   joinMethod = "walktrap",
-  verbose = F
+  verbose = FALSE
 )
 }
 \arguments{
