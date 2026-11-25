@@ -18,7 +18,10 @@
 #' recommend the value 2, in general.  The first run improves the template
 #' estimate such that the 2nd run gives a more accurate correction.
 #' @param freqLimits pair defining bandwidth of interest from low to high.
-#' @param nCompCor number of compcor components to use in CSF plus WM mask.
+#' @param nCompCor number of compcor components to use in CSF plus WM mask
+#' (CSF plus eroded white matter, or un-eroded white matter when erosion
+#' removes it all).  Fewer components are used, with a warning, when the mask
+#' has too few high-variance voxels; none are added when it is empty.
 #' @param polydegree eg 4 for polynomial nuisance variables.
 #' @param structuralImage the structural antsImage of the brain.
 #' @param structuralSeg a 3 or greater class tissue segmentation of the structural image.
@@ -388,13 +391,19 @@ fMRINormalization <- function(
   if (nCompCor > 0) {
     # use seg2bold and moco_img to get a better compcor set "anatomical compcor"
     # https://pubmed.ncbi.nlm.nih.gov/25987368
-    tempMask <- thresholdImage(seg2bold, 1, 1)
-    tempMask <- tempMask + thresholdImage(seg2bold, 3, 3) %>% iMath("ME", 1)
-    tempMat <- timeseries2matrix(fusedImg, tempMask)
-    compcorNuis <- compcor(tempMat, nCompCor)
-    colnames(compcorNuis) <- paste("compcor", 1:ncol(compcorNuis), sep = "")
-    nuisance <- cbind(nuisance, compcorNuis)
-    rm(tempMat)
+    tempMask <- .compcorMask(seg2bold)
+    if (is.null(tempMask)) {
+      warning("No CSF or white matter voxels for CompCor; ",
+        "no CompCor regressors are added.",
+        call. = FALSE
+      )
+    } else {
+      tempMat <- timeseries2matrix(fusedImg, tempMask)
+      compcorNuis <- compcor(tempMat, nCompCor)
+      colnames(compcorNuis) <- paste("compcor", seq_len(ncol(compcorNuis)), sep = "")
+      nuisance <- cbind(nuisance, compcorNuis)
+      rm(tempMat)
+    }
     rm(tempMask)
   }
 
@@ -717,6 +726,24 @@ fMRINormalization <- function(
   geff[!is.finite(geff)] <- NA
   geff <- mean(geff, na.rm = TRUE)
   cc <- igraph::transitivity(graph)
+}
+
+
+# CompCor mask: CSF (label 1) plus eroded white matter (label 3).  As for the
+# white-matter mean, the un-eroded white matter is used when erosion removes
+# all of it.  Returns NULL when the mask would be empty.
+.compcorMask <- function(seg) {
+  csf <- thresholdImage(seg, 1, 1)
+  wm <- thresholdImage(seg, 3, 3)
+  wmEroded <- iMath(wm, "ME", 1)
+  if (sum(wmEroded) == 0) {
+    wmEroded <- wm
+  }
+  out <- csf + wmEroded
+  if (sum(out) == 0) {
+    return(NULL)
+  }
+  out
 }
 
 

@@ -36,7 +36,10 @@ estimate such that the 2nd run gives a more accurate correction.}
 
 \item{freqLimits}{pair defining bandwidth of interest from low to high.}
 
-\item{nCompCor}{number of compcor components to use in CSF plus WM mask.}
+\item{nCompCor}{number of compcor components to use in CSF plus WM mask
+(CSF plus eroded white matter, or un-eroded white matter when erosion
+removes it all).  Fewer components are used, with a warning, when the mask
+has too few high-variance voxels; none are added when it is empty.}
 
 \item{polydegree}{eg 4 for polynomial nuisance variables.}
 
