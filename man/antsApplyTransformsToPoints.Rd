@@ -8,7 +8,8 @@ antsApplyTransformsToPoints(
   dim,
   points,
   transformlist = "",
-  whichtoinvert = NA
+  whichtoinvert = NA,
+  precision = c("float", "double")
 )
 }
 \arguments{
@@ -23,9 +24,16 @@ for large pointsets.}
 antsRegistration where each transform is a filename.}
 
 \item{whichtoinvert}{vector of booleans, same length as transforms}
+
+\item{precision}{\code{"float"} (default) or \code{"double"}: the
+precision used to store and transform the coordinates.  Single precision
+keeps about 7 significant digits, so use \code{"double"} when coordinates
+must be exact beyond that (e.g. large physical coordinates).}
 }
 \value{
-same type as input. 1 -- Failure
+same type as input; an antsImage input is returned with the pixel
+type given by \code{precision}.  An error is raised if the point set has
+fewer than \code{dim} coordinate columns or the transformation fails.
 }
 \description{
 Apply a transform list to map a pointset from one domain to another. In

@@ -125,7 +125,8 @@ jointLabelFusion <- function(
     noZeroes = FALSE,
     verbose = FALSE) {
   targetI <- check_ants(targetI)
-  targetIMask <- check_ants(targetIMask)
+  # clone so that noZeroes does not modify the caller's mask in place
+  targetIMask <- antsImageClone(check_ants(targetIMask))
   if (length(atlasList) < 2) {
     stop("jointLabelFusion requires at least 2 atlases.")
   }

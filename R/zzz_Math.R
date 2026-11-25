@@ -75,7 +75,28 @@ setMethod(
       return(ANTsRCore::antsImageMath(x, "round"))
     }
     res <- round(as.array(x), digits = digits)
-    return(as.antsImage(res, reference = x))
+    # keep the input pixel type unless the rounded values no longer fit in
+    # it (e.g. 255 in an unsigned char image rounds to 260 with digits = -1)
+    pixeltype <- x@pixeltype
+    range_ok <- switch(pixeltype,
+      "unsigned char" = all(res >= 0 & res <= 255, na.rm = TRUE),
+      "unsigned int" = all(res >= 0 & res <= 2^32 - 1, na.rm = TRUE),
+      TRUE
+    )
+    if (range_ok) {
+      return(as.antsImage(res, reference = x))
+    }
+    # as.antsImage(reference = ) would adopt the input pixel type, so build
+    # the header explicitly with a wider type
+    pixeltype <- if (all(abs(res) <= 2^24, na.rm = TRUE)) "float" else "double"
+    ndim <- length(dim(res))
+    return(ANTsRCore::antsImage_asantsImage(
+      res, pixeltype,
+      antsGetSpacing(x)[seq_len(ndim)],
+      antsGetOrigin(x)[seq_len(ndim)],
+      antsGetDirection(x),
+      (x@components > 1)
+    ))
   }
 )
 

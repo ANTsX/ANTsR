@@ -111,16 +111,14 @@ reconstructImageFromPatches <- function( patches, domainImage,
               } else {
               if( numberOfImageComponents == 1 )
                 {
-                patch <- patches[count,,]
+                patch <- patches[count,,, drop = FALSE]
                 } else {
-                patch <- patches[count,,,]
+                patch <- patches[count,,,, drop = FALSE]
                 }
               }
 
-            if( numberOfImageComponents == 1 )
-              {
-              patch <- array( data = patch, dim = c( dim( patch ), 1 ) )
-              }
+            # keep length-one patch axes (e.g. 1 x 3 patches)
+            patch <- array( data = patch, dim = c( patchSize, numberOfImageComponents ) )
 
             imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],] <-
               imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],, drop = FALSE] +
@@ -148,16 +146,14 @@ reconstructImageFromPatches <- function( patches, domainImage,
             } else {
             if( numberOfImageComponents == 1 )
               {
-              patch <- patches[count,,]
+              patch <- patches[count,,, drop = FALSE]
               } else {
-              patch <- patches[count,,,]
+              patch <- patches[count,,,, drop = FALSE]
               }
             }
 
-          if( numberOfImageComponents == 1 )
-            {
-            patch <- array( data = patch, dim = c( dim( patch ), 1 ) )
-            }
+          # keep length-one patch axes (e.g. 1 x 3 patches)
+          patch <- array( data = patch, dim = c( patchSize, numberOfImageComponents ) )
 
           imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],] <-
             imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],, drop = FALSE] +
@@ -205,16 +201,14 @@ reconstructImageFromPatches <- function( patches, domainImage,
                 } else {
                 if( numberOfImageComponents == 1 )
                   {
-                  patch <- patches[count,,,]
+                  patch <- patches[count,,,, drop = FALSE]
                   } else {
-                  patch <- patches[count,,,,]
+                  patch <- patches[count,,,,, drop = FALSE]
                   }
                 }
 
-              if( numberOfImageComponents == 1 )
-                {
-                patch <- array( data = patch, dim = c( dim( patch ), 1 ) )
-                }
+              # keep length-one patch axes (e.g. 1 x 3 patches)
+              patch <- array( data = patch, dim = c( patchSize, numberOfImageComponents ) )
 
               imageArray[startIndex[1]:endIndex[1],
                 startIndex[2]:endIndex[2], startIndex[3]:endIndex[3],] <-
@@ -250,16 +244,14 @@ reconstructImageFromPatches <- function( patches, domainImage,
               } else {
               if( numberOfImageComponents == 1 )
                 {
-                patch <- patches[count,,,]
+                patch <- patches[count,,,, drop = FALSE]
                 } else {
-                patch <- patches[count,,,,]
+                patch <- patches[count,,,,, drop = FALSE]
                 }
               }
 
-            if( numberOfImageComponents == 1 )
-              {
-              patch <- array( data = patch, dim = c( dim( patch ), 1 ) )
-              }
+            # keep length-one patch axes (e.g. 1 x 3 patches)
+            patch <- array( data = patch, dim = c( patchSize, numberOfImageComponents ) )
 
             imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],
                 startIndex[3]:endIndex[3],] <-

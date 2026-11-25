@@ -13,8 +13,19 @@
 #' correction.
 #' @param mask Brain mask for image.
 #' @param proportion Ratio of activity for white matter to gray matter.
-#' Assumed to be 0.4.
-#' @return Returns partial volume corrected antsImage.
+#' Assumed to be 0.4.  Must be a single non-negative number.
+#' @return Returns partial volume corrected antsImage (or numeric vector for
+#' numeric input).
+#' @details
+#' The correction assumes a fixed WM:GM flow ratio (\code{proportion}) in
+#' every voxel and returns the implied GM flow,
+#' \code{CBF / (GM + proportion * WM)}.  Voxels with little tissue
+#' (\code{GM + WM < 0.25}) are returned uncorrected for numerical
+#' stability.  Where the denominator itself is (numerically) zero, e.g. a
+#' pure WM voxel with \code{proportion = 0}, the model cannot recover GM
+#' flow; those voxels are returned as \code{NA} with a warning.  Small but
+#' nonzero denominators still amplify noise.  This fixed-ratio model differs
+#' from methods that estimate tissue-specific perfusion, such as FSL BASIL.
 #' @author Kandel BM %% ~~who you are~~
 #' @references Method: Pattern of cerebral hypoperfusion in Alzheimer disease
 #' and mild cognitive impairment measured with arterial spin-labeling MR
@@ -37,6 +48,10 @@
 #'
 #' @export partialVolumeCorrection
 partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion = 0.4) {
+  if (!is.numeric(proportion) || length(proportion) != 1 ||
+    is.na(proportion) || proportion < 0) {
+    stop("proportion must be a single non-negative number")
+  }
   if (is.antsImage(img)) {
     if (is.null(mask)) {
       mask <- antsImageClone(img)
@@ -55,9 +70,20 @@ partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion
     stop("Input image must be either antsImage or numeric.")
   }
 
-  values.corrected <- values.img / (values.gm + proportion * values.wm)
-  values.corrected[(values.gm + values.wm) < 0.25] <- values.img[(values.gm + values.wm) <
-    0.25] # numerical stability
+  denominator <- values.gm + proportion * values.wm
+  values.corrected <- values.img / denominator
+  # little tissue in the voxel: return it uncorrected (numerical stability)
+  lowtissue <- (values.gm + values.wm) < 0.25
+  values.corrected[lowtissue] <- values.img[lowtissue]
+  # the fixed-ratio model cannot recover GM flow when its denominator is zero
+  unrecoverable <- !lowtissue & abs(denominator) < sqrt(.Machine$double.eps)
+  if (any(unrecoverable)) {
+    warning(
+      sum(unrecoverable), " voxel(s) have GM + proportion * WM == 0, so GM ",
+      "flow cannot be recovered; returning NA for them"
+    )
+    values.corrected[unrecoverable] <- NA
+  }
   if (is.numeric(img)) {
     return(values.corrected)
   } else {

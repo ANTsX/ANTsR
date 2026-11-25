@@ -391,8 +391,17 @@ setMethod(
 # keeping the array's values: unlike as.antsImage(x, reference = reference),
 # the reference pixeltype is not adopted (that truncates, e.g. 0.5 -> 0 for an
 # unsigned char reference); double stays double, everything else is float.
-.as_antsImage_keep_values <- function(object, reference) {
-  pixeltype <- if (reference@pixeltype == "double") "double" else "float"
+# With exact = TRUE (used by the comparison operators) an integer-typed
+# reference also gives a double image, since float cannot hold every integer
+# above 2^24 (e.g. labels 16777216 and 16777217 would compare equal).  A float
+# reference stays float so that its own values compare equal.
+.as_antsImage_keep_values <- function(object, reference, exact = FALSE) {
+  pixeltype <- if (reference@pixeltype == "double" ||
+    (exact && reference@pixeltype != "float")) {
+    "double"
+  } else {
+    "float"
+  }
   ndim <- length(dim(object))
   return(ANTsRCore::antsImage_asantsImage(
     object, pixeltype,
