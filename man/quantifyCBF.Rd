@@ -11,7 +11,13 @@ quantifyCBF(perfusion, mask, parameters, M0val = NA, outlierValue = 0.02)
 
 \item{mask}{3D image mask (antsImage)}
 
-\item{parameters}{list with entries for sequence and m0 (at minimimum)}
+\item{parameters}{list with entries for sequence and m0 (at minimimum).
+For pcasl, \code{T1blood} is the longitudinal relaxation rate of blood
+in 1/sec (default 0.67, i.e. T1 = 1.49 s); \code{omega} (post-labeling
+delay), \code{slicetime} and \code{tau} (label duration) are in seconds.
+For pasl, times are in msec, \code{T1blood} is T1 of blood (default
+1150), and \code{TI2} is the inversion time of the first slice; when
+omitted it is \code{TI1 + delaytime}.}
 
 \item{M0val}{baseline M0 value (optional)}
 

@@ -63,7 +63,12 @@ Three options are currently provided, with different additional arguments:
        Defaults to 20 (1/20 of the image is used).}
     }
   }
-  \item{\code{scor}}{ SCOR method of Dolui et al.  No parameters.}
+  \item{\code{scor}}{ A simplified version of the SCORE method of Dolui
+    et al.: frames most correlated with the mean are removed while the
+    spatial variance of the mean decreases.  Unlike the published method it
+    operates on the frames given rather than pairwise CBF maps, uses the
+    total rather than the pooled within-tissue variance, and never removes
+    the last frame.  No parameters.}
 }
 }
 \examples{

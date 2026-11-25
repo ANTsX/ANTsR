@@ -46,3 +46,25 @@ test_that(".eanatsparsifyv uses clustval and never returns an all-zero component
   expect_true(any(small != 0))
   expect_false(isTRUE(all.equal(small, plain)))
 })
+
+test_that("networkEiganat binarizes fractional masks consistently", {
+  d <- eanat_blob_data()
+  # 100 ones plus ten 0.25 voxels outside the support
+  frac <- array(0, c(10, 11))
+  frac[, 1:10] <- 1
+  frac[, 11] <- 0.25
+  set.seed(5)
+  expect_silent(rf <- networkEiganat(d$X, nvecs = 2, its = 3, mask = frac,
+    clustval = 3))
+  expect_equal(dim(rf$v), c(100, 2))
+  expect_true(all(is.finite(rf$v)))
+  img <- as.array(rf$eigenanatomyimages[[1]])
+  # nothing is written outside the binary support
+  expect_true(all(img[, 11] == 0))
+  # same components as the equivalent binary mask
+  bin <- array(0, c(10, 11))
+  bin[, 1:10] <- 1
+  set.seed(5)
+  rb <- networkEiganat(d$X, nvecs = 2, its = 3, mask = bin, clustval = 3)
+  expect_equal(rf$v, rb$v)
+})

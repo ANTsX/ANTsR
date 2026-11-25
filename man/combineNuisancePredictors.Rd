@@ -44,7 +44,10 @@ Computation is much faster if so.}
 }
 \value{
 Array of size \code{nrow(aslmat)} by \code{npreds},
-containing a timeseries of all the nuisance predictors.
+containing a timeseries of all the nuisance predictors.  With
+\code{method = "cv"}, predictors are only added while they give a
+positive cross-validated R2, so \code{npreds} can be zero (with a
+warning) when none does.
 If \code{localpredictors} is not NA, array is of size \code{nrow(aslmat)}
 by \code{ncol(aslmat)} by \code{npreds}.
 }

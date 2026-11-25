@@ -45,8 +45,8 @@ F-fields use \code{df[1]} and \code{df[2]}.}
 \item{threshType}{\describe{
     \item{cRFT: }{computes a threshold per expected cluster level probability}
     \item{pRFT: }{uses the mask and pval calculates the minimum statistical threshold}
-    \item{cFDR: }{uses an uncorrected threshold at the alpha level and then computes and FDR threshold based on cluster maxima}
-    \item{pFDR: }{computes the fdr threshold for the entire field of voxels}
+    \item{cFDR: }{cluster-extent FDR at the primary height \code{pp} (as \code{spm_uc_clusterFDR})}
+    \item{pFDR: }{topological peak FDR on local maxima above the primary height \code{pp} (as \code{spm_uc_peakFDR})}
 }}
 
 \item{pp}{primary (initial) p-value threshold used in FDR methods}
@@ -54,7 +54,9 @@ F-fields use \code{df[1]} and \code{df[2]}.}
 \item{verbose}{enables verbose output}
 }
 \value{
-Outputs a statistical value to be used for threshold a SPM
+Outputs a statistical value to be used for threshold a SPM.
+For \code{"cFDR"} this is the primary height, with the FDR cluster-extent
+threshold (in voxels, at least \code{nvox}) in \code{attr(u, "k")}.
 }
 \description{
 Produces a threshold value based on cluster or voxel level statistics
@@ -64,13 +66,16 @@ A statistical threshold level is determined using the estimated p-value \code{pv
 given the provided parameters. "cRFT" and "pRFT" specify the method of estimation
 should use RFT cluster and peak statistic estimates respectively.
 
-In addition to RFT based thresholds the user may choose to utilize false-discovery rate
-(FDR) based thresholds. These use a primary p-value threshold (default \code{pp = .001})
-to create suprathreshold clusters which in turn are used to determine a final threshold
-(utilizing \code{pval} at this point). If the estimated peak-FDR statistic is used ("pFDR")
-then all suprathreshold voxels are FDR corrected to determine the threshold. If the
-estimated cluster-FDR statistic is used then the cluster maxima are FDR corrected in order
-to determine the threshold.
+In addition to RFT based thresholds the user may choose to utilize
+topological false-discovery rate (FDR) thresholds (Chumbley et al., 2010).
+Both use a primary p-value threshold (default \code{pp = .001}) to define a
+primary height. "pFDR" applies Benjamini-Hochberg at \code{pval} to the
+conditional p-values of the local maxima above that height,
+\eqn{E[EC](z_i) / E[EC](u)}, and returns the observed height of the last
+peak that passes, so the threshold is never below the primary height.
+"cFDR" keeps the primary height and applies Benjamini-Hochberg to the
+uncorrected cluster-extent p-values of the clusters at that height; the
+smallest passing extent (in voxels) is returned as \code{attr(u, "k")}.
 
 It is important that the user recognize that when statistical analyses are computed
 using RFT that the threshold level plays a role in predicting the p-value. This is

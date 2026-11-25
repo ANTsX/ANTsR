@@ -8,14 +8,37 @@
 #' derived from global residual signal. Estimate final glm.
 #'
 #'
-#' @param mat input matrix
+#' @param mat input matrix (time by voxels)
 #' @param hrf input hrf
-#' @param myvars output of getfMRInuisanceVariables
-#' @param correctautocorr correction auto correlation boolean
-#' @param residualizedesignmatrix boolean
-#' @param myformula statistical equation to be assessed at each voxel
-#' @return list of betas and other names entries is output
+#' @param myvars output of getfMRInuisanceVariables: a list with
+#' \code{nuisancevariables} (matrix of nuisance predictors, e.g. the
+#' \code{denoisingParams1}, \code{denoisingParams2}, ... columns produced by
+#' \code{getfMRInuisanceVariables}), \code{globalsignal} and, optionally,
+#' \code{motion} (matrix of motion predictors, named \code{motion1}, ... if
+#' unnamed).
+#' @param correctautocorr correct for temporal autocorrelation.  An AR(2)
+#' model (Burg) is estimated from the mean residual of the full model
+#' (task + nuisance) and the same AR filter is applied to the response and to
+#' every column of the design before the full model is refit (iterated, as in
+#' Bullmore et al., 1996).
+#' @param residualizedesignmatrix boolean, residualize the nuisance
+#' predictors against \code{hrf} before fitting
+#' @param myformula right hand side (without \code{hrf}) of the model fitted
+#' at each voxel, as a character string.  By default all supplied nuisance
+#' predictors are used: \code{globalsignal}, every column of
+#' \code{myvars$nuisancevariables} and every column of \code{myvars$motion}.
+#' @return list with entries
+#' \describe{
+#' \item{beta}{the t-statistic of the \code{hrf} term at each voxel (kept
+#' under this name for backward compatibility; identical to \code{tstat})}
+#' \item{tstat}{the t-statistic of the \code{hrf} term at each voxel}
+#' \item{coef}{the estimated \code{hrf} coefficient at each voxel}
+#' \item{fmrimat}{the (filtered, if \code{correctautocorr}) response}
+#' \item{adesmat}{the (filtered, if \code{correctautocorr}) design}
+#' }
 #' @author Avants BB
+#' @references Bullmore E., et al. (1996) Statistical methods of estimation
+#' and inference for functional MR image analysis. Magn Reson Med 35:261-277.
 #' @examples
 #' \dontrun{
 #' # read the fmri image in and maybe do slice timing correction
@@ -30,7 +53,7 @@
 #'   scans = dim(fmri)[4], onsets = blockfing,
 #'   durations = rep(12, length(blockfing)), rt = 2.5
 #' )
-#' activationBeta <- taskFMRI(mat, hrf, myvars)
+#' activationT <- taskFMRI(mat, hrf, myvars)$tstat
 #' }
 #'
 #' @export taskFMRI
@@ -42,92 +65,94 @@ taskFMRI <- function(
     print("Usage:  betas<-taskFMRI( x , hrf ) ")
     return(1)
   }
-  if (all(is.na(myformula))) {
-    myformula <- "globalsignal + motion1 +
-      motion2 + motion3 + compcorr1 + compcorr2 + compcorr3"
+  mat <- as.matrix(mat)
+  nt <- nrow(mat)
+  .asPredictors <- function(x, prefix) {
+    if (is.null(x) || all(is.na(x))) {
+      return(NULL)
+    }
+    x <- as.matrix(x)
+    if (nrow(x) != nt && ncol(x) == nt) {
+      x <- t(x)
+    }
+    if (nrow(x) != nt) {
+      stop(prefix, " predictors must have one row per time point")
+    }
+    if (is.null(colnames(x))) {
+      colnames(x) <- paste0(prefix, seq_len(ncol(x)))
+    }
+    x
   }
-  havemagic <- usePkg("magic")
-  if (!havemagic) {
-    print("Must have magic package to use this function")
-    return(NA)
-  }
-  avg <- myvars$avgImage
-  mask <- myvars$mask
-  nuis <- (myvars$nuisancevariables)
-  betas <- rep(NA, ncol(mat))
   # name the columns explicitly so that the formula terms (hrf,
   # globalsignal, ...) are found in the design data frame
   desmat <- cbind(
     globalsignal = as.numeric(myvars$globalsignal),
-    as.matrix(nuis)
+    .asPredictors(myvars$nuisancevariables, "nuisance"),
+    .asPredictors(myvars$motion, "motion")
   )
+  if (all(is.na(myformula))) {
+    myformula <- paste(paste0("`", colnames(desmat), "`"), collapse = " + ")
+  }
   if (residualizedesignmatrix) {
-    desmat <- residuals(lm(desmat ~ hrf))
+    desmat <- residuals(lm(desmat ~ as.numeric(hrf)))
   }
   desmat <- cbind(hrf = as.numeric(hrf), desmat)
-  print(colnames(desmat))
-  ####################################################### Statistical methods of estimation and inference for # functional MR image
-  ####################################################### analysis Bullmore 1996 #
+  myformhrf <- as.formula(paste("amat ~ hrf + ", myformula))
   amat <- mat
   adesmat <- desmat
-  myformhrf <- as.formula(paste("amat ~  hrf + ", myformula))
-  myformNOhrf <- as.formula(paste("amat ~ 1 + ", myformula))
-  print(myformhrf)
   if (correctautocorr) {
+    # Bullmore et al. (1996): estimate AR coefficients from the residual of
+    # the full model, prewhiten the response and the full design with the
+    # same filter, and iterate.  Nuisance terms are never removed from the
+    # response separately, so task variance shared with them is kept.
+    initialarcoefs <- NULL
     for (i in 1:11) {
-      residmat <- residuals(lm(myformhrf, data = data.frame(adesmat)))
-      residsig <- apply(residmat, FUN = mean, MARGIN = 1)
-      arcoefs <- ar(residsig, FALSE, 2, method = "burg")$ar # use something similar to  SPM's  autoregression estimate
-      if (i == 1) {
+      residmat <- residuals(lm(myformhrf, data = data.frame(adesmat, check.names = FALSE)))
+      residsig <- rowMeans(as.matrix(residmat))
+      arcoefs <- ar(residsig, FALSE, 2, method = "burg")$ar
+      if (is.null(initialarcoefs)) {
         initialarcoefs <- arcoefs
       }
-      if (abs(arcoefs[1]) > 0.05) {
-        print(arcoefs)
-        mat1 <- magic::ashift(amat, c(1, 0))
-        mat1[1, ] <- amat[1, ]
-        mat2 <- magic::ashift(amat, c(2, 0))
-        mat2[1, ] <- amat[1, ]
-        mat2[2, ] <- amat[2, ]
-        if (length(arcoefs) == 2) {
-          amat <- amat - mat1 * arcoefs[1] - mat2 * arcoefs[2]
-        }
-        if (length(arcoefs) == 1) {
-          amat <- amat - mat1 * arcoefs[1]
-        }
-        mat1 <- magic::ashift(adesmat, c(1, 0))
-        mat1[1, ] <- adesmat[1, ]
-        mat2 <- magic::ashift(adesmat, c(2, 0))
-        mat2[1, ] <- adesmat[1, ]
-        mat2[2, ] <- adesmat[2, ]
-        if (length(arcoefs) == 2) {
-          adesmat <- adesmat - mat1 * arcoefs[1] - mat2 * arcoefs[2]
-        }
-        if (length(arcoefs) == 1) {
-          adesmat <- adesmat - mat1 * arcoefs[1]
-        }
-      } # if gt 0.05
+      if (length(arcoefs) == 0 || abs(arcoefs[1]) <= 0.05) {
+        break
+      }
+      amat <- .taskARfilter(amat, arcoefs)
+      adesmat <- .taskARfilter(adesmat, arcoefs)
     }
-    # new regression
-    amat <- residuals(lm(myformNOhrf, data = data.frame(adesmat)))
-    residsig <- apply(amat, FUN = mean, MARGIN = 1)
-    arcoefs <- ar(residsig, FALSE, length(arcoefs), method = "burg")$ar # use something similar to  SPM's  autoregression estimate
-    print(paste("final arcoefs", arcoefs))
-    print(paste("initi arcoefs", initialarcoefs))
+    residmat <- residuals(lm(myformhrf, data = data.frame(adesmat, check.names = FALSE)))
+    arcoefs <- ar(rowMeans(as.matrix(residmat)), FALSE, 2, method = "burg")$ar
+    message("initial AR coefficients: ", paste(signif(initialarcoefs, 3), collapse = ", "),
+      "; final: ", paste(signif(arcoefs, 3), collapse = ", "))
   }
-  # final glm uses the (whitened, if requested) design and nuisance terms
-  myformvox <- as.formula(paste("vox ~  hrf + ", myformula))
-  progress <- txtProgressBar(min = 0, max = ncol(mat), style = 3)
-  for (i in 1:ncol(amat)) {
-    vox <- amat[, i]
-    # mdl<-lmrob( vox ~ hrf, data = data.frame( adesmat ) )
-    mdl <- lm(myformvox, data = data.frame(adesmat))
-    betas[i] <- coefficients(summary(mdl))["hrf", 3] # probably better way
-    # betas[i]<-cor.test( vox , hrf )$est
-    setTxtProgressBar(progress, i)
+  # final glm: (filtered) response on the full (filtered) design
+  fit <- lm(myformhrf, data = data.frame(adesmat, check.names = FALSE))
+  sm <- summary(fit)
+  if (ncol(amat) == 1) {
+    sm <- list(sm)
   }
-  close(progress)
-  betas[is.na(betas)] <- 0
-  return(list(beta = betas, fmrimat = amat, adesmat = adesmat))
+  coefs <- vapply(sm, function(x) coefficients(x)["hrf", 1], numeric(1))
+  tstat <- vapply(sm, function(x) coefficients(x)["hrf", 3], numeric(1))
+  names(coefs) <- names(tstat) <- NULL
+  tstat[is.na(tstat)] <- 0
+  coefs[is.na(coefs)] <- 0
+  return(list(
+    beta = tstat, tstat = tstat, coef = coefs,
+    fmrimat = amat, adesmat = adesmat
+  ))
+}
+
+# apply the AR whitening operator x_t - sum_k a_k x_{t-k} to every column;
+# the first rows, which lack some lags, reuse the earliest available value
+# (as in the original implementation)
+.taskARfilter <- function(x, arcoefs) {
+  x <- as.matrix(x)
+  out <- x
+  n <- nrow(x)
+  for (k in seq_along(arcoefs)) {
+    lagged <- x[c(rep(1, min(k, n)), seq_len(max(n - k, 0))), , drop = FALSE]
+    out <- out - arcoefs[k] * lagged
+  }
+  out
 }
 
 

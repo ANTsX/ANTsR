@@ -38,8 +38,8 @@ spatial variable lies along columns}
 \item{gradparam}{gradient descent parameter for data}
 
 \item{mask}{optional mask: an antsImage, or an array (converted with
-\code{as.antsImage}). Its number of voxels > 0.5 must equal
-\code{ncol(Xin)}. With a mask, components are cluster-filtered in image
+\code{as.antsImage}). It is binarized at 0.5, and its number of voxels
+> 0.5 must equal \code{ncol(Xin)}. With a mask, components are cluster-filtered in image
 space and returned as \code{eigenanatomyimages}.}
 
 \item{v}{the spatial solultion}
@@ -50,7 +50,12 @@ space and returned as \code{eigenanatomyimages}.}
 
 \item{clustval}{integer greater than or equal to zero: with a mask, the
 minimum cluster size (in voxels) kept when sparsifying components; 0 uses
-the previous fixed minimum of 1000 voxels.}
+the previous fixed minimum of 1000 voxels. Each sparsified component is
+smoothed (sigma 1), clusters with smoothed values between 0.1 and 0.5 are
+labelled, and voxels outside clusters of at least \code{clustval} voxels
+are set to zero. If this removes every voxel of a component (e.g. a mask
+smaller than the minimum cluster size), the component is kept without
+cluster filtering, so the minimum is not guaranteed in that case.}
 
 \item{downsample}{bool}
 

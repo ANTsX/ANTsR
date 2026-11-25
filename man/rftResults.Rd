@@ -48,10 +48,10 @@ field or a character of the following methods:
     probability }
     \item{pRFT: }{uses the mask and pval calculates the minimum statistical
     threshTypeold}
-    \item{cFDR: }{uses an uncorrected threshTypeold at the alpha level and
-    then computes and FDR threshTypeold based on cluster maxima}
-    \item{pFDR: }{computes the fdr threshTypeold for the entire field of
-    voxels}
+    \item{cFDR: }{cluster-extent FDR at the primary height \code{pp}; clusters
+    smaller than the FDR extent threshold (and \code{k}) are dropped}
+    \item{pFDR: }{topological peak FDR on the local maxima above the
+    primary height \code{pp}}
 }}
 
 \item{pval}{the p-value for estimating the threshTypeold (default = .05)}
@@ -90,7 +90,9 @@ Both cluster-level and peak-level statistics are described by the
 uncorrected
  p-value along with the FDR and FWE corrected p-values for each cluster.
 Peak-level statistics are described by the maximum statistical value in each
-cluster and the comparable Z statistic. The ClusterStats table also contains
+cluster and the comparable Z statistic. The peak-level FDR values are
+Benjamini-Hochberg adjusted over one maximum per reported cluster, unlike
+SPM's peak table, which can list several local maxima within a cluster. The ClusterStats table also contains
 coordinates for each cluster and the number of voxels therein. By default
 \code{threshType = "pRFT"} and pval=.05. Alternatively, the user may use a
 specific numeric value for threshTypeolding the statistical field.

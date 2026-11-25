@@ -19,7 +19,10 @@
 #' important to least important, as in output from PCA?
 #' Computation is much faster if so.
 #' @return Array of size \code{nrow(aslmat)} by \code{npreds},
-#' containing a timeseries of all the nuisance predictors.
+#' containing a timeseries of all the nuisance predictors.  With
+#' \code{method = "cv"}, predictors are only added while they give a
+#' positive cross-validated R2, so \code{npreds} can be zero (with a
+#' warning) when none does.
 #' If \code{localpredictors} is not NA, array is of size \code{nrow(aslmat)}
 #' by \code{ncol(aslmat)} by \code{npreds}.
 #' @author Benjamin M. Kandel, Brian B. Avants
@@ -51,12 +54,21 @@ combineNuisancePredictors <- function(
           residmat <- residuals(lm(inmat ~ as.matrix(globalpredictors[, 1:ii])))
           r2sum[ii] <- avgR2(residmat, target, k, covariates)
         }
-        scl <- 0.95
-        if (max(r2sum, na.rm = TRUE) < 0) {
-          scl <- 1.05
+        if (all(is.na(r2sum))) {
+          # no number of predictors gives a positive cross-validated R2
+          warning(
+            "no nuisance predictors give a positive cross-validated R2; ",
+            "returning zero predictors"
+          )
+          bestpreds <- integer(0)
+        } else {
+          scl <- 0.95
+          if (max(r2sum, na.rm = TRUE) < 0) {
+            scl <- 1.05
+          }
+          mxt <- scl * max(r2sum, na.rm = TRUE)
+          bestpreds <- seq_len(which(r2sum > mxt)[1])
         }
-        mxt <- scl * max(r2sum, na.rm = TRUE)
-        bestpreds <- seq_len(which(r2sum > mxt)[1])
       } else {
         # NA (not 0) so already-selected predictors cannot be re-picked
         r2sum <- matrix(rep(NA, ncol(globalpredictors) * maxpreds), ncol = maxpreds)
@@ -73,7 +85,18 @@ combineNuisancePredictors <- function(
             )])))
             r2sum[jj, ii] <- avgR2(residmat, target, k, covariates)
           }
+          if (all(is.na(r2sum[, ii]))) {
+            # no remaining predictor gives a positive cross-validated R2
+            break
+          }
           bestpreds <- c(bestpreds, which.max(r2sum[, ii]))
+        }
+        if (is.null(bestpreds)) {
+          warning(
+            "no nuisance predictors give a positive cross-validated R2; ",
+            "returning zero predictors"
+          )
+          bestpreds <- integer(0)
         }
       }
       noise <- noisemat[, bestpreds, drop = FALSE]

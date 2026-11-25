@@ -10,15 +10,20 @@
 #' @param its number of iterations
 #' @param gradparam gradient descent parameter for data
 #' @param mask optional mask: an antsImage, or an array (converted with
-#' \code{as.antsImage}). Its number of voxels > 0.5 must equal
-#' \code{ncol(Xin)}. With a mask, components are cluster-filtered in image
+#' \code{as.antsImage}). It is binarized at 0.5, and its number of voxels
+#' > 0.5 must equal \code{ncol(Xin)}. With a mask, components are cluster-filtered in image
 #' space and returned as \code{eigenanatomyimages}.
 #' @param v the spatial solultion
 #' @param prior the prior
 #' @param pgradparam  gradient descent parameter for prior term
 #' @param clustval integer greater than or equal to zero: with a mask, the
 #' minimum cluster size (in voxels) kept when sparsifying components; 0 uses
-#' the previous fixed minimum of 1000 voxels.
+#' the previous fixed minimum of 1000 voxels. Each sparsified component is
+#' smoothed (sigma 1), clusters with smoothed values between 0.1 and 0.5 are
+#' labelled, and voxels outside clusters of at least \code{clustval} voxels
+#' are set to zero. If this removes every voxel of a component (e.g. a mask
+#' smaller than the minimum cluster size), the component is kept without
+#' cluster filtering, so the minimum is not guaranteed in that case.
 #' @param downsample bool
 #' @param doscale bool
 #' @param domin bool
@@ -106,11 +111,16 @@ networkEiganat <- function(
     !(length(mask) == 1 && is.na(mask))) {
     stop("mask must be NA, an antsImage or an array")
   }
-  if (inherits(mask, "antsImage") && sum(as.array(mask) > 0.5) != ncol(Xin)) {
-    stop(
-      "mask has ", sum(as.array(mask) > 0.5), " voxels > 0.5 but Xin has ",
-      ncol(Xin), " columns"
-    )
+  if (inherits(mask, "antsImage")) {
+    if (sum(as.array(mask) > 0.5) != ncol(Xin)) {
+      stop(
+        "mask has ", sum(as.array(mask) > 0.5), " voxels > 0.5 but Xin has ",
+        ncol(Xin), " columns"
+      )
+    }
+    # use one binary support (voxels > 0.5) for extracting, sparsifying and
+    # writing components, so fractional masks are indexed consistently
+    mask <- antsCopyImageInfo(mask, as.antsImage(1 * (as.array(mask) > 0.5)))
   }
   X <- Xin / norm(Xin, "F")
   if (dowhite > 0 & (nvecs * 2 < nrow(Xin))) {
@@ -263,7 +273,7 @@ lowrankRowMatrix <- function(A, k = 2, faster = FALSE) {
   v <- vin
   v <- v * sign(.eanatcolMaxs(v))
   if (inherits(v, "antsImage") && inherits(mask, "antsImage")) {
-    v <- as.matrix(vin[mask > 1e-05])
+    v <- as.matrix(vin[mask > 0.5])
   }
   v <- as.matrix(v)
   vpos <- .eanatsparsifyv(v, sparam, mask, clustval = clustval, verbose = verbose)
@@ -305,7 +315,7 @@ lowrankRowMatrix <- function(A, k = 2, faster = FALSE) {
     }
     if (inherits(mask, "antsImage")) {
       vecimg <- antsImageClone(mask)
-      vecimg[mask > 0] <- sparsev
+      vecimg[mask > 0.5] <- sparsev
       temp <- antsImageClone(mask)
       temp <- smoothImage(vecimg, 1)
       temp[mask < 0.5] <- 0

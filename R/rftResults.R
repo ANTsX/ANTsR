@@ -23,10 +23,10 @@
 #' 	probability }
 #' 	\item{pRFT: }{uses the mask and pval calculates the minimum statistical
 #' 	threshTypeold}
-#' 	\item{cFDR: }{uses an uncorrected threshTypeold at the alpha level and
-#' 	then computes and FDR threshTypeold based on cluster maxima}
-#' 	\item{pFDR: }{computes the fdr threshTypeold for the entire field of
-#' 	voxels}
+#' 	\item{cFDR: }{cluster-extent FDR at the primary height \code{pp}; clusters
+#' 	smaller than the FDR extent threshold (and \code{k}) are dropped}
+#' 	\item{pFDR: }{topological peak FDR on the local maxima above the
+#' 	primary height \code{pp}}
 #' }
 #' @param pval the p-value for estimating the threshTypeold (default = .05)
 #' @param pp the primary (initial) p-value for threshTypeolding (only used for
@@ -57,7 +57,9 @@
 #' uncorrected
 #'  p-value along with the FDR and FWE corrected p-values for each cluster.
 #' Peak-level statistics are described by the maximum statistical value in each
-#' cluster and the comparable Z statistic. The ClusterStats table also contains
+#' cluster and the comparable Z statistic. The peak-level FDR values are
+#' Benjamini-Hochberg adjusted over one maximum per reported cluster, unlike
+#' SPM's peak table, which can list several local maxima within a cluster. The ClusterStats table also contains
 #' coordinates for each cluster and the number of voxels therein. By default
 #' \code{threshType = "pRFT"} and pval=.05. Alternatively, the user may use a
 #' specific numeric value for threshTypeolding the statistical field.
@@ -163,6 +165,11 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
       "specifying the chosen method for calculating a threshold"
     ))
   }
+  # cluster FDR keeps the primary height and returns an extent threshold
+  if (!is.null(attr(u, "k"))) {
+    k <- max(k, attr(u, "k"))
+  }
+  u <- as.numeric(u)
   D <- x@dimension
   vox2res <- 1 / prod(fwhm)
   nvox <- length(as.vector(x[x != 0]))
@@ -258,22 +265,18 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
     (
       rftPval(D, 1, 0, tmp, n, resels, df, fieldType)$Ec / Ez)
   }), "BH") # FDR (peak)
+  # uncorrected p-value (peak), from the upper tail so that strong peaks
+  # keep their precision; df[2] for chi-square as in euler()
   PeakStats[, 3] <- sapply(PeakStats[, 4], function(tmp) {
-    (
-      if (fieldType == "Z") {
-        1 - pnorm(tmp)
-      } else if (fieldType == "T") {
-        1 - pt(tmp, df[2])
-      } else if (fieldType == "F") {
-        1 - pf(tmp, df[1], df[2])
-      } else if (fieldType == "X") {
-        # df[2] as in euler(); the third argument of pchisq is ncp
-        1 - pchisq(tmp, df[2])
-      })
-  }) # uncorrected p-value (peak)
-  PeakStats[, 5] <- suppressWarnings(
-    sapply(PeakStats[, 3], function(tmp) (qnorm(1 - tmp)))
-  ) # comparable Z-statistic (from uncorrected peak p-value)
+    switch(fieldType,
+      Z = pnorm(tmp, lower.tail = FALSE),
+      T = pt(tmp, df[2], lower.tail = FALSE),
+      F = pf(tmp, df[1], df[2], lower.tail = FALSE),
+      X = pchisq(tmp, df[2], lower.tail = FALSE)
+    )
+  })
+  # comparable Z-statistic (from uncorrected peak p-value)
+  PeakStats[, 5] <- qnorm(PeakStats[, 3], lower.tail = FALSE)
 
   # prepare output-------------------------------------------
   ClusterStats <- round(ClusterStats, 4)

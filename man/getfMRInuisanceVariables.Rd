@@ -23,7 +23,8 @@ outputs list described above.
 Will motion correct, run compcorr and estimate global signal. Outputs a list
 with the time series data matrix (time by voxels), motion and other nuisance
 variables, global signal (for BOLD or ASL), the mask and the average time
-series image.  Meant to be used before filterfMRIforNetworkAnalysis or any
+series image (\code{motion} holds the motion regressors computed for
+the nuisance model).  Meant to be used before filterfMRIforNetworkAnalysis or any
 other results-oriented processing.
 }
 \examples{

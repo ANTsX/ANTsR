@@ -4,7 +4,13 @@
 #'
 #' @param perfusion input asl matrix
 #' @param mask 3D image mask (antsImage)
-#' @param parameters list with entries for sequence and m0 (at minimimum)
+#' @param parameters list with entries for sequence and m0 (at minimimum).
+#' For pcasl, \code{T1blood} is the longitudinal relaxation rate of blood
+#' in 1/sec (default 0.67, i.e. T1 = 1.49 s); \code{omega} (post-labeling
+#' delay), \code{slicetime} and \code{tau} (label duration) are in seconds.
+#' For pasl, times are in msec, \code{T1blood} is T1 of blood (default
+#' 1150), and \code{TI2} is the inversion time of the first slice; when
+#' omitted it is \code{TI1 + delaytime}.
 #' @param M0val baseline M0 value (optional)
 #' @param outlierValue trim outliers by this fractional value (optional)
 #' @return a list is output with 3 types of cbf images
@@ -81,6 +87,11 @@ quantifyCBF <- function(
       alpha <- parameters$alpha
     }
 
+    # T1blood is a relaxation RATE (1/sec), R1 = 1/T1.  With R1 the
+    # consensus equation (Alsop et al., 2015)
+    #   6000 lambda dM exp(PLD / T1) / (2 alpha T1 M0 (1 - exp(-tau / T1)))
+    # equals 6000 lambda dM R1 / (2 alpha M0 (exp(-PLD R1) - exp(-(tau + PLD) R1))),
+    # which is what is computed below.
     T1b <- 0.67 # 1/sec as per ASLtbx for 3T, ASLtbx suggests 0.83 for 1.5T
     if (!is.null(parameters$T1blood)) {
       T1b <- parameters$T1blood
@@ -141,11 +152,10 @@ quantifyCBF <- function(
       TI1 <- parameters$TI1
     }
 
-    # From Chen 2011
-    TI2 <- 1700
-    if (!is.null(parameters$TI2)) {
-      TI2 <- parameters$TI2
-    }
+    # TI2 (inversion to readout of the first slice, msec).  The QUIPSS II
+    # equation (Alsop et al., 2015; Chen et al., 2011) uses
+    # exp(-TI2 / T1b); when TI2 is not given it is TI1 + delaytime.
+    TI2 <- parameters$TI2
 
     # From Chen 2011
     lambda <- 0.9
@@ -205,7 +215,10 @@ quantifyCBF <- function(
       M0 <- rep(as.array(M0), nTimePoints)
       dim(M0) <- dim(perfusion)
     }
-    TI <- slicetime * sliceTimeMat + delaytime + TI1
+    if (is.null(TI2)) {
+      TI2 <- TI1 + delaytime
+    }
+    TI <- slicetime * sliceTimeMat + TI2
 
     # T2 correction of the white-matter-referenced M0 to blood (ASLtbx;
     # Wang et al. 2003 / Chen et al. 2011): exp((1/T2wm - 1/T2b) * TE)

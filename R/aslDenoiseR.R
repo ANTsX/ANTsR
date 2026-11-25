@@ -7,7 +7,9 @@
 #' @param covariates motion or other parameters / nuisance variables
 #' @param selectionthresh e.g. 0.1 take 10 percent worst variables for noise
 #' estimation
-#' @param maxnoisepreds integer search range e.g 1:10
+#' @param maxnoisepreds integer search range e.g 1:10.  The number of noise
+#' predictors is chosen by cross-validated R2; if no number gives a positive
+#' R2 for any voxel, the smallest value is used with a warning.
 #' @param polydegree eg 4 for polynomial nuisance variables or 'loess'
 #' @param crossvalidationgroups prior defined or integer valued
 #' @param scalemat boolean
@@ -193,6 +195,7 @@ aslDenoiseR <- function(
   if (!usecompcor) {
     noiseu <- svd(svdboldmat[, noisepool], nv = 0, nu = max(maxnoisepreds))$u
   }
+  maxnoisepreds <- sort(maxnoisepreds)
   R2summary <- rep(0, length(maxnoisepreds))
   ct <- 1
   for (i in maxnoisepreds) {
@@ -211,14 +214,24 @@ aslDenoiseR <- function(
     if (verbose) print(paste("NoiseU:", i, "MeanRSqrd", R2summary[ct]))
     ct <- ct + 1
   }
-  scl <- 0.95
-  if (max(R2summary, na.rm = TRUE) < 0) {
-    scl <- 1.05
-  }
-  mxt <- scl * max(R2summary, na.rm = TRUE)
   # R2summary / R2perNoiseLevel are indexed by position in maxnoisepreds,
   # not by the number of noise predictors
-  bestind <- which(R2summary > mxt)[1]
+  if (all(is.na(R2summary))) {
+    # no voxel has a positive cross-validated R2 at any noise level, so
+    # there is no best model: fall back to the fewest noise predictors
+    warning(
+      "no number of noise predictors gives a positive cross-validated R2; ",
+      "using the smallest value of maxnoisepreds (", maxnoisepreds[1], ")"
+    )
+    bestind <- 1
+  } else {
+    scl <- 0.95
+    if (max(R2summary, na.rm = TRUE) < 0) {
+      scl <- 1.05
+    }
+    mxt <- scl * max(R2summary, na.rm = TRUE)
+    bestind <- which(R2summary > mxt)[1]
+  }
   bestn <- maxnoisepreds[bestind]
   if (ct == 2) {
     R2final <- R2perNoiseLevel
@@ -228,7 +241,7 @@ aslDenoiseR <- function(
   }
   return(list(
     n = bestn, R2atBestN = R2summary[bestind], noisepool = noisepool, R2base = R2base,
-    R2final = R2final, noiseu = noiseu[, 1:bestn],
+    R2final = R2final, noiseu = noiseu[, 1:bestn, drop = FALSE],
     covariates = covariates
   ))
 }

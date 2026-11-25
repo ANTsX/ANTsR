@@ -123,14 +123,15 @@ test_that("hemodynamicRF mean argument centres the response", {
   expect_equal(c(h1), c(h0) - mean(h0))
 })
 
-test_that("temporalwhiten works for any AR order", {
-  skip_if_not_installed("magic")
+test_that("temporalwhiten subtracts the AR prediction for any AR order", {
   set.seed(1)
   m <- replicate(4, as.numeric(arima.sim(list(ar = 0.5), 40)))
   w1 <- temporalwhiten(m, 1)
   expect_false(anyNA(w1))
   arv <- ar(m[, 1], FALSE, 1)$ar
-  expect_equal(w1[, 1], magic::shift(m[, 1], 1) * arv[1])
+  mu <- mean(m[, 1])
+  d <- m[, 1] - mu
+  expect_equal(w1[, 1], mu + d - arv[1] * c(0, d[-40]))
   expect_false(anyNA(temporalwhiten(m, 3)))
 })
 
