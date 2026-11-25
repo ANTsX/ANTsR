@@ -400,8 +400,12 @@ fMRINormalization <- function(
     } else {
       tempMat <- timeseries2matrix(fusedImg, tempMask)
       compcorNuis <- compcor(tempMat, nCompCor)
-      colnames(compcorNuis) <- paste("compcor", seq_len(ncol(compcorNuis)), sep = "")
-      nuisance <- cbind(nuisance, compcorNuis)
+      # compcor() warns and returns fewer (possibly zero) components when
+      # the CompCor voxels are rank-deficient
+      if (ncol(compcorNuis) > 0) {
+        colnames(compcorNuis) <- paste("compcor", seq_len(ncol(compcorNuis)), sep = "")
+        nuisance <- cbind(nuisance, compcorNuis)
+      }
       rm(tempMat)
     }
     rm(tempMask)

@@ -67,7 +67,7 @@
     }
     if (exists("denoisingParams", inherits = FALSE)) {
       compcorrnames <- paste("denoisingParams",
-        c(1:ncol(denoisingParams)),
+        seq_len(ncol(denoisingParams)),
         sep = ""
       )
       colnames(denoisingParams) <- c(compcorrnames)

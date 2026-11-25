@@ -75,29 +75,30 @@ compcor <- function(
   if (returnhighvarmatinds) {
     return(highvarmatinds)
   }
-  maxcomp <- min(dim(highvarmat))
+  # cap at the numerical rank: after centering, constant or duplicated
+  # voxels add no information, and extra singular vectors would be
+  # arbitrary (e.g. an indicator of the first time point)
+  sv <- svd(highvarmat, nu = 0, nv = 0)$d
+  tol <- max(dim(highvarmat)) * max(c(sv, 0)) * .Machine$double.eps
+  maxcomp <- if (length(sv) == 0 || max(sv) == 0) 0L else sum(sv > tol)
   if (ncompcor > maxcomp) {
-    warning("Only ", maxcomp, " CompCor components can be estimated from ",
-      ncol(highvarmat), " high-variance voxels and ", nrow(highvarmat),
-      " time points; using ", maxcomp, " instead of ", ncompcor, ".",
+    warning("Only ", maxcomp, " CompCor components can be estimated (rank of ",
+      ncol(highvarmat), " high-variance voxels over ", nrow(highvarmat),
+      " time points); using ", maxcomp, " instead of ", ncompcor, ".",
       call. = FALSE
     )
     ncompcor <- maxcomp
   }
+  if (ncompcor == 0) {
+    return(matrix(numeric(0), nrow = if (returnv) ncol(highvarmat) else nrow(highvarmat), ncol = 0))
+  }
   if (!returnv) {
     compcorrsvd <- svd(highvarmat, nu = ncompcor, nv = 0)
-    if (ncompcor > 0) {
-      nuis <- compcorrsvd$u[, seq_len(ncompcor), drop = FALSE]
-      colnames(nuis) <- paste("compcorr", seq_len(ncompcor), sep = "")
-    }
-    return(nuis)
-  }
-  if (returnv) {
+    nuis <- compcorrsvd$u[, seq_len(ncompcor), drop = FALSE]
+  } else {
     compcorrsvd <- svd(highvarmat, nu = 0, nv = ncompcor)
-    if (ncompcor > 0) {
-      nuis <- compcorrsvd$v[, seq_len(ncompcor), drop = FALSE]
-      colnames(nuis) <- paste("compcorr", seq_len(ncompcor), sep = "")
-    }
-    return(nuis)
+    nuis <- compcorrsvd$v[, seq_len(ncompcor), drop = FALSE]
   }
+  colnames(nuis) <- paste("compcorr", seq_len(ncompcor), sep = "")
+  nuis
 }
