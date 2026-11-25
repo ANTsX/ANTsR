@@ -341,15 +341,20 @@ fMRINormalization <- function(
   wmMask <- seg2bold * 1 * mask
   wmMask[wmMask != 3] <- 0
   wmMask[wmMask == 3] <- 1
-  wmMask <- iMath(wmMask, "ME", 1)
-  wmVox <- which(subset(wmMask, mask > 0) == 1)
-  wmMean <- rowMeans(boldMat[, wmVox])
+  wmMaskEroded <- iMath(wmMask, "ME", 1)
+  wmVox <- which(subset(wmMaskEroded, mask > 0) == 1)
+  if (length(wmVox) == 0) {
+    # erosion removed all white matter (small or coarse masks); use the
+    # un-eroded mask rather than failing
+    wmVox <- which(subset(wmMask, mask > 0) == 1)
+  }
+  wmMean <- .tissueMean(boldMat, wmVox, "white matter")
 
   # CSF is labeled as 1
   csfMask <- seg2bold * 1
   csfMask[csfMask != 1] <- 0
   csfVox <- which(subset(csfMask, mask > 0) == 1)
-  csfMean <- rowMeans(boldMat[, csfVox])
+  csfMean <- .tissueMean(boldMat, csfVox, "CSF")
 
   globalMean <- rowMeans(boldMat)
   tissueNuis <- cbind(globalMean, wmMean, csfMean)
@@ -368,7 +373,7 @@ fMRINormalization <- function(
   ctxMask[ctxMask != 2] <- 0
   ctxMask[ctxMask == 2] <- 1
   ctxVox <- which(subset(ctxMask, mask > 0) == 1)
-  ctxMean <- rowMeans(boldMat[, ctxVox])
+  ctxMean <- .tissueMean(boldMat, ctxVox, "cortex")
 
   ## ----regression,message=FALSE,warnings=FALSE, fig.width=7, fig.height=5----
   mocoNuis <- reg_params
@@ -712,4 +717,19 @@ fMRINormalization <- function(
   geff[!is.finite(geff)] <- NA
   geff <- mean(geff, na.rm = TRUE)
   cc <- igraph::transitivity(graph)
+}
+
+
+# Mean time series over a set of voxel columns of a time-by-voxel matrix.
+# Keeps the matrix shape when only one voxel is selected, and returns NA
+# (with a warning) when none are, instead of erroring in rowMeans().
+.tissueMean <- function(boldMat, vox, label) {
+  if (length(vox) == 0) {
+    warning("No ", label, " voxels found in the BOLD mask; ",
+      "its mean signal is set to NA.",
+      call. = FALSE
+    )
+    return(rep(NA_real_, nrow(boldMat)))
+  }
+  rowMeans(boldMat[, vox, drop = FALSE])
 }
