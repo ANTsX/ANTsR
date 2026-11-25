@@ -64,3 +64,12 @@ test_that("invalid transforms give informative errors", {
     "must be a filename"
   )
 })
+
+test_that("temporary files are removed when a later transform is invalid", {
+  before <- list.files(tempdir())
+  expect_error(
+    antsApplyTransforms(fixed, moving, list(field, 1)),
+    "must be a filename"
+  )
+  expect_length(setdiff(list.files(tempdir()), before), 0)
+})

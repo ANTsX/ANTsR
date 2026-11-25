@@ -292,6 +292,9 @@ antsApplyTransforms <- function(
       "antsImage, an antsrTransform, or a list of these")
   }
   tempfiles <- character(0)
+  # if a later entry is invalid, remove the files already written
+  done <- FALSE
+  on.exit(if (!done) unlink(tempfiles), add = TRUE)
   out <- vapply(seq_along(transformlist), function(i) {
     tx <- transformlist[[i]]
     if (is.character(tx) && length(tx) == 1) {
@@ -316,6 +319,7 @@ antsApplyTransforms <- function(
     tempfiles <<- c(tempfiles, tfile)
     tfile
   }, character(1))
+  done <- TRUE
   structure(out, tempfiles = tempfiles)
 }
 
