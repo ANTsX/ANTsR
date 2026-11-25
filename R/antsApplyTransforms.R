@@ -181,8 +181,24 @@ antsApplyTransforms <- function(
         }
       }
       inpixeltype <- fixed@pixeltype
-      warpedmovout <- antsImageClone(moving)
       f <- fixed
+      # only the geometry of the reference is used, and a multi-component
+      # reference crashes antsApplyTransforms, so use its first channel
+      if (fixed@components > 1) {
+        f <- splitChannels(fixed)[[1]]
+      }
+      if (moving@components > 1 && imagetype == 0) {
+        if (!is.na(compose)) {
+          # moving is not used when composing transforms
+          moving <- f
+        } else {
+          stop(
+            "moving has ", moving@components, " components; ",
+            "set imagetype = 1 to transform vector images."
+          )
+        }
+      }
+      warpedmovout <- antsImageClone(moving)
       m <- moving
       if ((moving@dimension == 4) & (fixed@dimension == 3) &
         (imagetype == 0)) {

@@ -6,33 +6,15 @@ lm_points <- function(n = 12, seed = 1) {
 }
 
 
-# composeDisplacementFields() currently fails (it passes antsImage objects as
-# the transform list and reads a file name antsApplyTransforms never writes),
-# which breaks the "diffeo" and "syn" branches below.  Those tests first
-# document the failure and then substitute a working composition so the
-# fitting logic itself can be exercised.
-working_compose <- function(displacementField, warpingField) {
-  f1 <- tempfile(fileext = ".nii.gz")
-  f2 <- tempfile(fileext = ".nii.gz")
-  on.exit(unlink(c(f1, f2)))
-  antsImageWrite(displacementField, f1)
-  antsImageWrite(warpingField, f2)
-  ref <- makeImage(dim(displacementField), 0,
-    spacing = antsGetSpacing(displacementField),
-    origin = antsGetOrigin(displacementField),
-    direction = antsGetDirection(displacementField))
-  out <- antsApplyTransforms(ref, ref, c(f1, f2), compose = tempfile())
-  field <- antsImageRead(out)
-  unlink(out)
-  field
-}
-
-test_that("composeDisplacementFields fails on antsImage fields (known bug)", {
+test_that("composeDisplacementFields works on antsImage fields", {
   domain <- makeImage(c(8, 8), 0)
   field <- as.antsImage(array(0, c(2, 8, 8)), components = TRUE)
-  expect_error(suppressWarnings(composeDisplacementFields(field, field)))
-  expect_error(suppressWarnings(fitTransformToPairedPoints(lm_points(6), lm_points(6, 2),
-    "diffeo", domainImage = domain, numberOfCompositions = 1)))
+  u <- composeDisplacementFields(field, field)
+  expect_equal(u@components, 2L)
+  expect_equal(max(abs(as.array(u))), 0)
+  xd <- fitTransformToPairedPoints(lm_points(6), lm_points(6, 2),
+    "diffeo", domainImage = domain, numberOfCompositions = 1)
+  expect_s4_class(xd, "antsrTransform")
 })
 
 test_that("fitTransformToPairedPoints recovers known linear transforms", {
@@ -98,7 +80,6 @@ test_that("fitTransformToPairedPoints fits bspline and tps displacement transfor
 })
 
 test_that("fitTransformToPairedPoints diffeo converges toward targets", {
-  local_mocked_bindings(composeDisplacementFields = working_compose, .package = "ANTsR")
   domain <- makeImage(c(16, 16), 0)
   fixed <- lm_points(8)
   moving <- fixed + matrix(c(0.6, -0.4), nrow(fixed), 2, byrow = TRUE)
@@ -121,7 +102,6 @@ test_that("fitTransformToPairedPoints diffeo converges toward targets", {
 })
 
 test_that("fitTransformToPairedPoints syn returns symmetric transforms", {
-  local_mocked_bindings(composeDisplacementFields = working_compose, .package = "ANTsR")
   domain <- makeImage(c(16, 16), 0)
   fixed <- lm_points(8)
   moving <- fixed + 0.5

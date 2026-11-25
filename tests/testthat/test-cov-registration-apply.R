@@ -57,9 +57,9 @@ test_that("antsApplyTransforms composes transforms into a field", {
   expect_equal(dim(field), dim(fx$fixed))
   unlink(out)
   # a transform given as an antsImage is written to a temporary file
-  expect_warning(
-    w <- antsApplyTransforms(fx$fixed, fx$moving, antsImageRead(fx$syn$fwdtransforms[1])),
-    "creating a temporary file"
+  # internally (and removed afterwards), without a warning
+  expect_silent(
+    w <- antsApplyTransforms(fx$fixed, fx$moving, antsImageRead(fx$syn$fwdtransforms[1]))
   )
   expect_equal(dim(w), dim(fx$fixed))
 })
@@ -84,9 +84,9 @@ test_that("antsApplyTransforms validates input", {
   on.exit(unlink(tx3))
   writeAntsrTransform(createAntsrTransform(dimension = 3), tx3)
   expect_error(antsApplyTransforms(img3, img4, tx3), "imagetype 3")
-  expect_warning(
-    expect_error(antsApplyTransforms(fx$fixed, fx$moving, 1)),
-    "not a character vector"
+  expect_error(
+    antsApplyTransforms(fx$fixed, fx$moving, 1),
+    "must be a character vector of filenames"
   )
 })
 

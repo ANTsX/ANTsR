@@ -65,6 +65,28 @@ test_that("invalid transforms give informative errors", {
   )
 })
 
+test_that("multi-component fixed/moving images do not reach native code", {
+  vec <- mergeChannels(list(moving, moving))
+  # a vector reference is used only for its geometry
+  expect_equal(
+    as.array(antsApplyTransforms(mergeChannels(list(fixed, fixed)), moving,
+      reg$fwdtransforms)),
+    as.array(fromFiles)
+  )
+  # a vector moving image needs imagetype = 1
+  expect_error(
+    antsApplyTransforms(fixed, vec, reg$fwdtransforms),
+    "set imagetype = 1"
+  )
+  out <- antsApplyTransforms(fixed, vec, reg$fwdtransforms, imagetype = 1)
+  expect_equal(out@components, 2L)
+  # moving is unused when composing, so a vector moving image is fine
+  cfile <- antsApplyTransforms(vec, vec, list(field, affine),
+    compose = tempfile()
+  )
+  expect_true(file.exists(cfile))
+})
+
 test_that("temporary files are removed when a later transform is invalid", {
   before <- list.files(tempdir())
   expect_error(
