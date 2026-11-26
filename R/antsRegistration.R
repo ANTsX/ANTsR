@@ -46,8 +46,13 @@
 #' @param writeCompositeTransform if \code{TRUE}, will write transformations to h5 format.  Defaults to FALSE.
 #' @param samplingPercentage value between zero and one that allows the percentage
 #' of points sampled to be controlled in low-dimensional metric estimation.
-#' If not given, \code{"DenseRigid"} uses 1.0 and the linear stages of
-#' \code{"SyNabp"} and \code{"antsRegistrationSyN*"} use 0.25, as in ANTsPy.
+#' If not given, \code{"DenseRigid"} uses 0.8 and every other transform uses
+#' 0.2, as in earlier versions. These defaults will change in a future version
+#' to match ANTsPy: 1.0 for \code{"DenseRigid"} and 0.25 for the linear
+#' stages of \code{"SyNabp"} and \code{"antsRegistrationSyN*"}. For those
+#' transforms a warning (once per session) is given when
+#' \code{samplingPercentage} is not set; set it explicitly to keep results
+#' stable.
 #' @param verbose request verbose output (useful for debugging)
 #' @param printArgs print raw command line (useful for debugging)
 #' @param ... additional options see antsRegistration in ANTs
@@ -306,9 +311,10 @@ antsRegistration <- function(
   }
   if (typeofTransform == "DenseRigid") {
     typeofTransform <- "Rigid"
-    # as ANTsPy (aff_random_sampling_rate = 1.0)
+    # ANTsPy uses aff_random_sampling_rate = 1.0; keep 0.8 for now
     if (missing(samplingPercentage)) {
-      metsam <- 1.0
+      metsam <- 0.8
+      .int_warnSamplingDefault("DenseRigid", 0.8, 1.0)
     }
   }
   if (typeofTransform == "BOLDRigid") {
@@ -681,8 +687,11 @@ antsRegistration <- function(
       }
 
       if (typeofTransform == "SyNabp") {
-        # ANTsPy uses a fixed sampling rate of 0.25 here
-        abpSampling <- if (missing(samplingPercentage)) 0.25 else samplingPercentage
+        # ANTsPy uses a fixed sampling rate of 0.25 here; keep 0.2 for now
+        abpSampling <- samplingPercentage
+        if (missing(samplingPercentage)) {
+          .int_warnSamplingDefault("SyNabp", samplingPercentage, 0.25)
+        }
         args <- list(
           "-d", as.character(fixed@dimension), "-r", initx,
           "-m", paste("mattes[", f, ",", m, ",1,32,regular,", abpSampling, "]", sep = ""),
@@ -830,9 +839,11 @@ antsRegistration <- function(
         if (doQuick && !doRepro) {
           metricParameter <- 32
         }
-        # linear stages sample 25% of the points unless samplingPercentage
-        # is given (ANTsPy: "Regular,0.25")
-        linearSampling <- if (missing(samplingPercentage)) 0.25 else samplingPercentage
+        # linear stages: ANTsPy samples 25% ("Regular,0.25"); keep 0.2 for now
+        linearSampling <- samplingPercentage
+        if (missing(samplingPercentage)) {
+          .int_warnSamplingDefault("antsRegistrationSyN*", samplingPercentage, 0.25)
+        }
         linearGradientStep <- 0.1
         synGradientStep <- 0.2
 
@@ -1262,4 +1273,24 @@ buildTemplate <- function(
     return(list(template = template, segmentation = segmentation))
   }
   return(template)
+}
+
+# Sampling defaults that will change to ANTsPy's; warn once per session and
+# transform so that pipelines calling antsRegistration() repeatedly are not
+# flooded
+.int_samplingWarned <- new.env(parent = emptyenv())
+.int_warnSamplingDefault <- function(transform, current, future) {
+  if (isTRUE(.int_samplingWarned[[transform]])) {
+    return(invisible(FALSE))
+  }
+  assign(transform, TRUE, envir = .int_samplingWarned)
+  warning(
+    "antsRegistration(): ", transform, " samples ", current, " of the points ",
+    "when `samplingPercentage` is not given; this default will change to ",
+    future, " (as ANTsPy) in a future version of ANTsR. Set ",
+    "`samplingPercentage` explicitly to keep results stable. ",
+    "This warning is shown once per session.",
+    call. = FALSE
+  )
+  invisible(TRUE)
 }

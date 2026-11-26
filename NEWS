@@ -15,13 +15,15 @@ ones most likely to change your results.
   an error. New `precision = c("float", "double")` (double is kept for a
   double antsImage of points). It errors when there are fewer coordinate
   columns than `dim` or the native call fails, instead of returning the input.
-* BREAKING: `antsRegistration()` sampling, matching ANTsPy:
-  `samplingPercentage` is now honoured by `Rigid`, `Affine`, `Similarity`,
-  `Translation`, `QuickRigid` and `BOLD*` (it was ignored; default 0.2 output
-  is unchanged). When `samplingPercentage` is not given, `DenseRigid` samples
-  100% (was 80%) and the linear stages of `SyNabp` and the
-  `antsRegistrationSyN*` presets sample 25% (was 20%). Passing
-  `samplingPercentage = 0.2` explicitly keeps the old linear sampling.
+* FIX: `antsRegistration()` now honours `samplingPercentage` for `Rigid`,
+  `Affine`, `Similarity`, `Translation`, `QuickRigid`, `DenseRigid` and
+  `BOLD*` (it was ignored); default results are unchanged.
+* DEPRECATION: `antsRegistration()` sampling defaults will change to match
+  ANTsPy in a future version: `DenseRigid` from 0.8 to 1.0, and the linear
+  stages of `SyNabp` and the `antsRegistrationSyN*` presets from 0.2 to 0.25.
+  For now the old values are kept, and a warning is given once per session
+  when `samplingPercentage` is not set for these transforms. Set it
+  explicitly to keep results stable.
 * FIX: `antsRegistrationSyNQuickRepro` used a malformed CC metric
   (`CC[f,m,132]`, i.e. weight 132); it now uses `CC[f,m,1,2]` as in ANTsPy.
   The SyN* `Affine` stage argument is now a single `Affine[0.1]` string.

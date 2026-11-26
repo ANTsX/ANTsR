@@ -1,3 +1,9 @@
+# the sampling-default warning is tested explicitly; mark it as already shown
+for (.tx in c("DenseRigid", "SyNabp", "antsRegistrationSyN*")) {
+  assign(.tx, TRUE, envir = ANTsR:::.int_samplingWarned)
+}
+rm(.tx)
+
 # Coverage tests for antsRegistration(): argument assembly for every
 # typeofTransform (captured before native code runs) plus a handful of real,
 # fast registrations on small 2D images.
@@ -49,8 +55,8 @@ test_that("antsRegistration builds expected stages for linear transforms", {
   expect_equal(arg_after(a, "-t"), "Rigid[0.25]")
   expect_equal(arg_after(a, "-c"), "20x20x0x0")
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "DenseRigid")
-  # as ANTsPy (aff_random_sampling_rate = 1.0)
-  expect_match(arg_after(a, "-m"), ",1\\]$")
+  # keeps 0.8 by default (ANTsPy: 1.0, a future default)
+  expect_match(arg_after(a, "-m"), ",0.8\\]$")
   a <- capture_reg_args(p$fixed, p$moving, typeofTransform = "BOLDRigid")
   expect_equal(arg_after(a, "-s"), "1x0")
   # affIterations controls levels, a single level means no pyramid.

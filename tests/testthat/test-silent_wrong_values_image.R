@@ -1,5 +1,11 @@
 context("Functions that silently returned wrong values (image/registration)")
 
+# the sampling-default warning is tested explicitly; mark it as already shown
+for (.tx in c("DenseRigid", "SyNabp", "antsRegistrationSyN*")) {
+  assign(.tx, TRUE, envir = ANTsR:::.int_samplingWarned)
+}
+rm(.tx)
+
 .small_reg_images <- function() {
   f <- resampleImage(ri(1), c(32, 32), useVoxels = TRUE, interpType = 0)
   m <- resampleImage(ri(2), c(32, 32), useVoxels = TRUE, interpType = 0)
@@ -19,13 +25,23 @@ test_that("antsRegistration linear transforms honor samplingPercentage", {
     expect_true(grepl("regular,0.9]", out, fixed = TRUE), info = tx)
     expect_false(grepl("regular,0.2]", out, fixed = TRUE), info = tx)
   }
-  # DenseRigid samples densely (1.0, as ANTsPy) when samplingPercentage is not given
-  out <- capture.output(suppressMessages(
+  # DenseRigid keeps its old 0.8 when samplingPercentage is not given, and
+  # warns (once per session) that the default will become 1.0 as in ANTsPy
+  rm("DenseRigid", envir = ANTsR:::.int_samplingWarned)
+  expect_warning(
+    out <- capture.output(suppressMessages(
+      antsRegistration(imgs$f, imgs$m, "DenseRigid",
+        affIterations = c(2, 1), printArgs = TRUE
+      )
+    )),
+    "will change to 1"
+  )
+  expect_true(grepl("regular,0.8]", paste(out, collapse = " "), fixed = TRUE))
+  expect_no_warning(capture.output(suppressMessages(
     antsRegistration(imgs$f, imgs$m, "DenseRigid",
       affIterations = c(2, 1), printArgs = TRUE
     )
-  ))
-  expect_true(grepl("regular,1]", paste(out, collapse = " "), fixed = TRUE))
+  )))
 })
 
 test_that("antsRegistrationSyN metric/transform strings are well formed", {
@@ -40,8 +56,8 @@ test_that("antsRegistrationSyN metric/transform strings are well formed", {
   expect_true(grepl("CC\\[[^],]+,[^],]+,1,2\\]", out))
   expect_false(grepl(",132]", out, fixed = TRUE))
   expect_false(grepl(",1,32]", out, fixed = TRUE))
-  # linear stages sample 0.25 by default, as ANTsPy / antsRegistrationSyN.sh
-  expect_true(grepl("GC\\[[^]]+,1,1,regular,0.25\\]", out))
+  # linear stages keep the old 0.2 by default (ANTsPy: 0.25)
+  expect_true(grepl("GC\\[[^]]+,1,1,regular,0.2\\]", out))
 
   out <- capture.output(suppressMessages(
     antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuick[a]",
@@ -50,7 +66,7 @@ test_that("antsRegistrationSyN metric/transform strings are well formed", {
   ))
   out <- paste(out, collapse = " ")
   expect_true(grepl("--transform Affine[0.1] ", out, fixed = TRUE))
-  expect_true(grepl("MI\\[[^]]+,1,32,regular,0.25\\]", out))
+  expect_true(grepl("MI\\[[^]]+,1,32,regular,0.2\\]", out))
   # an explicit samplingPercentage is still honored
   out <- capture.output(suppressMessages(
     antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuick[a]",
@@ -58,6 +74,22 @@ test_that("antsRegistrationSyN metric/transform strings are well formed", {
     )
   ))
   expect_true(grepl("MI\\[[^]]+,1,32,regular,0.6\\]", paste(out, collapse = " ")))
+  # without samplingPercentage: one warning per session about the future 0.25
+  rm("antsRegistrationSyN*", envir = ANTsR:::.int_samplingWarned)
+  expect_warning(
+    capture.output(suppressMessages(
+      antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuick[a]", printArgs = TRUE)
+    )),
+    "will change to 0.25"
+  )
+  expect_no_warning(capture.output(suppressMessages(
+    antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuick[a]", printArgs = TRUE)
+  )))
+  expect_no_warning(capture.output(suppressMessages(
+    antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuick[a]",
+      samplingPercentage = 0.2, printArgs = TRUE
+    )
+  )))
 })
 
 test_that("maskImage binarizes with a scalar level", {
