@@ -2,7 +2,7 @@
 
 .taskfmri_inputs <- function(nt = 80, nv = 20, seed = 1) {
   set.seed(seed)
-  hrf <- hemodynamicRF(scans = nt, onsets = c(1, 21, 41, 61), durations = 10, rt = 2)
+  hrf <- hemodynamicRF(scans = nt, onsets = c(1, 21, 41, 61), durations = 10, rt = 2, mean = TRUE)
   mat <- outer(as.numeric(hrf), rep(5, nv)) + matrix(rnorm(nt * nv), nt)
   # motion parameter table in the layout of antsMotionCalculation()
   motionparams <- as.data.frame(matrix(rnorm(nt * 14), nt))
@@ -44,7 +44,7 @@ test_that("taskFMRI default formula works with the nuisance helper's output", {
 test_that("taskFMRI autocorrelation fits the filtered response on the full filtered design", {
   set.seed(2)
   nt <- 120
-  hrf <- hemodynamicRF(scans = nt, onsets = seq(1, nt, 30), durations = 12, rt = 2)
+  hrf <- hemodynamicRF(scans = nt, onsets = seq(1, nt, 30), durations = 12, rt = 2, mean = TRUE)
   hrf <- hrf / sd(hrf) # unit-variance regressor so the effect is detectable
   h <- as.numeric(hrf)
   # a nuisance regressor strongly correlated with the task

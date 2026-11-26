@@ -187,7 +187,7 @@ test_that("taskFMRI names, autocorrelation and full final model", {
   skip_if_not_installed("magic")
   set.seed(1)
   nt <- 60
-  hrf <- hemodynamicRF(scans = nt, onsets = c(1, 21, 41), durations = 10, rt = 2)
+  hrf <- hemodynamicRF(scans = nt, onsets = c(1, 21, 41), durations = 10, rt = 2, mean = TRUE)
   nuis <- matrix(rnorm(nt * 6), nt)
   colnames(nuis) <- c(
     "motion1", "motion2", "motion3",

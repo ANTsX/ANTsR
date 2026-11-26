@@ -10,7 +10,7 @@ hemodynamicRF(
   durations = c(1),
   rt = 3,
   times = NULL,
-  mean = TRUE,
+  mean = FALSE,
   a1 = 6,
   a2 = 12,
   b1 = 0.9,
@@ -31,8 +31,10 @@ hemodynamicRF(
 \item{times}{onset times in seconds. If present \code{onsets} arguments is
 ignored.}
 
-\item{mean}{logical. if TRUE the mean is substracted from the resulting
-vector}
+\item{mean}{logical. If \code{TRUE} (recommended) the mean is subtracted
+from the resulting vector. The default \code{FALSE} keeps the behaviour of
+earlier versions and will change to \code{TRUE} in a future version; a
+warning is given when \code{mean} is not specified.}
 
 \item{a1}{parameter of the hemodynamic response function (see details)}
 
@@ -71,13 +73,17 @@ The dimension of the function value is set to \code{c(scans,1)}.
 
 If \code{!is.null(times)} durations are specified in seconds.
 
-If \code{mean} is TRUE (default) the resulting vector is corrected to have
-zero mean.
+If \code{mean = TRUE} (recommended) the resulting vector is corrected to
+have zero mean. In earlier versions the default \code{mean = TRUE} was
+ignored and the response was never centred, so the default is now
+\code{mean = FALSE} to keep those results. Calling \code{hemodynamicRF()}
+without \code{mean} gives a warning, because the default will change to
+\code{TRUE} in a future version; set \code{mean} explicitly.
 }
 \examples{
 
 # Example 1
-hrf <- hemodynamicRF(107, c(18, 48, 78), 15, 2)
+hrf <- hemodynamicRF(107, c(18, 48, 78), 15, 2, mean = TRUE)
 # Example 2: effect of varying parameter cc
 cc <- round(seq(0, 1, length.out = 10), 2)
 nlev <- length(cc)
@@ -85,7 +91,7 @@ cscale <- rgb(seq(0, 1, length.out = nlev),
 seq(1, 0, length.out = nlev), 0, 1)
 mat <- matrix(NA, nrow = nlev, ncol = 20)
 for (i in 1:nlev) {
-  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, 
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, mean = TRUE,
   rt = 1, cc = cc[i], a1 = 4, a2 = 3))
   mat[i, ] <- hrf
 }
@@ -99,7 +105,7 @@ cscale <- rgb(seq(0, 1, length.out = nlev),
 seq(1, 0, length.out = nlev), 0, 1)
 mat <- matrix(NA, nrow = nlev, ncol = 20)
 for (i in 1:nlev) {
-  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, 
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, mean = TRUE,
   rt = 1, a1 = a1[i], a2 = 3))
   mat[i, ] <- hrf
 }
@@ -113,7 +119,7 @@ cscale <- rgb(seq(0, 1, length.out = nlev),
 seq(1, 0, length.out = nlev), 0, 1)
 mat <- matrix(NA, nrow = nlev, ncol = 20)
 for (i in 1:nlev) {
-  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, 
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, mean = TRUE,
   rt = 1, a1 = 4, a2 = a2[i]))
   mat[i, ] <- hrf
 }
@@ -127,7 +133,7 @@ cscale <- rgb(seq(0, 1, length.out = nlev),
 seq(1, 0, length.out = nlev), 0, 1)
 mat <- matrix(NA, nrow = nlev, ncol = 20)
 for (i in 1:nlev) {
-  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, 
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, mean = TRUE,
   durations = 2, rt = 1, a1 = 4, a2 = 3, b1 = b1[i]))
   mat[i, ] <- hrf
 }
@@ -141,7 +147,7 @@ cscale <- rgb(seq(0, 1, length.out = nlev),
 seq(1, 0, length.out = nlev), 0, 1)
 mat <- matrix(NA, nrow = nlev, ncol = 20)
 for (i in 1:nlev) {
-  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, 
+  hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, mean = TRUE,
   durations = 2, rt = 1, a1 = 4, a2 = 3, b2 = b2[i]))
   mat[i, ] <- hrf
 }

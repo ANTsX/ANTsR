@@ -6,7 +6,7 @@ make_cov_task_bold <- function(d = c(10, 10, 8), nt = 30, tr = 2, seed = 1) {
   g <- as.matrix(expand.grid(1:d[1], 1:d[2], 1:d[3]))
   r <- array(sqrt(rowSums(sweep(g, 2, (d + 1) / 2)^2 / (d / 2.3)^2)), d)
   base <- array(ifelse(r < 1, 1000, 50), d)
-  hrf <- hemodynamicRF(nt, onsets = seq(3, nt - 5, by = 10), durations = 4, rt = tr)
+  hrf <- hemodynamicRF(nt, onsets = seq(3, nt - 5, by = 10), durations = 4, rt = tr, mean = TRUE)
   arr <- array(0, c(d, nt))
   for (t in 1:nt) {
     arr[, , , t] <- base + rnorm(prod(d), 0, 5) + (r < 0.6) * 2000 * hrf[t]

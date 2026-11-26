@@ -70,7 +70,7 @@ mat <- frequencyFilterfMRI(mat, 2.5, freqLo = 0.01, freqHi = 0.1, opt = "butt")
 blockfing <- c(0, 36, 72)
 hrf <- hemodynamicRF(
   scans = dim(fmri)[4], onsets = blockfing,
-  durations = rep(12, length(blockfing)), rt = 2.5
+  durations = rep(12, length(blockfing)), rt = 2.5, mean = TRUE
 )
 activationT <- taskFMRI(mat, hrf, myvars)$tstat
 }

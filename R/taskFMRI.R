@@ -51,7 +51,7 @@
 #' blockfing <- c(0, 36, 72)
 #' hrf <- hemodynamicRF(
 #'   scans = dim(fmri)[4], onsets = blockfing,
-#'   durations = rep(12, length(blockfing)), rt = 2.5
+#'   durations = rep(12, length(blockfing)), rt = 2.5, mean = TRUE
 #' )
 #' activationT <- taskFMRI(mat, hrf, myvars)$tstat
 #' }

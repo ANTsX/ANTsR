@@ -22,8 +22,12 @@
 #'
 #' If \code{!is.null(times)} durations are specified in seconds.
 #'
-#' If \code{mean} is TRUE (default) the resulting vector is corrected to have
-#' zero mean.
+#' If \code{mean = TRUE} (recommended) the resulting vector is corrected to
+#' have zero mean. In earlier versions the default \code{mean = TRUE} was
+#' ignored and the response was never centred, so the default is now
+#' \code{mean = FALSE} to keep those results. Calling \code{hemodynamicRF()}
+#' without \code{mean} gives a warning, because the default will change to
+#' \code{TRUE} in a future version; set \code{mean} explicitly.
 #'
 #' @param scans number of scans
 #' @param onsets vector of onset times (in scans)
@@ -32,8 +36,10 @@
 #' @param rt time between scans in seconds (TR)
 #' @param times onset times in seconds. If present \code{onsets} arguments is
 #' ignored.
-#' @param mean logical. if TRUE the mean is substracted from the resulting
-#' vector
+#' @param mean logical. If \code{TRUE} (recommended) the mean is subtracted
+#' from the resulting vector. The default \code{FALSE} keeps the behaviour of
+#' earlier versions and will change to \code{TRUE} in a future version; a
+#' warning is given when \code{mean} is not specified.
 #' @param a1 parameter of the hemodynamic response function (see details)
 #' @param a2 parameter of the hemodynamic response function (see details)
 #' @param b1 parameter of the hemodynamic response function (see details)
@@ -51,7 +57,7 @@
 #' @examples
 #'
 #' # Example 1
-#' hrf <- hemodynamicRF(107, c(18, 48, 78), 15, 2)
+#' hrf <- hemodynamicRF(107, c(18, 48, 78), 15, 2, mean = TRUE)
 #' # Example 2: effect of varying parameter cc
 #' cc <- round(seq(0, 1, length.out = 10), 2)
 #' nlev <- length(cc)
@@ -59,7 +65,7 @@
 #' seq(1, 0, length.out = nlev), 0, 1)
 #' mat <- matrix(NA, nrow = nlev, ncol = 20)
 #' for (i in 1:nlev) {
-#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, 
+#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, mean = TRUE,
 #'   rt = 1, cc = cc[i], a1 = 4, a2 = 3))
 #'   mat[i, ] <- hrf
 #' }
@@ -73,7 +79,7 @@
 #' seq(1, 0, length.out = nlev), 0, 1)
 #' mat <- matrix(NA, nrow = nlev, ncol = 20)
 #' for (i in 1:nlev) {
-#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, 
+#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, mean = TRUE,
 #'   rt = 1, a1 = a1[i], a2 = 3))
 #'   mat[i, ] <- hrf
 #' }
@@ -87,7 +93,7 @@
 #' seq(1, 0, length.out = nlev), 0, 1)
 #' mat <- matrix(NA, nrow = nlev, ncol = 20)
 #' for (i in 1:nlev) {
-#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, 
+#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, durations = 2, mean = TRUE,
 #'   rt = 1, a1 = 4, a2 = a2[i]))
 #'   mat[i, ] <- hrf
 #' }
@@ -101,7 +107,7 @@
 #' seq(1, 0, length.out = nlev), 0, 1)
 #' mat <- matrix(NA, nrow = nlev, ncol = 20)
 #' for (i in 1:nlev) {
-#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, 
+#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, mean = TRUE,
 #'   durations = 2, rt = 1, a1 = 4, a2 = 3, b1 = b1[i]))
 #'   mat[i, ] <- hrf
 #' }
@@ -115,7 +121,7 @@
 #' seq(1, 0, length.out = nlev), 0, 1)
 #' mat <- matrix(NA, nrow = nlev, ncol = 20)
 #' for (i in 1:nlev) {
-#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, 
+#'   hrf <- ts(hemodynamicRF(scans = 20, onsets = 1, mean = TRUE,
 #'   durations = 2, rt = 1, a1 = 4, a2 = 3, b2 = b2[i]))
 #'   mat[i, ] <- hrf
 #' }
@@ -126,7 +132,15 @@
 #' @export hemodynamicRF
 hemodynamicRF <- function(
     scans = 1, onsets = c(1), durations = c(1), rt = 3, times = NULL,
-    mean = TRUE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35) {
+    mean = FALSE, a1 = 6, a2 = 12, b1 = 0.9, b2 = 0.9, cc = 0.35) {
+  if (missing(mean)) {
+    warning(
+      "hemodynamicRF(): the default `mean = FALSE` will change to `mean = TRUE` ",
+      "in a future version of ANTsR. Set `mean` explicitly; `mean = TRUE` ",
+      "(a zero-mean regressor) is recommended.",
+      call. = FALSE
+    )
+  }
   mygamma <- function(x, a1, a2, b1, b2, c) {
     d1 <- a1 * b1
     d2 <- a2 * b2
