@@ -81,6 +81,11 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] ==
       "antsImage") {
       inpixeltype <- fixed@pixeltype
+      # the native call runs in float (--float 1), so a double image must be
+      # converted first; its buffer would otherwise be read as float values
+      if (moving@pixeltype == "double") {
+        moving <- antsImageClone(moving, "float")
+      }
       warpedmovout <- antsImageClone(moving)
       f <- fixed
       m <- moving

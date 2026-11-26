@@ -113,6 +113,11 @@ antsApplyTransformsToPoints <- function(
       stop("Transform list and inversion list must be the same length")
     }
     whichtoinvert <- as.logical(whichtoinvert)
+    # the native code can crash on an unreadable transform and silently
+    # misapplies one of another dimension, so check them in R first
+    for (tf in transformlist) {
+      .int_checkPointTransform(tf, dim)
+    }
     for (i in c(1:length(transformlist)))
     {
       ismat <- grepl("\\.mat$", transformlist[i]) ||
@@ -184,4 +189,56 @@ antsApplyTransformsToPoints <- function(
   if (!ttexists) {
     stop("transforms may not exist")
   }
+}
+
+# Check that a transform file can be read and has dimension `dim` before it
+# reaches native code. Linear and composite transforms are read with
+# readAntsrTransform(), which raises an R error for unreadable files.
+# Displacement fields are images; ITK's header reader can crash on a corrupt
+# NIfTI file, so its header is checked in R first.
+.int_checkPointTransform <- function(file, dim) {
+  isImage <- grepl("\\.(nii|nii\\.gz|nrrd|nhdr|mha|mhd)$", file,
+    ignore.case = TRUE)
+  if (!isImage) {
+    tx <- tryCatch(readAntsrTransform(file), error = function(e) {
+      stop("cannot read transform '", file, "': ", conditionMessage(e),
+        call. = FALSE)
+    })
+    if (tx@dimension != dim) {
+      stop("transform '", file, "' is ", tx@dimension, "D but dim = ", dim,
+        call. = FALSE)
+    }
+    return(invisible(TRUE))
+  }
+  if (grepl("\\.nii(\\.gz)?$", file, ignore.case = TRUE) &&
+    !.int_isNiftiFile(file)) {
+    stop("cannot read displacement field '", file, "': not a NIfTI file",
+      call. = FALSE)
+  }
+  hdr <- tryCatch(antsImageHeaderInfo(file), error = function(e) {
+    stop("cannot read displacement field '", file, "': ",
+      conditionMessage(e), call. = FALSE)
+  })
+  if (length(hdr$dimensions) != dim || hdr$nComponents != dim) {
+    stop("'", file, "' is not a ", dim, "D displacement field (",
+      length(hdr$dimensions), "D image with ", hdr$nComponents,
+      " component(s))", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
+# A NIfTI-1 or NIfTI-2 header starts with its size (348 or 540), in either
+# byte order; gzfile() reads both compressed and plain files
+.int_isNiftiFile <- function(file) {
+  con <- gzfile(file, "rb")
+  on.exit(close(con))
+  raw4 <- tryCatch(readBin(con, "raw", 4), error = function(e) raw(0))
+  if (length(raw4) < 4) {
+    return(FALSE)
+  }
+  sizes <- c(
+    readBin(raw4, "integer", size = 4, endian = "little"),
+    readBin(raw4, "integer", size = 4, endian = "big")
+  )
+  any(sizes %in% c(348L, 540L))
 }

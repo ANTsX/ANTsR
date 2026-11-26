@@ -578,3 +578,63 @@ test_that("masked reconstruction handles length-one patch axes", {
   recon3 <- reconstructImageFromPatches(patches3, full3, 1, domainImageIsMask = TRUE)
   expect_equal(as.array(recon3), as.array(img3), tolerance = 1e-5)
 })
+
+test_that("antsApplyTransformsToPoints rejects unreadable or mismatched transforms", {
+  pts <- data.frame(x = 1, y = 2)
+  bad <- tempfile(fileext = ".mat")
+  writeLines("not a transform", bad)
+  expect_error(antsApplyTransformsToPoints(2, pts, bad), "cannot read transform")
+  # a 3D transform must not be applied to 2D points
+  t3 <- tempfile(fileext = ".mat")
+  writeAntsrTransform(createAntsrTransform(dimension = 3, translation = c(1, 2, 3)), t3)
+  expect_error(antsApplyTransformsToPoints(2, pts, t3), "is 3D but dim = 2")
+  # a corrupt displacement field is rejected before ITK reads it
+  badwarp <- tempfile(fileext = ".nii.gz")
+  writeLines("not an image", badwarp)
+  expect_error(antsApplyTransformsToPoints(2, pts, badwarp), "not a NIfTI file")
+  # a 2D translation still works
+  t2 <- tempfile(fileext = ".mat")
+  writeAntsrTransform(createAntsrTransform(dimension = 2, translation = c(1, 2)), t2)
+  expect_equal(unlist(antsApplyTransformsToPoints(2, pts, t2)), c(x = 2, y = 4))
+  unlink(c(bad, t3, badwarp, t2))
+})
+
+test_that("unreadable point transforms give an R error, not a crash", {
+  skip_on_cran()
+  # run in a separate R process: before the fix this segfaulted
+  bad <- tempfile(fileext = ".mat")
+  writeLines("not a transform", bad)
+  script <- tempfile(fileext = ".R")
+  writeLines(c(
+    "suppressMessages(library(ANTsR))",
+    sprintf("r <- try(antsApplyTransformsToPoints(2, data.frame(x = 1, y = 2), '%s'), silent = TRUE)", bad),
+    "cat(if (inherits(r, 'try-error')) 'RECOVERABLE' else 'NO-ERROR')"
+  ), script)
+  out <- suppressWarnings(system2(file.path(R.home("bin"), "Rscript"),
+    c("--vanilla", script),
+    stdout = TRUE, stderr = TRUE,
+    env = paste0("R_LIBS=", paste(.libPaths(), collapse = .Platform$path.sep))
+  ))
+  expect_null(attr(out, "status"))
+  expect_true(any(grepl("RECOVERABLE", out)))
+  unlink(c(bad, script))
+})
+
+test_that("round() keeps NA and Math uses double for unsigned int images", {
+  img <- antsImageClone(as.antsImage(matrix(c(1.4, 2.6, 0, 255), 2, 2)), "unsigned char")
+  r <- round(img, NA_integer_)
+  expect_true(all(is.na(as.array(r))))
+  r2 <- as.array(round(img, c(NA, -1)))
+  expect_true(all(is.na(r2[c(1, 3)])))
+  expect_equal(r2[c(2, 4)], round(c(2.6, 255), -1))
+  u <- antsImageClone(as.antsImage(matrix(100, 2, 2)), "unsigned int")
+  e <- expm1(u)
+  expect_equal(e@pixeltype, "double")
+  expect_equal(as.array(e)[1], expm1(100))
+})
+
+test_that("cropping and resampling a double image keeps its values", {
+  d <- antsImageClone(as.antsImage(matrix(13, 20, 20)), "double")
+  expect_true(all(as.array(cropImageFromCenterPoint(d, c(9, 9), c(5, 5))) == 13))
+  expect_true(all(as.array(resampleImageToTarget(d, makeImage(c(5, 5), 0))) == 13))
+})

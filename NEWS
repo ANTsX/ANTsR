@@ -15,6 +15,10 @@ ones most likely to change your results.
   an error. New `precision = c("float", "double")` (double is kept for a
   double antsImage of points). It errors when there are fewer coordinate
   columns than `dim` or the native call fails, instead of returning the input.
+  Transforms are checked in R first: an unreadable transform file, a corrupt
+  NIfTI displacement field, or a transform whose dimension differs from `dim`
+  gives an error (an unreadable `.mat` crashed R, and a 3D transform was
+  silently applied to 2D points).
 * FIX: `antsRegistration()` now honours `samplingPercentage` for `Rigid`,
   `Affine`, `Similarity`, `Translation`, `QuickRigid`, `DenseRigid` and
   `BOLD*` (it was ignored); default results are unchanged.
@@ -50,6 +54,8 @@ ones most likely to change your results.
   and `antsBrainExtraction.sh` do (the truncation was discarded).
 * FIX: `resampleImageToTarget()` passes `...` on to antsApplyTransforms and
   errors when the native call fails instead of returning the input unchanged.
+  Double images are resampled correctly (their buffer was read as float,
+  giving garbage values, e.g. in `cropImageFromCenterPoint()`).
 
 ### Image operations
 
@@ -67,8 +73,9 @@ ones most likely to change your results.
 * FIX: `round(img, digits)` honours `digits` (it was ignored) and promotes
   the pixel type when rounded values do not fit (`unsigned char` 255 with
   `digits = -1` gives 260, not 4); vector or `NA` `digits` work as in base
-  `round()`. `cumsum()` and friends on an antsImage
-  return a numeric vector instead of erroring.
+  `round()`, and missing results stay `NA` (an integer image is promoted)
+  instead of becoming 0. `cumsum()` and friends on an antsImage return a
+  numeric vector instead of erroring.
 * BREAKING: `maskImage(binarize = TRUE)` returns 1 where the image is
   non-zero and the mask matches `level`, as ANTsPy (a single level ignored
   `binarize`; several levels set 1 where the image was 0).

@@ -23,7 +23,10 @@ setMethod(
     if (is.null(dim(res))) {
       return(res)
     }
-    res <- .as_antsImage_keep_values(res, reference = x)
+    # unsigned int voxels can hold values float cannot (above 2^24), and
+    # results such as expm1(100) overflow float, so use double for them
+    res <- .as_antsImage_keep_values(res, reference = x,
+      exact = x@pixeltype == "unsigned int")
     return(res)
   }
 )
@@ -85,6 +88,10 @@ setMethod(
       "unsigned int" = all(res >= 0 & res <= 2^32 - 1, na.rm = TRUE),
       TRUE
     )
+    # integer pixel types cannot hold NA (it would become 0)
+    if (anyNA(res) && pixeltype %in% c("unsigned char", "unsigned int")) {
+      range_ok <- FALSE
+    }
     if (range_ok) {
       return(as.antsImage(res, reference = x))
     }
