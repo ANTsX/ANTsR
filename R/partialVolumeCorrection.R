@@ -90,7 +90,10 @@ partialVolumeCorrection <- function(img, img.gm, img.wm, mask = NULL, proportion
   if (is.numeric(img)) {
     return(values.corrected)
   } else {
-    img.corrected <- antsImageClone(img)
+    # floating point so that NA and fractional corrected values survive
+    img.corrected <- antsImageClone(
+      img, if (img@pixeltype == "double") "double" else "float"
+    )
     img.corrected[mask > 0] <- values.corrected
     img.corrected[mask == 0] <- 0
     return(img.corrected)

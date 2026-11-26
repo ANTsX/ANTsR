@@ -472,3 +472,28 @@ test_that("antsImageRead keeps components when dimension is given", {
   expect_equal(as.array(img), as.array(vec), tolerance = 1e-6)
   expect_equal(antsImageRead(f)@components, 2)
 })
+
+test_that("rfSegmentation labels survive an unsigned char mask", {
+  skip_if_not_installed("randomForest")
+  set.seed(7)
+  mask <- antsImageClone(as.antsImage(matrix(1, 10, 10)), "unsigned char")
+  labs <- matrix(rep(c(300, 500), each = 50), 10, 10)
+  labImg <- as.antsImage(labs)
+  fmat <- cbind(as.numeric(labs) + rnorm(100, sd = 1), rnorm(100))
+  rf <- rfSegmentation(fmat, mask, labImg, ntrees = 20)
+  expect_setequal(unique(as.numeric(rf$segmentation[mask == 1])), c(300, 500))
+  pred <- rfSegmentationPredict(rf$rfModel, fmat, mask)
+  expect_setequal(unique(as.numeric(pred[mask == 1])), c(300, 500))
+})
+
+test_that("partialVolumeCorrection keeps NA and large values on integer images", {
+  img <- antsImageClone(as.antsImage(matrix(c(200, 100, 50, 80), 2, 2)), "unsigned char")
+  gm <- as.antsImage(matrix(c(0.4, 0, 0.5, 1), 2, 2))
+  wm <- as.antsImage(matrix(c(0.6, 1, 0.5, 0), 2, 2))
+  expect_warning(out <- partialVolumeCorrection(img, gm, wm, proportion = 0),
+    "returning NA")
+  vals <- as.array(out)
+  expect_true(is.na(vals[2, 1])) # pure WM: GM flow cannot be recovered
+  expect_equal(vals[1, 1], 500) # 200 / 0.4, above the unsigned char range
+  expect_equal(vals[1, 2], 100)
+})

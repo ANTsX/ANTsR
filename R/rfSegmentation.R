@@ -78,8 +78,7 @@ rfSegmentation <- function(
   if (verbose) print(myrf)
   probabilityimages <- predict(myrf, type = "prob")
   probabilityimages <- matrixToImages(t(probabilityimages), mask)
-  segs <- antsImageClone(mask)
-  segs[mask == 1] <- .rfLabelValues(predict(myrf))
+  segs <- .rfLabelImage(mask, .rfLabelValues(predict(myrf)))
   myout <- list(segmentation = segs, probabilityimages = probabilityimages, rfModel = myrf)
   return(myout)
 }
@@ -113,15 +112,23 @@ rfSegmentation <- function(
 rfSegmentationPredict <- function(
     rfSegmentationModel, featureMatrix,
     mask, verbose = FALSE) {
-  segs <- antsImageClone(mask)
-  segs[mask == 1] <- .rfLabelValues(
+  .rfLabelImage(mask, .rfLabelValues(
     predict(rfSegmentationModel, newdata = featureMatrix)
-  )
-  return(segs)
+  ))
 }
 
 # Predicted classes as label values: the factor levels when they are numbers
 # (e.g. labels 0/1 or 2/5), otherwise the class codes 1..K
+# Label image on the mask's grid with a pixel type that can hold the labels
+# (a mask is often unsigned char, which would wrap labels above 255)
+.rfLabelImage <- function(mask, values) {
+  pixeltype <- if (all(values >= 0 & values == round(values) &
+    values <= .Machine$integer.max)) "unsigned int" else "float"
+  segs <- antsImageClone(mask, pixeltype) * 0
+  segs[mask == 1] <- values
+  segs
+}
+
 .rfLabelValues <- function(pred) {
   lev <- suppressWarnings(as.numeric(levels(pred)))
   if (anyNA(lev)) {
