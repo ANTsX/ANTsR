@@ -11,15 +11,18 @@ maskImage(img.in, img.mask, level = 1, binarize = FALSE)
 
 \item{img.mask}{Mask or label image.}
 
-\item{level}{Level(s) at which to mask image.  If vector or list
-of values, output image is non-zero at all locations where label image
-matches any of the levels specified.}
+\item{level}{Level(s) at which to mask image: a single value (e.g.
+\code{1}) or several (e.g. \code{1:3}). Voxels where \code{img.mask}
+equals any of these values form the mask; all other voxels are outside it.}
 
-\item{binarize}{binarize the output image?  As in ANTsPy, the result is
-the intersection of \code{img.in != 0} and the mask at \code{level}.}
+\item{binarize}{If \code{FALSE} (the default), voxels inside the mask keep
+their value from \code{img.in} and voxels outside it are set to 0. If
+\code{TRUE}, the output is 1 where \code{img.in} is non-zero and inside the
+mask (the intersection of the two), and 0 elsewhere. This is the same as in
+ANTsPy.}
 }
 \value{
-An object of type antsImage.
+An antsImage the same size as \code{img.in}.
 }
 \description{
 Mask an input image by a mask image.  If the mask image has multiple labels,

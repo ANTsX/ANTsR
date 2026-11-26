@@ -6,12 +6,15 @@
 #'
 #' @param img.in Input image.
 #' @param img.mask Mask or label image.
-#' @param level Level(s) at which to mask image.  If vector or list
-#' of values, output image is non-zero at all locations where label image
-#' matches any of the levels specified.
-#' @param binarize binarize the output image?  As in ANTsPy, the result is
-#' the intersection of \code{img.in != 0} and the mask at \code{level}.
-#' @return An object of type antsImage.
+#' @param level Level(s) at which to mask image: a single value (e.g.
+#' \code{1}) or several (e.g. \code{1:3}). Voxels where \code{img.mask}
+#' equals any of these values form the mask; all other voxels are outside it.
+#' @param binarize If \code{FALSE} (the default), voxels inside the mask keep
+#' their value from \code{img.in} and voxels outside it are set to 0. If
+#' \code{TRUE}, the output is 1 where \code{img.in} is non-zero and inside the
+#' mask (the intersection of the two), and 0 elsewhere. This is the same as in
+#' ANTsPy.
+#' @return An antsImage the same size as \code{img.in}.
 #' @author Kandel BM and Avants B.
 #' @examples
 #'
