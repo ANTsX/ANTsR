@@ -78,8 +78,7 @@ rfSegmentation <- function(
   if (verbose) print(myrf)
   probabilityimages <- predict(myrf, type = "prob")
   probabilityimages <- matrixToImages(t(probabilityimages), mask)
-  segs <- antsImageClone(mask)
-  segs[mask == 1] <- predict(myrf)
+  segs <- .rfLabelImage(mask, .rfLabelValues(predict(myrf)))
   myout <- list(segmentation = segs, probabilityimages = probabilityimages, rfModel = myrf)
   return(myout)
 }
@@ -113,7 +112,34 @@ rfSegmentation <- function(
 rfSegmentationPredict <- function(
     rfSegmentationModel, featureMatrix,
     mask, verbose = FALSE) {
-  segs <- antsImageClone(mask)
-  segs[mask == 1] <- predict(rfSegmentationModel, newdata = featureMatrix)
-  return(segs)
+  .rfLabelImage(mask, .rfLabelValues(
+    predict(rfSegmentationModel, newdata = featureMatrix)
+  ))
+}
+
+# Label image on the mask's grid with a pixel type that can hold the values
+# (a mask is often unsigned char, which would wrap labels above 255):
+# unsigned int for non-negative integers up to 2^32 - 1, otherwise double
+# (float would round integers above 2^24)
+.rfLabelImage <- function(mask, values) {
+  isLabel <- all(is.finite(values) & values >= 0 & values == round(values) &
+    values <= 2^32 - 1)
+  pixeltype <- if (isLabel) "unsigned int" else "double"
+  segs <- antsImageClone(mask, pixeltype) * 0
+  segs[mask == 1] <- values
+  segs
+}
+
+# Predictions as values: for a classification forest, the factor levels when
+# they are numbers (e.g. labels 0/1 or 2/5), otherwise the class codes 1..K;
+# a regression forest's numeric predictions are returned as they are
+.rfLabelValues <- function(pred) {
+  if (!is.factor(pred)) {
+    return(as.numeric(pred))
+  }
+  lev <- suppressWarnings(as.numeric(levels(pred)))
+  if (anyNA(lev)) {
+    return(as.integer(pred))
+  }
+  lev[as.integer(pred)]
 }

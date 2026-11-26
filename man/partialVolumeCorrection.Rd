@@ -19,10 +19,22 @@ correction.}
 \item{mask}{Brain mask for image.}
 
 \item{proportion}{Ratio of activity for white matter to gray matter.
-Assumed to be 0.4.}
+Assumed to be 0.4.  Must be a single finite non-negative number.}
 }
 \value{
-Returns partial volume corrected antsImage.
+Returns partial volume corrected antsImage (or numeric vector for
+numeric input).
+}
+\details{
+The correction assumes a fixed WM:GM flow ratio (\code{proportion}) in
+every voxel and returns the implied GM flow,
+\code{CBF / (GM + proportion * WM)}.  Voxels with little tissue
+(\code{GM + WM < 0.25}) are returned uncorrected for numerical
+stability.  Where the denominator itself is (numerically) zero, e.g. a
+pure WM voxel with \code{proportion = 0}, the model cannot recover GM
+flow; those voxels are returned as \code{NA} with a warning.  Small but
+nonzero denominators still amplify noise.  This fixed-ratio model differs
+from methods that estimate tissue-specific perfusion, such as FSL BASIL.
 }
 \description{
 This function performs a partial volume correction for ASL images by

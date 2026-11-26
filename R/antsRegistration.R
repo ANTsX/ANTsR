@@ -46,6 +46,13 @@
 #' @param writeCompositeTransform if \code{TRUE}, will write transformations to h5 format.  Defaults to FALSE.
 #' @param samplingPercentage value between zero and one that allows the percentage
 #' of points sampled to be controlled in low-dimensional metric estimation.
+#' If not given, \code{"DenseRigid"} uses 0.8 and every other transform uses
+#' 0.2, as in earlier versions. These defaults will change in a future version
+#' to match ANTsPy: 1.0 for \code{"DenseRigid"} and 0.25 for the linear
+#' stages of \code{"SyNabp"} and \code{"antsRegistrationSyN*"}. For those
+#' transforms a warning (once per session) is given when
+#' \code{samplingPercentage} is not set; set it explicitly to keep results
+#' stable.
 #' @param verbose request verbose output (useful for debugging)
 #' @param printArgs print raw command line (useful for debugging)
 #' @param ... additional options see antsRegistration in ANTs
@@ -272,7 +279,7 @@ antsRegistration <- function(
   args <- list(fixed, moving, typeofTransform, outprefix, ...)
   myfAff <- "6x4x2x1"
   mysAff <- "3x2x1x0"
-  metsam <- 0.2
+  metsam <- samplingPercentage
   myiterations <- "2100x1200x1200x10"
   if (!missing(affIterations)) {
     myiterations <- paste0(affIterations, collapse = "x")
@@ -304,7 +311,11 @@ antsRegistration <- function(
   }
   if (typeofTransform == "DenseRigid") {
     typeofTransform <- "Rigid"
-    metsam <- 0.8
+    # ANTsPy uses aff_random_sampling_rate = 1.0; keep 0.8 for now
+    if (missing(samplingPercentage)) {
+      metsam <- 0.8
+      .int_warnSamplingDefault("DenseRigid", 0.8, 1.0)
+    }
   }
   if (typeofTransform == "BOLDRigid") {
     typeofTransform <- "Rigid"
@@ -676,13 +687,18 @@ antsRegistration <- function(
       }
 
       if (typeofTransform == "SyNabp") {
+        # ANTsPy uses a fixed sampling rate of 0.25 here; keep 0.2 for now
+        abpSampling <- samplingPercentage
+        if (missing(samplingPercentage)) {
+          .int_warnSamplingDefault("SyNabp", samplingPercentage, 0.25)
+        }
         args <- list(
           "-d", as.character(fixed@dimension), "-r", initx,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,", samplingPercentage, "]", sep = ""),
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,", abpSampling, "]", sep = ""),
           "-t", "Rigid[0.1]", "-c", "1000x500x250x100", "-s", "4x2x1x0",
           "-f", "8x4x2x1",
           "-x", earlyMaskOption,
-          "-m", paste("mattes[", f, ",", m, ",1,32,regular,", samplingPercentage, "]", sep = ""),
+          "-m", paste("mattes[", f, ",", m, ",1,32,regular,", abpSampling, "]", sep = ""),
           "-t", "Affine[0.1]", "-c", "1000x500x250x100", "-s", "4x2x1x0",
           "-f", "8x4x2x1",
           "-x", earlyMaskOption,
@@ -810,11 +826,23 @@ antsRegistration <- function(
           doQuick <- TRUE
         }
 
+        doRepro <- FALSE
+        if (grepl("Repro", typeofTransform)) {
+          doRepro <- TRUE
+        }
+
         subtypeOfTransform <- "s"
         splineDistance <- 26
+        # as ANTsPy / antsRegistrationSyNQuick.sh: MI (32 bins) for Quick,
+        # otherwise (including QuickRepro) CC with radius 2
         metricParameter <- 2
-        if (doQuick) {
+        if (doQuick && !doRepro) {
           metricParameter <- 32
+        }
+        # linear stages: ANTsPy samples 25% ("Regular,0.25"); keep 0.2 for now
+        linearSampling <- samplingPercentage
+        if (missing(samplingPercentage)) {
+          .int_warnSamplingDefault("antsRegistrationSyN*", samplingPercentage, 0.25)
         }
         linearGradientStep <- 0.1
         synGradientStep <- 0.2
@@ -839,11 +867,6 @@ antsRegistration <- function(
           }
         }
 
-
-        doRepro <- FALSE
-        if (grepl("Repro", typeofTransform)) {
-          doRepro <- TRUE
-        }
 
         if (doQuick == TRUE) {
           rigidConvergence <- "[1000x500x250x0,1e-6,10]"
@@ -885,20 +908,20 @@ antsRegistration <- function(
 
         if (doQuick == TRUE && doRepro == TRUE) {
           synConvergence <- "[100x70x50x0,1e-6,10]"
-          synMetric <- paste0("CC[", f, ",", m, ",1", metricParameter, "]")
+          synMetric <- paste0("CC[", f, ",", m, ",1,", metricParameter, "]")
         }
 
         rigidStage <- list(
           "--transform", paste0(tx, "[", linearGradientStep, "]"),
-          "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", samplingPercentage, "]"),
+          "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", linearSampling, "]"),
           "--convergence", rigidConvergence,
           "--shrink-factors", rigidShrinkFactors,
           "--smoothing-sigmas", rigidSmoothingSigmas
         )
 
         affineStage <- list(
-          "--transform", "Affine[", linearGradientStep, "]",
-          "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", samplingPercentage, "]"),
+          "--transform", paste0("Affine[", linearGradientStep, "]"),
+          "--metric", paste0(linearMetric, "[", f, ",", m, ",1,", linearMetricParameter, ",regular,", linearSampling, "]"),
           "--convergence", affineConvergence,
           "--shrink-factors", affineShrinkFactors,
           "--smoothing-sigmas", affineSmoothingSigmas
@@ -1250,4 +1273,27 @@ buildTemplate <- function(
     return(list(template = template, segmentation = segmentation))
   }
   return(template)
+}
+
+# Defaults that will change in a future version: warn once per session and
+# key, so that pipelines calling a function repeatedly are not flooded
+.int_deprecationWarned <- new.env(parent = emptyenv())
+.int_warnOnce <- function(key, ...) {
+  if (isTRUE(.int_deprecationWarned[[key]])) {
+    return(invisible(FALSE))
+  }
+  assign(key, TRUE, envir = .int_deprecationWarned)
+  warning(..., " This warning is shown once per session.", call. = FALSE)
+  invisible(TRUE)
+}
+
+# Sampling defaults that will change to ANTsPy's
+.int_warnSamplingDefault <- function(transform, current, future) {
+  .int_warnOnce(
+    transform,
+    "antsRegistration(): ", transform, " samples ", current, " of the points ",
+    "when `samplingPercentage` is not given; this default will change to ",
+    future, " (as ANTsPy) in a future version of ANTsR. Set ",
+    "`samplingPercentage` explicitly to keep results stable."
+  )
 }

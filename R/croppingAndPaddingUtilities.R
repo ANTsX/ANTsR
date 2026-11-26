@@ -132,41 +132,23 @@ padOrCropImageToSize <- function( image, size )
 #' @export
 cropImageFromCenterPoint <- function( image, centerPoint, patchSize )
 {
+  # the centre is honoured even outside the image; the part of the patch
+  # outside the image is zero
   index <- round( antsTransformPhysicalPointToIndex( image, centerPoint ) )
 
-  imageShape <- dim( image )
+  # first (1-based) index of a patch centered on index; for even sizes the
+  # point is the lower of the two central voxels, as in ANTsPy
+  indexOffset <- as.numeric( index ) - ( patchSize - 1 ) %/% 2
 
-  for( k in seq_along( imageShape ) )
-    {
-    if( index[k] < 1 )
-      {
-      index[k] <- 1
-      }
-    if( index[k] > imageShape[k] )
-      {
-      index[k] <- imageShape[k]
-      }
-    }
+  # physical location of that index (may lie outside the image, in which
+  # case the out-of-image part of the patch is zero)
+  spacing <- antsGetSpacing( image )
+  direction <- antsGetDirection( image )
+  patchOrigin <- antsGetOrigin( image ) +
+    as.numeric( direction %*% ( ( indexOffset - 1 ) * spacing ) )
 
-  indexOffset <- index
-  for( k in seq_along( patchSize ) )
-    {
-    indexOffset[k] <- indexOffset[k] - round( 0.5 * patchSize[k] )
-    }
-
-  domainLow <- numeric( length(imageShape) )
-  domainHigh <- numeric( length(imageShape) )
-
-  for( k in seq_along(imageShape) )
-    {
-    domainLow[k] <- max(1, indexOffset[k] - 1)
-    domainHigh[k] <- min(imageShape[k], indexOffset[k] + 1)
-    }
-
-  domain <- cropIndices( image, domainLow, domainHigh )
-
-  patchImage <- makeImage( patchSize, 0 )
-  patchImage <- antsCopyImageInfo( domain, patchImage )
+  patchImage <- makeImage( patchSize, 0, spacing = spacing,
+    origin = patchOrigin, direction = direction )
 
   return( resampleImageToTarget( image, patchImage ) )
 }

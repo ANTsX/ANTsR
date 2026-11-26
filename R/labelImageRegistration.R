@@ -105,7 +105,7 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
     }
     
   labelImageWeights <- labelImageWeighting
-  if( is.numeric( labelImageWeighting ) && ! is.vector( labelImageWeighting ) )
+  if( is.numeric( labelImageWeighting ) && length( labelImageWeighting ) == 1 )
     {
     labelImageWeights <- rep( labelImageWeighting, length( fixedLabelImages ) ) 
     } else {
@@ -276,8 +276,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
           deformableMultivariateExtras[[count]] <- list( "MSQ", fixedSingleLabelImage,
                                                       movingSingleLabelImage, 
                                                       labelImageWeights[i], 0 )
+          count <- count + 1
           }
-        count <- count + 1 
         }
       }
 
@@ -340,7 +340,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       intensityMetric <- typeOfDeformableTransform[[3]]
       intensityMetricParameter <- typeOfDeformableTransform[[4]]
 
-      synConvergence <- paste( typeOfDeformableTransform[[5]], collapse = 'x')
+      synConvergence <- paste0( "[",
+        paste( typeOfDeformableTransform[[5]], collapse = 'x' ), ",1e-6,10]" )
 
       synSmoothingSigmas <- paste( typeOfDeformableTransform[[6]], collapse = 'x')
       synSmoothingSigmas <- paste0( synSmoothingSigmas, "vox")
@@ -353,12 +354,12 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       if( grepl( "Quick", typeOfDeformableTransform ) )
         {
         doQuick <- TRUE
-        } else if( grepl( "Repro", typeOfDeformableTransform ) ) {
-        # explicit seed, then setANTsDeterministic()'s, then 1
-        if( is.null( randomSeed ) )
-          {
-          randomSeed <- getOption( "ants.randomSeed", 1 )
-          }
+        }
+      # separate test so QuickRepro also gets a seed:
+      # explicit seed, then setANTsDeterministic()'s, then 1
+      if( grepl( "Repro", typeOfDeformableTransform ) && is.null( randomSeed ) )
+        {
+        randomSeed <- getOption( "ants.randomSeed", 1 )
         }
 
       if( grepl( "\\[", typeOfDeformableTransform ) && grepl("\\]", typeOfDeformableTransform ) ) 
@@ -422,7 +423,8 @@ labelImageRegistration <- function( fixedLabelImages, movingLabelImages,
       } else {
       synTransformComplete <- list( "--transform", paste0("BSplineSyN[", gradientStep, ",", splineDistance, ",0,3]" ) )
       }
-    synStage <- lappend( synStage, synTransformComplete )    
+    # the transform precedes its metrics, as in ANTsPy
+    synStage <- lappend( synTransformComplete, synStage )
 
     args <- list(
       "-d", as.character( imageDimension ),

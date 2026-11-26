@@ -18,7 +18,15 @@ setMethod(
   function(x) {
     a1 <- as.array(x)
     res <- callGeneric(a1)
-    res <- as.antsImage(res, reference = x)
+    # cumulative functions (cumsum, cumprod, cummax, cummin) return a plain
+    # vector over the voxels (as for an array); they are not images
+    if (is.null(dim(res))) {
+      return(res)
+    }
+    # unsigned int voxels can hold values float cannot (above 2^24), and
+    # results such as expm1(100) overflow float, so use double for them
+    res <- .as_antsImage_keep_values(res, reference = x,
+      exact = x@pixeltype == "unsigned int")
     return(res)
   }
 )
@@ -60,11 +68,44 @@ setMethod(
 )
 
 #' @rdname antsImagemath
+#' @param digits integer number of decimal places to round to, as in
+#' \code{\link[base]{round}}.
 #' @export
 setMethod(
   "round", signature(x = "antsImage"),
-  function(x) {
-    return(ANTsRCore::antsImageMath(x, "round"))
+  function(x, digits = 0) {
+    # native shortcut only for a single, non-missing 0; anything else
+    # (vector or NA digits) goes through base round()
+    if (length(digits) == 1 && !is.na(digits) && digits == 0) {
+      return(ANTsRCore::antsImageMath(x, "round"))
+    }
+    res <- round(as.array(x), digits = digits)
+    # keep the input pixel type unless the rounded values no longer fit in
+    # it (e.g. 255 in an unsigned char image rounds to 260 with digits = -1)
+    pixeltype <- x@pixeltype
+    range_ok <- switch(pixeltype,
+      "unsigned char" = all(res >= 0 & res <= 255, na.rm = TRUE),
+      "unsigned int" = all(res >= 0 & res <= 2^32 - 1, na.rm = TRUE),
+      TRUE
+    )
+    # integer pixel types cannot hold NA (it would become 0)
+    if (anyNA(res) && pixeltype %in% c("unsigned char", "unsigned int")) {
+      range_ok <- FALSE
+    }
+    if (range_ok) {
+      return(as.antsImage(res, reference = x))
+    }
+    # as.antsImage(reference = ) would adopt the input pixel type, so build
+    # the header explicitly with a wider type
+    pixeltype <- if (all(abs(res) <= 2^24, na.rm = TRUE)) "float" else "double"
+    ndim <- length(dim(res))
+    return(ANTsRCore::antsImage_asantsImage(
+      res, pixeltype,
+      antsGetSpacing(x)[seq_len(ndim)],
+      antsGetOrigin(x)[seq_len(ndim)],
+      antsGetDirection(x),
+      (x@components > 1)
+    ))
   }
 )
 

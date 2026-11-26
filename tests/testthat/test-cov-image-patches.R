@@ -23,15 +23,12 @@ test_that("extractImagePatches 2D: all patches, list and array forms", {
   expect_equal(arr_diff(r2, img), 0, tolerance = 1e-6)
 })
 
-test_that("reconstructImageFromPatches 2D single-component stride 1 (known bug)", {
+test_that("reconstructImageFromPatches 2D single-component stride 1 round-trips", {
   set.seed(1)
   img <- makeImage(c(8, 8), rnorm(64))
   pa <- extractImagePatches(img, c(3, 3), returnAsArray = TRUE)
-  # package bug: imageArray[...,] drops the component dimension -> non-conformable
-  expect_error(reconstructImageFromPatches(pa, img), "non-conformable")
-  expect_error(
-    reconstructImageFromPatches(pa, getMask(img + 10, 1, 100), domainImageIsMask = TRUE),
-    "non-conformable"
+  expect_equal(as.array(reconstructImageFromPatches(pa, img)), as.array(img),
+    tolerance = 1e-5
   )
 })
 

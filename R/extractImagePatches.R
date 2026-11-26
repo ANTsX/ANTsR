@@ -124,10 +124,10 @@ extractImagePatches <- function( image, patchSize, maxNumberOfPatches = 'all',
           if( numberOfImageComponents == 1 )
             {
             patch <- imageArray[startIndex[1]:endIndex[1],
-              startIndex[2]:endIndex[2]]
+              startIndex[2]:endIndex[2], drop = FALSE]
             } else {
             patch <- imageArray[startIndex[1]:endIndex[1],
-              startIndex[2]:endIndex[2],]
+              startIndex[2]:endIndex[2], , drop = FALSE]
             }
 
           if( returnAsArray )
@@ -158,10 +158,10 @@ extractImagePatches <- function( image, patchSize, maxNumberOfPatches = 'all',
             if( numberOfImageComponents == 1 )
               {
               patch <- imageArray[startIndex[1]:endIndex[1],
-                startIndex[2]:endIndex[2], startIndex[3]:endIndex[3]]
+                startIndex[2]:endIndex[2], startIndex[3]:endIndex[3], drop = FALSE]
               } else {
               patch <- imageArray[startIndex[1]:endIndex[1],
-                startIndex[2]:endIndex[2], startIndex[3]:endIndex[3],]
+                startIndex[2]:endIndex[2], startIndex[3]:endIndex[3], , drop = FALSE]
               }
 
             if( returnAsArray )
@@ -260,19 +260,19 @@ extractImagePatches <- function( image, patchSize, maxNumberOfPatches = 'all',
         if( numberOfImageComponents == 1 )
           {
           patch <- imageArray[startIndex[1]:endIndex[1],
-            startIndex[2]:endIndex[2]]
+            startIndex[2]:endIndex[2], drop = FALSE]
           } else {
           patch <- imageArray[startIndex[1]:endIndex[1],
-            startIndex[2]:endIndex[2],]
+            startIndex[2]:endIndex[2], , drop = FALSE]
           }
         } else {
         if( numberOfImageComponents == 1 )
           {
           patch <- imageArray[startIndex[1]:endIndex[1],
-            startIndex[2]:endIndex[2], startIndex[3]:endIndex[3]]
+            startIndex[2]:endIndex[2], startIndex[3]:endIndex[3], drop = FALSE]
           } else {
           patch <- imageArray[startIndex[1]:endIndex[1],
-            startIndex[2]:endIndex[2], startIndex[3]:endIndex[3],]
+            startIndex[2]:endIndex[2], startIndex[3]:endIndex[3], , drop = FALSE]
           }
         }
 

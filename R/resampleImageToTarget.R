@@ -81,6 +81,11 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
     if (fixed@class[[1]] == "antsImage" & moving@class[[1]] ==
       "antsImage") {
       inpixeltype <- fixed@pixeltype
+      # the native call runs in float (--float 1), so a double image must be
+      # converted first; its buffer would otherwise be read as float values
+      if (moving@pixeltype == "double") {
+        moving <- antsImageClone(moving, "float")
+      }
       warpedmovout <- antsImageClone(moving)
       f <- fixed
       m <- moving
@@ -91,7 +96,7 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
       if (is.na(compose)) {
         args <- list(
           d = fixed@dimension, i = m, o = wmo,
-          r = f, n = interpolator, unlist(mytx)
+          r = f, n = interpolator, unlist(mytx), ...
         )
       }
       tfn <- paste(compose, "comptx.nii.gz", sep = "")
@@ -99,7 +104,7 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
         mycompo <- paste("[", tfn, ",1]", sep = "")
         args <- list(
           d = fixed@dimension, i = m, o = mycompo,
-          r = f, n = interpolator, unlist(mytx)
+          r = f, n = interpolator, unlist(mytx), ...
         )
       }
       myargs <- .int_antsProcessArguments(c(args))
@@ -118,10 +123,16 @@ resampleImageToTarget <- function(image, target, interpType = "linear",
       if (verbose) {
         print(myargs)
       }
-      ANTsRCore::AntsApplyTransforms(c(
+      status <- ANTsRCore::AntsApplyTransforms(c(
         myargs, "-z", 1, "-v",
         myverb, "--float", 1, "-e", imagetype
       ))
+      # 0 is success; on failure (e.g. an unknown flag passed through ...)
+      # the output would be the unresampled input
+      if (!identical(as.integer(status), 0L)) {
+        stop("resampleImageToTarget failed (status ", status, "); ",
+          "see the ANTs message above.")
+      }
       if (is.na(compose)) {
         return(antsImageClone(warpedmovout, inpixeltype))
       }

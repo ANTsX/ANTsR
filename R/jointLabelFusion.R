@@ -19,7 +19,11 @@
 #' @param labelList optional list containing antsImages with segmentation labels
 #' @param rho ridge penalty increases robustness to outliers but also
 #'   makes image converge to average
-#' @param usecor employ correlation as local similarity
+#' @param usecor if \code{TRUE} (the current default), use correlation
+#' (\code{"PC"}) as the local similarity; if \code{FALSE}, use mean squares
+#' (\code{"MSQ"}). The default will change to \code{FALSE}, as in ANTsPy, in
+#' a future version; a warning (once per session) is given when
+#' \code{usecor} is not set. Set it explicitly to keep results stable.
 #' @param rSearch radius of search, default is 3
 #' @param nonnegative constrain weights to be non-negative
 #' @param maxLabelPlusOne boolean
@@ -112,14 +116,27 @@ jointLabelFusion <- function(
     rad = 2,
     labelList = NULL,
     rho = 0.01,
-    usecor = FALSE,
+    usecor = TRUE,
     rSearch = 3,
     nonnegative = FALSE,
     maxLabelPlusOne = FALSE,
     noZeroes = FALSE,
     verbose = FALSE) {
+  if (missing(usecor)) {
+    .int_warnOnce(
+      "jointLabelFusion",
+      "jointLabelFusion(): `usecor` defaults to TRUE (correlation, \"PC\"); ",
+      "this default will change to FALSE (mean squares, \"MSQ\", as ANTsPy) ",
+      "in a future version of ANTsR. Set `usecor` explicitly to keep results ",
+      "stable."
+    )
+  }
   targetI <- check_ants(targetI)
-  targetIMask <- check_ants(targetIMask)
+  # clone so that noZeroes does not modify the caller's mask in place
+  targetIMask <- antsImageClone(check_ants(targetIMask))
+  if (length(atlasList) < 2) {
+    stop("jointLabelFusion requires at least 2 atlases.")
+  }
   segpixtype <- "unsigned int"
   if (is.null(labelList)) doJif <- TRUE else doJif <- FALSE
   if (!doJif) {
@@ -133,7 +150,7 @@ jointLabelFusion <- function(
     }
     inlabs <- sort(unique(labelList[[1]][targetIMask == 1]))
     labsum <- labelList[[1]]
-    for (n in 2:length(labelList)) {
+    for (n in seq_along(labelList)[-1]) {
       inlabs <- sort(unique(c(inlabs, labelList[[n]][targetIMask == 1])))
       labsum <- labsum + labelList[[n]]
     }
@@ -187,7 +204,7 @@ jointLabelFusion <- function(
     b = beta,
     c = nnum, # constrain non-negative
     p = myrad, # patch radius
-    m = "PC",
+    m = if (usecor) "PC" else "MSQ",
     s = rSearch,
     #    e =     # -e, --exclusion-image label[exclusionImage] # FIXME
     x = mymask,
@@ -401,8 +418,12 @@ localJointLabelFusion <- function(
         }
       )
     }
-    rr <- readAntsrTransform(initMap)
-    if (!is.na(initMap) & all(!is.na(getAntsrTransformParameters(rr)))) {
+    initMapOk <- length(initMap) > 0 && !any(is.na(initMap))
+    if (initMapOk) {
+      rr <- readAntsrTransform(initMap[1])
+      initMapOk <- all(!is.na(getAntsrTransformParameters(rr)))
+    }
+    if (initMapOk) {
       localReg <- antsRegistration(croppedImage, atlasList[[k]],
         regIterations = regIterations, synMetric = synMetric, synSampling = synSampling,
         typeofTransform = typeofTransform, initialTransform = initMap, verbose = verbose
@@ -428,6 +449,7 @@ localJointLabelFusion <- function(
       atlasList = croppedmappedImages,
       labelList = croppedmappedSegs,
       maxLabelPlusOne = maxLabelPlusOne,
+      noZeroes = noZeroes,
       verbose = verbose, ...
     ),
     croppedmappedImages = croppedmappedImages,

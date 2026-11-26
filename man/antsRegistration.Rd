@@ -94,7 +94,14 @@ Restriction currently only works if there are no preceding transformations.}
 \item{writeCompositeTransform}{if \code{TRUE}, will write transformations to h5 format.  Defaults to FALSE.}
 
 \item{samplingPercentage}{value between zero and one that allows the percentage
-of points sampled to be controlled in low-dimensional metric estimation.}
+of points sampled to be controlled in low-dimensional metric estimation.
+If not given, \code{"DenseRigid"} uses 0.8 and every other transform uses
+0.2, as in earlier versions. These defaults will change in a future version
+to match ANTsPy: 1.0 for \code{"DenseRigid"} and 0.25 for the linear
+stages of \code{"SyNabp"} and \code{"antsRegistrationSyN*"}. For those
+transforms a warning (once per session) is given when
+\code{samplingPercentage} is not set; set it explicitly to keep results
+stable.}
 
 \item{verbose}{request verbose output (useful for debugging)}
 

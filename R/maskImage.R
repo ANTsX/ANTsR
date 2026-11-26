@@ -6,11 +6,15 @@
 #'
 #' @param img.in Input image.
 #' @param img.mask Mask or label image.
-#' @param level Level(s) at which to mask image.  If vector or list
-#' of values, output image is non-zero at all locations where label image
-#' matches any of the levels specified.
-#' @param binarize binarize the output image?
-#' @return An object of type antsImage.
+#' @param level Level(s) at which to mask image: a single value (e.g.
+#' \code{1}) or several (e.g. \code{1:3}). Voxels where \code{img.mask}
+#' equals any of these values form the mask; all other voxels are outside it.
+#' @param binarize If \code{FALSE} (the default), voxels inside the mask keep
+#' their value from \code{img.in} and voxels outside it are set to 0. If
+#' \code{TRUE}, the output is 1 where \code{img.in} is non-zero and inside the
+#' mask (the intersection of the two), and 0 elsewhere. This is the same as in
+#' ANTsPy.
+#' @return An antsImage the same size as \code{img.in}.
 #' @author Kandel BM and Avants B.
 #' @examples
 #'
@@ -29,6 +33,9 @@ maskImage <- function(img.in, img.mask, level = 1, binarize = FALSE) {
     img.out <- antsImageClone(img.in)
     img.mask <- check_ants(img.mask)
     img.out[img.mask != level] <- 0
+    if (binarize) {
+      img.out[img.out != 0] <- 1
+    }
     return(img.out)
   }
   if ((is.list(level)) |
@@ -39,12 +46,10 @@ maskImage <- function(img.in, img.mask, level = 1, binarize = FALSE) {
     img.mask <- check_ants(img.mask)
     for (mylevel in level) {
       myval <- as.numeric(mylevel)
-      if (binarize) {
-        img.out[img.mask == myval] <- 1
-      }
-      if (!binarize) {
-        img.out[img.mask == myval] <- img.in[img.mask == myval]
-      }
+      img.out[img.mask == myval] <- img.in[img.mask == myval]
+    }
+    if (binarize) {
+      img.out[img.out != 0] <- 1
     }
     return(img.out)
   }

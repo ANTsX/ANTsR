@@ -56,7 +56,9 @@ reconstructImageFromPatches <- function( patches, domainImage,
       numberOfImageComponents <- patchDimension[dimensionality + 2]
       }
     }
-  midPatchIndex <- round( patchSize / 2 )
+  # 1-based patch centre, as in extractImagePatches(); at least 1, so that
+  # length-one patch axes work
+  midPatchIndex <- pmax( round( patchSize / 2 ), 1 )
 
   imageArray <- array( data = 0, dim = c( imageSize, numberOfImageComponents ) )
 
@@ -77,6 +79,9 @@ reconstructImageFromPatches <- function( patches, domainImage,
     maskArray[maskArray != 0] <- 1
     }
 
+  # number of patches added at each voxel (cf. count_array in ANTsPy)
+  countArray <- array( 0, dim = imageSize )
+
   count <- 1
   if( dimensionality == 2 )
     {
@@ -92,8 +97,10 @@ reconstructImageFromPatches <- function( patches, domainImage,
           doAdd <- TRUE
           if( domainImageIsMask )
             {
-            if( maskArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2]]
-              [midPatchIndex[1], midPatchIndex[2]] == 0 )
+            # index the mask at the patch centre directly (sub-setting the
+            # patch first would drop length-one axes)
+            centre <- startIndex + midPatchIndex - 1
+            if( maskArray[centre[1], centre[2]] == 0 )
               {
               doAdd <- FALSE
               }
@@ -108,39 +115,25 @@ reconstructImageFromPatches <- function( patches, domainImage,
               } else {
               if( numberOfImageComponents == 1 )
                 {
-                patch <- patches[count,,]
+                patch <- patches[count,,, drop = FALSE]
                 } else {
-                patch <- patches[count,,,]
+                patch <- patches[count,,,, drop = FALSE]
                 }
               }
 
-            if( numberOfImageComponents == 1 )
-              {
-              patch <- array( data = patch, dim = c( dim( patch ), 1 ) )
-              }
+            # keep length-one patch axes (e.g. 1 x 3 patches)
+            patch <- array( data = patch, dim = c( patchSize, numberOfImageComponents ) )
 
             imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],] <-
-              imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],] +
+              imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],, drop = FALSE] +
               patch
+            countArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2]] <-
+              countArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2]] + 1
             count <- count + 1
             }
           }
         }
-      if( !domainImageIsMask )
-        {
-        for( i in seq_len( imageSize[1] ) )
-          {
-          for( j in seq_len( imageSize[2] ) )
-            {
-            factor <- min( i, patchSize[1], imageSize[1] - i + 1 ) *
-              min( j, patchSize[2], imageSize[2] - j + 1 )
-
-            imageArray[i, j,] <- imageArray[i, j,] / factor
-            }
-          }
-        }
       } else {
-      countArray <- array( 0, dim = dim( imageArray )[1:dimensionality] )
       for( i in seq.int( from = 1, to = imageSize[1] - patchSize[1] + 1,
         by = strideLengthVector[1] ) )
         {
@@ -157,16 +150,14 @@ reconstructImageFromPatches <- function( patches, domainImage,
             } else {
             if( numberOfImageComponents == 1 )
               {
-              patch <- patches[count,,]
+              patch <- patches[count,,, drop = FALSE]
               } else {
-              patch <- patches[count,,,]
+              patch <- patches[count,,,, drop = FALSE]
               }
             }
 
-          if( numberOfImageComponents == 1 )
-            {
-            patch <- array( data = patch, dim = c( dim( patch ), 1 ) )
-            }
+          # keep length-one patch axes (e.g. 1 x 3 patches)
+          patch <- array( data = patch, dim = c( patchSize, numberOfImageComponents ) )
 
           imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],] <-
             imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],, drop = FALSE] +
@@ -177,11 +168,11 @@ reconstructImageFromPatches <- function( patches, domainImage,
           count <- count + 1
           }
         }
-      countArray[which( countArray == 0 )] <- 1
-      for( i in seq_len( numberOfImageComponents ) )
-        {
-        imageArray[,, i] <- imageArray[,, i] / countArray
-        }
+      }
+    countArray[which( countArray == 0 )] <- 1
+    for( i in seq_len( numberOfImageComponents ) )
+      {
+      imageArray[,, i] <- imageArray[,, i] / countArray
       }
     } else {
     if( all( strideLengthVector == 1 ) )
@@ -198,8 +189,8 @@ reconstructImageFromPatches <- function( patches, domainImage,
             doAdd <- TRUE
             if( domainImageIsMask )
               {
-              if( maskArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],
-                startIndex[3]:endIndex[3]][midPatchIndex[1], midPatchIndex[2], midPatchIndex[3]] == 0 )
+              centre <- startIndex + midPatchIndex - 1
+              if( maskArray[centre[1], centre[2], centre[3]] == 0 )
                 {
                 doAdd <- FALSE
                 }
@@ -214,47 +205,30 @@ reconstructImageFromPatches <- function( patches, domainImage,
                 } else {
                 if( numberOfImageComponents == 1 )
                   {
-                  patch <- patches[count,,,]
+                  patch <- patches[count,,,, drop = FALSE]
                   } else {
-                  patch <- patches[count,,,,]
+                  patch <- patches[count,,,,, drop = FALSE]
                   }
                 }
 
-              if( numberOfImageComponents == 1 )
-                {
-                patch <- array( data = patch, dim = c( dim( patch ), 1 ) )
-                }
+              # keep length-one patch axes (e.g. 1 x 3 patches)
+              patch <- array( data = patch, dim = c( patchSize, numberOfImageComponents ) )
 
               imageArray[startIndex[1]:endIndex[1],
                 startIndex[2]:endIndex[2], startIndex[3]:endIndex[3],] <-
                 imageArray[startIndex[1]:endIndex[1],
                   startIndex[2]:endIndex[2], startIndex[3]:endIndex[3],, drop = FALSE] +
                 patch
+              countArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],
+                startIndex[3]:endIndex[3]] <-
+                countArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],
+                  startIndex[3]:endIndex[3]] + 1
               count <- count + 1
               }
             }
           }
         }
-
-      if( !domainImageIsMask )
-        {
-        for( i in seq_len( imageSize[1] ) )
-          {
-          for( j in seq_len( imageSize[2] ) )
-            {
-            for( k in seq_len( imageSize[3] ) )
-              {
-              factor <- min( i, patchSize[1], imageSize[1] - i + 1 ) *
-                min( j, patchSize[2], imageSize[2] - j + 1 ) *
-                min( k, patchSize[3], imageSize[3] - k + 1 )
-
-              imageArray[i, j, k,] <- imageArray[i, j, k,] / factor
-              }
-            }
-          }
-        }
       } else {
-      countArray <- array( 0, dim = dim( imageArray )[1:dimensionality] )
       for( i in seq.int( from = 1, to = imageSize[1] - patchSize[1] + 1,
         by = strideLengthVector[1] ) )
         {
@@ -274,16 +248,14 @@ reconstructImageFromPatches <- function( patches, domainImage,
               } else {
               if( numberOfImageComponents == 1 )
                 {
-                patch <- patches[count,,,]
+                patch <- patches[count,,,, drop = FALSE]
                 } else {
-                patch <- patches[count,,,,]
+                patch <- patches[count,,,,, drop = FALSE]
                 }
               }
 
-            if( numberOfImageComponents == 1 )
-              {
-              patch <- array( data = patch, dim = c( dim( patch ), 1 ) )
-              }
+            # keep length-one patch axes (e.g. 1 x 3 patches)
+            patch <- array( data = patch, dim = c( patchSize, numberOfImageComponents ) )
 
             imageArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],
                 startIndex[3]:endIndex[3],] <-
@@ -297,11 +269,11 @@ reconstructImageFromPatches <- function( patches, domainImage,
             }
           }
         }
-      countArray[which( countArray == 0 )] <- 1
-      for( i in seq_len( numberOfImageComponents ) )
-        {
-        imageArray[,,, i] <- imageArray[,,, i] / countArray
-        }
+      }
+    countArray[which( countArray == 0 )] <- 1
+    for( i in seq_len( numberOfImageComponents ) )
+      {
+      imageArray[,,, i] <- imageArray[,,, i] / countArray
       }
     }
 

@@ -25,7 +25,10 @@ test_that("sparseDecom returns sparse eigenanatomy with and without mask", {
   r2 <- quiet(sparseDecom(mat, inmask = mask, nvecs = 2, sparseness = 0.2,
     its = 2, cthresh = 0, verbose = TRUE, robust = 1))
   expect_equal(dim(r2$Reconstruction), dim(mat))
-  expect_true(r2$varex > 0 && r2$varex <= 1)
+  # varex is no longer overwritten by the reconstruction correlation
+  expect_true(r2$varex > 0)
+  expect_true(r2$meanReconstructionCorrelation > -1 &&
+    r2$meanReconstructionCorrelation <= 1)
   expect_error(sparseDecom(mat, inmask = makeImage(c(5, 5), 1), nvecs = 2),
     "mask size")
   expect_equal(quiet(sparseDecom()), 0)
