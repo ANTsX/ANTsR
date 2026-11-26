@@ -35,7 +35,8 @@ average image ie 0.8 means threshold at 0.8 of the mean.}
 
 \item{initialNuisanceVariables}{Optional initial nuisance variables.}
 
-\item{denseFramewise}{boolean for dense framewise stats}
+\item{denseFramewise}{ignored; framewise displacement always uses all
+brain-mask voxels (kept for backward compatibility)}
 
 \item{numberOfCompCorComponents}{Numer of CompCor nuisance components.}
 
@@ -76,7 +77,11 @@ List of:
   \item{maskImage: }{mask image.}
   \item{DVARS: }{Framewise change in BOLD signal, as in Powers et al.}
   \item{DVARSPostCleaning: }{DVARS after cleaning image.}
-  \item{FD: }{Framewise displacement.}
+  \item{FD: }{Framewise displacement: mean Euclidean displacement (in mm)
+  of brain-mask points between consecutive frames, computed from the full
+  motion-correction transforms.  This is not the FD of Power et al. (2012),
+  which sums absolute changes in translations and radius-scaled rotations.
+  The first value is the mean of the others.}
   \item{globalSignal: }{Global signal.}
   \item{nuisanceVariables: }{Nuisance variables used in denoising.}
 }

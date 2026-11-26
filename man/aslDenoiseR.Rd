@@ -28,7 +28,9 @@ aslDenoiseR(
 \item{selectionthresh}{e.g. 0.1 take 10 percent worst variables for noise
 estimation}
 
-\item{maxnoisepreds}{integer search range e.g 1:10}
+\item{maxnoisepreds}{integer search range e.g 1:10.  The number of noise
+predictors is chosen by cross-validated R2; if no number gives a positive
+R2 for any voxel, the smallest value is used with a warning.}
 
 \item{polydegree}{eg 4 for polynomial nuisance variables or 'loess'}
 

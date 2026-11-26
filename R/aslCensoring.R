@@ -35,7 +35,12 @@
 #'        Defaults to 20 (1/20 of the image is used).}
 #'     }
 #'   }
-#'   \item{\code{scor}}{ SCOR method of Dolui et al.  No parameters.}
+#'   \item{\code{scor}}{ A simplified version of the SCORE method of Dolui
+#'     et al.: frames most correlated with the mean are removed while the
+#'     spatial variance of the mean decreases.  Unlike the published method it
+#'     operates on the frames given rather than pairwise CBF maps, uses the
+#'     total rather than the pooled within-tissue variance, and never removes
+#'     the last frame.  No parameters.}
 #' }
 #' @return vector of the same length as number of timepoints in \code{asl}, with
 #'  1 indicating the corresponding timepoint is included and 0 indicating exclusion.
@@ -168,30 +173,42 @@ aslCensoring <- function(asl, mask = NULL, nuis = NA, method = "outlier",
   }
 
   scor <- function(asl) {
-    npairs <- dim(asl)[1]
-    indices <- 1:npairs
-    meancbf <- apply(asl, 1, mean)
-    var.tot <- var(meancbf)
-    var.prev <- var.tot + 1
-    while (var.tot < var.prev) {
-      print(paste(var.prev, var.tot))
-      var.prev <- var.tot
-      meancbf.prev <- meancbf
-      cc <- rep(NA, npairs)
-      for (timepoint in 1:npairs) {
-        if (is.na(indices[timepoint])) {
-          next
-        }
-        tmp <- asl[, timepoint]
-        cc[timepoint] <- cor(meancbf, tmp)
+    # Simplified SCORE (Dolui et al., 2017): repeatedly drop the frame most
+    # correlated with the current mean and keep the removal while the
+    # spatial variance of the mean decreases.  Unlike the published
+    # method this works on the frames given (not pairwise CBF maps) and
+    # uses the total spatial variance rather than the pooled within-tissue
+    # variance.
+    # asl is a time x voxel matrix (from timeseries2matrix): rows are frames
+    asl <- t(asl) # voxel x time, so columns index timepoints below
+    nframes <- dim(asl)[2]
+    keep <- rep(TRUE, nframes)
+    meancbf <- rowMeans(asl)
+    var.best <- var(meancbf)
+    # never remove the last remaining frame
+    while (sum(keep) > 1) {
+      cc <- rep(NA_real_, nframes)
+      for (timepoint in which(keep)) {
+        cc[timepoint] <- suppressWarnings(cor(meancbf, asl[, timepoint]))
       }
-      indices[which.max(cc)] <- NA
-      meancbf <- apply(asl[, indices[!is.na(indices)]], 1, mean)
-      var.tot <- var(meancbf)
+      # no frame has a valid correlation with the mean: stop
+      if (all(is.na(cc))) {
+        break
+      }
+      removed <- which.max(cc)
+      candidate <- keep
+      candidate[removed] <- FALSE
+      meancand <- rowMeans(asl[, candidate, drop = FALSE])
+      var.cand <- var(meancand)
+      # stop (keeping the frame) when the variance does not improve
+      if (!is.finite(var.cand) || !is.finite(var.best) || var.cand >= var.best) {
+        break
+      }
+      keep <- candidate
+      meancbf <- meancand
+      var.best <- var.cand
     }
-    indices.out <- rep(1, length(indices))
-    indices.out[which(is.na(indices))] <- 0
-    which(indices.out == 0)
+    which(!keep)
   }
 
   if (is.null(mask)) {
@@ -234,7 +251,7 @@ aslCensoring <- function(asl, mask = NULL, nuis = NA, method = "outlier",
   }
 
   if (length(which.outliers) > 0) {
-    aslmat.inlier <- ts[-which.outliers, ]
+    aslmat.inlier <- ts[-which.outliers, , drop = FALSE]
   } else {
     aslmat.inlier <- ts
   }

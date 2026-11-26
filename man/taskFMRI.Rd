@@ -14,20 +14,41 @@ taskFMRI(
 )
 }
 \arguments{
-\item{mat}{input matrix}
+\item{mat}{input matrix (time by voxels)}
 
 \item{hrf}{input hrf}
 
-\item{myvars}{output of getfMRInuisanceVariables}
+\item{myvars}{output of getfMRInuisanceVariables: a list with
+\code{nuisancevariables} (matrix of nuisance predictors, e.g. the
+\code{denoisingParams1}, \code{denoisingParams2}, ... columns produced by
+\code{getfMRInuisanceVariables}), \code{globalsignal} and, optionally,
+\code{motion} (matrix of motion predictors, named \code{motion1}, ... if
+unnamed).}
 
-\item{correctautocorr}{correction auto correlation boolean}
+\item{correctautocorr}{correct for temporal autocorrelation.  An AR(2)
+model (Burg) is estimated from the mean residual of the full model
+(task + nuisance) and the same AR filter is applied to the response and to
+every column of the design before the full model is refit (iterated, as in
+Bullmore et al., 1996).}
 
-\item{residualizedesignmatrix}{boolean}
+\item{residualizedesignmatrix}{boolean, residualize the nuisance
+predictors against \code{hrf} before fitting}
 
-\item{myformula}{statistical equation to be assessed at each voxel}
+\item{myformula}{right hand side (without \code{hrf}) of the model fitted
+at each voxel, as a character string.  By default all supplied nuisance
+predictors are used: \code{globalsignal}, every column of
+\code{myvars$nuisancevariables} and every column of \code{myvars$motion}.}
 }
 \value{
-list of betas and other names entries is output
+list with entries
+\describe{
+\item{beta}{the t-statistic of the \code{hrf} term at each voxel (kept
+under this name for backward compatibility; identical to \code{tstat})}
+\item{tstat}{the t-statistic of the \code{hrf} term at each voxel}
+\item{coef}{the estimated \code{hrf} coefficient at each voxel}
+\item{fmrimat}{the (filtered, if \code{correctautocorr}) response}
+\item{adesmat}{the (filtered, if \code{correctautocorr}) design}
+}
 }
 \description{
 Input 4D time series matrix. (Perform slice timing correction externally).
@@ -49,11 +70,15 @@ mat <- frequencyFilterfMRI(mat, 2.5, freqLo = 0.01, freqHi = 0.1, opt = "butt")
 blockfing <- c(0, 36, 72)
 hrf <- hemodynamicRF(
   scans = dim(fmri)[4], onsets = blockfing,
-  durations = rep(12, length(blockfing)), rt = 2.5
+  durations = rep(12, length(blockfing)), rt = 2.5, mean = TRUE
 )
-activationBeta <- taskFMRI(mat, hrf, myvars)
+activationT <- taskFMRI(mat, hrf, myvars)$tstat
 }
 
+}
+\references{
+Bullmore E., et al. (1996) Statistical methods of estimation
+and inference for functional MR image analysis. Magn Reson Med 35:261-277.
 }
 \author{
 Avants BB

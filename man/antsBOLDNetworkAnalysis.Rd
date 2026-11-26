@@ -25,7 +25,11 @@ antsBOLDNetworkAnalysis(
 
 \item{labels}{antsImage defines regions of interest ie a parcellation}
 
-\item{motion}{motion parameters - if missing, will estimate from data}
+\item{motion}{motion parameters (the \code{moco_params} of
+\code{\link{antsMotionCalculation}}: MetricPre, MetricPost, then the ITK
+transform parameters) - if missing, will estimate from data.  The
+parameters must have been estimated with the average of \code{bold} as the
+reference, since its center of gravity is used as the transform center.}
 
 \item{gdens}{graph density applied to network covariance matrix}
 

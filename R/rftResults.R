@@ -23,10 +23,10 @@
 #' 	probability }
 #' 	\item{pRFT: }{uses the mask and pval calculates the minimum statistical
 #' 	threshTypeold}
-#' 	\item{cFDR: }{uses an uncorrected threshTypeold at the alpha level and
-#' 	then computes and FDR threshTypeold based on cluster maxima}
-#' 	\item{pFDR: }{computes the fdr threshTypeold for the entire field of
-#' 	voxels}
+#' 	\item{cFDR: }{cluster-extent FDR at the primary height \code{pp}; clusters
+#' 	smaller than the FDR extent threshold (and \code{k}) are dropped}
+#' 	\item{pFDR: }{topological peak FDR on the local maxima above the
+#' 	primary height \code{pp}}
 #' }
 #' @param pval the p-value for estimating the threshTypeold (default = .05)
 #' @param pp the primary (initial) p-value for threshTypeolding (only used for
@@ -57,7 +57,9 @@
 #' uncorrected
 #'  p-value along with the FDR and FWE corrected p-values for each cluster.
 #' Peak-level statistics are described by the maximum statistical value in each
-#' cluster and the comparable Z statistic. The ClusterStats table also contains
+#' cluster and the comparable Z statistic. The peak-level FDR values are
+#' Benjamini-Hochberg adjusted over one maximum per reported cluster, unlike
+#' SPM's peak table, which can list several local maxima within a cluster. The ClusterStats table also contains
 #' coordinates for each cluster and the number of voxels therein. By default
 #' \code{threshType = "pRFT"} and pval=.05. Alternatively, the user may use a
 #' specific numeric value for threshTypeolding the statistical field.
@@ -149,7 +151,7 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
   }
 
   if (is.character(threshType)) {
-    if (verbose == "TRUE") {
+    if (isTRUE(verbose)) {
       cat("Calculating threshTypeold \n")
     }
     u <- statFieldThresh(
@@ -165,6 +167,11 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
       "specifying the chosen method for calculating a threshold"
     ))
   }
+  # cluster FDR keeps the primary height and returns an extent threshold
+  if (!is.null(attr(u, "k"))) {
+    k <- max(k, attr(u, "k"))
+  }
+  u <- as.numeric(u)
   D <- x@dimension
   vox2res <- 1 / prod(fwhm)
   nvox <- length(as.vector(x[x != 0]))
@@ -176,9 +183,17 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
       filename = file.path(statdir, "ClusterImg.nii.gz")
     )
   }
-  labs <- unique(clust[clust > 0])
+  # sort so that rows line up with getCentroids(), which is in label order
+  labs <- sort(unique(clust[clust > 0]))
   nclus <- length(labs) # number of clusters
-  cnames <- paste("Cluster", 1:nclus, sep = "") # create name for each cluster
+  if (nclus == 0) {
+    warning("No clusters survive threshold given the parameters")
+    return(list(
+      "SetStats" = NA, "ClusterStats" = NULL, "PeakStats" = NULL,
+      "LabeledClusters" = 0, "threshold" = u, "ClusterImage" = clust
+    ))
+  }
+  cnames <- paste("Cluster", seq_len(nclus), sep = "") # create name for each cluster
   k <- k * vox2res # convert voxel number to resels
 
 
@@ -189,7 +204,8 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
     "Pfwe", "Pfdr", "P",
     "Voxels", "xc", "yc", "zc"
   )
-  ClusterStats[1:nclus, 5:7] <- getCentroids(clust)[1:nclus, 1:3]
+  # getCentroids() always returns x, y, z, t columns (z = 0 for 2D images)
+  ClusterStats[, 5:7] <- getCentroids(clust)[seq_len(nclus), 1:3, drop = FALSE]
   # get locations of clusters
 
   # create table for peak-level statistics----------------------
@@ -206,7 +222,8 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
     (
       sum(as.array(clust[clust == tmp])) / tmp)
   })
-  K <- sapply(ClusterStats[, 4], function(tmp) {
+  K <- sapply(seq_len(nclus), function(i) {
+    tmp <- ClusterStats[i, 4] # number of voxels in cluster
     (
       if (is.null(RPVImg)) {
         # follows isotropic image assumptions
@@ -214,9 +231,7 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
       } else {
         RPVImg <- check_ants(RPVImg)
         # extract resels per voxel in cluster (for non-isotropic image)
-        cmask <- antsImageClone(clust)
-        cmask[cmask != tmp] <- 0
-        cmask[cmask == tmp] <- 1
+        cmask <- thresholdImage(clust, labs[i], labs[i])
         rkc <- RPVImg[cmask == 1]
         lkc <- sum(rkc) / tmp
         iv <- matrix(resels(cmask, c(1, 1, 1)), nrow = 1)
@@ -248,28 +263,22 @@ rftResults <- function(x, resels, fwhm, df, fieldType,
         rftPval(D = D, c = 1, k = 0, u = tmp, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor)
     }
   ) # fwe p-value (peak)
-  PeakStats[, 2] <- sapply(PeakStats[, 4], function(tmp) {
+  PeakStats[, 2] <- p.adjust(sapply(PeakStats[, 4], function(tmp) {
     (
-      p.adjust(rftPval(D = D, c = 1, k = 0, u = tmp, n = n, resels = resels, df = df, fieldType = fieldType)$Ec / Ez,
-        "BH",
-        n = nclus
-    ))
-  }) # FDR (peak)
+      rftPval(D = D, c = 1, k = 0, u = tmp, n = n, resels = resels, df = df, fieldType = fieldType)$Ec / Ez)
+  }), "BH") # FDR (peak)
+  # uncorrected p-value (peak), from the upper tail so that strong peaks
+  # keep their precision; df[2] for chi-square as in euler()
   PeakStats[, 3] <- sapply(PeakStats[, 4], function(tmp) {
-    (
-      if (fieldType == "Z") {
-        1 - pnorm(tmp)
-      } else if (fieldType == "T") {
-        1 - pt(tmp, df[2])
-      } else if (fieldType == "F") {
-        1 - pf(tmp, df[1], df[2])
-      } else if (fieldType == "X") {
-        1 - pchisq(tmp, df[1], df[2])
-      })
-  }) # uncorrected p-value (peak)
-  PeakStats[, 5] <- suppressWarnings(
-    sapply(PeakStats[, 4], function(tmp) (qnorm(1 - tmp)))
-  ) # comparable Z-statistic
+    switch(fieldType,
+      Z = pnorm(tmp, lower.tail = FALSE),
+      T = pt(tmp, df[2], lower.tail = FALSE),
+      F = pf(tmp, df[1], df[2], lower.tail = FALSE),
+      X = pchisq(tmp, df[2], lower.tail = FALSE)
+    )
+  })
+  # comparable Z-statistic (from uncorrected peak p-value)
+  PeakStats[, 5] <- qnorm(PeakStats[, 3], lower.tail = FALSE)
 
   # prepare output-------------------------------------------
   ClusterStats <- round(ClusterStats, 4)

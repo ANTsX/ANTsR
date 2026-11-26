@@ -58,7 +58,7 @@ compcor <- function(
     thresh <- max(tvhist$mids[wh])
     highvarmatinds <- which(temporalvar > thresh)
   }
-  highvarmat <- mat[, highvarmatinds]
+  highvarmat <- mat[, highvarmatinds, drop = FALSE]
   if (scale) highvarmat <- scale(highvarmat, scale = FALSE)
   if (returnhighvarmatinds) {
     return(highvarmatinds)
@@ -66,7 +66,7 @@ compcor <- function(
   if (!returnv) {
     compcorrsvd <- svd(highvarmat, nu = ncompcor, nv = 0)
     if (ncompcor > 0) {
-      compcorr <- (compcorrsvd$u[, 1:ncompcor])
+      compcorr <- (compcorrsvd$u[, 1:ncompcor, drop = FALSE])
       compcorrnames <- paste("compcorr", c(1:ncol(compcorr)), sep = "")
       nuis <- compcorr
       colnames(nuis) <- c(compcorrnames)
@@ -76,7 +76,7 @@ compcor <- function(
   if (returnv) {
     compcorrsvd <- svd(highvarmat, nu = 0, nv = ncompcor)
     if (ncompcor > 0) {
-      compcorr <- (compcorrsvd$v[, 1:ncompcor])
+      compcorr <- (compcorrsvd$v[, 1:ncompcor, drop = FALSE])
       compcorrnames <- paste("compcorr", c(1:ncol(compcorr)), sep = "")
       nuis <- compcorr
       colnames(nuis) <- c(compcorrnames)

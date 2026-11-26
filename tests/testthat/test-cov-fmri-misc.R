@@ -52,14 +52,25 @@ test_that("timeserieswindow2matrix extracts event windows", {
 })
 
 test_that("hemodynamicRF builds normalized regressors", {
-  h <- hemodynamicRF(scans = 40, onsets = c(5, 20), durations = 4, rt = 2)
+  h <- hemodynamicRF(scans = 40, onsets = c(5, 20), durations = 4, rt = 2, mean = TRUE)
   expect_equal(dim(h), c(40, 1))
-  expect_equal(sum(h), 1, tolerance = 1e-8)
-  expect_true(min(h) >= 0)
+  # mean = TRUE centres the normalised response
+  expect_equal(sum(h), 0, tolerance = 1e-8)
+  h0 <- hemodynamicRF(scans = 40, onsets = c(5, 20), durations = 4, rt = 2, mean = FALSE)
+  expect_equal(sum(h0), 1, tolerance = 1e-8)
+  expect_true(min(h0) >= 0)
+  expect_equal(c(h), c(h0) - mean(h0))
+  # without `mean`: warns that the default will change, and keeps mean = FALSE
+  expect_warning(
+    hd <- hemodynamicRF(scans = 40, onsets = c(5, 20), durations = 4, rt = 2),
+    "will change to `mean = TRUE`"
+  )
+  expect_equal(hd, h0)
+  expect_silent(hemodynamicRF(scans = 40, onsets = c(5, 20), durations = 4, rt = 2, mean = FALSE))
   h2 <- hemodynamicRF(scans = 20, times = c(4, 20), durations = 2, rt = 2, mean = FALSE)
   expect_equal(nrow(h2), 20)
   expect_error(
-    hemodynamicRF(scans = 40, onsets = c(5, 20), durations = c(1, 2, 3)),
+    hemodynamicRF(scans = 40, onsets = c(5, 20), durations = c(1, 2, 3), mean = TRUE),
     "does not match"
   )
 })

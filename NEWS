@@ -2,6 +2,13 @@
 
 ## Development version
 
+* DEPRECATION: `hemodynamicRF()` now honours `mean`; the default
+  `mean = TRUE` was ignored, so the response was never centred. To keep
+  earlier results the default is now `mean = FALSE`, and calling it without
+  `mean` warns that the default will change to `TRUE` in a future version.
+  Set `mean` explicitly; `mean = TRUE` (a zero-mean regressor) is
+  recommended.
+
 * MAINT: requires ANTsRCore >= 0.8.5, where the raw Rcpp bindings
   `fastMarchingExtension`, `robustMatrixTransform` and `antsImageMutualInformation`
   were renamed with a `cpp_` prefix so they no longer clash with the ANTsR

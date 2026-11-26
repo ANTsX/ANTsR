@@ -197,23 +197,19 @@ test_that("quantifyCBF for pcasl and pasl, 3D and 4D", {
   expect_true(all(is.finite(as.array(q2$meancbf))))
   # 4D perfusion time series
   expect_true(all(is.na(q1$kmeancbf)))
-  # 4D perfusion: getAverageOfTimeSeries() is called on a plain array
-  # (package bug), so the time-series path errors
+  # 4D perfusion time series: the mean CBF image matches the 3D result
   perf4 <- a$img * 0 + 30
-  expect_error(
-    quantifyCBF(perf4, a$mask, list(sequence = "pcasl", m0 = m0)),
-    "not antsImage"
-  )
+  q3 <- quantifyCBF(perf4, a$mask, list(sequence = "pcasl", m0 = m0))
+  expect_equal(as.array(q3$meancbf), as.array(q1$meancbf), tolerance = 1e-4)
   capture.output(q4 <- quantifyCBF(perf3, a$mask, list(
     sequence = "pasl", m0 = m0,
     TI1 = 700, TI2 = 1700, lambda = 0.9, alpha = 0.95, T1blood = 1150,
     slicetime = 45, A = 1.06, T2wm = 40, T2b = 80, TE = 20, delaytime = 800
   )))
   expect_true(all(q4$meancbf[a$mask == 1] > 0))
-  capture.output(expect_error(
-    quantifyCBF(perf4, a$mask, list(sequence = "pasl", m0 = m0)),
-    "not antsImage"
-  ))
+  capture.output(q5 <- quantifyCBF(perf4, a$mask, list(sequence = "pasl", m0 = m0)))
+  expect_true(is.antsImage(q5$meancbf))
+  expect_true(all(is.finite(as.array(q5$meancbf))))
 })
 
 test_that("aslDenoiseR polynomial, compcor, loess variants", {

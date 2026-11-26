@@ -41,16 +41,16 @@ test_that("rftPval returns probabilities", {
 test_that("resels in 2D and input validation", {
   m2 <- makeImage(c(12, 12), 1)
   r <- resels(m2, c(1, 1))
-  expect_equal(r, c(1, 22, 120, 1))
+  # a 12 x 12 lattice: area 11^2, and no 3D term in 2D (Worsley et al., 1996)
+  expect_equal(r, c(1, 22, 121, 0))
   expect_equal(resels(m2), r)
   # larger fwhm -> fewer resels
   r2 <- resels(m2, c(2, 2))
-  expect_equal(r2[2:3], c(11, 30))
+  expect_equal(r2[2:3], c(11, 30.25))
   expect_error(resels(as.array(m2)), "antsImage")
   expect_error(resels(m2 * 2), "binarized")
-  # package bug: 3D resels uses image[i, j, k] with vector k, which fails
-  # in the antsImage `[` method (`missing(k) || is.na(k)` on a vector)
-  expect_error(resels(makeImage(c(5, 5, 5), 1), c(1, 1, 1)), "length")
+  # 3D: a 5 x 5 x 5 cube has volume 4^3, surface terms 3 * 4^2, edges 3 * 4
+  expect_equal(resels(makeImage(c(5, 5, 5), 1), c(1, 1, 1)), c(1, 12, 48, 64))
 })
 
 test_that("estSmooth on 2D images and residual matrices", {
@@ -73,11 +73,11 @@ test_that("estSmooth on 2D images and residual matrices", {
   e4 <- estSmooth(mat, m2, rdf = 4, scaleResid = FALSE, sample = 4, verbose = FALSE)
   expect_length(e4$fwhm, 2)
   expect_error(estSmooth(noise), "mask")
-  # package bug: 3D estSmooth fails for the same antsImage `[` reason as resels
-  expect_error(
-    suppressWarnings(estSmooth(makeImage(c(5, 5, 5), rnorm(125)), makeImage(c(5, 5, 5), 1), verbose = FALSE)),
-    "length"
-  )
+  # 3D
+  e5 <- suppressWarnings(estSmooth(makeImage(c(5, 5, 5), rnorm(125)),
+    makeImage(c(5, 5, 5), 1), verbose = FALSE))
+  expect_length(e5$fwhm, 3)
+  expect_true(all(is.finite(e5$fwhm)))
 })
 
 test_that("statFieldThresh RFT thresholds", {
@@ -97,15 +97,15 @@ test_that("statFieldThresh RFT thresholds", {
     statFieldThresh(x, 1e-12, 10, 1, c(1, 1, 1), res2, c(1, 10), "T", "pRFT"),
     "No voxels survive"
   )
-  # package bugs in the FDR branches
-  expect_error(
-    statFieldThresh(x, 0.05, 10, 1, c(1, 1, 1), res2, c(1, 10), "T", "cFDR"),
-    "'u' not found"
+  # cluster FDR keeps the primary height and returns the extent threshold
+  ucf <- statFieldThresh(x, 0.05, 10, 1, c(1, 1, 1), res2, c(1, 10), "T", "cFDR")
+  expect_equal(as.numeric(ucf), qt(1 - 0.001, 10)) # primary height, pp = 0.001
+  expect_equal(attr(ucf, "k"), 27)
+  # peak FDR returns the height of the last peak that passes
+  upf <- suppressWarnings(
+    statFieldThresh(x * 1.5, 0.05, 10, 1, c(1, 1, 1), res2, c(1, 10), "Z", "pFDR")
   )
-  expect_error(
-    suppressWarnings(statFieldThresh(x * 1.5, 0.05, 10, 1, c(1, 1, 1), res2, c(1, 10), "Z", "pFDR")),
-    "binary"
-  )
+  expect_equal(upf, 7.5)
 })
 
 test_that("rftResults produces cluster and peak tables", {

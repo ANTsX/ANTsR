@@ -6,7 +6,7 @@ make_cov_task_bold <- function(d = c(10, 10, 8), nt = 30, tr = 2, seed = 1) {
   g <- as.matrix(expand.grid(1:d[1], 1:d[2], 1:d[3]))
   r <- array(sqrt(rowSums(sweep(g, 2, (d + 1) / 2)^2 / (d / 2.3)^2)), d)
   base <- array(ifelse(r < 1, 1000, 50), d)
-  hrf <- hemodynamicRF(nt, onsets = seq(3, nt - 5, by = 10), durations = 4, rt = tr)
+  hrf <- hemodynamicRF(nt, onsets = seq(3, nt - 5, by = 10), durations = 4, rt = tr, mean = TRUE)
   arr <- array(0, c(d, nt))
   for (t in 1:nt) {
     arr[, , , t] <- base + rnorm(prod(d), 0, 5) + (r < 0.6) * 2000 * hrf[t]
@@ -248,9 +248,11 @@ test_that("getfMRInuisanceVariables and taskFMRI detect task activation", {
   expect_equal(dim(tf2$fmrimat), dim(nv$matrixTimeSeries))
   hn <- h
   colnames(hn) <- "hrf"
-  capture.output(expect_error(taskFMRI(nv$matrixTimeSeries, hn, nv,
+  # a named design column no longer errors
+  capture.output(tf3 <- taskFMRI(nv$matrixTimeSeries, hn, nv,
     myformula = "denoisingParams1"
-  ), "dimnames"))
+  ))
+  expect_equal(dim(tf3$fmrimat), dim(nv$matrixTimeSeries))
   # AR(2) correction helper
   set.seed(3)
   e <- as.numeric(arima.sim(list(ar = c(0.6, -0.2)), n = 100))

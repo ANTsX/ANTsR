@@ -146,9 +146,9 @@ test_that("networkEiganat decomposes data and validates mask handling", {
     prior = matrix(rnorm(60), 30, 2), verbose = TRUE))
   expect_equal(nrow(ne2$X), 5)
   expect_true(all(colSums(ne2$v != 0) <= 9))
-  # supplying an antsImage mask fails inside .eanatsparsify (bug)
-  expect_error(networkEiganat(mat, nvecs = 2, its = 1,
-    mask = makeImage(c(5, 6), 1)), "not interpretable as logical")
+  # an antsImage mask is accepted
+  nem <- quiet(networkEiganat(mat, nvecs = 2, its = 1, mask = makeImage(c(5, 6), 1)))
+  expect_equal(dim(nem$v), c(30, 2))
   # .eanatsparsifyv with positive sparseness keeps the largest entries
   sv <- ANTsR:::.eanatsparsifyv(matrix(c(5, 4, 3, 2, 1, -1, 0.5, 0.1), ncol = 1),
     0.5, verbose = TRUE) %>% quiet()

@@ -32,7 +32,8 @@
 #' needs to be specified with the conductance parameter and the number of
 #' iterations, e.g. \code{c(0.25, 5)}.
 #' @param residualizeMatrix boolean
-#' @param denseFramewise boolean for dense framewise stats
+#' @param denseFramewise ignored; framewise displacement always uses all
+#' brain-mask voxels (kept for backward compatibility)
 #'
 #' @return List of:
 #' \describe{
@@ -40,7 +41,11 @@
 #'   \item{maskImage: }{mask image.}
 #'   \item{DVARS: }{Framewise change in BOLD signal, as in Powers et al.}
 #'   \item{DVARSPostCleaning: }{DVARS after cleaning image.}
-#'   \item{FD: }{Framewise displacement.}
+#'   \item{FD: }{Framewise displacement: mean Euclidean displacement (in mm)
+#'   of brain-mask points between consecutive frames, computed from the full
+#'   motion-correction transforms.  This is not the FD of Power et al. (2012),
+#'   which sums absolute changes in translations and radius-scaled rotations.
+#'   The first value is the mean of the others.}
 #'   \item{globalSignal: }{Global signal.}
 #'   \item{nuisanceVariables: }{Nuisance variables used in denoising.}
 #' }
@@ -75,7 +80,7 @@ preprocessRestingBOLD <- function(
 
   numberOfTimePoints <- dim(boldImage)[4]
 
-  # do motion correction https://pmc.ncbi.nlm.nih.gov/articles/PMC3254728/
+  # do motion correction
   framewiseDisplacement <- rep(0, numberOfTimePoints)
 
   if (doMotionCorrection) {
@@ -93,6 +98,11 @@ preprocessRestingBOLD <- function(
         fixed = meanBoldFixedImageForMotionCorrection,
         moreaccurate = motionCorrectionAccuracyLevel
       )
+      # refine the reference with the motion-corrected average; otherwise
+      # every iteration repeats exactly the same registration
+      if (iter < motionCorrectionIterations) {
+        meanBoldFixedImageForMotionCorrection <- motionCorrectionResults$moco_avg_img
+      }
     }
 
     # Store motion correction parameters
@@ -102,38 +112,14 @@ preprocessRestingBOLD <- function(
       as.matrix(motionCorrectionParameters)[, 3:ncol(motionCorrectionParameters)]
     )
 
-    # Framewise displacement calculation
-    for (i in 2:numberOfTimePoints) {
-      motionCorrectionParametersAtTime1 <- c(motionCorrectionParameters[
-        i,
-        3:14
-      ])
-      rotationMatrixAtTime1 <- matrix(as.numeric(motionCorrectionParametersAtTime1[1:9]),
-        ncol = 3, nrow = 3
-      )
-      translationAtTime1 <- as.numeric(motionCorrectionParametersAtTime1[10:12])
-      motionCorrectionParametersAtTime2 <- c(motionCorrectionParameters[i -
-        1, 3:14])
-      rotationMatrixAtTime2 <- matrix(as.numeric(motionCorrectionParametersAtTime2[1:9]),
-        ncol = 3, nrow = 3
-      )
-      translationAtTime2 <- as.numeric(motionCorrectionParametersAtTime2[10:12])
-
-      if (!denseFramewise) {
-        # pick a point 10 voxels from the center
-        samplePoint <- matrix(rep(10, 3), nrow = 1)
-        samplePoint <- antsTransformIndexToPhysicalPoint(meanBoldFixedImageForMotionCorrection, samplePoint)
-
-        # calculate the transformed point at time point i and ( i - 1 )
-        transformedPointAtTime1 <- data.matrix(rotationMatrixAtTime1) %*% t(samplePoint) +
-          translationAtTime1
-        transformedPointAtTime2 <- data.matrix(rotationMatrixAtTime2) %*% t(samplePoint) +
-          translationAtTime2
-        framewiseDisplacement[i] <- dist(rbind(transformedPointAtTime2, transformedPointAtTime1))[[1]]
-      } else {
-
-      }
-    }
+    # Framewise displacement: mean Euclidean displacement of brain-mask points
+    # between consecutive frames, using the full ITK transforms (row-major
+    # matrix, translation and the center antsMotionCorr used, i.e. the center
+    # of gravity of the fixed image of the last iteration)
+    framewiseDisplacement <- .mocoFramewiseDisplacement(
+      motionCorrectionParameters, meanBoldFixedImageForMotionCorrection,
+      maskImage
+    )$MeanDisplacement
     framewiseDisplacement[1] <- mean(framewiseDisplacement[2:numberOfTimePoints])
 
     if (useMotionCorrectedImage) {

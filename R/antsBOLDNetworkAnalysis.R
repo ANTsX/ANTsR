@@ -8,7 +8,11 @@
 #' @param bold input 4D image
 #' @param mask antsImage defines areas of interest
 #' @param labels antsImage defines regions of interest ie a parcellation
-#' @param motion motion parameters - if missing, will estimate from data
+#' @param motion motion parameters (the \code{moco_params} of
+#' \code{\link{antsMotionCalculation}}: MetricPre, MetricPost, then the ITK
+#' transform parameters) - if missing, will estimate from data.  The
+#' parameters must have been estimated with the average of \code{bold} as the
+#' reference, since its center of gravity is used as the transform center.
 #' @param gdens graph density applied to network covariance matrix
 #' @param threshLo lower threshold for the label image
 #' @param threshHi upper threshold for the label image
@@ -73,17 +77,15 @@ antsBOLDNetworkAnalysis <- function(
     temp <- antsMotionCalculation(bold)
     motion <- temp$moco_params
   }
-  templateFD <- rep(0, nrow(motion))
   DVARS <- rep(0, nrow(motion))
+  # framewise displacement: mean Euclidean displacement of brain-mask points
+  # between consecutive frames, using the full ITK transforms.  The transform
+  # center is the center of gravity of the motion-correction reference, which
+  # antsMotionCalculation() takes to be the average of the time series.
+  templateFD <- .mocoFramewiseDisplacement(
+    motion, getAverageOfTimeSeries(bold), mask
+  )$MeanDisplacement
   for (i in 2:nrow(motion)) {
-    mparams1 <- c(motion[i, 3:14])
-    tmat1 <- matrix(as.numeric(mparams1[1:9]), ncol = 3, nrow = 3)
-    mparams2 <- c(motion[i - 1, 3:14])
-    tmat2 <- matrix(as.numeric(mparams2[1:9]), ncol = 3, nrow = 3)
-    pt <- t(matrix(rep(10, 3), nrow = 1))
-    newpt1 <- data.matrix(tmat1) %*% data.matrix(pt) + as.numeric(mparams1[10:12])
-    newpt2 <- data.matrix(tmat2) %*% data.matrix(pt) + as.numeric(mparams1[10:12])
-    templateFD[i] <- sum(abs(newpt2 - newpt1))
     DVARS[i] <- sqrt(mean((omat[i, ] - omat[i - 1, ])^2))
   }
   # question - should this be a constant of 0.2 as recommended in Yan Craddock He

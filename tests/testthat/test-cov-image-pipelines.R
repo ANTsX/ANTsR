@@ -64,7 +64,9 @@ test_that("combineNuisancePredictors selection methods", {
   cn2 <- combineNuisancePredictors(inmat, target, gp, maxpreds = 2, method = "svd")
   expect_equal(dim(cn2), c(30, 2))
   cn3 <- combineNuisancePredictors(inmat, target, gp, maxpreds = 5, k = 3, ordered = TRUE)
-  expect_length(cn3, 30)
+  # ordered selection keeps the first predictors up to the best number
+  expect_equal(nrow(cn3), 30)
+  expect_true(ncol(cn3) >= 1 && ncol(cn3) <= 5)
 })
 
 test_that("abpBrainExtraction runs with a rigid map", {
