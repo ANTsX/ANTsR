@@ -11,7 +11,6 @@
 #' @param ... arguments passed to other methods,
 #' namely \code{\link{antsImageRead}}
 #' @export
-#' @import methods
 #' @author John Muschelli \email{muschellij2@@gmail.com}
 setGeneric("check_ants", function(x, ...) {
   standardGeneric("check_ants")

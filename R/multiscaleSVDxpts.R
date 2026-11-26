@@ -87,9 +87,6 @@ getNamesFromDataframe <- function( x, demogIn, exclusions ) {
 #' @param replacer string to replace left with in column names of output
 #' @return fixed x
 #' @author Avants BB
-#' @importFrom stringr str_extract_all
-#' @importFrom stringr str_replace
-#' @importFrom purrr map_chr
 #' @export
 mapAsymVar <-function( mydataframe, leftvar, leftname='left', rightname='right', replacer='Asym' ) {
 
@@ -1705,8 +1702,8 @@ jointSmoothMatrixReconstruction <- function(
                           errs,
                           iterations = subIterations,
                           smoothingMatrix = loSmoo,
-                          repeatedMeasures = repeatedMeasures, ilist[[i]],
-                          positivity = positivity, gammas[i] * parameters[i, 3],
+                          repeatedMeasures = repeatedMeasures, intercept = ilist[[i]],
+                          positivity = positivity, gamma = gammas[i] * parameters[i, 3],
                           sparsenessQuantile = sparsenessQuantile, usubs = usubs,
                           doOrth = doOrth, verbose = FALSE
       )
@@ -3651,6 +3648,7 @@ estimate_learning_rate_nsa <- function(
   verbose = TRUE,
   plot = TRUE
 ) {
+  learning_rate = energy = NULL; rm(list = c("learning_rate", "energy"))  # NSE / non-standard names (R CMD check)
   method <- match.arg(method)
   stopifnot(is.matrix(Y0), is.matrix(X0))
   if (method == "default" & apply_nonneg) {
@@ -3782,21 +3780,13 @@ estimate_learning_rate_nsa <- function(
 }
 
 
-#' Retraction onto the Stiefel Manifold (soft-polar multiplicative, with adaptive inv-sqrt)
+#' Retraction onto the Stiefel Manifold (polar or soft-polar)
 #'
 #' @param Y_cand Candidate matrix.
 #' @param w_retract Weight for soft retraction.
 #' @param retraction_type Type of retraction ('polar', 'soft_polar', or 'none').
-#' @param eps_rf Small numeric value for stability.
-#' @param inv_method Method for inverse square root.
-#' @param ns_iter Number of iterations for Newton-Schulz.
-#' @param eig_thresh Threshold for eigen-decomposition.
-#' @param diag_thresh Threshold for diagonal check.
-#' @param verbose Verbose output.
 #' @export
-nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("polar", "soft_polar", "none"),
-                             eps_rf = 1e-8, inv_method = "diag", ns_iter = 1L,
-                             eig_thresh = 128L, diag_thresh = 8192L, verbose = FALSE) {
+nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("polar", "soft_polar", "none")) {
   retraction_type <- match.arg(retraction_type)
 
   # trivial
@@ -3805,9 +3795,6 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
 
   p <- nrow(Y_cand); k <- ncol(Y_cand)
   normY <- sqrt(sum(Y_cand^2))
-
-  # Prepare Gram matrix (k x k)
-  # We add eps_rf to the diagonal inside the inv_sqrt routine for stability
 
   # --- polar exact (full) ---
   if (retraction_type == "polar") {
@@ -3823,49 +3810,17 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
     return(Ytilde)
   }
 
-  # --- soft_polar (multiplicative) ---
+  # --- soft_polar ---
   if (retraction_type == "soft_polar") {
-    # We use the multiplicative soft-polar operator:
-    #   Ytilde = Y_cand %*% ( (1-w) I + w * (YtY + eps_rf I)^{-1/2} )
-    # Choose an efficient way to compute the inverse sqrt of the small k x k Gram matrix.
-    # For moderate k we use eigendecomposition; for larger k we use Newton-Schulz or diag fallback.
-    # If k is extremely large relative to p, computing T on k x k may be worse than SVD on (p x p) route.
-    use_additive_svd_fallback <- FALSE
-
-    # Heuristic: if k is very large compared to p and k is huge, prefer SVD-based soft additive fallback
-    if (k > diag_thresh && p < k) {
-      use_additive_svd_fallback <- TRUE
+    # Additive soft-SVD blend of Y_cand with its polar factor.
+    s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
+    Q <- s$u %*% t(s$v)
+    Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
+    if (!is.null(normY) && normY > 1e-12) {
+      cur_norm <- sqrt(sum(Ytilde^2))
+      if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
     }
-    use_additive_svd_fallback <- TRUE
-    if (!use_additive_svd_fallback) {
-      # compute T = (YtY + eps_rf I)^{-1/2} using adaptive routine
-      YtY <- crossprod(Y_cand)
-      T <- inv_sqrt_sym_adaptive(YtY, epsilon = eps_rf, method = inv_method,
-                                 ns_iter = ns_iter, eig_thresh = eig_thresh, verbose = verbose)
-      # multiplicative soft polar
-      T_w <- (1 - w_retract) * diag(k) + w_retract * T
-      Ytilde <- Y_cand %*% T_w
-
-      # Optional: preserve Frobenius norm (matches previous code / practical desire)
-      if (!is.null(normY) && normY > 1e-12) {
-        cur_norm <- sqrt(sum(Ytilde^2))
-        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
-      }
-
-      # Ensure numeric symmetry / cleanup
-      return(as.matrix(Ytilde))
-    } else {
-      # Fallback: for extremely wide problems compute economy SVD and perform additive soft-SVD blend
-      # (this avoids expensive k x k inv-sqrt when k >> p)
-      s <- svd(Y_cand, nu = min(p, k), nv = min(p, k))
-      Q <- s$u %*% t(s$v)
-      Ytilde <- (1 - w_retract) * Y_cand + w_retract * Q
-      if (!is.null(normY) && normY > 1e-12) {
-        cur_norm <- sqrt(sum(Ytilde^2))
-        if (cur_norm > 0) Ytilde <- Ytilde / cur_norm * normY
-      }
-      return(as.matrix(Ytilde))
-    }
+    return(as.matrix(Ytilde))
   }
 
   stop("unsupported retraction_type in nsa_flow_retract_auto()")
@@ -3939,14 +3894,12 @@ nsa_flow_retract_auto <- function(Y_cand, w_retract = 1.0, retraction_type = c("
 #' Y0 <- matrix(runif(20), 5, 4)
 #' X0 <- matrix(runif(20), 5, 4)
 #' # The original function relies on helper functions not shown here, such as:
-#' # create_optimizer, step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
+#' # create_optimizer, optimizer_step, inv_sqrt_sym, symm, and invariant_orthogonality_defect.
 #' # The following example is conceptual:
 #' # result <- nsa_flow(Y0, X0, w = 0.0, max_iter = 10, verbose = TRUE, plot = TRUE)
 #' # print(result$plot)
 #' # print(result$traces)
 #'
-#' @import ggplot2
-#' @import reshape2
 #' @export
 nsa_flow <- function(
   Y0, X0 = NULL, w = 0.5,
@@ -3958,6 +3911,7 @@ nsa_flow <- function(
   simplified = FALSE,
   plot = FALSE
 ) {
+  iter = NULL; rm(list = c("iter"))  # NSE / non-standard names (R CMD check)
   # --- Input validation ---
   stopifnot(is.matrix(Y0), is.numeric(Y0))
   stopifnot(is.null(X0) || (is.matrix(X0) && is.numeric(X0)))
@@ -4154,7 +4108,7 @@ nsa_flow <- function(
     }
 
     # --- Optimizer step ---
-    step_result <- step(
+    step_result <- optimizer_step(
       opt, i = 1, V_current = Y,
       descent_gradient = rgrad,
       learning_rate = lr,
@@ -4399,7 +4353,7 @@ digraph nsa_flow_algorithm {
 ")
   
   # Create and return the DiagrammeR graph
-  grViz(graph_spec)
+  DiagrammeR::grViz(graph_spec)
 }
 
 
@@ -4498,8 +4452,9 @@ nsa_flow_pca <- function(X, k,
                          proximal_type = c("basic", "nsa_flow"),
                          w_pca = 1.0, nsa_w = 0.5,
                          apply_soft_thresh_in_nns = FALSE,
-                         tol = 1e-6, retraction = def_ret,
+                         tol = 1e-6, retraction = "soft_polar",
                          grad_tol = 1e-4, nsa_flow_fn = nsa_flow_autograd, verbose = FALSE) {
+  sparsity_level = NULL; rm(list = c("sparsity_level"))  # NSE / non-standard names (R CMD check)
   # --- argument checks ---
   if (!is.matrix(X) || any(!is.finite(X))) stop("X must be a finite numeric matrix")
   n <- nrow(X); p <- ncol(X)

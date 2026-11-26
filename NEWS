@@ -2,6 +2,12 @@
 
 ## Development version
 
+* MAINT: requires ANTsRCore >= 0.8.5, where the raw Rcpp bindings
+  `fastMarchingExtension`, `robustMatrixTransform` and `antsImageMutualInformation`
+  were renamed with a `cpp_` prefix so they no longer clash with the ANTsR
+  functions of the same name. `fastMarchingExtension()` and
+  `robustMatrixTransform()` now call the `cpp_` versions.
+
 * FIX: on Windows, ANTsR now selects ITK's `Platform` threader at load time
   (unless `ITK_GLOBAL_DEFAULT_THREADER` is already set). With ITK's default
   thread pool, R did not exit after running ITK filters, so `R CMD check`
@@ -228,6 +234,20 @@
 * FIX: `timeseries2matrix()` works when a label has a single voxel.
 * FIX: Fixed the global-signal dimension and the smoothing call in rs-fMRI
   preprocessing.
+
+## Development version
+
+* FIX: the SiMLR optimizer generic `step()` has been renamed to
+  `optimizer_step()` (methods are now `optimizer_step.adam()`,
+  `optimizer_step.nadam()`, ...). The exported `step()` generic masked
+  `stats::step()`, so `step(lm(...))` failed with "no applicable method"
+  once ANTsR was attached. ANTsR no longer exports `step()`; code that called
+  `step(optimizer, ...)` (or `ANTsR::step()`) directly should call
+  `optimizer_step()` instead.
+
+* FIX: `sd()` on non-`antsImage` input ignored `na.rm`, so
+  `sd(c(1, 2, NA, 4), na.rm = TRUE)` returned `NA` once ANTsR was attached.
+  It now matches `stats::sd()`.
 
 ## 0.4.0
 

@@ -20,7 +20,7 @@
 fastMarchingExtension <- function(speedImage, labelImage, valueImage) {
   healthymask <- antsImageClone(labelImage)
   healthymask[labelImage == 2] <- 0
-  outimg <- ANTsRCore::fastMarchingExtension(
+  outimg <- ANTsRCore::cpp_fastMarchingExtension(
     speedImage, healthymask, valueImage
   )
   outimg[labelImage == 1] <- valueImage[labelImage == 1]

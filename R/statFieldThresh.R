@@ -84,9 +84,9 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
   if (threshType == "cRFT" | threshType == "pRFT") {
     u <- max(x)
     if (threshType == "cRFT") {
-      alpha <- rftPval(D, 1, k, u, n, resels, df, fieldType)$Pcor
+      alpha <- rftPval(D = D, c = 1, k = k, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor
     } else if (threshType == "pRFT") {
-      alpha <- rftPval(D, 1, 0, u, n, resels, df, fieldType)$Pcor
+      alpha <- rftPval(D = D, c = 1, k = 0, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor
     }
     if (alpha > pval) {
       stop("No voxels survive threshold given the parameters")
@@ -94,9 +94,9 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
     while (alpha < pval) {
       u <- u - .01
       if (threshType == "cRFT") {
-        alpha <- rftPval(D, 1, k, u, n, resels, df, fieldType)$Pcor
+        alpha <- rftPval(D = D, c = 1, k = k, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor
       } else if (threshType == "pRFT") {
-        alpha <- rftPval(D, 1, 0, u, n, resels, df, fieldType)$Pcor
+        alpha <- rftPval(D = D, c = 1, k = 0, u = u, n = n, resels = resels, df = df, fieldType = fieldType)$Pcor
       }
     }
 
@@ -116,13 +116,16 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
       if (length(peakvals) == 0) {
         stop("No voxels survive the primary threshold given the parameters")
       }
-      Eu <- rftPval(D, 1, 0, stat, n, resels, df, fieldType)$Ec
+      Eu <- rftPval(D = D, c = 1, k = 0, u = stat, n = n, resels = resels, df = df, fieldType = fieldType)$Ec
       if (isTRUE(verbose)) {
         progress <- txtProgressBar(min = 0, max = length(peakvals), style = 3)
       }
       ps <- numeric(length(peakvals))
       for (i in seq_along(peakvals)) {
-        ps[i] <- rftPval(D, 1, 0, peakvals[i], n, resels, df, fieldType)$Ec / Eu
+        ps[i] <- rftPval(
+          D = D, c = 1, k = 0, u = peakvals[i], n = n, resels = resels,
+          df = df, fieldType = fieldType
+        )$Ec / Eu
         if (isTRUE(verbose)) {
           setTxtProgressBar(progress, i)
         }
@@ -141,7 +144,7 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
       # height, BH on their uncorrected extent p-values P(extent >= k | stat).
       # The height stays at the primary threshold; the FDR extent threshold
       # (in voxels) is returned as attr(u, "k").
-      fdrclust <- as.array(labelClusters(x, 1, stat, Inf))
+      fdrclust <- as.array(labelClusters(x, minClusterSize = 1, minThresh = stat, maxThresh = Inf))
       fdrlabs <- sort(unique(fdrclust[fdrclust > 0]))
       if (length(fdrlabs) == 0) {
         stop("No voxels survive the primary threshold given the parameters")
@@ -152,8 +155,10 @@ statFieldThresh <- function(x, pval, nvox, n, fwhm, resels, df,
       }
       ps <- numeric(length(extents))
       for (i in seq_along(extents)) {
-        ps[i] <- rftPval(D, 1, extents[i] * vox2res, stat, n, resels, df,
-          fieldType)$Punc
+        ps[i] <- rftPval(
+          D = D, c = 1, k = extents[i] * vox2res, u = stat, n = n,
+          resels = resels, df = df, fieldType = fieldType
+        )$Punc
         if (isTRUE(verbose)) {
           setTxtProgressBar(progress, i)
         }

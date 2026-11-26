@@ -113,6 +113,13 @@ fMRINormalization <- function(
   if (!usePkg("igraph")) stop("need igraph")
   if (!usePkg("pracma")) stop("need pracma")
   if (!usePkg("mFilter")) stop("need mFilter")
+  # check extra runs before any reading or motion correction
+  if (length(extraRuns) > 0) {
+    if (!is.list(extraRuns) || !all(vapply(extraRuns, is.antsImage, logical(1)))) {
+      stop("extraRuns must be a list of antsImages.")
+    }
+    if (!usePkg("abind")) stop("need abind package for the extraRuns feature")
+  }
   if (missing(img)) # for stand-alone testing
     {
       img <- antsImageRead(getANTsRData("rsbold"))

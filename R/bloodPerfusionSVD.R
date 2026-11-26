@@ -284,11 +284,12 @@ generateAifMaskImage <- function(
     return(optimization)
   }
 
-  voiPerfusionMatrix <- timeseries2matrix(perfusionImage, voiMaskImage)
-
+  # checked before extracting the time series
   if (!.isNA1(index)) {
     .stopIfNA(index, "index")
   }
+  voiPerfusionMatrix <- timeseries2matrix(perfusionImage, voiMaskImage)
+
   if (!.isNA1(index)) {
     aifMatrix <- matrix(voiPerfusionMatrix[1, ], nrow = 1) * 0
     aifMatrix[1, index] <- 1

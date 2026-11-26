@@ -37,7 +37,6 @@ mask_values <- function(x, mask) {
 #' mask <- img > 0
 #' hist(img)
 #' hist(img, mask = mask)
-#' @importFrom graphics hist
 hist.antsImage <- function(x, ..., mask) {
   x <- mask_values(x, mask)
   hist(x, ...)
@@ -100,7 +99,6 @@ density.antsImage <- function(x, ..., mask) {
 #' img <- makeImage(c(10, 10), rnorm(100))
 #' mask <- img > 0
 #' boxplot(img, mask = mask)
-#' @importFrom graphics boxplot
 boxplot.antsImage <- function(x, ..., mask) {
   x <- mask_values(x, mask)
   boxplot(x, ...)

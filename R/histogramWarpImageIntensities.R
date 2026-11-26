@@ -14,7 +14,6 @@
 #' @param transformDomainSize Defines the sampling resolution of the B-spline warping.
 #' @return warped intensity image
 #' @author Tustison NJ
-#' @importFrom stats rnorm
 #' @examples
 #'
 #' library( ANTsR )

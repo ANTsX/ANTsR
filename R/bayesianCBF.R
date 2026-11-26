@@ -43,7 +43,7 @@ bayesianCBF <- function(pcasl, segmentation, tissuelist,
   mask <- antsImageClone(seg)
   mask[mask > 0] <- 1
   if (useDataDrivenMask > 0) {
-    mask2 <- getMask(avg, mean(avg), Inf, useDataDrivenMask)
+    mask2 <- getMask(avg, lowThresh = mean(avg), highThresh = Inf, cleanup = useDataDrivenMask)
     # cleans up mask to agree with data-driven mask2
     mask[mask2 == 0] <- 0
     seg[mask2 == 0] <- 0

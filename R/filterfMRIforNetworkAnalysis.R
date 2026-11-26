@@ -74,6 +74,23 @@ filterfMRIforNetworkAnalysis <- function(
     print(myusage)
     return(NULL)
   }
+  # Check the network-analysis inputs before the (slow) frequency filtering;
+  # they used to be checked only afterwards.
+  if (!missing(aslmat) && !is.null(labels) && is.null(mask)) {
+    stop("mask is required when labels are given")
+  }
+  if (!missing(aslmat) && !is.null(labels) && !.isNA1(nuisancein)) {
+    .stopIfNA(nuisancein, "nuisancein")
+    if (NROW(nuisancein) != nrow(aslmat)) {
+      stop(
+        "nuisancein has ", NROW(nuisancein), " rows but there are ",
+        nrow(aslmat), " time points"
+      )
+    }
+    if (!is.numeric(as.matrix(nuisancein))) {
+      stop("nuisancein must be numeric")
+    }
+  }
   if (!is.numeric(freqLo) | !is.numeric(freqHi)) {
     print("freqLo/Hi is not numeric type")
     print(myusage)

@@ -6,6 +6,15 @@ if (.Platform$OS.type == "windows" &&
   Sys.setenv(ITK_GLOBAL_DEFAULT_THREADER = "Platform")
 }
 
+# On macOS, R and ANTsRCore can each load their own OpenMP runtime, and the
+# second one aborts the process ("OMP: Error #15: Initializing libomp.dylib,
+# but found libomp.dylib already initialized"). Allow the duplicate runtime
+# for the tests; an existing setting is respected.
+if (Sys.info()[["sysname"]] == "Darwin" &&
+  !nzchar(Sys.getenv("KMP_DUPLICATE_LIB_OK"))) {
+  Sys.setenv(KMP_DUPLICATE_LIB_OK = "TRUE")
+}
+
 library(methods)
 library(testthat)
 library(ANTsR)
