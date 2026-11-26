@@ -193,6 +193,13 @@ aslDenoiseR <- function(
   if (!usecompcor) {
     noiseu <- svd(svdboldmat[, noisepool], nv = 0, nu = max(maxnoisepreds))$u
   }
+  # compcor() can return fewer components than requested (rank-limited
+  # data); only search the noise levels that are available
+  noiseu <- as.matrix(noiseu)
+  maxnoisepreds <- maxnoisepreds[maxnoisepreds <= ncol(noiseu)]
+  if (length(maxnoisepreds) == 0) {
+    stop("No noise components could be estimated from the noise pool.")
+  }
   R2summary <- rep(0, length(maxnoisepreds))
   ct <- 1
   for (i in maxnoisepreds) {
