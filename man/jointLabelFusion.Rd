@@ -12,7 +12,7 @@ jointLabelFusion(
   rad = 2,
   labelList = NULL,
   rho = 0.01,
-  usecor = FALSE,
+  usecor = TRUE,
   rSearch = 3,
   nonnegative = FALSE,
   maxLabelPlusOne = FALSE,
@@ -36,9 +36,9 @@ jointLabelFusion(
 \item{rho}{ridge penalty increases robustness to outliers but also
 makes image converge to average}
 
-\item{usecor}{employ correlation (\code{"PC"}) as local similarity;
-if \code{FALSE} (the default, as in ANTsPy), mean squares (\code{"MSQ"})
-is used}
+\item{usecor}{if \code{TRUE} (the default), use correlation (\code{"PC"})
+as the local similarity; if \code{FALSE}, use mean squares
+(\code{"MSQ"}). ANTsPy defaults to \code{FALSE}.}
 
 \item{rSearch}{radius of search, default is 3}
 

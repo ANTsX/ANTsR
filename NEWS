@@ -25,10 +25,10 @@ ones most likely to change your results.
 * FIX: `antsRegistrationSyNQuickRepro` used a malformed CC metric
   (`CC[f,m,132]`, i.e. weight 132); it now uses `CC[f,m,1,2]` as in ANTsPy.
   The SyN* `Affine` stage argument is now a single `Affine[0.1]` string.
-* BREAKING: `jointLabelFusion()` now respects `usecor`; it always used
-  correlation (`PC`). The default `usecor = FALSE` uses mean squares as in
-  ANTsPy, so segmentations change; use `usecor = TRUE` for the old results.
-  It now needs at least two atlases and no longer modifies the caller's mask
+* FIX: `jointLabelFusion()` now respects `usecor`; it always used
+  correlation (`PC`) whatever was passed. The default is now `usecor = TRUE`,
+  so default results are unchanged; `usecor = FALSE` gives mean squares
+  (`MSQ`), the ANTsPy default. It now needs at least two atlases and no longer modifies the caller's mask
   with `noZeroes = TRUE`. `localJointLabelFusion()` passes `noZeroes` on,
   skips atlases whose initial registration fails, and its `Similarity` step
   now really uses full sampling.
