@@ -17,6 +17,19 @@ composite displacement field
 \description{
 Compose displacement fields.
 }
+\details{
+As in ANTsPy (\code{itk::ComposeDisplacementFieldsImageFilter}), the
+result is \eqn{u(x) = w(x) + d(x + w(x))}, where \eqn{d} is
+\code{displacementField} and \eqn{w} is \code{warpingField}: the warping
+field is applied first.  The result is defined on the grid of
+\code{displacementField}.
+}
+\examples{
+d <- as.antsImage(array(0.5, c(2, 8, 8)), components = TRUE)
+w <- as.antsImage(array(1, c(2, 8, 8)), components = TRUE)
+u <- composeDisplacementFields(d, w)
+
+}
 \author{
 NJ Tustison
 }
