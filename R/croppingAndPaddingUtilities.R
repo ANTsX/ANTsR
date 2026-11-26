@@ -132,21 +132,9 @@ padOrCropImageToSize <- function( image, size )
 #' @export
 cropImageFromCenterPoint <- function( image, centerPoint, patchSize )
 {
+  # the centre is honoured even outside the image; the part of the patch
+  # outside the image is zero
   index <- round( antsTransformPhysicalPointToIndex( image, centerPoint ) )
-
-  imageShape <- dim( image )
-
-  for( k in seq_along( imageShape ) )
-    {
-    if( index[k] < 1 )
-      {
-      index[k] <- 1
-      }
-    if( index[k] > imageShape[k] )
-      {
-      index[k] <- imageShape[k]
-      }
-    }
 
   # first (1-based) index of a patch centered on index; for even sizes the
   # point is the lower of the two central voxels, as in ANTsPy

@@ -56,7 +56,9 @@ reconstructImageFromPatches <- function( patches, domainImage,
       numberOfImageComponents <- patchDimension[dimensionality + 2]
       }
     }
-  midPatchIndex <- round( patchSize / 2 )
+  # 1-based patch centre, as in extractImagePatches(); at least 1, so that
+  # length-one patch axes work
+  midPatchIndex <- pmax( round( patchSize / 2 ), 1 )
 
   imageArray <- array( data = 0, dim = c( imageSize, numberOfImageComponents ) )
 
@@ -95,8 +97,10 @@ reconstructImageFromPatches <- function( patches, domainImage,
           doAdd <- TRUE
           if( domainImageIsMask )
             {
-            if( maskArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2]]
-              [midPatchIndex[1], midPatchIndex[2]] == 0 )
+            # index the mask at the patch centre directly (sub-setting the
+            # patch first would drop length-one axes)
+            centre <- startIndex + midPatchIndex - 1
+            if( maskArray[centre[1], centre[2]] == 0 )
               {
               doAdd <- FALSE
               }
@@ -185,8 +189,8 @@ reconstructImageFromPatches <- function( patches, domainImage,
             doAdd <- TRUE
             if( domainImageIsMask )
               {
-              if( maskArray[startIndex[1]:endIndex[1], startIndex[2]:endIndex[2],
-                startIndex[3]:endIndex[3]][midPatchIndex[1], midPatchIndex[2], midPatchIndex[3]] == 0 )
+              centre <- startIndex + midPatchIndex - 1
+              if( maskArray[centre[1], centre[2], centre[3]] == 0 )
                 {
                 doAdd <- FALSE
                 }

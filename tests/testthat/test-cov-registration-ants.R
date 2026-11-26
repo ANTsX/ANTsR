@@ -1,6 +1,6 @@
 # the sampling-default warning is tested explicitly; mark it as already shown
 for (.tx in c("DenseRigid", "SyNabp", "antsRegistrationSyN*")) {
-  assign(.tx, TRUE, envir = ANTsR:::.int_samplingWarned)
+  assign(.tx, TRUE, envir = ANTsR:::.int_deprecationWarned)
 }
 rm(.tx)
 

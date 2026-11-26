@@ -30,7 +30,9 @@ ones most likely to change your results.
 * FIX: `jointLabelFusion()` now respects `usecor`; it always used
   correlation (`PC`) whatever was passed. The default is now `usecor = TRUE`,
   so default results are unchanged; `usecor = FALSE` gives mean squares
-  (`MSQ`), the ANTsPy default. It now needs at least two atlases and no
+  (`MSQ`), the ANTsPy default. DEPRECATION: the default will change to
+  `usecor = FALSE` in a future version; a warning is given once per session
+  when `usecor` is not set. It now needs at least two atlases and no
   longer modifies the caller's mask with `noZeroes = TRUE`.
   `localJointLabelFusion()` passes `noZeroes` on, skips atlases whose initial
   registration fails, and its `Similarity` step now really uses full
@@ -64,7 +66,8 @@ ones most likely to change your results.
   labels above 2^24.
 * FIX: `round(img, digits)` honours `digits` (it was ignored) and promotes
   the pixel type when rounded values do not fit (`unsigned char` 255 with
-  `digits = -1` gives 260, not 4). `cumsum()` and friends on an antsImage
+  `digits = -1` gives 260, not 4); vector or `NA` `digits` work as in base
+  `round()`. `cumsum()` and friends on an antsImage
   return a numeric vector instead of erroring.
 * BREAKING: `maskImage(binarize = TRUE)` returns 1 where the image is
   non-zero and the mask matches `level`, as ANTsPy (a single level ignored
@@ -81,11 +84,14 @@ ones most likely to change your results.
   with stride 1 and for length-one patch axes, divides overlaps by the true
   count (3D stride-1 values were wrong when the patch exceeded half the
   image), and with `domainImageIsMask = TRUE` averages overlapping patches
-  instead of summing them, as ANTsPy.
+  instead of summing them, as ANTsPy. With a mask it also works for
+  length-one patch axes (the centre is at least 1, as in
+  `extractImagePatches()`).
 * BREAKING: `cropImageFromCenterPoint()` centres the patch on the point (it
-  was shifted by one or more voxels), keeps spacing and direction, zero-pads
-  points near or outside the image instead of erroring, and for even sizes
-  uses the lower of the two central voxels, as ANTsPy.
+  was shifted by one or more voxels), keeps spacing and direction, and for
+  even sizes uses the lower of the two central voxels, as ANTsPy. A centre
+  near or outside the image is honoured, not clamped to the edge: the part of
+  the patch outside the image is zero.
 
 ### Segmentation and other
 
@@ -98,8 +104,10 @@ ones most likely to change your results.
 * BREAKING: `rfSegmentation()` and `rfSegmentationPredict()` return the label
   values (factor codes 1..K were returned, so labels {0, 1} became {1, 2});
   models with non-numeric classes still return the codes. The output is an
-  `unsigned int` (or `float`) image rather than the mask's pixel type, so
-  labels above 255 are no longer wrapped with an `unsigned char` mask.
+  `unsigned int` image (labels up to 2^32 - 1) rather than the mask's pixel
+  type, so labels above 255 are no longer wrapped with an `unsigned char`
+  mask; other values use `double`. `rfSegmentationPredict()` returns a
+  regression forest's numeric predictions (they were all NA).
 * BREAKING: `segmentationRefinement.predict()` labels a voxel background
   unless some label's probability exceeds 0.5 (any non-zero probability kept
   the whole dilated region), so refined segmentations are usually smaller.

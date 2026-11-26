@@ -71,7 +71,9 @@ setMethod(
 setMethod(
   "round", signature(x = "antsImage"),
   function(x, digits = 0) {
-    if (digits == 0) {
+    # native shortcut only for a single, non-missing 0; anything else
+    # (vector or NA digits) goes through base round()
+    if (length(digits) == 1 && !is.na(digits) && digits == 0) {
       return(ANTsRCore::antsImageMath(x, "round"))
     }
     res <- round(as.array(x), digits = digits)

@@ -1275,22 +1275,25 @@ buildTemplate <- function(
   return(template)
 }
 
-# Sampling defaults that will change to ANTsPy's; warn once per session and
-# transform so that pipelines calling antsRegistration() repeatedly are not
-# flooded
-.int_samplingWarned <- new.env(parent = emptyenv())
-.int_warnSamplingDefault <- function(transform, current, future) {
-  if (isTRUE(.int_samplingWarned[[transform]])) {
+# Defaults that will change in a future version: warn once per session and
+# key, so that pipelines calling a function repeatedly are not flooded
+.int_deprecationWarned <- new.env(parent = emptyenv())
+.int_warnOnce <- function(key, ...) {
+  if (isTRUE(.int_deprecationWarned[[key]])) {
     return(invisible(FALSE))
   }
-  assign(transform, TRUE, envir = .int_samplingWarned)
-  warning(
+  assign(key, TRUE, envir = .int_deprecationWarned)
+  warning(..., " This warning is shown once per session.", call. = FALSE)
+  invisible(TRUE)
+}
+
+# Sampling defaults that will change to ANTsPy's
+.int_warnSamplingDefault <- function(transform, current, future) {
+  .int_warnOnce(
+    transform,
     "antsRegistration(): ", transform, " samples ", current, " of the points ",
     "when `samplingPercentage` is not given; this default will change to ",
     future, " (as ANTsPy) in a future version of ANTsR. Set ",
-    "`samplingPercentage` explicitly to keep results stable. ",
-    "This warning is shown once per session.",
-    call. = FALSE
+    "`samplingPercentage` explicitly to keep results stable."
   )
-  invisible(TRUE)
 }

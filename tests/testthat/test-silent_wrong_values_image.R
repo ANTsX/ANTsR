@@ -1,8 +1,8 @@
 context("Functions that silently returned wrong values (image/registration)")
 
 # the sampling-default warning is tested explicitly; mark it as already shown
-for (.tx in c("DenseRigid", "SyNabp", "antsRegistrationSyN*")) {
-  assign(.tx, TRUE, envir = ANTsR:::.int_samplingWarned)
+for (.tx in c("DenseRigid", "SyNabp", "antsRegistrationSyN*", "jointLabelFusion")) {
+  assign(.tx, TRUE, envir = ANTsR:::.int_deprecationWarned)
 }
 rm(.tx)
 
@@ -27,7 +27,7 @@ test_that("antsRegistration linear transforms honor samplingPercentage", {
   }
   # DenseRigid keeps its old 0.8 when samplingPercentage is not given, and
   # warns (once per session) that the default will become 1.0 as in ANTsPy
-  rm("DenseRigid", envir = ANTsR:::.int_samplingWarned)
+  rm("DenseRigid", envir = ANTsR:::.int_deprecationWarned)
   expect_warning(
     out <- capture.output(suppressMessages(
       antsRegistration(imgs$f, imgs$m, "DenseRigid",
@@ -75,7 +75,7 @@ test_that("antsRegistrationSyN metric/transform strings are well formed", {
   ))
   expect_true(grepl("MI\\[[^]]+,1,32,regular,0.6\\]", paste(out, collapse = " ")))
   # without samplingPercentage: one warning per session about the future 0.25
-  rm("antsRegistrationSyN*", envir = ANTsR:::.int_samplingWarned)
+  rm("antsRegistrationSyN*", envir = ANTsR:::.int_deprecationWarned)
   expect_warning(
     capture.output(suppressMessages(
       antsRegistration(imgs$f, imgs$m, "antsRegistrationSyNQuick[a]", printArgs = TRUE)
@@ -118,6 +118,10 @@ test_that("round(img, digits) honors digits; cumulative Math functions work", {
   img <- as.antsImage(matrix(vals, 2, 2))
   expect_equal(c(as.array(round(img, 2))), round(vals, 2), tolerance = 1e-6)
   expect_equal(c(as.array(round(img))), round(vals))
+  # vector and NA digits go through base round() instead of erroring
+  expect_equal(c(as.array(round(img, c(0, 1)))), round(vals, c(0, 1)),
+    tolerance = 1e-6)
+  expect_true(all(is.na(as.array(round(img, NA)))))
   expect_equal(cumsum(img), cumsum(vals), tolerance = 1e-6)
   expect_equal(cumprod(img), cumprod(vals), tolerance = 1e-5)
   expect_equal(cummax(img), cummax(vals), tolerance = 1e-6)
@@ -291,6 +295,14 @@ test_that("cropImageFromCenterPoint centers the patch on the point", {
   expect_equal(p[, 2], 9:12)
   p <- as.array(cropImageFromCenterPoint(ramp, center, c(2, 2)))
   expect_equal(p[, 1], 10:11)
+  # a centre outside the image is honoured (not clamped to the edge): the
+  # patch sits at the requested place and is entirely zero
+  far <- cropImageFromCenterPoint(ramp + 1, c(-20, 9), c(5, 5))
+  expect_equal(antsGetOrigin(far), c(-22, 7))
+  expect_true(all(as.array(far) == 0))
+  # partly outside: the outside part is zero, the inside part is image data
+  edge <- as.array(cropImageFromCenterPoint(ramp, c(0, 9), c(5, 5)))
+  expect_equal(edge[, 3], c(0, 0, 1, 2, 3))
 })
 
 test_that("segmentationRefinement.predict uses a 0.5 background row", {
@@ -473,8 +485,13 @@ test_that("jointLabelFusion honors usecor and needs >= 2 atlases", {
   expect_equal(metricUsed(), "PC")
   expect_equal(metricUsed(usecor = TRUE), "PC")
   expect_equal(metricUsed(usecor = FALSE), "MSQ")
+  # without usecor: one warning per session that the default will change
+  rm("jointLabelFusion", envir = ANTsR:::.int_deprecationWarned)
+  expect_warning(metricUsed(), "will change to FALSE")
+  expect_no_warning(metricUsed())
+  expect_no_warning(metricUsed(usecor = TRUE))
   expect_error(
-    jointLabelFusion(tgt, mask, atl[1], labelList = labs[1]),
+    jointLabelFusion(tgt, mask, atl[1], labelList = labs[1], usecor = TRUE),
     "at least 2 atlases"
   )
 })
@@ -528,4 +545,36 @@ test_that("partialVolumeCorrection keeps NA and large values on integer images",
   expect_true(is.na(vals[2, 1])) # pure WM: GM flow cannot be recovered
   expect_equal(vals[1, 1], 500) # 200 / 0.4, above the unsigned char range
   expect_equal(vals[1, 2], 100)
+})
+
+test_that("rfSegmentation keeps the full label range and regression predictions", {
+  skip_if_not_installed("randomForest")
+  set.seed(9)
+  mask <- antsImageClone(as.antsImage(matrix(1, 10, 10)), "unsigned char")
+  vals <- c(2^31 + 5, 2^32 - 1) # valid unsigned 32-bit labels above 2^31 - 1
+  out <- ANTsR:::.rfLabelImage(mask, rep(vals, each = 50))
+  expect_equal(out@pixeltype, "unsigned int")
+  expect_setequal(unique(as.numeric(out[mask == 1])), vals)
+  # regression forest: numeric predictions are returned, not NA
+  y <- rep(c(1.5, 7.25), each = 50) + rnorm(100, sd = 0.01)
+  fmat <- cbind(y + rnorm(100, sd = 0.01), rnorm(100))
+  rfr <- randomForest::randomForest(x = fmat, y = y, ntree = 20)
+  pred <- rfSegmentationPredict(rfr, fmat, mask)
+  expect_false(anyNA(as.array(pred)))
+  expect_equal(as.numeric(pred[mask == 1]),
+    as.numeric(predict(rfr, newdata = fmat)), tolerance = 1e-6)
+})
+
+test_that("masked reconstruction handles length-one patch axes", {
+  set.seed(8)
+  img <- as.antsImage(matrix(rnorm(48), 6, 8))
+  full <- as.antsImage(matrix(1, 6, 8))
+  patches <- extractImagePatches(img, c(1, 3), "all", 1)
+  recon <- reconstructImageFromPatches(patches, full, 1, domainImageIsMask = TRUE)
+  expect_equal(as.array(recon), as.array(img), tolerance = 1e-5)
+  img3 <- as.antsImage(array(rnorm(5 * 6 * 4), c(5, 6, 4)))
+  full3 <- as.antsImage(array(1, c(5, 6, 4)))
+  patches3 <- extractImagePatches(img3, c(1, 3, 2), "all", 1)
+  recon3 <- reconstructImageFromPatches(patches3, full3, 1, domainImageIsMask = TRUE)
+  expect_equal(as.array(recon3), as.array(img3), tolerance = 1e-5)
 })

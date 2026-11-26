@@ -19,9 +19,11 @@
 #' @param labelList optional list containing antsImages with segmentation labels
 #' @param rho ridge penalty increases robustness to outliers but also
 #'   makes image converge to average
-#' @param usecor if \code{TRUE} (the default), use correlation (\code{"PC"})
-#' as the local similarity; if \code{FALSE}, use mean squares
-#' (\code{"MSQ"}). ANTsPy defaults to \code{FALSE}.
+#' @param usecor if \code{TRUE} (the current default), use correlation
+#' (\code{"PC"}) as the local similarity; if \code{FALSE}, use mean squares
+#' (\code{"MSQ"}). The default will change to \code{FALSE}, as in ANTsPy, in
+#' a future version; a warning (once per session) is given when
+#' \code{usecor} is not set. Set it explicitly to keep results stable.
 #' @param rSearch radius of search, default is 3
 #' @param nonnegative constrain weights to be non-negative
 #' @param maxLabelPlusOne boolean
@@ -120,6 +122,15 @@ jointLabelFusion <- function(
     maxLabelPlusOne = FALSE,
     noZeroes = FALSE,
     verbose = FALSE) {
+  if (missing(usecor)) {
+    .int_warnOnce(
+      "jointLabelFusion",
+      "jointLabelFusion(): `usecor` defaults to TRUE (correlation, \"PC\"); ",
+      "this default will change to FALSE (mean squares, \"MSQ\", as ANTsPy) ",
+      "in a future version of ANTsR. Set `usecor` explicitly to keep results ",
+      "stable."
+    )
+  }
   targetI <- check_ants(targetI)
   # clone so that noZeroes does not modify the caller's mask in place
   targetIMask <- antsImageClone(check_ants(targetIMask))
